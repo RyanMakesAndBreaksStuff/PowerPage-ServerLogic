@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Server Logic — Clay Workshop</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700&family=Karla:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* Clay Workshop — soft, spacious, warm */
+  --canvas:#F5EEE3;
+  --card:#FFFEFA;
+  --card-2:#FBF4E9;
+  --line:#E9DFCE;
+  --line-strong:#DCCBB2;
+  --ink:#38251B;
+  --t2:#6D5A4E;
+  --t3:#84705F;
+  --clay:#B04A20;            /* terracotta, white text 5.5:1 */
+  --clay-press:#96401C;
+  --clay-soft:#F7E4D8;
+  --sage:#5F7A56;
+  --sage-soft:#E9EFE1;
+  --focus:#B04A20;
+  --scrim:rgba(56,37,27,.5);
+  --card-shadow:0 24px 48px -24px rgba(93,58,37,.3);
+  --card-shadow-lift:0 32px 60px -28px rgba(93,58,37,.4);
+  --ring:0 0 0 4px rgba(176,74,32,.16);
+  --sy-cmt:#9A8672;
+  --sy-kw:#A4472B;
+  --sy-str:#5F7A56;
+  --sy-num:#8A6A2F;
+  --gutter:#B4A18C;
+  color-scheme:light;
+}
+:root[data-theme="dark"]{
+  --canvas:#241A13;
+  --card:#30241B;
+  --card-2:#2A1F17;
+  --line:#463628;
+  --line-strong:#5A4533;
+  --ink:#F4EADB;
+  --t2:#CBB9A8;
+  --t3:#A8947F;
+  --clay:#E58B5F;            /* warm clay on dark, 6.5:1 */
+  --clay-press:#F2A17C;
+  --clay-soft:#3E2A1E;
+  --sage:#A9C290;
+  --sage-soft:#2C3324;
+  --focus:#E58B5F;
+  --scrim:rgba(10,6,3,.66);
+  --card-shadow:0 28px 56px -28px rgba(0,0,0,.7);
+  --card-shadow-lift:0 36px 68px -30px rgba(0,0,0,.8);
+  --ring:0 0 0 4px rgba(229,139,95,.22);
+  --sy-cmt:#8F7C69;
+  --sy-kw:#E58B5F;
+  --sy-str:#A9C290;
+  --sy-num:#D9B36A;
+  --gutter:#6E5B48;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;background:var(--canvas);color:var(--ink);
+  font-family:"Karla","Segoe UI",system-ui,sans-serif;
+  font-size:16px;line-height:1.65;
+  -webkit-font-smoothing:antialiased;
+}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--focus);outline-offset:3px;border-radius:6px}
+::selection{background:var(--clay-soft)}
+
+/* ---------- top bar ---------- */
+.topbar{
+  background:var(--card);border-bottom:1px solid var(--line);
+  position:sticky;top:0;z-index:20;
+}
+.topbar-inner{
+  max-width:1240px;margin:auto;padding:14px 4%;
+  display:flex;align-items:center;justify-content:space-between;gap:20px;
+}
+.brand{display:flex;align-items:center;gap:13px}
+.brand-mark{width:40px;height:40px;flex:none}
+.brand-name{
+  font-family:"Bricolage Grotesque",sans-serif;
+  font-size:20px;font-weight:600;letter-spacing:-.01em;
+}
+.nav{display:flex;align-items:center;gap:10px}
+.text-button{
+  border:0;background:none;color:var(--t2);
+  min-height:44px;padding:8px 16px;border-radius:12px;
+  font-size:15px;font-weight:600;
+  transition:background .2s,color .2s;
+}
+.text-button:hover{background:var(--clay-soft);color:var(--clay)}
+.theme-toggle{
+  border:1px solid var(--line-strong);border-radius:999px;
+  min-height:44px;padding:8px 18px 8px 14px;background:var(--card);
+  display:inline-flex;align-items:center;gap:9px;
+  font-size:13.5px;font-weight:700;color:var(--t2);
+  transition:border-color .2s,color .2s,transform .2s;
+}
+.theme-toggle:hover{border-color:var(--clay);color:var(--ink);transform:translateY(-1px)}
+.theme-toggle svg{width:16px;height:16px;stroke:currentColor;stroke-width:2}
+
+/* ---------- hero ---------- */
+main{max-width:1240px;margin:auto;padding:76px 4% 64px}
+.hero{position:relative;margin-bottom:64px}
+.hero::before{
+  content:"";position:absolute;left:-60px;top:-70px;width:280px;height:280px;
+  background:radial-gradient(circle,var(--clay-soft) 0%,transparent 68%);
+  border-radius:50%;z-index:-1;
+}
+.kicker{
+  display:inline-flex;align-items:center;gap:9px;margin:0 0 22px;
+  padding:7px 16px;border-radius:999px;background:var(--card);
+  border:1px solid var(--line);
+  font-family:"JetBrains Mono",monospace;font-size:12px;font-weight:500;
+  color:var(--sage);
+}
+.kicker svg{width:13px;height:13px;stroke:currentColor;stroke-width:2.4}
+h1{
+  font-family:"Bricolage Grotesque",sans-serif;
+  font-size:clamp(42px,5.8vw,76px);font-weight:600;line-height:1.02;
+  letter-spacing:-.028em;margin:0 0 24px;max-width:14ch;
+}
+h1 em{font-style:normal;color:var(--clay)}
+.intro{
+  font-size:clamp(16.5px,1.6vw,20px);line-height:1.6;color:var(--t2);
+  margin:0;max-width:56ch;font-weight:500;
+}
+
+/* ---------- workspace ---------- */
+.workspace{
+  display:grid;grid-template-columns:minmax(330px,420px) minmax(0,1fr);
+  gap:clamp(28px,3.5vw,56px);align-items:start;
+}
+
+/* settings card */
+.settings{
+  background:var(--card);border:1px solid var(--line);border-radius:24px;
+  padding:clamp(26px,3vw,40px);
+  box-shadow:var(--card-shadow);
+}
+.settings h2{
+  font-family:"Bricolage Grotesque",sans-serif;
+  font-size:21px;font-weight:600;letter-spacing:-.01em;
+  margin:0 0 24px;
+}
+.field{margin-bottom:26px}
+.field label{
+  display:block;margin-bottom:10px;font-size:15px;font-weight:700;
+  color:var(--ink);
+}
+.field input,.field select{
+  width:100%;height:50px;padding:10px 18px;
+  border:1.5px solid var(--line-strong);border-radius:14px;
+  background:var(--card-2);color:var(--ink);font-size:16px;
+  transition:border-color .2s,box-shadow .2s,background .2s;
+}
+.field input:hover,.field select:hover{border-color:var(--t3)}
+.field input:focus,.field select:focus{
+  border-color:var(--clay);box-shadow:var(--ring);outline:none;background:var(--card);
+}
+.field select{
+  appearance:none;cursor:pointer;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23B04A20' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 18px center;padding-right:44px;
+}
+:root[data-theme="dark"] .field select{
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23E58B5F' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+}
+.hint{margin:9px 0 0;font-size:13.5px;line-height:1.55;color:var(--t3)}
+
+.guidance{border-top:1px solid var(--line);padding-top:28px;margin-top:6px}
+.checks{list-style:none;padding:0;margin:0 0 26px;display:grid;gap:16px}
+.checks li{
+  display:flex;gap:16px;align-items:flex-start;
+  padding:16px 18px;border-radius:16px;background:var(--card-2);
+  border:1px solid var(--line);
+}
+.check-pill{
+  flex:none;width:28px;height:28px;border-radius:10px;
+  background:var(--sage-soft);color:var(--sage);
+  display:grid;place-items:center;margin-top:1px;
+}
+.check-pill svg{width:15px;height:15px;stroke:currentColor;stroke-width:2.6}
+.checks strong{display:block;font-size:15px;font-weight:700}
+.checks p{margin:3px 0 0;font-size:13.5px;line-height:1.5;color:var(--t3)}
+
+.primary{
+  width:100%;min-height:56px;
+  border:0;border-radius:18px;background:var(--clay);color:#FFF9F2;
+  font-size:17px;font-weight:700;letter-spacing:.005em;
+  display:flex;align-items:center;justify-content:center;gap:12px;
+  box-shadow:0 18px 34px -16px rgba(176,74,32,.55);
+  transition:background .2s,transform .2s,box-shadow .2s;
+}
+:root[data-theme="dark"] .primary{color:#241A13}
+.primary svg{width:18px;height:18px;stroke:currentColor;stroke-width:2.2}
+.primary:hover{background:var(--clay-press);transform:translateY(-2px);box-shadow:0 24px 40px -16px rgba(176,74,32,.6)}
+.primary:active{transform:translateY(0)}
+.feedback{min-height:22px;margin:14px 0 0;font-size:14px;font-weight:600;color:var(--clay);text-align:center}
+
+/* editor card */
+.editor{
+  background:var(--card);border:1px solid var(--line);border-radius:24px;
+  box-shadow:var(--card-shadow);
+  display:flex;flex-direction:column;overflow:hidden;min-width:0;
+}
+.editor-top{
+  display:flex;justify-content:space-between;align-items:center;gap:14px;
+  padding:20px 24px;
+}
+.editor-title{
+  font-family:"JetBrains Mono",monospace;font-size:13px;font-weight:500;
+  color:var(--t2);overflow-wrap:anywhere;
+}
+.included{
+  display:inline-flex;align-items:center;gap:8px;white-space:nowrap;
+  padding:8px 16px;border-radius:999px;
+  background:var(--sage-soft);color:var(--sage);
+  font-family:"JetBrains Mono",monospace;font-size:11.5px;font-weight:500;
+}
+.included svg{width:14px;height:14px;stroke:currentColor;stroke-width:2.2}
+.code-wrap{overflow:auto;padding:20px 0 26px;flex:1;tab-size:2}
+.code{
+  display:block;min-width:max-content;
+  font-family:"JetBrains Mono",monospace;
+  font-size:clamp(13px,1vw,14.5px);line-height:2.1;
+  counter-reset:line;
+}
+.ln{display:block;white-space:pre;padding-right:30px;counter-increment:line}
+.ln::before{
+  content:counter(line);display:inline-block;
+  width:46px;padding-right:20px;margin-right:24px;
+  text-align:right;color:var(--gutter);
+  border-radius:8px;user-select:none;font-size:12px;
+}
+.ln:first-child::before,.ln:first-child{border-top-left-radius:12px}
+.c{color:var(--sy-cmt)}
+.k{color:var(--sy-kw);font-weight:600}
+.s{color:var(--sy-str)}
+.n{color:var(--sy-num)}
+.editor-note{
+  border-top:1px solid var(--line);background:var(--card-2);
+  padding:15px 24px;font-size:13.5px;color:var(--t3);border-radius:0 0 24px 24px;
+}
+
+/* ---------- footer ---------- */
+footer{
+  max-width:1240px;margin:auto;padding:26px 4% 44px;
+  display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap;
+  font-size:14px;color:var(--t3);
+}
+.footer-note{display:flex;align-items:center;gap:11px;font-weight:600}
+.footer-note svg{width:16px;height:16px;stroke:var(--clay);stroke-width:2;flex:none}
+.footer-tag{
+  font-family:"JetBrains Mono",monospace;font-size:12px;
+  padding:6px 14px;border-radius:999px;background:var(--card);
+  border:1px solid var(--line);
+}
+
+/* ---------- dialogs ---------- */
+dialog{
+  width:min(500px,calc(100% - 40px));
+  border:1px solid var(--line);border-radius:24px;
+  background:var(--card);color:var(--ink);padding:36px;
+  box-shadow:var(--card-shadow-lift);
+}
+dialog::backdrop{background:var(--scrim);backdrop-filter:blur(3px)}
+dialog h2{
+  font-family:"Bricolage Grotesque",sans-serif;
+  font-size:26px;font-weight:600;letter-spacing:-.015em;margin:0 0 12px;
+}
+dialog p{margin:0 0 26px;color:var(--t2);font-size:16px;line-height:1.6}
+dialog .close{
+  min-height:48px;padding:11px 30px;border:0;border-radius:14px;
+  background:var(--clay);color:#FFF9F2;font-weight:700;font-size:15.5px;
+  transition:background .2s,transform .2s;
+}
+:root[data-theme="dark"] dialog .close{color:#241A13}
+dialog .close:hover{background:var(--clay-press);transform:translateY(-1px)}
+
+/* ---------- motion ---------- */
+.reveal{opacity:0}
+@media (prefers-reduced-motion: no-preference){
+  .reveal{
+    animation:settle .62s cubic-bezier(.22,1,.36,1) forwards;
+    animation-delay:calc(var(--i,0) * 100ms + 120ms);
+  }
+  @keyframes settle{
+    from{opacity:0;transform:translateY(22px)}
+    to{opacity:1;transform:translateY(0)}
+  }
+}
+@media (prefers-reduced-motion: reduce){
+  .reveal{opacity:1}
+  *{transition:none!important;animation:none!important}
+}
+
+/* ---------- responsive ---------- */
+@media (max-width:1020px){
+  .workspace{grid-template-columns:minmax(300px,.8fr) minmax(0,1fr);gap:32px}
+  .included{display:none}
+}
+@media (max-width:840px){
+  .workspace{grid-template-columns:1fr;gap:32px}
+  main{padding:48px 5% 48px}
+  .topbar-inner{padding:12px 5%;gap:12px}
+  .brand-name{font-size:18px}
+  .nav{gap:4px}
+  .text-button{padding:8px 12px}
+  .theme-toggle{padding:8px 14px 8px 12px}
+  .included{display:inline-flex}
+  h1{max-width:none}
+  .hero::before{left:-110px;top:-50px}
+  .code{font-size:12.5px}
+  .editor-top{padding:18px 16px}
+  footer{flex-direction:column;align-items:flex-start;gap:14px;padding:22px 5% 36px}
+}
+*{scrollbar-width:thin;scrollbar-color:var(--line-strong) transparent}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 40 40" aria-hidden="true">
+        <rect x="2" y="2" width="36" height="36" rx="13" fill="var(--clay)"/>
+        <path d="M13 27c1.5-8 4.2-12 7.4-12 2.9 0 4.2 2.6 4.2 5.4 0 3.4-2 5.8-4.9 5.8-2.4 0-4.1-1.8-4.1-4.2 0-3.7 3.2-6.6 8.2-7" fill="none" stroke="#FFF6EC" stroke-width="2.4" stroke-linecap="round"/>
+      </svg>
+      <span class="brand-name">Server Logic</span>
+    </div>
+    <nav class="nav" aria-label="Utility">
+      <button class="text-button" data-dialog="about">About</button>
+      <button class="text-button" data-dialog="help">Help</button>
+      <button class="theme-toggle" id="theme" aria-label="Switch to dark theme">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg>
+        <span id="theme-label">Dark</span>
+      </button>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <p class="kicker reveal" style="--i:0">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 12.5l5.5 5.5L20 6.5"/></svg>
+      Power Pages starter kit
+    </p>
+    <h1 class="reveal" style="--i:1">From idea to <em>server handler</em></h1>
+    <p class="intro reveal" style="--i:2">Create a starter for Power Pages server logic. Choose your settings and preview your code.</p>
+  </section>
+
+  <div class="workspace">
+    <section aria-label="Starter settings" class="settings reveal" style="--i:3">
+      <h2>Starter settings</h2>
+
+      <div class="field">
+        <label for="logic-name">Logic name</label>
+        <input id="logic-name" value="customer-summary" spellcheck="false" aria-describedby="name-hint">
+        <p class="hint" id="name-hint">Used for the file name and handler function.</p>
+      </div>
+
+      <div class="field">
+        <label for="method">HTTP method</label>
+        <select id="method" aria-describedby="method-hint">
+          <option>GET</option><option>POST</option>
+        </select>
+        <p class="hint" id="method-hint">The method this server logic will handle.</p>
+      </div>
+
+      <div class="field">
+        <label for="recipe">Recipe</label>
+        <select id="recipe" aria-describedby="recipe-hint">
+          <option>Read Dataverse records</option><option>Validate a request</option>
+        </select>
+        <p class="hint" id="recipe-hint">A starter outline for querying Dataverse and returning JSON.</p>
+      </div>
+
+      <section class="guidance">
+        <h2>Includes best practice guidance</h2>
+        <ul class="checks">
+          <li>
+            <span class="check-pill" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12.5l5.5 5.5L20 6.5"/></svg></span>
+            <div><strong>Browser API checks</strong><p>Guidance for calls from your Power Pages site.</p></div>
+          </li>
+          <li>
+            <span class="check-pill" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12.5l5.5 5.5L20 6.5"/></svg></span>
+            <div><strong>Input validation template</strong><p>A place to validate incoming request parameters.</p></div>
+          </li>
+          <li>
+            <span class="check-pill" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12.5l5.5 5.5L20 6.5"/></svg></span>
+            <div><strong>Permission setup checklist</strong><p>Review table permissions and web roles.</p></div>
+          </li>
+        </ul>
+        <button class="primary" id="download">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3v12m0 0l-4.5-4.5M12 15l4.5-4.5M4 20h16"/></svg>
+          Download starter
+        </button>
+        <p class="feedback" id="feedback" role="status"></p>
+      </section>
+    </section>
+
+    <section class="editor reveal" style="--i:4" aria-label="Illustrative server handler">
+      <div class="editor-top">
+        <div class="editor-title">Server handler (customer-summary.js)</div>
+        <div class="included">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 6l-6 6 6 6M16 6l6 6-6 6"/></svg>
+          Client call planned
+        </div>
+      </div>
+      <div class="code-wrap" tabindex="0" aria-label="Code outline, scroll horizontally if needed">
+        <code class="code"><span class="ln c">// customer-summary.js</span><span class="ln c">// Illustrative outline · not executable starter code</span><span class="ln"> </span><span class="ln c">/**</span><span class="ln c"> * Return a summary of customer records.</span><span class="ln c"> * Add site-specific logic before deployment.</span><span class="ln c"> */</span><span class="ln"><span class="k">async function</span> get() {</span><span class="ln">  <span class="k">try</span> {</span><span class="ln c">    // 1. Read and validate request parameters.</span><span class="ln c">    //    Limit results and reject invalid input.</span><span class="ln"> </span><span class="ln c">    // 2. Check the required table permissions.</span><span class="ln c">    //    Confirm access for the intended web roles.</span><span class="ln"> </span><span class="ln c">    // 3. Query Dataverse using the supported API.</span><span class="ln c">    //    Replace this sample data with your query.</span><span class="ln">    <span class="k">const</span> records = [];</span><span class="ln"> </span><span class="ln c">    // 4. Format the response for your handler.</span><span class="ln">    <span class="k">return</span> { value: records };</span><span class="ln">  } <span class="k">catch</span> (error) {</span><span class="ln c">    // Log details securely; return a safe message.</span><span class="ln">    <span class="k">return</span> { message: <span class="s">"Unable to load records."</span> };</span><span class="ln">  }</span><span class="ln">}</span></code>
+      </div>
+      <div class="editor-note">Illustrative preview — settings and generation are mock only.</div>
+    </section>
+  </div>
+</main>
+
+<footer>
+  <span class="footer-note">
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M12 11v5.5M12 7.6v.2"/></svg>
+    Validate generated files on your development site.
+  </span>
+  <span class="footer-tag">Mock concept · Clay Workshop</span>
+</footer>
+
+<dialog id="about">
+  <h2>About Server Logic</h2>
+  <p>A visual concept for a local Power Pages starter tool. Logic Inspector is planned for phase 2.</p>
+  <form method="dialog"><button class="close">Close</button></form>
+</dialog>
+
+<dialog id="help">
+  <h2>Starter workflow</h2>
+  <p>Name your logic, choose a method and recipe, then review the server handler. This mock demonstrates the layout; it does not generate or deploy code.</p>
+  <form method="dialog"><button class="close">Close</button></form>
+</dialog>
+
+<script>
+const themeButton = document.getElementById('theme');
+const themeLabel = document.getElementById('theme-label');
+themeButton.addEventListener('click', () => {
+  const dark = document.documentElement.dataset.theme !== 'dark';
+  document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+  themeLabel.textContent = dark ? 'Light' : 'Dark';
+  themeButton.setAttribute('aria-label', `Switch to ${dark ? 'light' : 'dark'} theme`);
+});
+document.querySelectorAll('[data-dialog]').forEach(button =>
+  button.addEventListener('click', () => document.getElementById(button.dataset.dialog).showModal())
+);
+document.getElementById('download').addEventListener('click', () => {
+  document.getElementById('feedback').textContent = 'Mock only — starter generation is not connected.';
+});
+</script>
+
+</body>
+</html>

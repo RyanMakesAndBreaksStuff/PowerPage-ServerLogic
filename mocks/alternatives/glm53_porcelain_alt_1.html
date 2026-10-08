@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Server Logic — Juniper</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&family=Inter:wght@400;500;600&family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* Juniper — cool porcelain, deep teal accent (light) */
+  --m-canvas:#F2F5F3;
+  --m-page:#FBFDFC;
+  --m-card:#FFFFFF;
+  --m-subtle:#E7EFEA;
+  --m-inset:#F0F5F2;
+  --m-divider:#DFE8E3;
+  --m-control-stroke:#C8D5CE;
+  --m-strong:#9FB2A9;
+  --m-focus:#0F6E5E;
+  /* text */
+  --m-t1:#17211D;            /* 15.6:1 on canvas */
+  --m-t2:#4E5B55;            /* 7.4:1 on canvas */
+  --m-t3:#5E6B65;            /* 5.1:1 on canvas */
+  --m-td:#93A49C;
+  --m-on-accent:#FFFFFF;     /* 5.9:1 on accent */
+  --m-link:#0F6E5E;
+  /* accent */
+  --m-accent:#0F6E5E;
+  --m-accent-h:#0C5B4E;
+  --m-accent-p:#0A4E42;
+  --m-accent-tint:#E1F0EB;
+  --m-accent-tint-stroke:#BCDDD2;
+  --m-sel:#0F6E5E;
+  /* controls */
+  --m-control-fill:#FFFFFF;
+  --m-control-hover:#F2F6F4;
+  --m-hover:rgba(14,26,22,.078);
+  /* status */
+  --m-success:#0B6B45;
+  --m-success-tint:#E2F3EB;
+  --m-danger:#B3261E;
+  --m-danger-tint:#FBEAE8;
+  --m-danger-stroke:#F0B9B4;
+  --m-warn:#7A5200;
+  --m-warn-tint:#FBF1DC;
+  --m-energy:#C25E00;
+  --m-track:#D9E2DD;
+  --m-scrim:rgba(10,18,15,.42);
+  /* series */
+  --s1:#0F6E5E;--s2:#C25E00;--s3:#2E6B9E;--s4:#7A52C9;--s5:#8A7A1B;
+  /* code syntax */
+  --sy-cmt:#66736C;
+  --sy-kw:#0F6E5E;
+  --sy-str:#7A5B00;
+  --sy-num:#5B4BA8;
+  --gutter:#9FB2A9;
+  --card-shadow:0 30px 60px -34px rgba(14,26,22,.25), 0 2px 6px -2px rgba(14,26,22,.07);
+  --field-shadow:0 0 0 4px rgba(15,110,94,.14);
+  color-scheme:light;
+}
+:root[data-theme="dark"]{
+  /* Juniper (dark) — green-tinted near-black, lit mint accent */
+  --m-canvas:#0E1513;
+  --m-page:#131B18;
+  --m-card:#16201C;
+  --m-subtle:#1C2823;
+  --m-inset:#182219;
+  --m-divider:#24302A;
+  --m-control-stroke:#2E3C35;
+  --m-strong:#46564E;
+  --m-focus:#53C9A4;
+  /* text */
+  --m-t1:#E9F0EC;            /* 14.6:1 on canvas */
+  --m-t2:#AFC0B8;            /* 8.2:1 on canvas */
+  --m-t3:#93A49C;            /* 7.1:1 on canvas */
+  --m-td:#61736B;
+  --m-on-accent:#06231A;     /* 8.6:1 on accent */
+  --m-link:#53C9A4;
+  /* accent */
+  --m-accent:#53C9A4;
+  --m-accent-h:#6AD6B4;
+  --m-accent-p:#48BD97;
+  --m-accent-tint:#17352B;
+  --m-accent-tint-stroke:#2A5546;
+  --m-sel:#53C9A4;
+  /* controls */
+  --m-control-fill:#16201C;
+  --m-control-hover:#1B2620;
+  --m-hover:rgba(214,236,227,.09);
+  /* status */
+  --m-success:#6FD8A8;
+  --m-success-tint:#122A20;
+  --m-danger:#F0968C;
+  --m-danger-tint:#2E1815;
+  --m-danger-stroke:#5C2C24;
+  --m-warn:#E8C06A;
+  --m-warn-tint:#2A2110;
+  --m-energy:#F09A3E;
+  --m-track:#243029;
+  --m-scrim:rgba(0,0,0,.6);
+  /* series */
+  --s1:#53C9A4;--s2:#F09A3E;--s3:#7FB6E0;--s4:#B79AF0;--s5:#D3C568;
+  /* code syntax */
+  --sy-cmt:#7E8C85;
+  --sy-kw:#53C9A4;
+  --sy-str:#C9B36A;
+  --sy-num:#A99BE8;
+  --gutter:#5D6F67;
+  --card-shadow:0 34px 70px -38px rgba(0,0,0,.75), 0 2px 6px -2px rgba(0,0,0,.45);
+  --field-shadow:0 0 0 4px rgba(83,201,164,.16);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  background:var(--m-canvas);
+  color:var(--m-t1);
+  font-family:"Inter","Segoe UI",system-ui,sans-serif;
+  font-size:16px;
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+a{color:var(--m-link)}
+:focus-visible{outline:2px solid var(--m-focus);outline-offset:3px;border-radius:2px}
+::selection{background:var(--m-accent-tint);color:var(--m-t1)}
+
+/* ---------- top bar ---------- */
+.topbar{border-bottom:1px solid var(--m-divider);background:color-mix(in srgb,var(--m-canvas) 88%,var(--m-page))}
+.topbar-inner{
+  max-width:1440px;margin:auto;padding:16px 4.5%;
+  display:flex;align-items:center;justify-content:space-between;gap:24px;
+}
+.brand{display:flex;align-items:center;gap:13px}
+.brand-mark{width:38px;height:38px;flex:none}
+.brand-name{
+  font-family:"Space Grotesk","Segoe UI",sans-serif;
+  font-size:21px;font-weight:600;letter-spacing:-.02em;color:var(--m-t1);
+}
+.brand-sub{
+  font-family:"JetBrains Mono",monospace;font-size:10px;font-weight:500;
+  letter-spacing:.22em;text-transform:uppercase;color:var(--m-t3);
+  display:block;margin-top:1px;
+}
+.nav{display:flex;align-items:center;gap:24px}
+.text-button{
+  border:0;background:none;padding:10px 2px;min-height:44px;color:var(--m-t2);
+  font-size:14.5px;font-weight:500;position:relative;
+}
+.text-button::after{
+  content:"";position:absolute;left:0;right:100%;bottom:6px;height:2px;
+  background:var(--m-accent);border-radius:2px;
+  transition:right .25s cubic-bezier(.22,1,.36,1);
+}
+.text-button:hover{color:var(--m-t1)}
+.text-button:hover::after{right:0}
+.theme{
+  border:1px solid var(--m-control-stroke);border-radius:999px;
+  padding:9px 18px;min-height:44px;background:var(--m-control-fill);
+  font-family:"JetBrains Mono",monospace;font-size:12px;font-weight:500;
+  letter-spacing:.08em;text-transform:uppercase;color:var(--m-t2);
+  display:inline-flex;align-items:center;gap:8px;
+  transition:border-color .2s,color .2s;
+}
+.theme:hover{border-color:var(--m-accent);color:var(--m-t1)}
+.theme svg{width:14px;height:14px;stroke:currentColor}
+
+/* ---------- layout ---------- */
+main{max-width:1440px;margin:auto;padding:60px 4.5% 56px}
+.hero{margin-bottom:52px;position:relative}
+.kicker{
+  font-family:"JetBrains Mono",monospace;font-size:11.5px;font-weight:600;
+  letter-spacing:.28em;text-transform:uppercase;color:var(--m-accent);
+  display:flex;align-items:center;gap:14px;margin:0 0 24px;
+}
+.kicker::before{content:"";width:44px;height:1px;background:var(--m-accent)}
+h1{
+  font-family:"Space Grotesk","Segoe UI",sans-serif;
+  font-size:clamp(42px,6vw,78px);font-weight:500;line-height:1.06;
+  letter-spacing:-.025em;margin:0 0 20px;max-width:16ch;
+}
+h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--m-accent-tint) 62%);border-radius:2px}
+.intro{
+  font-size:clamp(16px,1.5vw,19px);line-height:1.65;color:var(--m-t2);
+  margin:0;max-width:58ch;
+}
+
+/* ---------- workspace ---------- */
+.workspace{
+  display:grid;grid-template-columns:minmax(320px,420px) minmax(0,1fr);
+  gap:clamp(32px,4vw,60px);align-items:start;
+}
+
+/* settings */
+.settings{display:grid;gap:28px}
+.field label{
+  display:block;font-family:"JetBrains Mono",monospace;font-size:11.5px;
+  font-weight:600;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--m-t2);margin-bottom:9px;
+}
+.field input,.field select{
+  width:100%;height:48px;padding:10px 16px;
+  border:1px solid var(--m-control-stroke);border-radius:10px;
+  background:var(--m-control-fill);color:var(--m-t1);
+  font-size:15.5px;
+  transition:border-color .18s,box-shadow .18s;
+}
+.field input:hover,.field select:hover{border-color:var(--m-strong)}
+.field input:focus,.field select:focus{
+  border-color:var(--m-accent);box-shadow:var(--field-shadow);outline:none;
+}
+.field select{
+  appearance:none;cursor:pointer;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%230F6E5E' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 16px center;padding-right:42px;
+}
+:root[data-theme="dark"] .field select{
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%2353C9A4' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E");
+}
+.hint{margin:8px 0 0;font-size:13.5px;line-height:1.55;color:var(--m-t3)}
+
+.guidance{
+  border-top:1px solid var(--m-divider);padding-top:28px;
+  display:grid;gap:20px;
+}
+.guidance h2{
+  font-family:"Space Grotesk","Segoe UI",sans-serif;
+  font-size:23px;font-weight:500;letter-spacing:-.01em;
+  margin:0;color:var(--m-t1);
+}
+.checks{list-style:none;padding:0;margin:0;display:grid;gap:17px}
+.checks li{display:flex;gap:14px;align-items:flex-start}
+.check-dot{
+  flex:none;width:26px;height:26px;border-radius:50%;
+  border:1.5px solid var(--m-accent);color:var(--m-accent);
+  display:grid;place-items:center;margin-top:2px;
+  font-size:13px;line-height:1;
+}
+.checks strong{display:block;font-size:15px;font-weight:600}
+.checks p{margin:3px 0 0;font-size:13.5px;line-height:1.5;color:var(--m-t3)}
+
+.primary{
+  width:100%;min-height:52px;border:1px solid var(--m-accent);border-radius:999px;
+  background:var(--m-accent);color:var(--m-on-accent);
+  display:flex;align-items:center;justify-content:center;gap:11px;
+  font-size:16px;font-weight:600;letter-spacing:.01em;
+  box-shadow:0 14px 30px -14px rgba(15,110,94,.55);
+  transition:background .18s,transform .18s,box-shadow .18s;
+}
+.primary span[aria-hidden]{font-size:18px;line-height:1}
+.primary:hover{background:var(--m-accent-h);transform:translateY(-1px)}
+.primary:active{transform:translateY(0);background:var(--m-accent-p)}
+.feedback{min-height:22px;margin:12px 0 0;font-size:13.5px;color:var(--m-accent);font-weight:500}
+
+/* editor */
+.editor{
+  border:1px solid var(--m-divider);border-radius:14px;
+  background:var(--m-card);box-shadow:var(--card-shadow);
+  display:flex;flex-direction:column;overflow:hidden;min-width:0;
+}
+.editor-top{
+  display:flex;justify-content:space-between;align-items:center;gap:16px;
+  padding:18px 22px;border-bottom:1px solid var(--m-divider);
+  background:var(--m-inset);
+}
+.editor-title{
+  font-family:"JetBrains Mono",monospace;font-size:12.5px;font-weight:600;
+  color:var(--m-t2);letter-spacing:.02em;overflow-wrap:anywhere;
+}
+.included{
+  display:inline-flex;align-items:center;gap:8px;white-space:nowrap;
+  padding:7px 14px;border-radius:999px;
+  border:1px solid var(--m-accent-tint-stroke);
+  background:var(--m-accent-tint);color:var(--m-accent);
+  font-family:"JetBrains Mono",monospace;
+  font-size:11px;font-weight:600;letter-spacing:.05em;
+}
+:root[data-theme="dark"] .included{color:#8ADBBE}
+.code-wrap{overflow:auto;padding:22px 0 26px;flex:1;tab-size:2}
+.code{
+  display:block;min-width:max-content;
+  font-family:"JetBrains Mono",monospace;
+  font-size:clamp(13px,1vw,14.5px);line-height:2.05;
+  counter-reset:line;
+}
+.line{display:block;white-space:pre;padding-right:28px;counter-increment:line}
+.line::before{
+  content:counter(line);display:inline-block;
+  width:44px;padding-right:20px;margin-right:22px;
+  text-align:right;color:var(--gutter);
+  border-right:1px solid var(--m-divider);
+  font-size:11.5px;user-select:none;
+}
+.comment{color:var(--sy-cmt);font-style:italic}
+.keyword{color:var(--sy-kw);font-weight:600}
+.string{color:var(--sy-str)}
+.editor-note{
+  border-top:1px solid var(--m-divider);background:var(--m-inset);
+  padding:14px 22px;font-size:12.5px;color:var(--m-t3);
+}
+
+/* ---------- footer ---------- */
+footer{
+  border-top:1px solid var(--m-divider);
+  padding:26px 4.5%;display:flex;justify-content:space-between;
+  align-items:center;gap:24px;flex-wrap:wrap;
+  max-width:1440px;margin:auto;
+  font-size:13px;color:var(--m-t3);
+}
+.footer-note{display:flex;align-items:center;gap:11px}
+.footer-note .info{
+  flex:none;width:18px;height:18px;border-radius:50%;
+  border:1.5px solid var(--m-accent);color:var(--m-accent);
+  display:grid;place-items:center;font-size:11px;font-style:italic;
+}
+:root[data-theme="dark"] .footer-note .info{color:#8ADBBE}
+.footer-tag{font-family:"JetBrains Mono",monospace;font-size:11.5px;letter-spacing:.14em;text-transform:uppercase}
+
+/* ---------- dialogs ---------- */
+dialog{
+  width:min(500px,calc(100% - 40px));
+  border:1px solid var(--m-divider);border-radius:16px;
+  background:var(--m-page);color:var(--m-t1);padding:34px;
+  box-shadow:var(--card-shadow);
+}
+dialog::backdrop{background:var(--m-scrim);backdrop-filter:blur(2px)}
+dialog h2{
+  font-family:"Space Grotesk","Segoe UI",sans-serif;font-size:26px;font-weight:500;
+  letter-spacing:-.01em;margin:0 0 12px;
+}
+dialog p{margin:0 0 22px;color:var(--m-t2);font-size:15.5px;line-height:1.6}
+dialog .theme{
+  min-height:44px;padding:10px 26px;background:var(--m-accent);
+  border-color:var(--m-accent);color:var(--m-on-accent);
+  font-family:"Inter",sans-serif;font-size:14.5px;font-weight:600;
+  text-transform:none;letter-spacing:0;
+  transition:background .18s;
+}
+dialog .theme:hover{background:var(--m-accent-h);border-color:var(--m-accent-h)}
+
+/* ---------- motion ---------- */
+.reveal{opacity:0}
+@media (prefers-reduced-motion: no-preference){
+  .reveal{
+    animation:rise .6s cubic-bezier(.22,1,.36,1) forwards;
+    animation-delay:calc(var(--i,0) * 90ms + 120ms);
+  }
+  @keyframes rise{
+    from{opacity:0;transform:translateY(16px)}
+    to{opacity:1;transform:translateY(0)}
+  }
+}
+@media (prefers-reduced-motion: reduce){
+  .reveal{opacity:1}
+  *{transition:none!important;animation:none!important;scroll-behavior:auto}
+}
+
+/* ---------- responsive ---------- */
+@media (max-width:1020px){
+  .workspace{grid-template-columns:minmax(300px,.85fr) minmax(0,1fr);gap:36px}
+  .included{display:none}
+}
+@media (max-width:820px){
+  .workspace{grid-template-columns:1fr;gap:40px}
+  main{padding:44px 5% 40px}
+  .topbar-inner{padding:14px 5%;gap:14px}
+  .brand-name{font-size:19px}
+  .brand-sub{display:none}
+  .nav{gap:16px}
+  .included{display:inline-flex}
+  h1{max-width:none}
+  .code{font-size:12.5px}
+  .editor-top{padding:16px 14px;flex-direction:column;align-items:flex-start;gap:10px}
+  footer{flex-direction:column;align-items:flex-start;gap:12px;padding:22px 5%}
+}
+*{scrollbar-width:thin;scrollbar-color:var(--m-track) transparent}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" aria-hidden="true" style="position:absolute">
+  <symbol id="logo" viewBox="0 0 40 40">
+    <rect x="1.5" y="1.5" width="37" height="37" rx="10" fill="var(--m-accent-tint)" stroke="var(--m-accent-tint-stroke)" stroke-width="1.5"/>
+    <path d="M12 27.5 V13 h8.4 a6.4 6.4 0 0 1 0 12.8 H12" fill="none" stroke="var(--m-accent)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  </symbol>
+</svg>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <svg class="brand-mark" aria-hidden="true"><use href="#logo"/></svg>
+      <span>
+        <span class="brand-name">Server Logic</span>
+        <span class="brand-sub">Power Pages starters</span>
+      </span>
+    </div>
+    <nav class="nav" aria-label="Utility">
+      <button class="text-button" data-dialog="about">About</button>
+      <button class="text-button" data-dialog="help">Help</button>
+      <button class="theme" id="theme" aria-label="Switch to dark theme">
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg>
+        Dark
+      </button>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <p class="kicker reveal" style="--i:0">Starter generator</p>
+    <h1 class="reveal" style="--i:1">From idea to <em>server handler</em></h1>
+    <p class="intro reveal" style="--i:2">Create a starter for Power Pages server logic. Choose your settings and preview your code.</p>
+  </section>
+
+  <div class="workspace">
+    <section aria-label="Starter settings" class="settings reveal" style="--i:3">
+      <div class="field">
+        <label for="logic-name">Logic name</label>
+        <input id="logic-name" value="customer-summary" spellcheck="false" aria-describedby="name-hint">
+        <p class="hint" id="name-hint">Used for the file name and handler function.</p>
+      </div>
+      <div class="field">
+        <label for="method">HTTP method</label>
+        <select id="method" aria-describedby="method-hint">
+          <option>GET</option>
+          <option>POST</option>
+        </select>
+        <p class="hint" id="method-hint">The method this server logic will handle.</p>
+      </div>
+      <div class="field">
+        <label for="recipe">Recipe</label>
+        <select id="recipe" aria-describedby="recipe-hint">
+          <option>Read Dataverse records</option>
+          <option>Validate a request</option>
+        </select>
+        <p class="hint" id="recipe-hint">A starter outline for querying Dataverse and returning JSON.</p>
+      </div>
+
+      <section class="guidance">
+        <h2>Includes best practice guidance</h2>
+        <ul class="checks">
+          <li>
+            <span class="check-dot" aria-hidden="true">✓</span>
+            <div>
+              <strong>Browser API checks</strong>
+              <p>Guidance for calls from your Power Pages site.</p>
+            </div>
+          </li>
+          <li>
+            <span class="check-dot" aria-hidden="true">✓</span>
+            <div>
+              <strong>Input validation template</strong>
+              <p>A place to validate incoming request parameters.</p>
+            </div>
+          </li>
+          <li>
+            <span class="check-dot" aria-hidden="true">✓</span>
+            <div>
+              <strong>Permission setup checklist</strong>
+              <p>Review table permissions and web roles.</p>
+            </div>
+          </li>
+        </ul>
+        <button class="primary" id="download"><span aria-hidden="true">↓</span> Download starter</button>
+        <p class="feedback" id="feedback" role="status"></p>
+      </section>
+    </section>
+
+    <section class="editor reveal" style="--i:4" aria-label="Illustrative server handler">
+      <div class="editor-top">
+        <div class="editor-title">Server handler (customer-summary.js)</div>
+        <div class="included"><span aria-hidden="true">&lt;/&gt;</span> Client call planned</div>
+      </div>
+      <div class="code-wrap" tabindex="0" aria-label="Code outline, scroll horizontally if needed">
+        <code class="code">
+<span class="line comment">// customer-summary.js</span>
+<span class="line comment">// Illustrative outline · not executable starter code</span>
+<span class="line"> </span>
+<span class="line comment">/**</span>
+<span class="line comment"> * Return a summary of customer records.</span>
+<span class="line comment"> * Add site-specific logic before deployment.</span>
+<span class="line comment"> */</span>
+<span class="line"><span class="keyword">async function</span> get() {</span>
+<span class="line">  <span class="keyword">try</span> {</span>
+<span class="line comment">    // 1. Read and validate request parameters.</span>
+<span class="line comment">    //    Limit results and reject invalid input.</span>
+<span class="line"> </span>
+<span class="line comment">    // 2. Check the required table permissions.</span>
+<span class="line comment">    //    Confirm access for the intended web roles.</span>
+<span class="line"> </span>
+<span class="line comment">    // 3. Query Dataverse using the supported API.</span>
+<span class="line comment">    //    Replace this sample data with your query.</span>
+<span class="line">    <span class="keyword">const</span> records = [];</span>
+<span class="line"> </span>
+<span class="line comment">    // 4. Format the response for your handler.</span>
+<span class="line">    <span class="keyword">return</span> { value: records };</span>
+<span class="line">  } <span class="keyword">catch</span> (error) {</span>
+<span class="line comment">    // Log details securely; return a safe message.</span>
+<span class="line">    <span class="keyword">return</span> { message: <span class="string">"Unable to load records."</span> };</span>
+<span class="line">  }</span>
+<span class="line">}</span>
+        </code>
+      </div>
+      <div class="editor-note">Illustrative preview · settings and generation are mock only.</div>
+    </section>
+  </div>
+</main>
+
+<footer>
+  <span class="footer-note"><span class="info" aria-hidden="true">i</span>Validate generated files on your development site.</span>
+  <span class="footer-tag">Mock concept · Juniper</span>
+</footer>
+
+<dialog id="about">
+  <h2>About Server Logic</h2>
+  <p>A visual concept for a local Power Pages starter tool. Logic Inspector is planned for phase 2.</p>
+  <form method="dialog"><button class="theme">Close</button></form>
+</dialog>
+
+<dialog id="help">
+  <h2>Starter workflow</h2>
+  <p>Name your logic, choose a method and recipe, then review the server handler. This mock demonstrates the layout; it does not generate or deploy code.</p>
+  <form method="dialog"><button class="theme">Close</button></form>
+</dialog>
+
+<script>
+const themeButton=document.getElementById('theme');
+themeButton.addEventListener('click',()=>{const dark=document.documentElement.dataset.theme!=='dark';document.documentElement.dataset.theme=dark?'dark':'light';themeButton.textContent=dark?'Light':'Dark';themeButton.setAttribute('aria-label',`Switch to ${dark?'light':'dark'} theme`)});
+document.querySelectorAll('[data-dialog]').forEach(button=>button.addEventListener('click',()=>document.getElementById(button.dataset.dialog).showModal()));
+document.getElementById('download').addEventListener('click',()=>{document.getElementById('feedback').textContent='Mock only — starter generation is not connected.'});
+</script>
+
+</body></html>

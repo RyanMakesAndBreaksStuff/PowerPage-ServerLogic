@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Server Logic — dsp4 · Phosphor Terminal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   DSP4 · PHOSPHOR TERMINAL
+   Color is signal, not decoration:
+   grayscale machine + green (go/success) + amber (attention) + red (error)
+   ============================================================ */
+:root{
+  --bg:#05070B; --panel:#0A0E14; --panel-2:#0E131B; --screen:#070B11;
+  --border:#1E2733; --border-strong:#2C3947;
+  --t1:#E7EDF3; --t2:#93A0B0; --t3:#74808E;
+  --go:#2BFF88; --go-strong:#16C963; --go-ink:#05140B;
+  --go-bg:rgba(43,255,136,.09); --go-line:rgba(43,255,136,.42);
+  --amber:#FFB020; --amber-bg:rgba(255,176,32,.12);
+  --err:#FF5959; --err-bg:rgba(255,89,89,.10);
+  --focus:#FFB020;
+  --cta-bg:#2BFF88; --cta-ink:#05140B; --cta-glow:0 0 26px rgba(43,255,136,.32);
+  --mark-glow:0 0 16px rgba(43,255,136,.35);
+  --pl-glow:0 0 14px rgba(43,255,136,.5); --pl-op:1;
+  --dot-glow:0 0 9px rgba(255,176,32,.75);
+  --screen-inner:inset 0 0 110px rgba(43,255,136,.05);
+  --scan:rgba(0,0,0,.17); --scan-op:.5;
+  --ambient:radial-gradient(1100px 460px at 78% -140px, rgba(43,255,136,.055), transparent 70%);
+  --sel:rgba(43,255,136,.28);
+  --sb:#1A222D;
+  --c-comment:#74808E; --c-key:#16C963; --c-str:#FFB020; --c-num:#2BFF88;
+  color-scheme:dark;
+}
+:root[data-theme="light"]{
+  /* thermal paper */
+  --bg:#EFE9DA; --panel:#F7F3E7; --panel-2:#F1ECDD; --screen:#FBF8EE;
+  --border:#D8D2C0; --border-strong:#B8AF99;
+  --t1:#182720; --t2:#4C5A50; --t3:#67715F;
+  --go:#0B6B3C; --go-strong:#0A5A32; --go-ink:#F7F3E7;
+  --go-bg:rgba(11,107,60,.10); --go-line:rgba(11,107,60,.55);
+  --amber:#8A5300; --amber-bg:rgba(138,83,0,.10);
+  --err:#B3261E; --err-bg:rgba(179,38,30,.07);
+  --focus:#8A5300;
+  --cta-bg:#0A5A32; --cta-ink:#F7F3E7; --cta-glow:none;
+  --mark-glow:none;
+  --pl-glow:0 0 10px rgba(11,107,60,.30); --pl-op:.75;
+  --dot-glow:0 0 8px rgba(138,83,0,.45);
+  --screen-inner:inset 0 0 90px rgba(138,83,0,.05);
+  --scan:rgba(24,39,32,.09); --scan-op:.5;
+  --ambient:radial-gradient(1100px 460px at 78% -140px, rgba(11,107,60,.05), transparent 70%);
+  --sel:rgba(11,107,60,.22);
+  --sb:#DAD3C1;
+  --c-comment:#67715F; --c-key:#0B6B3C; --c-str:#8A5300; --c-num:#0F7A44;
+  color-scheme:light;
+}
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; min-height:100vh; display:flex; flex-direction:column;
+  background-color:var(--bg); background-image:var(--ambient); background-repeat:no-repeat;
+  color:var(--t1);
+  font-family:"Bahnschrift","Segoe UI Variable","Segoe UI",system-ui,sans-serif;
+  font-size:15px; line-height:1.55;
+}
+.mono{font-family:"JetBrains Mono",Consolas,monospace}
+a{color:var(--t2); text-decoration:none}
+a:hover{color:var(--t1); text-decoration:underline}
+:focus-visible{outline:2px solid var(--focus); outline-offset:2px}
+button{font:inherit; color:inherit; background:none; border:none; cursor:pointer}
+input,select{font:inherit}
+svg{display:block}
+::selection{background:var(--sel)}
+
+/* smooth theme swap only when motion is welcome */
+@media (prefers-reduced-motion:no-preference){
+  body,.mast,.panel,.panel-head,.panel-body,.screen,.screen-foot,.statusline,
+  .chip,.navlink,input,select,.primary,.tag,.check,.hint,.concepts a,.ghost{
+    transition:background-color .22s ease, border-color .22s ease, color .22s ease, filter .22s ease;
+  }
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none !important; transition:none !important}
+}
+
+/* ---------- skip link ---------- */
+.skip{
+  position:fixed; left:16px; top:-60px; z-index:100;
+  background:var(--panel); color:var(--t1); border:1px solid var(--go);
+  border-radius:4px; padding:10px 16px; min-height:44px;
+  display:inline-flex; align-items:center;
+  font-family:"JetBrains Mono",Consolas,monospace; font-size:12px; letter-spacing:.08em;
+}
+.skip:focus{top:12px}
+
+/* ---------- mast / machine header ---------- */
+.mast{
+  position:sticky; top:0; z-index:40;
+  background:var(--bg); border-bottom:1px solid var(--border);
+}
+.mast::after{ /* power trace — the machine is on */
+  content:""; position:absolute; left:0; bottom:-1px; height:2px; width:min(460px,55%);
+  background:linear-gradient(90deg, var(--go), transparent 92%);
+  box-shadow:var(--pl-glow); opacity:var(--pl-op);
+}
+.mast-inner{
+  max-width:1240px; margin:auto; padding:12px 24px;
+  display:flex; align-items:center; gap:16px; flex-wrap:wrap;
+}
+.brand{display:flex; align-items:center; gap:12px; min-height:44px}
+.brand-mark{
+  width:30px; height:30px; border-radius:7px; flex:none;
+  background:var(--cta-bg); color:var(--cta-ink);
+  display:grid; place-items:center; box-shadow:var(--mark-glow);
+}
+.brand-text{display:flex; flex-direction:column; gap:1px}
+.brand-name{font-weight:700; font-size:16px; letter-spacing:.05em; text-transform:uppercase; line-height:1.15}
+.brand-sub{font-family:"JetBrains Mono",Consolas,monospace; font-size:9.5px; letter-spacing:.22em; text-transform:uppercase; color:var(--t3)}
+.mast-nav{margin-left:auto; display:flex; gap:8px; flex-wrap:wrap}
+.navlink{
+  min-height:44px; padding:8px 14px; border:1px solid var(--border); border-radius:4px;
+  color:var(--t2); display:inline-flex; align-items:center; gap:8px;
+  font-family:"JetBrains Mono",Consolas,monospace; font-size:11.5px; letter-spacing:.1em; text-transform:uppercase;
+}
+.navlink:hover{color:var(--t1); border-color:var(--border-strong); background:var(--panel)}
+html[data-theme="dark"] .icon-moon{display:none}
+html[data-theme="light"] .icon-sun{display:none}
+
+/* ---------- stage ---------- */
+.stage{flex:1; width:100%; max-width:1240px; margin:0 auto; padding:40px 24px 56px}
+
+.pagehead{
+  display:flex; justify-content:space-between; align-items:flex-end; gap:24px;
+  flex-wrap:wrap; margin-bottom:28px;
+}
+.overline{margin:0 0 10px; font-family:"JetBrains Mono",Consolas,monospace; font-size:12px; color:var(--t3); letter-spacing:.04em}
+h1{
+  margin:0; font-size:clamp(28px,4vw,42px); line-height:1.06; font-weight:600;
+  text-transform:uppercase; letter-spacing:.005em; max-width:26ch;
+}
+.caret{color:var(--go); font-family:"JetBrains Mono",Consolas,monospace; font-weight:700}
+.sub{margin:12px 0 0; color:var(--t2); font-size:15px; max-width:62ch}
+.chip{
+  display:inline-flex; align-items:center; gap:10px; white-space:nowrap;
+  border:1px solid var(--border); border-radius:4px; background:var(--panel);
+  padding:9px 14px; min-height:38px;
+  font-family:"JetBrains Mono",Consolas,monospace; font-size:11px;
+  letter-spacing:.12em; text-transform:uppercase; color:var(--t2);
+}
+.chip .dot{width:8px; height:8px; border-radius:50%; background:var(--amber); box-shadow:var(--dot-glow); flex:none}
+
+/* ---------- console: config | screen ---------- */
+.console{
+  display:grid; grid-template-columns:minmax(320px,380px) minmax(0,1fr);
+  gap:16px; align-items:stretch;
+}
+.panel{
+  background:var(--panel); border:1px solid var(--border); border-radius:6px;
+  overflow:hidden; display:flex; flex-direction:column; min-width:0;
+}
+.panel-head{
+  display:flex; justify-content:space-between; align-items:center; gap:12px;
+  padding:10px 16px; background:var(--panel-2); border-bottom:1px solid var(--border);
+}
+.panel-head h2{
+  margin:0; font-family:"JetBrains Mono",Consolas,monospace; font-size:11px; font-weight:600;
+  letter-spacing:.16em; text-transform:uppercase; color:var(--t2);
+}
+.meta{font-family:"JetBrains Mono",Consolas,monospace; font-size:10.5px; color:var(--t3); letter-spacing:.1em; text-transform:uppercase; white-space:nowrap}
+
+/* ---------- config form ---------- */
+.panel-body{padding:20px 16px; display:flex; flex-direction:column; gap:16px}
+.field label{
+  display:flex; justify-content:space-between; align-items:baseline; gap:10px; margin-bottom:8px;
+  font-family:"JetBrains Mono",Consolas,monospace; font-size:11.5px; font-weight:600;
+  letter-spacing:.14em; text-transform:uppercase; color:var(--t2);
+}
+.req{color:var(--amber)}
+.field input,.select-wrap select{
+  width:100%; min-height:44px; padding:10px 12px;
+  background:var(--screen); border:1px solid var(--border); border-radius:4px;
+  color:var(--t1); caret-color:var(--go);
+  font-family:"JetBrains Mono",Consolas,monospace; font-size:14px;
+}
+.field input:hover,.select-wrap select:hover{border-color:var(--border-strong)}
+.field input:focus-visible,.select-wrap select:focus-visible{outline-offset:0}
+[aria-invalid="true"]{border-color:var(--err) !important; background:var(--err-bg)}
+.select-wrap{position:relative}
+.select-wrap select{appearance:none; -webkit-appearance:none; padding-right:38px}
+.select-wrap .chev{
+  position:absolute; right:12px; top:50%; transform:translateY(-50%);
+  color:var(--t3); pointer-events:none;
+}
+.hint{margin:8px 0 0; font-size:12.5px; color:var(--t3); line-height:1.5}
+.error{
+  display:none; margin:8px 0 0; font-size:12.5px; color:var(--err); line-height:1.5;
+  font-family:"JetBrains Mono",Consolas,monospace;
+}
+.error .err-mark{
+  display:inline-grid; place-items:center; width:15px; height:15px; margin-right:7px;
+  border:1px solid var(--err); border-radius:3px; font-weight:700; font-size:11px;
+  vertical-align:-2px; text-align:center;
+}
+.field-wrap.has-error .error{display:block}
+
+/* guidance checklist */
+.guidance{border-top:1px solid var(--border); padding-top:16px}
+.guidance h3{
+  margin:0 0 12px; font-family:"JetBrains Mono",Consolas,monospace; font-size:11px; font-weight:600;
+  letter-spacing:.16em; text-transform:uppercase; color:var(--t3);
+}
+.checks{list-style:none; margin:0; padding:0; display:grid; gap:12px}
+.checks li{display:flex; gap:12px; align-items:flex-start}
+.check{
+  flex:none; width:20px; height:20px; margin-top:1px; border-radius:4px;
+  border:1px solid var(--go-line); background:var(--go-bg); color:var(--go);
+  display:grid; place-items:center;
+}
+.checks strong{display:block; font-size:13.5px; color:var(--t1)}
+.checks p{margin:2px 0 0; font-size:12px; color:var(--t3); line-height:1.5}
+
+/* primary CTA — green = go */
+.primary{
+  width:100%; min-height:48px; padding:12px 18px; margin-top:4px;
+  background:var(--cta-bg); color:var(--cta-ink);
+  border:1px solid transparent; border-radius:4px;
+  font-family:"JetBrains Mono",Consolas,monospace; font-size:13px; font-weight:700;
+  letter-spacing:.08em; text-transform:uppercase;
+  display:inline-flex; align-items:center; justify-content:center; gap:10px;
+  box-shadow:var(--cta-glow);
+}
+.primary:hover{filter:brightness(1.07)}
+.primary:active{transform:translateY(1px)}
+
+/* terminal response line */
+.feedback-row{display:flex; gap:10px; align-items:baseline; min-height:20px; margin-top:2px}
+.fp{color:var(--go); font-family:"JetBrains Mono",Consolas,monospace; font-size:12.5px; font-weight:700}
+.feedback{margin:0; font-family:"JetBrains Mono",Consolas,monospace; font-size:12.5px; line-height:1.5; color:var(--t2)}
+.feedback.ok{color:var(--go)}
+.feedback.bad{color:var(--err)}
+
+/* ---------- the screen (hero) ---------- */
+.filetab{
+  margin:0; text-transform:none; letter-spacing:0;
+  display:flex; align-items:center; gap:10px; min-width:0;
+}
+.filetab svg{flex:none; color:var(--t3)}
+.fname{
+  font-family:"JetBrains Mono",Consolas,monospace; font-size:12.5px; font-weight:600;
+  color:var(--go); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0;
+}
+.tag{
+  font-family:"JetBrains Mono",Consolas,monospace; font-size:10px; color:var(--t3);
+  border:1px solid var(--border); border-radius:3px; padding:3px 8px;
+  letter-spacing:.1em; text-transform:uppercase; white-space:nowrap;
+}
+.screen-wrap{position:relative; flex:1; display:flex; min-height:0}
+.screen{
+  flex:1; overflow:auto; min-height:280px; padding:16px 12px 22px 8px;
+  background:var(--screen); box-shadow:var(--screen-inner);
+  scrollbar-width:thin; scrollbar-color:var(--sb) transparent;
+}
+.screen::-webkit-scrollbar{height:10px; width:10px}
+.screen::-webkit-scrollbar-thumb{background:var(--sb); border-radius:5px}
+.screen::-webkit-scrollbar-track{background:transparent}
+.scanlines{
+  position:absolute; inset:0; z-index:1; pointer-events:none; opacity:var(--scan-op);
+  background:repeating-linear-gradient(180deg, var(--scan) 0 1px, transparent 1px 3px);
+}
+.code{
+  display:block; margin:0; min-width:max-content;
+  font-family:"JetBrains Mono",Consolas,monospace;
+  font-size:clamp(12.5px,1vw,14.5px); line-height:2.05;
+  counter-reset:line; color:var(--t1);
+}
+.line{display:block; white-space:pre; padding-right:24px; counter-increment:line}
+.line::before{
+  content:counter(line,decimal-leading-zero);
+  display:inline-block; min-width:2ch; padding-right:12px; margin-right:16px;
+  text-align:right; color:var(--t3); opacity:.55; user-select:none;
+  border-right:1px solid var(--border);
+}
+.comment{color:var(--c-comment)}
+.keyword{color:var(--c-key)}
+.string{color:var(--c-str)}
+.number{color:var(--c-num)}
+.cursor{
+  display:inline-block; width:.58em; height:1.05em; margin-left:.18em;
+  background:var(--go); border-radius:1px; vertical-align:-.18em;
+  box-shadow:0 0 10px rgba(43,255,136,.55);
+}
+:root[data-theme="light"] .cursor{box-shadow:none}
+.screen-foot{
+  border-top:1px solid var(--border); background:var(--screen);
+  padding:9px 16px; display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; align-items:center;
+  font-family:"JetBrains Mono",Consolas,monospace; font-size:10.5px; color:var(--t3); letter-spacing:.04em;
+}
+.screen-foot .seg{display:inline-flex; align-items:center; gap:9px; white-space:nowrap; min-width:0}
+.ok-dot{width:7px; height:7px; border-radius:50%; background:var(--go); flex:none}
+.foot-meta{white-space:nowrap}
+
+/* ---------- statusline footer ---------- */
+.statusline{border-top:1px solid var(--border); background:var(--panel)}
+.statusline-inner{
+  max-width:1240px; margin:auto; padding:14px 24px;
+  display:flex; align-items:center; gap:24px; flex-wrap:wrap;
+}
+.foot-note{
+  margin:0; display:flex; align-items:center; gap:10px;
+  font-family:"JetBrains Mono",Consolas,monospace; font-size:12px; color:var(--t2); letter-spacing:.02em;
+}
+.foot-note svg{flex:none; color:var(--amber)}
+.legend{
+  margin:0 0 0 auto; display:flex; gap:16px; align-items:center;
+  font-family:"JetBrains Mono",Consolas,monospace; font-size:10.5px; color:var(--t3); letter-spacing:.08em;
+}
+.legend span{display:inline-flex; align-items:center; gap:7px; white-space:nowrap}
+.legend .sw{width:8px; height:8px; border-radius:50%; display:inline-block; flex:none}
+.legend .sw.go{background:var(--go)}
+.legend .sw.at{background:var(--amber)}
+.legend .sw.er{background:var(--err)}
+.concepts{display:flex; gap:2px; flex-wrap:wrap}
+.concepts a{
+  min-height:44px; padding:0 12px; display:inline-flex; align-items:center;
+  font-family:"JetBrains Mono",Consolas,monospace; font-size:11px; letter-spacing:.06em; color:var(--t3);
+}
+.concepts a:hover{color:var(--t1); text-decoration:underline; text-underline-offset:4px}
+.concepts a[aria-current]{
+  color:var(--go); background:var(--go-bg);
+  text-decoration:underline; text-decoration-thickness:2px; text-underline-offset:5px;
+}
+
+/* ---------- dialogs ---------- */
+dialog{
+  border:none; padding:14px; background:transparent; color:var(--t1);
+  width:min(500px, calc(100vw - 32px)); max-height:calc(100vh - 40px);
+}
+dialog::backdrop{background:rgba(4,7,11,.62); backdrop-filter:blur(2px)}
+.dlg-inner{
+  background:var(--panel); border:1px solid var(--border-strong); border-radius:8px;
+  overflow:hidden; box-shadow:0 18px 50px rgba(0,0,0,.4);
+}
+.dlg-head{
+  display:flex; align-items:center; gap:12px; padding:8px 8px 8px 16px;
+  background:var(--panel-2); border-bottom:1px solid var(--border);
+}
+.dlg-head h2{
+  margin:0; flex:1; min-width:0;
+  font-family:"JetBrains Mono",Consolas,monospace; font-size:11.5px; font-weight:600;
+  letter-spacing:.14em; text-transform:uppercase; color:var(--t2);
+}
+.dlg-esc{
+  font-family:"JetBrains Mono",Consolas,monospace; font-size:10px; color:var(--t3);
+  letter-spacing:.12em; text-transform:uppercase;
+}
+.dlg-x{
+  width:44px; height:44px; display:grid; place-items:center; border-radius:4px;
+  color:var(--t2); border:1px solid transparent;
+}
+.dlg-x:hover{color:var(--t1); border-color:var(--border); background:var(--panel)}
+.dlg-body{padding:20px 16px}
+.dlg-body p{margin:0 0 16px; color:var(--t2); font-size:14px; line-height:1.6}
+.ghost{
+  min-height:44px; padding:8px 16px; border:1px solid var(--border); border-radius:4px;
+  color:var(--t2); display:inline-flex; align-items:center;
+  font-family:"JetBrains Mono",Consolas,monospace; font-size:11.5px; letter-spacing:.1em; text-transform:uppercase;
+}
+.ghost:hover{color:var(--t1); border-color:var(--border-strong); background:var(--screen)}
+
+/* ---------- motion: staggered power-on (opacity/transform only) ---------- */
+@media (prefers-reduced-motion:no-preference){
+  .reveal{animation:boot .55s cubic-bezier(.2,.7,.3,1) backwards}
+  .reveal-1{animation-delay:.05s}
+  .reveal-2{animation-delay:.15s}
+  .reveal-3{animation-delay:.25s}
+  .code .line{animation:lineIn .45s ease backwards; animation-delay:calc(.5s + var(--i)*75ms)}
+  .cursor{animation:blink 1.15s linear infinite 1.9s}
+  .caret{animation:blink 1.15s linear infinite 1.2s}
+  .chip .dot{animation:pulse 2.8s ease-in-out infinite}
+  dialog[open]{animation:dlgIn .22s ease}
+}
+@keyframes boot{from{opacity:0; transform:translateY(10px)} to{opacity:1; transform:none}}
+@keyframes lineIn{from{opacity:0; transform:translateX(-8px)} to{opacity:1; transform:none}}
+@keyframes blink{0%,55%{opacity:1} 56%,100%{opacity:0}}
+@keyframes pulse{0%,100%{opacity:1} 50%{opacity:.3}}
+@keyframes dlgIn{from{opacity:0; transform:translateY(8px)} to{opacity:1; transform:none}}
+
+/* ---------- responsive ---------- */
+@media (max-width:960px){
+  .console{grid-template-columns:1fr}
+  .pagehead{flex-direction:column; align-items:flex-start; gap:16px}
+  .stage{padding:28px 16px 40px}
+  .mast-inner{padding:10px 16px}
+  .legend{display:none}
+  .screen{max-height:62vh}
+}
+@media (max-width:600px){
+  .mast-inner{gap:10px}
+  .mast-nav{margin-left:auto}
+  .navlink{padding:8px 10px}
+  .concepts{width:100%}
+  .statusline-inner{flex-direction:column; align-items:flex-start; gap:8px; padding:12px 16px}
+  .feedback-row{flex-wrap:wrap}
+  .screen{max-height:58vh}
+  .chip{white-space:normal}
+}
+</style>
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="mast">
+  <div class="mast-inner">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 5l7 7-7 7"/><path d="M15.5 19H21"/></svg>
+      </span>
+      <span class="brand-text">
+        <span class="brand-name">Server Logic</span>
+        <span class="brand-sub">Power Pages starter tool</span>
+      </span>
+    </div>
+    <nav class="mast-nav" aria-label="Utility">
+      <button class="navlink" type="button" data-dialog="about">About</button>
+      <button class="navlink" type="button" data-dialog="help">Help</button>
+      <button class="navlink" id="theme" type="button" aria-pressed="true" aria-label="Switch to light theme">
+        <svg class="icon-sun" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4m11.4-11.4 1.4-1.4"/></svg>
+        <svg class="icon-moon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8Z"/></svg>
+        <span id="theme-label">Light</span>
+      </button>
+    </nav>
+  </div>
+</header>
+
+<main class="stage" id="main" aria-labelledby="page-title">
+
+  <div class="pagehead reveal reveal-1">
+    <div>
+      <p class="overline" aria-hidden="true">// new handler</p>
+      <h1 id="page-title">Create a server logic starter<span class="caret" aria-hidden="true">_</span></h1>
+      <p class="sub">Configure a handler, review the outline, then take it into your site.</p>
+    </div>
+    <p class="chip" role="status">
+      <span class="dot" aria-hidden="true"></span>Local mock · No connection
+    </p>
+  </div>
+
+  <div class="console">
+
+    <!-- ============ left pane: configuration ============ -->
+    <section class="panel reveal reveal-2" aria-labelledby="config-title">
+      <header class="panel-head">
+        <h2 id="config-title">Handler configuration</h2>
+        <span class="meta">3 fields</span>
+      </header>
+      <form class="panel-body" id="starter-form" novalidate>
+
+        <div class="field field-wrap" id="wrap-name">
+          <label for="logic-name"><span>Logic name</span><span class="req" aria-hidden="true">*</span></label>
+          <input id="logic-name" name="logic-name" value="customer-summary" spellcheck="false" autocomplete="off" autocapitalize="off" aria-describedby="name-hint name-error">
+          <p class="hint" id="name-hint">Used for the file name and handler function.</p>
+          <p class="error" id="name-error"><span class="err-mark" aria-hidden="true">!</span>Lowercase letters, numbers, and dashes only. Start with a letter.</p>
+        </div>
+
+        <div class="field">
+          <label for="method"><span>HTTP method</span></label>
+          <div class="select-wrap">
+            <select id="method" aria-describedby="method-hint">
+              <option value="get">GET · read</option>
+              <option value="post">POST · submit</option>
+            </select>
+            <svg class="chev" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+          </div>
+          <p class="hint" id="method-hint">The method this server logic will handle.</p>
+        </div>
+
+        <div class="field">
+          <label for="recipe"><span>Recipe</span></label>
+          <div class="select-wrap">
+            <select id="recipe" aria-describedby="recipe-hint">
+              <option>Read Dataverse records</option>
+              <option>Validate a request</option>
+            </select>
+            <svg class="chev" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+          </div>
+          <p class="hint" id="recipe-hint">A starter outline for querying Dataverse and returning JSON.</p>
+        </div>
+
+        <section class="guidance" aria-labelledby="guidance-title">
+          <h3 id="guidance-title">Best practice guidance included</h3>
+          <ul class="checks">
+            <li>
+              <span class="check" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5 9.5 18 20 6"/></svg></span>
+              <div><strong>Browser API checks</strong><p>Guidance for calls from your Power Pages site.</p></div>
+            </li>
+            <li>
+              <span class="check" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5 9.5 18 20 6"/></svg></span>
+              <div><strong>Input validation template</strong><p>A place to validate incoming request parameters.</p></div>
+            </li>
+            <li>
+              <span class="check" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5 9.5 18 20 6"/></svg></span>
+              <div><strong>Permission setup checklist</strong><p>Review table permissions and web roles.</p></div>
+            </li>
+          </ul>
+        </section>
+
+        <button class="primary" type="submit" id="download">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0 4.5-4.5M12 15 7.5 10.5M4 21h16"/></svg>
+          <span>Download starter</span>
+        </button>
+
+        <div class="feedback-row">
+          <span class="fp" aria-hidden="true">&gt;</span>
+          <p class="feedback" id="feedback" role="status" aria-live="polite"></p>
+        </div>
+
+      </form>
+    </section>
+
+    <!-- ============ right pane: the screen ============ -->
+    <section class="panel screen-panel reveal reveal-3" aria-label="Starter code preview">
+      <header class="panel-head">
+        <h2 class="filetab">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M8 4H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h3M16 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3"/></svg>
+          <span class="fname"><span id="tab-name">customer-summary</span>.js</span>
+        </h2>
+        <span class="tag">client call · planned</span>
+      </header>
+
+      <div class="screen-wrap">
+        <div class="screen" tabindex="0" role="group" aria-label="Starter code preview, illustrative outline">
+          <code class="code"><span class="line comment" style="--i:0">// <span id="code-name">customer-summary</span>.js</span><span class="line" style="--i:1"><span class="keyword">async function</span> <span class="number" id="code-method">get</span>() {</span><span class="line" style="--i:2">  <span class="keyword">try</span> {</span><span class="line comment" style="--i:3">    // read &amp; validate request params, check permissions, query Dataverse</span><span class="line" style="--i:4">    <span class="keyword">const</span> records = [];</span><span class="line" style="--i:5">    <span class="keyword">return</span> { value: records };</span><span class="line" style="--i:6">  } <span class="keyword">catch</span> (error) {</span><span class="line" style="--i:7">    <span class="keyword">return</span> { message: <span class="string">"Unable to load records."</span> };</span><span class="line" style="--i:8">  }</span><span class="line" style="--i:9">}<span class="cursor" aria-hidden="true"></span></span></code>
+        </div>
+        <div class="scanlines" aria-hidden="true"></div>
+      </div>
+
+      <footer class="screen-foot">
+        <span class="seg">
+          <span class="ok-dot" aria-hidden="true"></span>
+          <span><span id="verb">get</span>() · <span id="foot-name">customer-summary</span>.js</span>
+        </span>
+        <span class="foot-meta">illustrative outline · not executable starter code</span>
+      </footer>
+    </section>
+
+  </div>
+</main>
+
+<footer class="statusline">
+  <div class="statusline-inner">
+    <p class="foot-note">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M12 11.5V16"/></svg>
+      Validate generated files on your development site
+    </p>
+    <p class="legend" aria-hidden="true">
+      <span><i class="sw go"></i>go</span>
+      <span><i class="sw at"></i>attention</span>
+      <span><i class="sw er"></i>error</span>
+    </p>
+    <nav class="concepts" aria-label="Compare design concepts">
+      <a href="proto2-alt-1.html">alt-1</a>
+      <a href="proto2-alt-2.html">alt-2</a>
+      <a href="proto2-alt-3.html">alt-3</a>
+      <a href="proto2-alt-4.html">alt-4</a>
+      <a href="dsp4_blueprint.html">dsp4-blueprint</a>
+      <a href="dsp4_phosphor.html" aria-current="page">dsp4-phosphor</a>
+    </nav>
+  </div>
+</footer>
+
+<dialog id="about" aria-labelledby="about-title">
+  <div class="dlg-inner">
+    <header class="dlg-head">
+      <h2 id="about-title">About Server Logic</h2>
+      <span class="dlg-esc" aria-hidden="true">esc</span>
+      <button class="dlg-x" type="button" data-close aria-label="Close dialog">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+    </header>
+    <div class="dlg-body">
+      <p>A visual concept for a local Power Pages starter tool. Logic Inspector is planned for phase&nbsp;2.</p>
+      <button class="ghost" type="button" data-close>Close</button>
+    </div>
+  </div>
+</dialog>
+
+<dialog id="help" aria-labelledby="help-title">
+  <div class="dlg-inner">
+    <header class="dlg-head">
+      <h2 id="help-title">Starter workflow</h2>
+      <span class="dlg-esc" aria-hidden="true">esc</span>
+      <button class="dlg-x" type="button" data-close aria-label="Close dialog">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+    </header>
+    <div class="dlg-body">
+      <p>Name your logic, choose a method and recipe, then review the server handler. This mock demonstrates the layout; it does not generate or deploy code.</p>
+      <button class="ghost" type="button" data-close>Close</button>
+    </div>
+  </div>
+</dialog>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const nameInput = $('logic-name');
+const methodSel = $('method');
+const recipeSel = $('recipe');
+const form = $('starter-form');
+const feedback = $('feedback');
+const valid = (v) => /^[a-z][a-z0-9-]*$/.test(v.trim());
+
+/* ---- theme toggle ---- */
+const themeBtn = $('theme');
+const themeLabel = $('theme-label');
+themeBtn.addEventListener('click', () => {
+  const dark = document.documentElement.dataset.theme !== 'dark';
+  document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+  themeLabel.textContent = dark ? 'Light' : 'Dark';
+  themeBtn.setAttribute('aria-pressed', String(dark));
+  themeBtn.setAttribute('aria-label', dark ? 'Switch to light theme' : 'Switch to dark theme');
+});
+
+/* ---- About / Help dialogs ---- */
+document.querySelectorAll('[data-dialog]').forEach((b) =>
+  b.addEventListener('click', () => $(b.dataset.dialog).showModal()));
+document.querySelectorAll('[data-close]').forEach((b) =>
+  b.addEventListener('click', () => b.closest('dialog').close()));
+document.querySelectorAll('dialog').forEach((d) =>
+  d.addEventListener('click', (e) => { if (e.target === d) d.close(); }));
+
+/* ---- live sync: name + method into the preview ---- */
+const syncCode = () => {
+  const name = nameInput.value.trim() || 'untitled';
+  $('code-name').textContent = name;   /* filename comment in code */
+  $('tab-name').textContent = name;    /* screen tab */
+  $('foot-name').textContent = name;   /* screen status line */
+  $('verb').textContent = methodSel.value;          /* status line */
+  $('code-method').textContent = methodSel.value;   /* handler function name */
+};
+nameInput.addEventListener('input', syncCode);
+methodSel.addEventListener('change', syncCode);
+
+/* ---- recipe hint swap ---- */
+recipeSel.addEventListener('change', () => {
+  $('recipe-hint').textContent = recipeSel.value === 'Validate a request'
+    ? 'A starter outline for checking inputs and rejecting bad requests.'
+    : 'A starter outline for querying Dataverse and returning JSON.';
+});
+
+/* ---- inline validation on blur ---- */
+const setInvalid = (bad) => {
+  nameInput.setAttribute('aria-invalid', bad ? 'true' : 'false');
+  $('wrap-name').classList.toggle('has-error', bad);
+};
+nameInput.addEventListener('blur', () => setInvalid(!valid(nameInput.value)));
+nameInput.addEventListener('input', () => {
+  if ($('wrap-name').classList.contains('has-error') && valid(nameInput.value)) setInvalid(false);
+});
+
+/* ---- submit: mock download with guard ---- */
+form.addEventListener('submit', (e) => {
+  e.preventDefault();
+  feedback.classList.remove('ok', 'bad');
+  if (!valid(nameInput.value)) {
+    setInvalid(true);
+    nameInput.focus();
+    feedback.textContent = 'Fix the logic name before downloading.';
+    feedback.classList.add('bad');
+    return;
+  }
+  feedback.textContent = 'Mock only — starter generation is not connected.';
+  feedback.classList.add('ok');
+});
+
+syncCode();
+</script>
+</body>
+</html>

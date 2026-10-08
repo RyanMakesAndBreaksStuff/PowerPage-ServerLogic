@@ -1,0 +1,352 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Server Logic · Verdigris mockup</title>
+<style>
+/* ============ Verdigris tokens ============ */
+:root{
+  /* neutrals — cool bone / sage paper */
+  --m-canvas:#E9EEE9;        /* deepest paper (code field) */
+  --m-page:#F3F6F1;          /* body sheet */
+  --m-card:#FCFDFB;          /* raised panels */
+  --m-subtle:#EDF1EC;
+  --m-inset:#F1F4EF;         /* receded chrome */
+  --m-divider:#DCE3DD;
+  --m-control-stroke:#C7D1C8;
+  --m-strong:#A9B5AB;
+  --m-focus:#0F766E;
+  /* text */
+  --m-t1:#1A2420; --m-t2:#4D5B55; --m-t3:#66756D; --m-td:#8FA097;
+  --m-on-accent:#F3FBF8;
+  /* accent — teal-green */
+  --m-link:#0F766E;
+  --m-accent:#0F766E; --m-accent-h:#0C655E; --m-accent-p:#0A544E;
+  --m-accent-tint:#DCEEE9; --m-accent-tint-stroke:#A6D4C8; --m-sel:#0F766E;
+  /* controls */
+  --m-control-fill:#FDFEFC; --m-control-hover:#F0F4F0;
+  --m-hover:rgba(15,34,29,.08);
+  /* states — muted sage */
+  --m-success:#3E7250; --m-success-tint:#E2EBE1;
+  --m-danger:#A5503F; --m-danger-tint:#F1E7E3; --m-danger-stroke:#DCB3A8;
+  --m-warn:#8A6212; --m-warn-tint:#EFEADA;
+  /* energy — warm ochre highlight */
+  --m-energy:#A85E0E;
+  --m-track:#D8DFD9;
+  --m-scrim:rgba(13,29,24,.45);
+  /* accent scale */
+  --s1:#0F766E; --s2:#A85E0E; --s3:#5B8A72; --s4:#7A6FA8; --s5:#8C7A3A;
+  /* type */
+  --f-display:"Iowan Old Style","Palatino Linotype","Book Antiqua",Palatino,Georgia,serif;
+  --f-body:"Bahnschrift","Avenir Next",Avenir,"Segoe UI",Verdana,sans-serif;
+  --f-mono:"Cascadia Code","Cascadia Mono","JetBrains Mono",Consolas,Menlo,monospace;
+  --m-select-chevron:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='7'%3E%3Cpath d='M1 1.5 5 5.5 9 1.5' fill='none' stroke='%234D5B55' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  color-scheme:light;
+}
+:root[data-theme="dark"]{
+  --m-canvas:#0F1512; --m-page:#131A17; --m-card:#1B2420; --m-subtle:#222C27; --m-inset:#161F1B;
+  --m-divider:#28322C;
+  --m-control-stroke:#37453E;
+  --m-strong:#515F58;
+  --m-focus:#5EEAD4;
+  --m-t1:#EAF2ED; --m-t2:#AEC0B8; --m-t3:#8DA098; --m-td:#5F6E66;
+  --m-on-accent:#04211C;
+  --m-link:#5EEAD4;
+  --m-accent:#2DD4BF; --m-accent-h:#5EEAD4; --m-accent-p:#1FB3A2;
+  --m-accent-tint:#0E3129; --m-accent-tint-stroke:#1F4A40; --m-sel:#5EEAD4;
+  --m-control-fill:#1E2723; --m-control-hover:#27322C;
+  --m-hover:rgba(210,240,228,.08);
+  --m-success:#7CC496; --m-success-tint:#152419;
+  --m-danger:#E39B8B; --m-danger-tint:#2E1D18; --m-danger-stroke:#69332A;
+  --m-warn:#D9B45C; --m-warn-tint:#272113;
+  --m-energy:#E0A254;
+  --m-track:#28322D;
+  --m-scrim:rgba(2,8,6,.62);
+  --s1:#2DD4BF; --s2:#E0A254; --s3:#7FBDA6; --s4:#A79BD4; --s5:#C4B168;
+  --m-select-chevron:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='7'%3E%3Cpath d='M1 1.5 5 5.5 9 1.5' fill='none' stroke='%23AEC0B8' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  color-scheme:dark;
+}
+
+/* ============ base ============ */
+*{box-sizing:border-box;scrollbar-color:var(--m-strong) var(--m-inset);scrollbar-width:thin}
+body{margin:0;background:var(--m-page);color:var(--m-t1);font-family:var(--f-body);font-size:14.5px;line-height:1.55;-webkit-font-smoothing:antialiased}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--m-focus);outline-offset:2px}
+::selection{background:var(--m-sel);color:var(--m-on-accent)}
+
+/* ============ topbar ============ */
+.topbar{border-bottom:1px solid var(--m-strong);background:var(--m-card)}
+.topbar::after{content:"";display:block;height:3px; /* verdigris→copper signature rule */
+  background:linear-gradient(90deg,var(--m-accent) 0%,var(--m-accent) 32%,var(--s3) 62%,var(--m-s2) 100%)}
+.topbar-inner{max-width:1280px;margin:auto;padding:14px 4.5%;display:flex;align-items:center;justify-content:space-between;gap:24px}
+.brand{display:flex;align-items:center;gap:12px;font-family:var(--f-display);font-size:20px;font-weight:600;letter-spacing:.1px}
+.brand-mark{width:26px;height:26px;flex:none}
+.brand-mark rect{fill:var(--m-accent);stroke:var(--m-accent)}
+.brand-mark path{stroke:var(--m-on-accent)}
+.nav{display:flex;align-items:center;gap:22px}
+.text-button{background:none;border:0;padding:6px 2px;border-radius:4px;
+  font-family:var(--f-mono);font-size:11px;font-weight:600;line-height:1;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--m-t3)}
+.text-button:hover{color:var(--m-accent)}
+.pill{border:1px solid var(--m-control-stroke);border-radius:999px;background:var(--m-control-fill);color:var(--m-t1);
+  padding:7px 12px;font-family:var(--f-mono);font-size:10.5px;font-weight:600;line-height:1;
+  letter-spacing:.12em;text-transform:uppercase}
+.pill:hover{background:var(--m-control-hover);border-color:var(--m-strong)}
+
+/* ============ hero ============ */
+main{max-width:1280px;margin:auto;padding:36px 4.5% 30px}
+.hero{margin:4px 0 38px;max-width:720px}
+h1{font-family:var(--f-display);font-size:clamp(34px,4.3vw,58px);font-weight:600;
+  line-height:1.07;letter-spacing:-.4px;margin:0 0 14px}
+h1 .flip{font-style:italic;color:var(--m-accent)}
+.intro{margin:0;color:var(--m-t2);font-size:15.5px;line-height:1.6}
+
+/* ============ workspace ============ */
+.workspace{display:grid;grid-template-columns:minmax(300px,.72fr) minmax(0,1fr);
+  gap:clamp(26px,3.4vw,48px);align-items:stretch}
+.field{margin-bottom:22px}
+label{display:block;margin:0 0 7px;font-size:14.5px;font-weight:700}
+input,select{width:100%;font-family:var(--f-mono);font-size:13.5px;line-height:1.4;font-weight:500;
+  color:var(--m-t1);background:var(--m-control-fill);
+  border:1px solid var(--m-control-stroke);border-radius:8px;padding:11px 12px}
+input:hover,select:hover{border-color:var(--m-strong)}
+input:focus,select:focus{outline:none;border-color:var(--m-accent);box-shadow:0 0 0 3px var(--m-accent-tint)}
+select{appearance:none;cursor:pointer;padding-right:32px;
+  background-image:var(--m-select-chevron);background-repeat:no-repeat;background-position:right 12px center}
+.hint{margin:7px 0 0;color:var(--m-t2);font-size:12px;line-height:1.6}
+
+/* guidance */
+.guidance{border-top:1px solid var(--m-strong);padding-top:20px;margin-top:8px}
+.guidance h2{display:flex;align-items:center;gap:10px;font-family:var(--f-display);
+  font-size:19px;font-weight:600;margin:0 0 15px}
+.guidance h2::before{content:"";width:8px;height:8px;flex:none;transform:rotate(45deg);
+  border-radius:2px;background:var(--m-energy)}
+.checks{list-style:none;margin:0 0 18px;padding:0;display:grid;gap:13px}
+.checks li{display:flex;gap:12px;align-items:flex-start}
+.check{display:grid;place-items:center;flex:none;width:24px;height:24px;border-radius:50%;
+  background:var(--m-success);margin-top:1px}
+.check svg{width:12px;height:12px;display:block}
+.check path{fill:none;stroke:var(--m-card);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.checks strong{font-size:13.5px}
+.checks p{margin:2px 0 0;color:var(--m-t2);font-size:12px;line-height:1.55}
+.primary{width:100%;display:flex;align-items:center;justify-content:center;gap:10px;
+  border:1px solid var(--m-accent);border-radius:8px;background:var(--m-accent);color:var(--m-on-accent);
+  padding:13px;font-family:var(--f-body);font-size:14.5px;font-weight:700;line-height:1}
+.primary:hover{background:var(--m-accent-h);border-color:var(--m-accent-h)}
+.primary:active{background:var(--m-accent-p);border-color:var(--m-accent-p)}
+.primary svg{width:15px;height:15px}
+.feedback{min-height:18px;margin:10px 0 0;font-family:var(--f-mono);font-size:11.5px;line-height:1.5;color:var(--m-t2)}
+.feedback:not(:empty){color:var(--m-energy);font-weight:600}
+
+/* ============ editor ============ */
+.editor{border:1px solid var(--m-strong);border-radius:10px;background:var(--m-card);
+  min-width:0;display:flex;flex-direction:column;overflow:hidden}
+.editor-top{display:flex;justify-content:space-between;align-items:stretch;
+  border-bottom:1px solid var(--m-divider);background:var(--m-inset)}
+.editor-title{display:flex;align-items:center;gap:9px;padding:13px 16px;
+  font-family:var(--f-mono);font-size:11.5px;font-weight:600;line-height:1.2;
+  letter-spacing:.03em;color:var(--m-t2)}
+.editor-title::before{content:"";width:7px;height:7px;flex:none;border-radius:2px;background:var(--m-accent)}
+.included{display:flex;gap:8px;align-items:center;padding:0 14px;
+  border-left:1px solid var(--m-control-stroke);white-space:nowrap;
+  font-family:var(--f-mono);font-size:11px;font-weight:600;line-height:1;
+  color:var(--m-success);background:var(--m-success-tint)}
+.code-wrap{flex:1;overflow:auto;padding:16px 0 20px;background:var(--m-canvas)}
+.code-wrap:focus-visible{outline-offset:-2px}
+.code{display:block;min-width:max-content;counter-reset:line;color:var(--m-t1);
+  font-family:var(--f-mono);font-size:clamp(11px,.92vw,13.5px);line-height:1.9}
+.line{display:block;white-space:pre;padding-right:28px;counter-increment:line}
+.line::before{content:counter(line);display:inline-block;width:44px;padding-right:16px;margin-right:18px;
+  border-right:1px solid var(--m-divider);color:var(--m-td);text-align:right;user-select:none;
+  font-variant-numeric:tabular-nums}
+.line.comment{color:var(--m-td)}
+.keyword{color:var(--m-accent);font-weight:600}
+.string{color:var(--m-energy)}
+.editor-note{border-top:1px solid var(--m-divider);background:var(--m-inset);
+  padding:11px 16px;font-size:11.5px;color:var(--m-t2)}
+
+/* ============ footer ============ */
+footer{max-width:1280px;margin:auto;padding:18px 4.5% 30px;display:flex;
+  justify-content:space-between;gap:14px;color:var(--m-t3);font-size:12px}
+.footer-note{display:flex;align-items:center;gap:8px}
+.footer-note svg{width:13px;height:13px;flex:none}
+
+/* ============ dialogs ============ */
+dialog{width:min(460px,calc(100% - 40px));max-height:calc(100vh - 64px);overflow:auto;
+  background:var(--m-card);color:var(--m-t1);border:1px solid var(--m-strong);
+  border-radius:12px;padding:26px 28px;box-shadow:0 24px 60px -20px var(--m-scrim)}
+dialog::backdrop{background:var(--m-scrim)}
+dialog h2{font-family:var(--f-display);font-size:22px;font-weight:600;margin:0 0 10px}
+dialog p{margin:0 0 20px;color:var(--m-t2);line-height:1.6}
+dialog form{display:flex;justify-content:flex-end;margin:0}
+
+/* ============ motion ============ */
+@media (prefers-reduced-motion:no-preference){
+  .hero,.workspace>section{animation:rise .55s cubic-bezier(.2,.8,.3,1) backwards}
+  .workspace>section:nth-child(1){animation-delay:.08s}
+  .workspace>section:nth-child(2){animation-delay:.18s}
+  body,.topbar,.editor,.code-wrap,.editor-top,.editor-note,.primary,.pill,input,select{
+    transition:background-color .18s ease,border-color .18s ease,color .18s ease,box-shadow .18s ease}
+  dialog[open]{animation:pop .22s cubic-bezier(.2,.9,.3,1)}
+  @keyframes rise{from{opacity:0;transform:translateY(12px)}}
+  @keyframes pop{from{opacity:0;transform:translateY(8px) scale(.98)}}
+}
+
+/* ============ responsive ============ */
+@media (max-width:1050px){
+  .workspace{grid-template-columns:minmax(260px,.8fr) minmax(0,1fr);gap:22px}
+  .included{display:none}
+  .nav{gap:16px}
+  .checks p{font-size:11.5px}
+  h1{letter-spacing:-.25px}
+}
+@media (max-width:760px){
+  .workspace{grid-template-columns:1fr}
+  .topbar-inner{padding:12px 5%;gap:12px}
+  .brand{font-size:18px;gap:10px}
+  .brand-mark{width:22px;height:22px}
+  .nav{gap:12px}
+  main{padding:24px 5% 26px}
+  .hero{margin-bottom:26px}
+  .field{margin-bottom:18px}
+  .editor{min-height:480px}
+  .editor-top{flex-wrap:wrap}
+  .included{display:flex;flex:1 1 100%;border-left:0;border-top:1px solid var(--m-control-stroke);padding:10px 14px}
+  .code{font-size:12px}
+  footer{flex-direction:column;gap:8px;padding:16px 5% 26px}
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 26 26" aria-hidden="true" focusable="false">
+        <rect x=".5" y=".5" width="25" height="25" rx="7.5"></rect>
+        <path d="M10 8.6 7.2 13l2.8 4.4M16 8.6 18.8 13 16 17.4M14.6 7.9l-3.2 10.2"
+          fill="none" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"></path>
+      </svg>
+      Server Logic
+    </div>
+    <nav class="nav" aria-label="Utility">
+      <button class="text-button" data-dialog="about">About</button>
+      <button class="text-button" data-dialog="help">Help</button>
+      <button class="pill" id="theme" aria-label="Switch to dark theme">Dark</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <h1>From idea to <span class="flip">server handler</span></h1>
+    <p class="intro">Create a starter for Power Pages server logic. Choose your settings and preview your code.</p>
+  </section>
+
+  <div class="workspace">
+    <section aria-label="Starter settings">
+      <div class="field">
+        <label for="logic-name">Logic name</label>
+        <input id="logic-name" value="customer-summary" spellcheck="false" aria-describedby="name-hint">
+        <p class="hint" id="name-hint">Used for the file name and handler function.</p>
+      </div>
+      <div class="field">
+        <label for="method">HTTP method</label>
+        <select id="method" aria-describedby="method-hint">
+          <option>GET</option>
+          <option>POST</option>
+        </select>
+        <p class="hint" id="method-hint">The method this server logic will handle.</p>
+      </div>
+      <div class="field">
+        <label for="recipe">Recipe</label>
+        <select id="recipe" aria-describedby="recipe-hint">
+          <option>Read Dataverse records</option>
+          <option>Validate a request</option>
+        </select>
+        <p class="hint" id="recipe-hint">A starter outline for querying Dataverse and returning JSON.</p>
+      </div>
+
+      <section class="guidance">
+        <h2>Includes best practice guidance</h2>
+        <ul class="checks">
+          <li>
+            <span class="check" aria-hidden="true"><svg viewBox="0 0 12 12" focusable="false"><path d="M2 6.4l2.6 2.6L10 3.2"></path></svg></span>
+            <div><strong>Browser API checks</strong><p>Guidance for calls from your Power Pages site.</p></div>
+          </li>
+          <li>
+            <span class="check" aria-hidden="true"><svg viewBox="0 0 12 12" focusable="false"><path d="M2 6.4l2.6 2.6L10 3.2"></path></svg></span>
+            <div><strong>Input validation template</strong><p>A place to validate incoming request parameters.</p></div>
+          </li>
+          <li>
+            <span class="check" aria-hidden="true"><svg viewBox="0 0 12 12" focusable="false"><path d="M2 6.4l2.6 2.6L10 3.2"></path></svg></span>
+            <div><strong>Permission setup checklist</strong><p>Review table permissions and web roles.</p></div>
+          </li>
+        </ul>
+        <button class="primary" id="download">
+          <svg viewBox="0 0 15 15" aria-hidden="true" focusable="false">
+            <path d="M7.5 2v7.2M4.6 6.3l2.9 2.9 2.9-2.9M2.8 10.2v1.6a1.2 1.2 0 0 0 1.2 1.2h7a1.2 1.2 0 0 0 1.2-1.2v-1.6"
+              fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+          Download starter
+        </button>
+        <p class="feedback" id="feedback" role="status"></p>
+      </section>
+    </section>
+
+    <section class="editor" aria-label="Illustrative server handler">
+      <div class="editor-top">
+        <div class="editor-title">Server handler (customer-summary.js)</div>
+        <div class="included"><span aria-hidden="true">&lt;/&gt;</span> Client call planned</div>
+      </div>
+      <div class="code-wrap" tabindex="0" aria-label="Code outline, scroll horizontally if needed">
+        <code class="code"><span class="line comment">// customer-summary.js</span><span class="line comment">// Illustrative outline — not executable starter code</span><span class="line"> </span><span class="line comment">/**</span><span class="line comment"> * Return a summary of customer records.</span><span class="line comment"> * Add site-specific logic before deployment.</span><span class="line comment"> */</span><span class="line"><span class="keyword">async function</span> get() {</span><span class="line">  <span class="keyword">try</span> {</span><span class="line comment">    // 1. Read and validate request parameters.</span><span class="line comment">    //    Limit results and reject invalid input.</span><span class="line"> </span><span class="line comment">    // 2. Check the required table permissions.</span><span class="line comment">    //    Confirm access for the intended web roles.</span><span class="line"> </span><span class="line comment">    // 3. Query Dataverse using the supported API.</span><span class="line comment">    //    Replace this sample data with your query.</span><span class="line">    <span class="keyword">const</span> records = [];</span><span class="line"> </span><span class="line comment">    // 4. Format the response for your handler.</span><span class="line">    <span class="keyword">return</span> { value: records };</span><span class="line">  } <span class="keyword">catch</span> (error) {</span><span class="line comment">    // Log details securely; return a safe message.</span><span class="line">    <span class="keyword">return</span> { message: <span class="string">"Unable to load records."</span> };</span><span class="line">  }</span><span class="line">}</span></code>
+      </div>
+      <div class="editor-note">Illustrative preview — settings and generation are mock only.</div>
+    </section>
+  </div>
+</main>
+
+<footer>
+  <span class="footer-note">
+    <svg viewBox="0 0 13 13" aria-hidden="true" focusable="false">
+      <circle cx="6.5" cy="6.5" r="5.7" fill="none" stroke="currentColor" stroke-width="1.2"></circle>
+      <path d="M6.5 6.1v3.4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"></path>
+      <circle cx="6.5" cy="3.8" r=".75" fill="currentColor"></circle>
+    </svg>
+    Validate generated files on your development site.
+  </span>
+  <span>Mock concept · Verdigris</span>
+</footer>
+
+<dialog id="about">
+  <h2>About Server Logic</h2>
+  <p>A visual concept for a local Power Pages starter tool. Logic Inspector is planned for phase 2.</p>
+  <form method="dialog"><button class="pill">Close</button></form>
+</dialog>
+
+<dialog id="help">
+  <h2>Starter workflow</h2>
+  <p>Name your logic, choose a method and recipe, then review the server handler. This mock demonstrates the layout; it does not generate or deploy code.</p>
+  <form method="dialog"><button class="pill">Close</button></form>
+</dialog>
+
+<script>
+const themeButton = document.getElementById('theme');
+themeButton.addEventListener('click', () => {
+  const dark = document.documentElement.dataset.theme !== 'dark';
+  document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+  themeButton.textContent = dark ? 'Light' : 'Dark';
+  themeButton.setAttribute('aria-label', `Switch to ${dark ? 'light' : 'dark'} theme`);
+});
+document.querySelectorAll('[data-dialog]').forEach(button => {
+  button.addEventListener('click', () => document.getElementById(button.dataset.dialog).showModal());
+});
+document.getElementById('download').addEventListener('click', () => {
+  document.getElementById('feedback').textContent = 'Mock only — starter generation is not connected.';
+});
+</script>
+
+</body>
+</html>

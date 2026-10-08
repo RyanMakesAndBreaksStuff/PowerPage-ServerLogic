@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Server Logic — Alt 3 · Field Notes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#FBF8F1; --paper-2:#F5F1E6; --card:#FFFFFF;
+  --ink:#22252E; --ink-2:#4A4E5C; --muted:#6A6E7B;
+  --rule:#22252E; --hair:#DCD5C2;
+  --accent:#A34A2A; --accent-deep:#7E3A22; --accent-tint:#F4E7E0;
+  --ok:#2E6B4F; --ok-tint:#E9F1EB;
+  --err:#A3261E; --err-tint:#F6E8E7;
+  --focus:#7E3A22;
+  --code-bg:#FFFDF8;
+  --c-comment:#6E6A5C; --c-key:#A34A2A; --c-str:#5B4A8A; --c-num:#2E6B6B; --c-fn:#22252E;
+  --shadow:0 1px 0 rgba(34,37,46,.06), 0 14px 34px -18px rgba(60,50,30,.22);
+  color-scheme:light;
+}
+:root[data-theme="dark"]{
+  --paper:#1B1B20; --paper-2:#222228; --card:#26262E;
+  --ink:#EAE6DB; --ink-2:#C9C5B9; --muted:#9B978B;
+  --rule:#EAE6DB; --hair:#3C3C45;
+  --accent:#D98A6C; --accent-deep:#E8A48B; --accent-tint:#3A2C26;
+  --ok:#7FBF9E; --ok-tint:#26322B;
+  --err:#E8938C; --err-tint:#382523;
+  --focus:#E8A48B;
+  --code-bg:#212127;
+  --c-comment:#8E8A7E; --c-key:#D98A6C; --c-str:#B8A7E8; --c-num:#7FBFBF; --c-fn:#EAE6DB;
+  --shadow:0 1px 0 rgba(0,0,0,.25), 0 14px 34px -18px rgba(0,0,0,.6);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+  font-size:16px; line-height:1.6;
+}
+.sans{font-family:"Segoe UI",system-ui,sans-serif}
+.mono{font-family:"JetBrains Mono",Consolas,monospace}
+a{color:var(--accent-deep); text-decoration-thickness:1px; text-underline-offset:3px}
+a:hover{color:var(--accent)}
+:focus-visible{outline:2px solid var(--focus); outline-offset:3px; border-radius:2px}
+button{font:inherit; cursor:pointer}
+input,select{font:inherit}
+svg{display:block}
+
+.page{max-width:1060px; margin:0 auto; padding:0 clamp(18px,4vw,44px)}
+
+/* ---------- masthead ---------- */
+.masthead{border-bottom:3px double var(--rule); padding:26px 0 16px; display:flex; align-items:baseline; justify-content:space-between; gap:20px; flex-wrap:wrap}
+.mast-brand{display:flex; align-items:baseline; gap:14px}
+.mast-brand .mark{
+  font-family:"JetBrains Mono",monospace; font-weight:600; font-size:13px;
+  border:1.5px solid var(--ink); padding:3px 7px; letter-spacing:.04em; transform:translateY(-2px);
+}
+.mast-brand h2{margin:0; font-size:19px; font-weight:600; letter-spacing:.01em}
+.mast-meta{font-family:"JetBrains Mono",monospace; font-size:10.5px; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); display:flex; align-items:center; gap:14px; flex-wrap:wrap}
+.mast-meta button{
+  border:1px solid var(--hair); background:none; color:var(--ink-2); border-radius:999px;
+  padding:7px 14px; min-height:40px; font-family:"JetBrains Mono",monospace; font-size:10.5px;
+  letter-spacing:.16em; text-transform:uppercase; display:inline-flex; align-items:center; gap:8px;
+}
+.mast-meta button:hover{border-color:var(--ink); color:var(--ink)}
+
+/* ---------- hero ---------- */
+.hero{padding:clamp(40px,7vw,84px) 0 clamp(34px,5vw,60px); display:grid; grid-template-columns:minmax(0,1.5fr) minmax(200px,.8fr); gap:clamp(24px,4vw,56px); align-items:start}
+.eyebrow{font-family:"JetBrains Mono",monospace; font-size:11px; letter-spacing:.22em; text-transform:uppercase; color:var(--accent); display:flex; align-items:center; gap:10px; margin:0 0 18px}
+.eyebrow::before{content:""; width:34px; height:1.5px; background:var(--accent)}
+h1{
+  margin:0; font-size:clamp(40px,5.6vw,72px); line-height:1.04; font-weight:600; letter-spacing:-.015em;
+  font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+}
+h1 em{font-style:italic; color:var(--accent)}
+.lede{margin:22px 0 0; font-size:clamp(16px,1.5vw,19px); line-height:1.65; color:var(--ink-2); max-width:44ch}
+.hero-note{
+  border-left:2px solid var(--rule); padding:6px 0 6px 18px; align-self:end;
+  font-size:13.5px; color:var(--ink-2); font-style:italic; max-width:30ch;
+}
+.hero-note .mono{display:block; font-style:normal; font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); margin-bottom:8px}
+
+/* ---------- chapters ---------- */
+.chapter{border-top:1px solid var(--hair); padding:clamp(28px,4vw,44px) 0 8px; display:grid; grid-template-columns:64px minmax(0,1fr); gap:clamp(16px,3vw,36px)}
+.chapter-num{
+  font-size:clamp(30px,3.6vw,44px); font-weight:400; font-style:italic; color:var(--accent);
+  line-height:1; font-variant-numeric:tabular-nums;
+}
+.chapter-kicker{font-family:"JetBrains Mono",monospace; font-size:10.5px; letter-spacing:.2em; text-transform:uppercase; color:var(--muted); margin:0 0 6px}
+h2.ch-title{margin:0 0 10px; font-size:clamp(22px,2.6vw,30px); font-weight:600; letter-spacing:-.01em}
+.ch-lede{margin:0 0 26px; color:var(--ink-2); font-size:15.5px; max-width:56ch}
+
+/* ---------- form ---------- */
+.fields{display:grid; grid-template-columns:1fr 1fr; gap:22px 28px; max-width:760px}
+.field.full{grid-column:1 / -1}
+label{display:block; font-family:"JetBrains Mono",monospace; font-size:10.5px; letter-spacing:.18em; text-transform:uppercase; color:var(--ink-2); margin-bottom:8px}
+input,select{
+  width:100%; min-height:46px; padding:10px 4px; border:none; border-bottom:1.5px solid var(--ink);
+  background:transparent; color:var(--ink); border-radius:0; font-size:16px; font-family:inherit;
+  box-shadow:0 1.5px 0 rgba(34,37,46,.10);
+}
+select{appearance:none; background-image:linear-gradient(45deg,transparent 50%,var(--ink) 50%),linear-gradient(135deg,var(--ink) 50%,transparent 50%); background-position:calc(100% - 10px) 55%,calc(100% - 5px) 55%; background-size:5px 5px; background-repeat:no-repeat; padding-right:26px; cursor:pointer}
+input:focus-visible,select:focus-visible{outline:none; border-bottom-color:var(--accent); box-shadow:0 2px 0 var(--accent)}
+[aria-invalid="true"]{border-bottom-color:var(--err); box-shadow:0 1.5px 0 var(--err)}
+.hint{margin:7px 0 0; font-size:12.5px; color:var(--muted); font-family:"Segoe UI",system-ui,sans-serif}
+.field-error{margin:7px 0 0; font-size:12.5px; color:var(--err); font-family:"Segoe UI",system-ui,sans-serif; display:none}
+.field-wrap.has-error .field-error{display:block}
+
+/* guidance */
+.guidance{margin-top:34px; max-width:760px; border:1px solid var(--hair); background:var(--card); border-radius:4px; padding:22px 26px; box-shadow:var(--shadow)}
+.guidance h3{margin:0; font-family:"JetBrains Mono",monospace; font-size:10.5px; letter-spacing:.2em; text-transform:uppercase; color:var(--muted); font-weight:600}
+.checks{list-style:none; margin:14px 0 0; padding:0; display:grid; gap:14px}
+.checks li{display:flex; gap:14px; align-items:flex-start}
+.check{
+  flex:none; width:24px; height:24px; border-radius:50%; background:var(--ok-tint); color:var(--ok);
+  display:grid; place-items:center; margin-top:1px;
+}
+.checks strong{display:block; font-size:15.5px; font-weight:600}
+.checks p{margin:2px 0 0; font-size:13px; color:var(--muted); font-family:"Segoe UI",system-ui,sans-serif; line-height:1.5}
+.cta-row{display:flex; align-items:center; gap:18px; flex-wrap:wrap; margin-top:22px; padding-top:20px; border-top:1px solid var(--hair)}
+.primary{
+  min-height:52px; padding:13px 26px; border:1.5px solid var(--accent-deep); border-radius:999px;
+  background:var(--accent); color:#FFF6F0; font-weight:600; font-size:16px; letter-spacing:.01em;
+  display:inline-flex; align-items:center; gap:12px;
+}
+:root[data-theme="dark"] .primary{color:#241009}
+.primary:hover{background:var(--accent-deep); color:#FFF6F0}
+:root[data-theme="dark"] .primary:hover{background:var(--accent); color:#241009}
+.feedback{min-height:20px; margin:0; font-size:12.5px; color:var(--muted); font-family:"JetBrains Mono",monospace}
+
+/* ---------- listing (code) ---------- */
+.listing{
+  border:1px solid var(--hair); border-radius:4px; background:var(--code-bg); overflow:hidden;
+  box-shadow:var(--shadow); margin-bottom:14px;
+}
+.listing-bar{display:flex; justify-content:space-between; align-items:center; gap:14px; padding:13px 18px; border-bottom:1px solid var(--hair); background:var(--paper-2)}
+.listing-bar .title{font-family:"JetBrains Mono",monospace; font-size:12px; color:var(--ink-2); letter-spacing:.03em; overflow-wrap:anywhere}
+.stamp{
+  font-family:"JetBrains Mono",monospace; font-size:10px; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--ok); border:1px solid var(--ok); border-radius:2px; padding:3px 8px; white-space:nowrap;
+  transform:rotate(-1.2deg); display:inline-flex; align-items:center; gap:7px; background:var(--ok-tint);
+}
+.code-wrap{overflow:auto; padding:16px 0 20px}
+.code{
+  display:block; margin:0; min-width:max-content; counter-reset:line;
+  font-family:"JetBrains Mono",Consolas,monospace; font-size:clamp(12px,1vw,14px); line-height:1.85;
+}
+.line{display:block; white-space:pre; padding-right:28px; counter-increment:line}
+.line::before{
+  content:counter(line); display:inline-block; width:44px; padding-right:16px; margin-right:18px;
+  text-align:right; color:var(--muted); opacity:.55; border-right:1px solid var(--hair); user-select:none; font-size:11px;
+}
+.comment{color:var(--c-comment); font-style:italic} .keyword{color:var(--c-key)}
+.string{color:var(--c-str)} .number{color:var(--c-num)}
+.fig-cap{font-size:12.5px; color:var(--muted); font-style:italic; margin:0 0 4px}
+
+/* ---------- colophon ---------- */
+.colophon{border-top:3px double var(--rule); margin-top:clamp(36px,6vw,64px); padding:24px 0 40px}
+.colophon-inner{display:flex; justify-content:space-between; align-items:center; gap:18px; flex-wrap:wrap}
+.colophon .note{display:flex; align-items:center; gap:11px; font-size:12.5px; color:var(--ink-2); font-style:italic}
+.concepts{display:flex; gap:8px; flex-wrap:wrap}
+.concepts a{
+  font-family:"JetBrains Mono",monospace; font-size:10.5px; letter-spacing:.12em; text-transform:uppercase;
+  border:1px solid var(--hair); border-radius:999px; padding:12px 14px; min-height:44px;
+  display:inline-flex; align-items:center; text-decoration:none; color:var(--ink-2); background:var(--paper);
+}
+.concepts a:hover{border-color:var(--ink); color:var(--ink)}
+.concepts a[aria-current]{background:var(--ink); color:var(--paper); border-color:var(--ink)}
+
+/* motion */
+@media (prefers-reduced-motion:no-preference){
+  @keyframes rise{from{opacity:0; transform:translateY(14px)} to{opacity:1; transform:none}}
+  .hero > *, .chapter{animation:rise .5s cubic-bezier(.2,.6,.2,1) both}
+  .chapter:nth-of-type(1){animation-delay:.06s}
+  .primary,.concepts a,.mast-meta button{transition:background-color .18s ease,color .18s ease,border-color .18s ease}
+}
+@media (prefers-reduced-motion:reduce){ *{animation:none !important; transition:none !important} }
+
+/* responsive */
+@media (max-width:880px){
+  .hero{grid-template-columns:1fr}
+  .hero-note{border-left:none; border-top:1px solid var(--hair); padding:14px 0 0; max-width:none}
+  .fields{grid-template-columns:1fr}
+}
+@media (max-width:600px){
+  body{font-size:15px}
+  .chapter{grid-template-columns:1fr; gap:10px}
+  .chapter-num{font-size:26px}
+  .masthead{padding:18px 0 12px}
+  .mast-brand h2{font-size:16px}
+  .code-wrap{max-height:70vh}
+  .cta-row .primary{width:100%; justify-content:center}
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="masthead">
+    <div class="mast-brand">
+      <span class="mark" aria-hidden="true">{ }</span>
+      <h2>Server Logic</h2>
+    </div>
+    <div class="mast-meta">
+      <span>Field notes · Edition 02</span>
+      <button type="button" id="theme" aria-pressed="false">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z"/></svg>
+        Dark
+      </button>
+    </div>
+  </header>
+
+  <section class="hero" aria-labelledby="page-title">
+    <div>
+      <p class="eyebrow">From first idea to first handler</p>
+      <h1 id="page-title">A better <em>starting point</em> for server logic.</h1>
+      <p class="lede">Create a starter for Power Pages server logic. Choose your settings, read through the outline, and leave the blank file behind.</p>
+    </div>
+    <p class="hero-note">
+      <span class="mono">Local mock · no connection</span>
+      A quiet workshop page. Nothing is generated, sent, or deployed.
+    </p>
+  </section>
+
+  <section class="chapter" aria-labelledby="ch1">
+    <div class="chapter-num" aria-hidden="true">01</div>
+    <div>
+      <p class="chapter-kicker">Chapter one</p>
+      <h2 class="ch-title" id="ch1">Choose your settings</h2>
+      <p class="ch-lede">Three decisions, made once. Everything downstream — the file name, the function, the shape of the response — follows from here.</p>
+
+      <form id="starter-form" novalidate>
+        <div class="fields">
+          <div class="field full field-wrap" id="wrap-name">
+            <label for="logic-name">Logic name</label>
+            <input id="logic-name" value="customer-summary" spellcheck="false" autocomplete="off" aria-describedby="name-hint name-error">
+            <p class="hint" id="name-hint">Used for the file name and handler function.</p>
+            <p class="field-error" id="name-error">Lowercase letters, numbers, and dashes only — starting with a letter.</p>
+          </div>
+          <div class="field">
+            <label for="method">HTTP method</label>
+            <select id="method" aria-describedby="method-hint">
+              <option value="get">GET · read</option>
+              <option value="post">POST · submit</option>
+            </select>
+            <p class="hint" id="method-hint">The method this server logic will handle.</p>
+          </div>
+          <div class="field">
+            <label for="recipe">Recipe</label>
+            <select id="recipe" aria-describedby="recipe-hint">
+              <option>Read Dataverse records</option>
+              <option>Validate a request</option>
+            </select>
+            <p class="hint" id="recipe-hint">A starter outline for querying Dataverse and returning JSON.</p>
+          </div>
+        </div>
+
+        <aside class="guidance" aria-labelledby="guidance-title">
+          <h3 id="guidance-title">Bound into every starter</h3>
+          <ul class="checks">
+            <li>
+              <span class="check" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M4 12.5 9.5 18 20 6"/></svg></span>
+              <div><strong>Browser API checks</strong><p>Guidance for calls from your Power Pages site.</p></div>
+            </li>
+            <li>
+              <span class="check" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M4 12.5 9.5 18 20 6"/></svg></span>
+              <div><strong>Input validation template</strong><p>A place to validate incoming request parameters.</p></div>
+            </li>
+            <li>
+              <span class="check" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M4 12.5 9.5 18 20 6"/></svg></span>
+              <div><strong>Permission setup checklist</strong><p>Review table permissions and web roles.</p></div>
+            </li>
+          </ul>
+          <div class="cta-row">
+            <button class="primary" type="submit" id="download">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 4v11m0 0 4-4m-4 4-4-4M5 20h14"/></svg>
+              Download starter
+            </button>
+            <p class="feedback" id="feedback" role="status" aria-live="polite"></p>
+          </div>
+        </aside>
+      </form>
+    </div>
+  </section>
+
+  <section class="chapter" aria-labelledby="ch2">
+    <div class="chapter-num" aria-hidden="true">02</div>
+    <div>
+      <p class="chapter-kicker">Chapter two</p>
+      <h2 class="ch-title" id="ch2">Read the handler</h2>
+      <p class="ch-lede">An illustrative outline, annotated the way a colleague would — numbered steps, quiet asides, nothing invented.</p>
+
+      <figure style="margin:0" aria-label="Illustrative server handler listing">
+        <div class="listing">
+          <div class="listing-bar">
+            <span class="title">Server handler (<span id="file-name">customer-summary</span>.js)</span>
+            <span class="stamp">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M8 4H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h3M16 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3"/></svg>
+              Client call planned
+            </span>
+          </div>
+          <div class="code-wrap" tabindex="0" aria-label="Code outline, scroll horizontally if needed">
+            <code class="code"><span class="line comment">// <span id="code-name">customer-summary</span>.js</span><span class="line comment">// Illustrative outline · not executable starter code</span><span class="line"> </span><span class="line comment">/**</span><span class="line comment"> * Return a summary of customer records.</span><span class="line comment"> * Add site-specific logic before deployment.</span><span class="line comment"> */</span><span class="line"><span class="keyword">async function</span> <span class="number" id="code-method">get</span>() {</span><span class="line">  <span class="keyword">try</span> {</span><span class="line comment">    // 1. Read and validate request parameters.</span><span class="line comment">    //    Limit results and reject invalid input.</span><span class="line"> </span><span class="line comment">    // 2. Check the required table permissions.</span><span class="line comment">    //    Confirm access for the intended web roles.</span><span class="line"> </span><span class="line comment">    // 3. Query Dataverse using the supported API.</span><span class="line comment">    //    Replace this sample data with your query.</span><span class="line">    <span class="keyword">const</span> records = [];</span><span class="line"> </span><span class="line comment">    // 4. Format the response for your handler.</span><span class="line">    <span class="keyword">return</span> { value: records };</span><span class="line">  } <span class="keyword">catch</span> (error) {</span><span class="line comment">    // Log details securely; return a safe message.</span><span class="line">    <span class="keyword">return</span> { message: <span class="string">"Unable to load records."</span> };</span><span class="line">  }</span><span class="line">}</span></code>
+          </div>
+        </div>
+        <figcaption class="fig-cap">Listing 1 — validate generated files on your development site before trusting them.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <footer class="colophon">
+    <div class="colophon-inner">
+      <span class="note">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M12 11v5" stroke-linecap="round"/></svg>
+        Set in Iowan Old Style &amp; JetBrains Mono · Mock concept, no tenant connection
+      </span>
+      <nav class="concepts" aria-label="Compare proto-2 concepts">
+        <a href="proto2-alt-1.html">Alt 1 · Sheet</a>
+        <a href="proto2-alt-2.html">Alt 2 · Console</a>
+        <a href="proto2-alt-3.html" aria-current="page">Alt 3 · Notes</a>
+        <a href="proto2-alt-4.html">Alt 4 · Aurora</a>
+      </nav>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const nameInput = $('logic-name'), method = $('method'), recipe = $('recipe');
+const valid = (v) => /^[a-z][a-z0-9-]*$/.test(v.trim());
+
+const themeButton = $('theme');
+themeButton.addEventListener('click', () => {
+  const dark = document.documentElement.dataset.theme !== 'dark';
+  document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+  themeButton.textContent = dark ? 'Light' : 'Dark';
+  themeButton.setAttribute('aria-pressed', String(dark));
+  themeButton.setAttribute('aria-label', dark ? 'Switch to light theme' : 'Switch to dark theme');
+});
+
+const syncCode = () => {
+  const name = nameInput.value.trim() || 'untitled';
+  $('file-name').textContent = name;
+  $('code-name').textContent = name;
+  $('code-method').textContent = method.value;
+};
+nameInput.addEventListener('input', syncCode);
+method.addEventListener('change', syncCode);
+recipe.addEventListener('change', () => {
+  $('recipe-hint').textContent = recipe.value === 'Validate a request'
+    ? 'A starter outline for checking inputs and rejecting bad requests.'
+    : 'A starter outline for querying Dataverse and returning JSON.';
+});
+
+nameInput.addEventListener('blur', () => {
+  const bad = !valid(nameInput.value);
+  nameInput.setAttribute('aria-invalid', bad ? 'true' : 'false');
+  $('wrap-name').classList.toggle('has-error', bad);
+});
+
+$('starter-form').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const bad = !valid(nameInput.value);
+  nameInput.setAttribute('aria-invalid', bad ? 'true' : 'false');
+  $('wrap-name').classList.toggle('has-error', bad);
+  if (bad) {
+    nameInput.focus();
+    $('feedback').textContent = 'Fix the logic name before downloading.';
+    return;
+  }
+  $('feedback').textContent = 'Mock only — starter generation is not connected.';
+});
+
+syncCode();
+</script>
+</body>
+</html>

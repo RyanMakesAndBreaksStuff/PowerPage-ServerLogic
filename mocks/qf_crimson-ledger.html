@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<!-- Crimson Ledger · self-contained concept mock · a re-expression of the Server Logic screen -->
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Server Logic — Crimson Ledger</title>
+<style>
+/* ——— Crimson Ledger · tokens ——— */
+:root{
+  /* warm ivory paper neutrals */
+  --cl-canvas:#EFE8D8;
+  --cl-page:#F8F3E6;
+  --cl-card:#FFFDF4;
+  --cl-subtle:#EFE8D5;
+  --cl-inset:#F4EDDC;
+  --cl-divider:#E5DCC4;
+  --cl-stroke:#D8CDAF;
+  --cl-strong:#C0B392;
+  --cl-focus:#B3261E;
+  /* ink text ramp */
+  --cl-t1:#221C12;
+  --cl-t2:#5D5240;
+  --cl-t3:#7A6E58;
+  --cl-td:#A2957A;
+  --cl-on-accent:#FFF7EC;
+  /* deep crimson accent */
+  --cl-link:#B3261E;
+  --cl-accent:#B3261E;
+  --cl-accent-h:#9E2118;
+  --cl-accent-p:#881C14;
+  --cl-tint:#F5E3DF;
+  --cl-tint-stroke:#E6C0B9;
+  --cl-sel:#B3261E;
+  --cl-fill:#FFFDF4;
+  --cl-fill-hover:#F4EDDC;
+  --cl-hover:rgba(82,60,26,.08);
+  /* semantic: forest green = success only · amber = warning */
+  --cl-success:#226B41;
+  --cl-success-tint:#E3F0E5;
+  --cl-danger:#A32014;
+  --cl-danger-tint:#F7E5E1;
+  --cl-danger-stroke:#DFABA3;
+  --cl-warn:#8A6114;
+  --cl-warn-tint:#F5ECD6;
+  --cl-energy:#B4551F;
+  --cl-track:#E5DCC4;
+  --cl-scrim:rgba(44,30,12,.45);
+  --cl-glow:rgba(179,38,30,.05);
+  /* code syntax */
+  --cl-s1:#B3261E;
+  --cl-s2:#8A6114;
+  --cl-s3:#1F5F5F;
+  --cl-s4:#8A4B2A;
+  --cl-s5:#7A6E58;
+  /* type */
+  --cl-sans:system-ui,"Segoe UI","Helvetica Neue",Arial,sans-serif;
+  --cl-mono:"Cascadia Code","Cascadia Mono",Consolas,"SF Mono",Menlo,monospace;
+  color-scheme:light;
+}
+:root[data-theme="dark"]{
+  /* warm charcoal paper, red undertone */
+  --cl-canvas:#1A1210;
+  --cl-page:#201715;
+  --cl-card:#271E1B;
+  --cl-subtle:#2F2521;
+  --cl-inset:#1B1412;
+  --cl-divider:#372B27;
+  --cl-stroke:#443630;
+  --cl-strong:#5A473E;
+  --cl-focus:#FF8A80;
+  --cl-t1:#F5EEDF;
+  --cl-t2:#C6B8A5;
+  --cl-t3:#A18F79;
+  --cl-td:#7B6957;
+  --cl-on-accent:#26090A;
+  /* soft coral-red accent */
+  --cl-link:#FF8A80;
+  --cl-accent:#FF8A80;
+  --cl-accent-h:#FFA199;
+  --cl-accent-p:#EF7A70;
+  --cl-tint:#341F1C;
+  --cl-tint-stroke:#5D312A;
+  --cl-sel:#FF9C93;
+  --cl-fill:#2F2521;
+  --cl-fill-hover:#392D27;
+  --cl-hover:rgba(255,220,190,.09);
+  --cl-success:#72C896;
+  --cl-success-tint:#1C2A20;
+  --cl-danger:#FF9C93;
+  --cl-danger-tint:#341F1C;
+  --cl-danger-stroke:#6B342C;
+  --cl-warn:#E4BC79;
+  --cl-warn-tint:#2C2314;
+  --cl-energy:#FFA773;
+  --cl-track:#372B27;
+  --cl-scrim:rgba(0,0,0,.62);
+  --cl-glow:rgba(255,138,128,.06);
+  --cl-s1:#FF8A80;
+  --cl-s2:#E4BC79;
+  --cl-s3:#71C0BC;
+  --cl-s4:#DA9B6D;
+  --cl-s5:#A18F79;
+  color-scheme:dark;
+}
+/* ——— base ——— */
+*{box-sizing:border-box;scrollbar-color:var(--cl-strong) var(--cl-inset);scrollbar-width:thin}
+::selection{background:var(--cl-sel);color:var(--cl-on-accent)}
+body{margin:0;background:var(--cl-page);color:var(--cl-t1);font-family:var(--cl-sans);font-size:14px;line-height:1.55;background-image:radial-gradient(920px 440px at 50% -12%,var(--cl-glow),transparent 70%);background-repeat:no-repeat}
+button,input,select{font:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--cl-focus);outline-offset:3px}
+/* ——— topbar ——— */
+.topbar{border-bottom:1px solid var(--cl-strong);background:var(--cl-card)}
+.topbar-inner{max-width:1480px;padding:15px 4.7%;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:24px}
+.brand{display:flex;gap:13px;align-items:center;font-size:22px;font-weight:800;letter-spacing:-.6px}
+.brand-mark{display:grid;place-items:center;flex:none}
+.brand-mark svg{display:block;width:34px;height:34px}
+.brand-mark rect{fill:var(--cl-accent)}
+.brand-mark path{stroke:var(--cl-on-accent)}
+.nav{display:flex;gap:24px;align-items:center}
+.text-button{border:0;background:none;color:var(--cl-t2);padding:6px 0;font-weight:600}
+.text-button:hover{color:var(--cl-accent)}
+.theme,.close{border:1px solid var(--cl-stroke);border-radius:6px;padding:6px 11px;background:var(--cl-fill);color:var(--cl-t1);font-size:12px;font-weight:600}
+.theme:hover,.close:hover{border-color:var(--cl-accent)}
+/* ——— hero ——— */
+main{max-width:1480px;margin:auto;padding:30px 4.7% 30px}
+.hero{margin:6px 0 36px}
+.kicker{margin:0 0 13px;font-size:11px;font-weight:700;letter-spacing:.17em;text-transform:uppercase;color:var(--cl-accent)}
+h1{font-size:clamp(31px,4.5vw,64px);font-weight:800;line-height:1.08;letter-spacing:-.03em;margin:0 0 14px}
+h1 em{font-style:normal;color:var(--cl-accent)}
+.intro{font-size:clamp(14px,1.3vw,19px);color:var(--cl-t2);line-height:1.6;margin:0;max-width:880px}
+/* ——— workspace ——— */
+.workspace{display:grid;grid-template-columns:minmax(300px,.72fr) minmax(0,1fr);gap:clamp(28px,3.4vw,54px);align-items:stretch}
+.field{margin-bottom:24px}
+label{display:block;margin-bottom:7px;font-weight:700;font-size:15px}
+input,select{width:100%;height:44px;border:1px solid var(--cl-strong);background:var(--cl-fill);border-radius:6px;color:var(--cl-t1);padding:8px 13px}
+input:hover,select:hover{border-color:var(--cl-accent)}
+select{appearance:none;background-repeat:no-repeat;background-position:right 14px center;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='7' viewBox='0 0 11 7'%3E%3Cpath d='M1 1l4.5 4.5L10 1' fill='none' stroke='%23B3261E' stroke-width='1.7' stroke-linecap='round'/%3E%3C/svg%3E")}
+:root[data-theme="dark"] select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='7' viewBox='0 0 11 7'%3E%3Cpath d='M1 1l4.5 4.5L10 1' fill='none' stroke='%23FF8A80' stroke-width='1.7' stroke-linecap='round'/%3E%3C/svg%3E")}
+.hint{margin:7px 0 0;color:var(--cl-t2);font-size:12px;line-height:1.6}
+/* ——— guidance / checks ——— */
+.guidance{border-top:1px solid var(--cl-strong);padding-top:20px}
+h2{font-size:16px;margin:0 0 16px;letter-spacing:-.01em}
+.checks{list-style:none;padding:0;margin:0 0 18px;display:grid;gap:13px}
+.checks li{display:flex;gap:13px;align-items:flex-start}
+.check{display:grid;place-items:center;flex:none;width:25px;height:25px;border-radius:50%;background:var(--cl-success);color:var(--cl-card);font-size:15px;font-weight:700;margin-top:2px}
+.checks strong{font-size:13px;display:block}
+.checks p{font-size:12px;color:var(--cl-t2);margin:3px 0 0;line-height:1.55}
+.primary{width:100%;display:flex;align-items:center;justify-content:center;gap:12px;border:1px solid var(--cl-accent);border-radius:7px;background:var(--cl-accent);color:var(--cl-on-accent);padding:14px;font-weight:700;letter-spacing:-.01em}
+.primary:hover{background:var(--cl-accent-h);border-color:var(--cl-accent-h)}
+.primary:active{background:var(--cl-accent-p);border-color:var(--cl-accent-p)}
+.feedback{min-height:20px;font-size:11px;color:var(--cl-t2);margin:9px 0 0}
+/* ——— editor · crimson bookmark tab is the structural signature ——— */
+.editor{position:relative;border:1px solid var(--cl-strong);border-radius:9px;overflow:hidden;background:var(--cl-card);min-width:0;display:flex;flex-direction:column}
+.editor::before{content:"";position:absolute;top:0;left:0;width:15px;height:41px;background:var(--cl-accent);clip-path:polygon(0 0,100% 0,100% 100%,50% 74%,0 100%);z-index:2}
+.editor-top{display:flex;justify-content:space-between;align-items:stretch;border-bottom:1px solid var(--cl-strong);background:var(--cl-inset);min-height:52px}
+.editor-title{padding:16px 18px 15px 42px;font-family:var(--cl-mono);font-size:11.5px;font-weight:700;overflow-wrap:anywhere}
+.included{display:flex;gap:8px;align-items:center;padding:12px 16px;border-left:1px solid var(--cl-stroke);font-size:11px;font-weight:600;white-space:nowrap;color:var(--cl-success);background:var(--cl-success-tint)}
+.code-wrap{overflow:auto;padding:18px 0 26px;flex:1}
+.code{font-family:var(--cl-mono);font-size:clamp(11px,.95vw,13.5px);line-height:1.85;counter-reset:line;display:block;min-width:max-content}
+.line{display:block;white-space:pre;padding-right:22px;counter-increment:line}
+.line:before{content:counter(line);display:inline-block;color:var(--cl-td);text-align:right;width:44px;padding-right:16px;margin-right:18px;border-right:1px solid var(--cl-divider);user-select:none}
+.comment{color:var(--cl-t3)}
+.keyword{color:var(--cl-link)}
+.string{color:var(--cl-s4)}
+.number{color:var(--cl-s3)}
+.editor-note{border-top:1px solid var(--cl-divider);padding:12px 18px;font-size:11px;color:var(--cl-t2);background:var(--cl-inset)}
+/* ——— footer · dialogs ——— */
+footer{border-top:1px solid var(--cl-stroke);padding:20px 4.7%;display:flex;justify-content:space-between;gap:25px;color:var(--cl-t2);font-size:11px}
+.footer-note{display:flex;gap:11px;align-items:center}
+.info{border:1px solid var(--cl-t2);border-radius:50%;width:19px;height:19px;display:inline-grid;place-items:center;flex:none;font-size:10px;font-style:italic}
+dialog{width:min(480px,calc(100% - 32px));background:var(--cl-card);color:var(--cl-t1);border:1px solid var(--cl-strong);border-radius:11px;padding:28px;box-shadow:0 24px 60px rgba(0,0,0,.18)}
+dialog::backdrop{background:var(--cl-scrim)}
+dialog h2{font-size:20px;margin:0 0 10px;letter-spacing:-.02em}
+dialog p{color:var(--cl-t2);margin:0;line-height:1.6}
+dialog form{margin-top:18px}
+/* ——— responsive ——— */
+@media(max-width:1050px){
+  .workspace{grid-template-columns:minmax(280px,.8fr) minmax(0,1fr);gap:26px}
+  .included{display:none}
+  .nav{gap:18px}
+}
+@media(max-width:760px){
+  .workspace{grid-template-columns:1fr}
+  .topbar-inner{padding:13px 5%;gap:12px}
+  .brand{font-size:17px;gap:9px;letter-spacing:-.4px}
+  .brand-mark svg{width:27px;height:27px}
+  .nav{gap:11px;font-size:12px}
+  .theme,.close{font-size:10.5px;padding:5px 8px}
+  main{padding:24px 5%}
+  .hero{margin:2px 0 26px}
+  .editor{min-height:480px}
+  .code{font-size:12px}
+  footer{flex-direction:column;gap:10px;padding:18px 5%}
+  .included{display:flex;font-size:10px;padding:10px 12px}
+  .editor-title{padding:14px 12px 13px 38px}
+  .field{margin-bottom:20px}
+}
+@media(prefers-reduced-motion:no-preference){
+  button,input,select{transition:background-color .16s ease,color .16s ease,border-color .16s ease}
+}
+</style>
+</head>
+<body>
+<header class="topbar"><div class="topbar-inner">
+  <div class="brand">
+    <span class="brand-mark" aria-hidden="true">
+      <svg viewBox="0 0 36 36" width="34" height="34" focusable="false">
+        <rect width="36" height="36" rx="8.5"></rect>
+        <path d="M9.5 12.6h17" stroke-width="3.2" stroke-linecap="round"></path>
+        <path d="M9.5 18h10.5" stroke-width="3.2" stroke-linecap="round"></path>
+        <path d="M9.5 23.4h14" stroke-width="3.2" stroke-linecap="round"></path>
+      </svg>
+    </span>
+    Server Logic
+  </div>
+  <nav class="nav" aria-label="Utility">
+    <button class="text-button" data-dialog="about">About</button>
+    <button class="text-button" data-dialog="help">Help</button>
+    <button class="theme" id="theme" aria-label="Switch to dark theme">Dark</button>
+  </nav>
+</div></header>
+<main>
+  <section class="hero">
+    <p class="kicker">Power Pages · starter tool</p>
+    <h1>From idea to <em>server handler</em></h1>
+    <p class="intro">Create a starter for Power Pages server logic. Choose your settings and preview your code.</p>
+  </section>
+  <div class="workspace">
+    <section aria-label="Starter settings">
+      <div class="field">
+        <label for="logic-name">Logic name</label>
+        <input id="logic-name" value="customer-summary" spellcheck="false" aria-describedby="name-hint">
+        <p class="hint" id="name-hint">Used for the file name and handler function.</p>
+      </div>
+      <div class="field">
+        <label for="method">HTTP method</label>
+        <select id="method" aria-describedby="method-hint"><option>GET</option><option>POST</option></select>
+        <p class="hint" id="method-hint">The method this server logic will handle.</p>
+      </div>
+      <div class="field">
+        <label for="recipe">Recipe</label>
+        <select id="recipe" aria-describedby="recipe-hint"><option>Read Dataverse records</option><option>Validate a request</option></select>
+        <p class="hint" id="recipe-hint">A starter outline for querying Dataverse and returning JSON.</p>
+      </div>
+      <section class="guidance">
+        <h2>Includes best practice guidance</h2>
+        <ul class="checks">
+          <li><span class="check" aria-hidden="true">✓</span><div><strong>Browser API checks</strong><p>Guidance for calls from your Power Pages site.</p></div></li>
+          <li><span class="check" aria-hidden="true">✓</span><div><strong>Input validation template</strong><p>A place to validate incoming request parameters.</p></div></li>
+          <li><span class="check" aria-hidden="true">✓</span><div><strong>Permission setup checklist</strong><p>Review table permissions and web roles.</p></div></li>
+        </ul>
+        <button class="primary" id="download"><span aria-hidden="true">↓</span> Download starter</button>
+        <p class="feedback" id="feedback" role="status"></p>
+      </section>
+    </section>
+    <section class="editor" aria-label="Illustrative server handler">
+      <div class="editor-top">
+        <div class="editor-title">Server handler (customer-summary.js)</div>
+        <div class="included"><span aria-hidden="true">&lt;/&gt;</span> Client call planned</div>
+      </div>
+      <div class="code-wrap" tabindex="0" aria-label="Code outline, scroll horizontally if needed">
+        <code class="code"><span class="line comment">// customer-summary.js</span><span class="line comment">// Illustrative outline · not executable starter code</span><span class="line"> </span><span class="line comment">/**</span><span class="line comment"> * Return a summary of customer records.</span><span class="line comment"> * Add site-specific logic before deployment.</span><span class="line comment"> */</span><span class="line"><span class="keyword">async function</span> get() {</span><span class="line">  <span class="keyword">try</span> {</span><span class="line comment">    // 1. Read and validate request parameters.</span><span class="line comment">    //    Limit results and reject invalid input.</span><span class="line"> </span><span class="line comment">    // 2. Check the required table permissions.</span><span class="line comment">    //    Confirm access for the intended web roles.</span><span class="line"> </span><span class="line comment">    // 3. Query Dataverse using the supported API.</span><span class="line comment">    //    Replace this sample data with your query.</span><span class="line">    <span class="keyword">const</span> records = [];</span><span class="line"> </span><span class="line comment">    // 4. Format the response for your handler.</span><span class="line">    <span class="keyword">return</span> { value: records };</span><span class="line">  } <span class="keyword">catch</span> (error) {</span><span class="line comment">    // Log details securely; return a safe message.</span><span class="line">    <span class="keyword">return</span> { message: <span class="string">"Unable to load records."</span> };</span><span class="line">  }</span><span class="line">}</span></code>
+      </div>
+      <div class="editor-note">Illustrative preview · settings and generation are mock only.</div>
+    </section>
+  </div>
+</main>
+<footer>
+  <span class="footer-note"><span class="info" aria-hidden="true">i</span>Validate generated files on your development site.</span>
+  <span>Mock concept · Crimson Ledger</span>
+</footer>
+<dialog id="about">
+  <h2>About Server Logic</h2>
+  <p>A visual concept for a local Power Pages starter tool. Logic Inspector is planned for phase 2.</p>
+  <form method="dialog"><button class="close">Close</button></form>
+</dialog>
+<dialog id="help">
+  <h2>Starter workflow</h2>
+  <p>Name your logic, choose a method and recipe, then review the server handler. This mock demonstrates the layout; it does not generate or deploy code.</p>
+  <form method="dialog"><button class="close">Close</button></form>
+</dialog>
+<script>
+const themeButton=document.getElementById('theme');
+themeButton.addEventListener('click',()=>{const dark=document.documentElement.dataset.theme!=='dark';document.documentElement.dataset.theme=dark?'dark':'light';themeButton.textContent=dark?'Light':'Dark';themeButton.setAttribute('aria-label',`Switch to ${dark?'light':'dark'} theme`)});
+document.querySelectorAll('[data-dialog]').forEach(button=>button.addEventListener('click',()=>document.getElementById(button.dataset.dialog).showModal()));
+document.getElementById('download').addEventListener('click',()=>{document.getElementById('feedback').textContent='Mock only — starter generation is not connected.'});
+</script>
+</body>
+</html>

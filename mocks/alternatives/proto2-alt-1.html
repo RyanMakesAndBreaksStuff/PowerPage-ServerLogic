@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Server Logic — Alt 1 · Ops Sheet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F4F1E8; --ink:#16181F; --ink-2:#3E4149; --muted:#5A5F55;
+  --rule:#16181F; --hair:rgba(22,24,31,.18);
+  --green:#0E7C46; --green-ink:#FFFFFF; --green-tint:#E4F2E9; --green-stroke:#0E7C46;
+  --err:#B3261E; --err-tint:#F9E9E8;
+  --focus:#B45309;
+  --code-bg:#FBFAF5;
+  --c-comment:#5F6455; --c-key:#9A2A1F; --c-str:#7030A0; --c-num:#0E6B6B; --c-fn:#16181F;
+  --chip:#16181F; --chip-ink:#F4F1E8;
+  color-scheme:light;
+}
+:root[data-theme="dark"]{
+  --paper:#0F172A; --ink:#F1F5F9; --ink-2:#C7D0DC; --muted:#A8B3C5;
+  --rule:#8B98AC; --hair:rgba(139,152,172,.32);
+  --green:#22C55E; --green-ink:#08130D; --green-tint:#12281C; --green-stroke:#22C55E;
+  --err:#FF8A80; --err-tint:#33201E;
+  --focus:#EAB308;
+  --code-bg:#131C31;
+  --c-comment:#9AA5B8; --c-key:#FF9A90; --c-str:#C7A7F7; --c-num:#5FD3D3; --c-fn:#F1F5F9;
+  --chip:#E6EDF6; --chip-ink:#0F172A;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:"Bahnschrift","Segoe UI",system-ui,sans-serif;
+  font-size:15px; line-height:1.55;
+}
+/* visible grid on the canvas */
+body::before{
+  content:""; position:fixed; inset:0; pointer-events:none; z-index:0;
+  background:
+    repeating-linear-gradient(to right, var(--hair) 0 1px, transparent 1px 120px),
+    repeating-linear-gradient(to bottom, var(--hair) 0 1px, transparent 1px 120px);
+  opacity:.5;
+}
+.mono{font-family:"JetBrains Mono",Consolas,monospace}
+a{color:inherit; text-decoration-thickness:2px; text-underline-offset:3px}
+a:hover{text-decoration-color:var(--green)}
+:focus-visible{outline:3px solid var(--focus); outline-offset:3px}
+button{font:inherit; cursor:pointer}
+input,select{font:inherit}
+svg{display:block}
+
+/* ---------- top bar ---------- */
+.top{
+  position:relative; z-index:1; border-bottom:2px solid var(--rule);
+  background:var(--paper);
+}
+.top-inner{
+  max-width:1440px; margin:auto; padding:14px 4vw;
+  display:flex; align-items:center; gap:20px; flex-wrap:wrap;
+}
+.brand{display:flex; align-items:center; gap:12px; font-weight:700; letter-spacing:.06em; font-size:17px; text-transform:uppercase}
+.brand-mark{
+  width:38px; height:38px; border:2px solid var(--ink); display:grid; place-items:center;
+  background:var(--chip); color:var(--chip-ink);
+}
+.brand small{display:block; font-weight:400; text-size-adjust:none; font-size:10px; letter-spacing:.22em; color:var(--muted); text-transform:uppercase; margin-top:2px}
+.top-nav{display:flex; gap:4px; margin-left:auto}
+.top-nav button{
+  border:2px solid transparent; background:none; color:var(--ink-2);
+  padding:9px 14px; min-height:44px; text-transform:uppercase; letter-spacing:.08em; font-size:12px; font-weight:700;
+}
+.top-nav button:hover{border-color:var(--ink); color:var(--ink)}
+.theme{
+  border:2px solid var(--ink); background:var(--paper); color:var(--ink);
+  padding:9px 14px; min-height:44px; text-transform:uppercase; letter-spacing:.08em; font-size:12px; font-weight:700;
+}
+.theme:hover{background:var(--ink); color:var(--paper)}
+
+/* ---------- shell ---------- */
+main{position:relative; z-index:1; max-width:1440px; margin:auto; padding:44px 4vw 56px}
+
+.hero{display:grid; grid-template-columns:minmax(0,1.6fr) minmax(220px,.9fr); gap:32px; align-items:end; margin-bottom:40px}
+h1{
+  margin:0; font-size:clamp(38px,5.4vw,76px); line-height:.98; letter-spacing:-.02em;
+  text-transform:uppercase; font-weight:700; max-width:14ch;
+}
+h1 .stroke{color:transparent; -webkit-text-stroke:2px var(--ink)}
+.intro{margin:18px 0 0; font-size:clamp(15px,1.3vw,18px); color:var(--ink-2); max-width:52ch}
+.hero-side{border:2px solid var(--rule); background:var(--paper); align-self:stretch; display:flex; flex-direction:column; justify-content:center; padding:18px}
+.hero-side .mono{font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted)}
+.hero-side strong{display:block; margin-top:6px; font-size:13px; letter-spacing:.04em; text-transform:uppercase}
+
+/* ---------- job sheet ---------- */
+.sheet{border:2px solid var(--rule); background:var(--paper); display:grid; grid-template-columns:minmax(320px,.92fr) minmax(0,1.35fr)}
+.sheet > * + *{border-left:2px solid var(--rule)}
+
+.panel-head{
+  display:flex; justify-content:space-between; align-items:center; gap:12px;
+  border-bottom:2px solid var(--rule); padding:14px 22px; background:var(--chip); color:var(--chip-ink);
+}
+.panel-head .mono{font-size:11px; letter-spacing:.18em; text-transform:uppercase; font-weight:700}
+
+/* form side */
+.configure{padding:26px 22px 22px}
+.step{display:grid; grid-template-columns:44px 1fr; gap:14px; padding:18px 0; border-bottom:1px solid var(--hair)}
+.step:first-child{padding-top:0}
+.step-num{
+  grid-row:span 2; font-family:"JetBrains Mono",monospace; font-weight:700; font-size:13px;
+  border:2px solid var(--ink); width:40px; height:40px; display:grid; place-items:center;
+}
+label,.field-label{display:block; font-size:12px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; margin:0 0 8px}
+input,select{
+  width:100%; border:2px solid var(--ink); background:var(--code-bg); color:var(--ink);
+  padding:11px 12px; min-height:44px; border-radius:0; appearance:none;
+}
+select{
+  background-image:linear-gradient(45deg,transparent 50%,var(--ink) 50%),linear-gradient(135deg,var(--ink) 50%,transparent 50%);
+  background-position:calc(100% - 18px) 50%,calc(100% - 13px) 50%; background-size:5px 5px; background-repeat:no-repeat; padding-right:34px;
+}
+input:hover,select:hover{background-color:var(--green-tint)}
+.hint{margin:8px 0 0; font-size:12px; color:var(--muted)}
+.error{margin:8px 0 0; font-size:12px; color:var(--err); font-weight:700; display:none}
+.error .mono{font-size:12px}
+[aria-invalid="true"]{border-color:var(--err); border-width:2px; background:var(--err-tint)}
+.field-wrap.has-error .error{display:block}
+
+/* guidance */
+.guidance{border-top:2px solid var(--rule); margin-top:8px; padding:20px 0 0}
+.guidance h2{margin:0 0 4px; font-size:13px; font-weight:700; letter-spacing:.16em; text-transform:uppercase}
+.guidance .mono{font-size:11px; color:var(--muted); letter-spacing:.08em; text-transform:uppercase}
+.checks{list-style:none; margin:14px 0 0; padding:0; display:grid; gap:12px}
+.checks li{display:flex; gap:12px; align-items:flex-start}
+.check{
+  flex:none; width:24px; height:24px; border:2px solid var(--green-stroke); background:var(--green-tint);
+  color:var(--green); display:grid; place-items:center; margin-top:2px;
+}
+.checks strong{display:block; font-size:14px}
+.checks p{margin:2px 0 0; font-size:12px; color:var(--muted)}
+.primary{
+  width:100%; margin-top:20px; border:2px solid var(--green); background:var(--green); color:var(--green-ink);
+  padding:16px; min-height:52px; font-weight:700; font-size:14px; letter-spacing:.1em; text-transform:uppercase;
+  display:flex; align-items:center; justify-content:center; gap:12px; border-radius:0;
+}
+.primary:hover{background:var(--paper); color:var(--green); }
+.primary:active{transform:translate(2px,2px)}
+.feedback{min-height:20px; margin:10px 0 0; font-size:12px; color:var(--muted); font-family:"JetBrains Mono",monospace}
+
+/* editor side */
+.editor{display:flex; flex-direction:column; min-width:0}
+.editor-body{padding:0; flex:1; overflow:auto}
+.code{
+  display:block; margin:0; padding:20px 0 26px; min-width:max-content;
+  font-family:"JetBrains Mono",Consolas,monospace; font-size:clamp(12px,.95vw,14.5px); line-height:1.95;
+  counter-reset:line; background:var(--code-bg);
+}
+.line{display:block; white-space:pre; padding-right:26px; counter-increment:line}
+.line::before{
+  content:counter(line); display:inline-block; width:46px; padding-right:16px; margin-right:16px;
+  text-align:right; color:var(--muted); border-right:1px solid var(--hair); user-select:none; opacity:.8;
+}
+.comment{color:var(--c-comment)} .keyword{color:var(--c-key); font-weight:700}
+.string{color:var(--c-str)} .number{color:var(--c-num)}
+.chip-plan{
+  border:2px solid var(--green-stroke); color:var(--green); background:var(--green-tint);
+  font-family:"JetBrains Mono",monospace; font-size:10px; letter-spacing:.12em; text-transform:uppercase;
+  padding:5px 9px; font-weight:700; display:inline-flex; align-items:center; gap:7px; white-space:nowrap;
+}
+.editor-note{
+  border-top:2px solid var(--rule); padding:13px 22px; font-size:11.5px; color:var(--muted);
+  background:var(--paper); font-family:"JetBrains Mono",monospace; letter-spacing:.02em;
+}
+
+/* ---------- footer ---------- */
+footer{
+  position:relative; z-index:1; border-top:2px solid var(--rule); background:var(--paper);
+}
+.foot-inner{
+  max-width:1440px; margin:auto; padding:20px 4vw;
+  display:flex; justify-content:space-between; align-items:center; gap:22px; flex-wrap:wrap;
+  font-family:"JetBrains Mono",monospace; font-size:11px; color:var(--muted); letter-spacing:.05em;
+}
+.foot-note{display:flex; align-items:center; gap:11px; text-transform:uppercase}
+.foot-note svg{flex:none}
+.concepts{display:flex; gap:0; flex-wrap:wrap}
+.concepts a{
+  border:2px solid var(--hair); border-right:none; padding:12px 13px; min-height:44px;
+  display:inline-flex; align-items:center; text-decoration:none; color:var(--ink-2);
+  font-family:"JetBrains Mono",monospace; font-size:11px; letter-spacing:.06em; margin-top:2px;
+}
+.concepts a:last-child{border-right:2px solid var(--hair)}
+.concepts a:hover{border-color:var(--ink); color:var(--ink); background:var(--green-tint)}
+.concepts a[aria-current]{background:var(--chip); color:var(--chip-ink); border-color:var(--chip)}
+
+/* ---------- dialog ---------- */
+dialog{
+  width:min(520px,calc(100% - 40px)); border:2px solid var(--rule); border-radius:0;
+  background:var(--paper); color:var(--ink); padding:0;
+}
+dialog::backdrop{background:rgba(12,16,28,.55)}
+dialog .panel-head{position:sticky; top:0}
+dialog .dialog-body{padding:22px 24px 26px}
+dialog p{margin:0 0 12px; color:var(--ink-2); font-size:14px}
+dialog .dialog-body .theme{margin-top:6px}
+
+/* ---------- motion (style: near-instant swaps) ---------- */
+@media (prefers-reduced-motion:no-preference){
+  .primary, .theme, .top-nav button, .concepts a, input, select{transition:background-color .12s linear, color .12s linear, border-color .12s linear}
+}
+@media (prefers-reduced-motion:reduce){
+  *{transition:none !important; animation:none !important}
+}
+
+/* ---------- responsive ---------- */
+@media (max-width:1080px){
+  .hero{grid-template-columns:1fr}
+  .hero-side{max-width:420px}
+  .sheet{grid-template-columns:1fr}
+  .sheet > * + *{border-left:none; border-top:2px solid var(--rule)}
+}
+@media (max-width:640px){
+  main{padding:30px 5% 40px}
+  .top-inner{padding:12px 5%; gap:10px}
+  .top-nav{margin-left:auto}
+  .brand{font-size:15px}
+  .h1-gap{margin-bottom:26px}
+  .editor-body{max-height:70vh}
+  .step{grid-template-columns:1fr; gap:8px}
+  .step-num{grid-row:auto; width:100%; height:34px; max-width:44px}
+  .foot-inner{flex-direction:column; align-items:flex-start; gap:12px}
+  .panel-head{flex-wrap:wrap}
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="square"><path d="M8 4H6a2 2 0 0 0-2 2v3a2 2 0 0 1-2 2 2 2 0 0 1 2 2v3a2 2 0 0 0 2 2h2M16 4h2a2 2 0 0 1 2 2v3a2 2 0 0 0 2 2 2 2 0 0 0-2 2v3a2 2 0 0 1-2 2h-2"/></svg>
+      </span>
+      <span>Server Logic<small>Power Pages starter tool</small></span>
+    </div>
+    <nav class="top-nav" aria-label="About this mock">
+      <button type="button" data-dialog="about">About</button>
+      <button type="button" data-dialog="help">Help</button>
+      <button class="theme" type="button" id="theme" aria-pressed="false">Dark</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="hero" aria-labelledby="page-title">
+    <div class="h1-gap">
+      <h1 id="page-title">From idea to <span class="stroke">server handler</span></h1>
+      <p class="intro">Create a starter for Power Pages server logic. Choose your settings and preview your code — then take the file from there.</p>
+    </div>
+    <div class="hero-side">
+      <span class="mono">Sheet status</span>
+      <strong>Local mock · No connection</strong>
+    </div>
+  </section>
+
+  <div class="sheet">
+    <section aria-label="Starter settings">
+      <div class="panel-head">
+        <span class="mono">Job ticket · Configure</span>
+        <span class="mono" aria-hidden="true">01 / 02</span>
+      </div>
+      <form class="configure" id="starter-form" novalidate>
+        <div class="step field-wrap" id="wrap-name">
+          <span class="step-num" aria-hidden="true">01</span>
+          <label for="logic-name">Logic name</label>
+          <div>
+            <input id="logic-name" name="logic-name" value="customer-summary" spellcheck="false" autocomplete="off" aria-describedby="name-hint name-error">
+            <p class="hint" id="name-hint">Used for the file name and handler function.</p>
+            <p class="error" id="name-error"><span class="mono">REJECTED —</span> lowercase letters, numbers, and dashes only. Start with a letter.</p>
+          </div>
+        </div>
+        <div class="step">
+          <span class="step-num" aria-hidden="true">02</span>
+          <label for="method">HTTP method</label>
+          <div>
+            <select id="method" aria-describedby="method-hint">
+              <option value="get">GET · read</option>
+              <option value="post">POST · submit</option>
+            </select>
+            <p class="hint" id="method-hint">The method this server logic will handle.</p>
+          </div>
+        </div>
+        <div class="step" style="border-bottom:none">
+          <span class="step-num" aria-hidden="true">03</span>
+          <label for="recipe">Recipe</label>
+          <div>
+            <select id="recipe" aria-describedby="recipe-hint">
+              <option>Read Dataverse records</option>
+              <option>Validate a request</option>
+            </select>
+            <p class="hint" id="recipe-hint">A starter outline for querying Dataverse and returning JSON.</p>
+          </div>
+        </div>
+
+        <section class="guidance" aria-labelledby="guidance-title">
+          <h2 id="guidance-title">Includes best practice guidance</h2>
+          <span class="mono">Stamped into every starter</span>
+          <ul class="checks">
+            <li>
+              <span class="check" aria-hidden="true"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="square"><path d="M4 12.5 9.5 18 20 6"/></svg></span>
+              <div><strong>Browser API checks</strong><p>Guidance for calls from your Power Pages site.</p></div>
+            </li>
+            <li>
+              <span class="check" aria-hidden="true"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="square"><path d="M4 12.5 9.5 18 20 6"/></svg></span>
+              <div><strong>Input validation template</strong><p>A place to validate incoming request parameters.</p></div>
+            </li>
+            <li>
+              <span class="check" aria-hidden="true"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="square"><path d="M4 12.5 9.5 18 20 6"/></svg></span>
+              <div><strong>Permission setup checklist</strong><p>Review table permissions and web roles.</p></div>
+            </li>
+          </ul>
+          <button class="primary" type="submit" id="download">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="square" aria-hidden="true"><path d="M12 3v13m0 0 5-5m-5 5-5-5M4 21h16"/></svg>
+            Download starter
+          </button>
+          <p class="feedback" id="feedback" role="status" aria-live="polite"></p>
+        </section>
+      </form>
+    </section>
+
+    <section class="editor" aria-label="Illustrative server handler">
+      <div class="panel-head">
+        <span class="mono">Server handler (<span id="file-name">customer-summary</span>.js)</span>
+        <span class="chip-plan">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="square" aria-hidden="true"><path d="M8 4H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h3M16 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3"/></svg>
+          Client call planned
+        </span>
+      </div>
+      <div class="editor-body" tabindex="0" aria-label="Code outline, scroll horizontally if needed">
+        <code class="code"><span class="line comment">// <span id="code-name">customer-summary</span>.js</span><span class="line comment">// Illustrative outline · not executable starter code</span><span class="line"> </span><span class="line comment">/**</span><span class="line comment"> * Return a summary of customer records.</span><span class="line comment"> * Add site-specific logic before deployment.</span><span class="line comment"> */</span><span class="line"><span class="keyword">async function</span> <span class="number" id="code-method">get</span>() {</span><span class="line">  <span class="keyword">try</span> {</span><span class="line comment">    // 1. Read and validate request parameters.</span><span class="line comment">    //    Limit results and reject invalid input.</span><span class="line"> </span><span class="line comment">    // 2. Check the required table permissions.</span><span class="line comment">    //    Confirm access for the intended web roles.</span><span class="line"> </span><span class="line comment">    // 3. Query Dataverse using the supported API.</span><span class="line comment">    //    Replace this sample data with your query.</span><span class="line">    <span class="keyword">const</span> records = [];</span><span class="line"> </span><span class="line comment">    // 4. Format the response for your handler.</span><span class="line">    <span class="keyword">return</span> { value: records };</span><span class="line">  } <span class="keyword">catch</span> (error) {</span><span class="line comment">    // Log details securely; return a safe message.</span><span class="line">    <span class="keyword">return</span> { message: <span class="string">"Unable to load records."</span> };</span><span class="line">  }</span><span class="line">}</span></code>
+      </div>
+      <p class="editor-note">Illustrative outline — validate generated files on your development site.</p>
+    </section>
+  </div>
+</main>
+
+<footer>
+  <div class="foot-inner">
+    <span class="foot-note">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M12 11v5" stroke-linecap="square"/></svg>
+      Validate generated files on your development site
+    </span>
+    <nav class="concepts" aria-label="Compare proto-2 concepts">
+      <a href="proto2-alt-1.html" aria-current="page">ALT-1 OPS SHEET</a>
+      <a href="proto2-alt-2.html">ALT-2 CONSOLE</a>
+      <a href="proto2-alt-3.html">ALT-3 FIELD NOTES</a>
+      <a href="proto2-alt-4.html">ALT-4 AURORA</a>
+    </nav>
+  </div>
+</footer>
+
+<dialog id="about">
+  <div class="panel-head"><span class="mono">About Server Logic</span></div>
+  <div class="dialog-body">
+    <p>A visual concept for a local Power Pages starter tool. Logic Inspector is planned for phase 2.</p>
+    <button class="theme" type="button" data-close>Close</button>
+  </div>
+</dialog>
+<dialog id="help">
+  <div class="panel-head"><span class="mono">Starter workflow</span></div>
+  <div class="dialog-body">
+    <p>Name your logic, choose a method and recipe, then review the server handler. This mock demonstrates the layout; it does not generate or deploy code.</p>
+    <button class="theme" type="button" data-close>Close</button>
+  </div>
+</dialog>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const nameInput = $('logic-name'), method = $('method'), recipe = $('recipe');
+
+/* theme */
+const themeButton = $('theme');
+themeButton.addEventListener('click', () => {
+  const dark = document.documentElement.dataset.theme !== 'dark';
+  document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+  themeButton.textContent = dark ? 'Light' : 'Dark';
+  themeButton.setAttribute('aria-pressed', String(dark));
+  themeButton.setAttribute('aria-label', dark ? 'Switch to light theme' : 'Switch to dark theme');
+});
+
+/* dialogs */
+document.querySelectorAll('[data-dialog]').forEach(b =>
+  b.addEventListener('click', () => $(b.dataset.dialog).showModal()));
+document.querySelectorAll('[data-close]').forEach(b =>
+  b.addEventListener('click', () => b.closest('dialog').close()));
+
+/* live code updates */
+const syncCode = () => {
+  $('file-name').textContent = nameInput.value.trim() || 'untitled';
+  $('code-name').textContent = nameInput.value.trim() || 'untitled';
+  $('code-method').textContent = method.value;
+};
+nameInput.addEventListener('input', syncCode);
+method.addEventListener('change', syncCode);
+recipe.addEventListener('change', () => {
+  $('recipe-hint').textContent = recipe.value === 'Validate a request'
+    ? 'A starter outline for checking inputs and rejecting bad requests.'
+    : 'A starter outline for querying Dataverse and returning JSON.';
+});
+
+/* inline validation on blur */
+nameInput.addEventListener('blur', () => {
+  const bad = !/^[a-z][a-z0-9-]*$/.test(nameInput.value.trim());
+  nameInput.setAttribute('aria-invalid', bad ? 'true' : 'false');
+  $('wrap-name').classList.toggle('has-error', bad);
+});
+
+/* download: mock feedback + guard invalid name */
+$('starter-form').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const bad = !/^[a-z][a-z0-9-]*$/.test(nameInput.value.trim());
+  nameInput.setAttribute('aria-invalid', bad ? 'true' : 'false');
+  $('wrap-name').classList.toggle('has-error', bad);
+  if (bad) {
+    nameInput.focus();
+    $('feedback').textContent = 'Fix the logic name before downloading.';
+    return;
+  }
+  $('feedback').textContent = 'Mock only — starter generation is not connected.';
+});
+
+syncCode();
+</script>
+</body>
+</html>

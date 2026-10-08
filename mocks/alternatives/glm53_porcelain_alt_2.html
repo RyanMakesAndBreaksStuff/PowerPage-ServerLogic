@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Server Logic — Oxide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=Source+Sans+3:ital,wght@0,400;0,500;0,600;1,400&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* Oxide — bone paper, oxide-rust accent (light) */
+  --m-canvas:#F6F2EC;
+  --m-page:#FDFBF7;
+  --m-card:#FFFFFF;
+  --m-subtle:#EFE9DF;
+  --m-inset:#F9F5EE;
+  --m-divider:#E6DECF;
+  --m-control-stroke:#CFC4B0;
+  --m-strong:#A99C86;
+  --m-focus:#A63A24;
+  /* text */
+  --m-t1:#241B14;            /* 14.9:1 on canvas */
+  --m-t2:#574A3D;            /* 8.1:1 on canvas */
+  --m-t3:#6B5D4E;            /* 5.7:1 on canvas */
+  --m-td:#A2937F;
+  --m-on-accent:#FFFDF7;     /* 6.5:1 on accent */
+  --m-link:#A63A24;
+  /* accent */
+  --m-accent:#A63A24;
+  --m-accent-h:#923019;
+  --m-accent-p:#7E2915;
+  --m-accent-tint:#F7E7E1;
+  --m-accent-tint-stroke:#E9C7BC;
+  --m-sel:#A63A24;
+  /* controls */
+  --m-control-fill:#FFFFFF;
+  --m-control-hover:#FBF7F0;
+  --m-hover:rgba(38,26,18,.08);
+  /* status */
+  --m-success:#4A6B3A;
+  --m-success-tint:#EAF2E2;
+  --m-danger:#8C2B1B;
+  --m-danger-tint:#F8E8E3;
+  --m-danger-stroke:#E5B7AC;
+  --m-warn:#8A5514;
+  --m-warn-tint:#F8EEDA;
+  --m-energy:#B4541A;
+  --m-track:#E4DCCC;
+  --m-scrim:rgba(32,22,15,.45);
+  /* series */
+  --s1:#A63A24;--s2:#8A5514;--s3:#4A6B3A;--s4:#3D5A8C;--s5:#7A4A6B;
+  /* code syntax */
+  --sy-cmt:#7D6E5B;
+  --sy-kw:#A63A24;
+  --sy-str:#4A6B3A;
+  --sy-num:#3D5A8C;
+  --gutter:#A99C86;
+  --card-shadow:0 30px 60px -34px rgba(36,27,20,.28), 0 2px 6px -2px rgba(36,27,20,.08);
+  --field-shadow:0 0 0 4px rgba(166,58,36,.14);
+  color-scheme:light;
+}
+:root[data-theme="dark"]{
+  /* Oxide (dark) — warm near-black, lit rust accent */
+  --m-canvas:#1D1713;
+  --m-page:#261E18;
+  --m-card:#2A2119;
+  --m-subtle:#31271E;
+  --m-inset:#2C231B;
+  --m-divider:#382D23;
+  --m-control-stroke:#453829;
+  --m-strong:#5C4E3D;
+  --m-focus:#F08A6E;
+  /* text */
+  --m-t1:#F2EDE6;            /* 14.7:1 on canvas */
+  --m-t2:#C9BEB2;            /* 9.0:1 on canvas */
+  --m-t3:#A89C8E;            /* 6.6:1 on canvas */
+  --m-td:#746656;
+  --m-on-accent:#201510;     /* 7.3:1 on accent */
+  --m-link:#F08A6E;
+  /* accent */
+  --m-accent:#F08A6E;
+  --m-accent-h:#F49D85;
+  --m-accent-p:#E47B5D;
+  --m-accent-tint:#3A231A;
+  --m-accent-tint-stroke:#5C3526;
+  --m-sel:#F08A6E;
+  /* controls */
+  --m-control-fill:#2A2119;
+  --m-control-hover:#31281F;
+  --m-hover:rgba(240,222,206,.09);
+  /* status */
+  --m-success:#A9C48F;
+  --m-success-tint:#1F2717;
+  --m-danger:#F0968C;
+  --m-danger-tint:#331C12;
+  --m-danger-stroke:#6B3225;
+  --m-warn:#E8C06A;
+  --m-warn-tint:#2A2110;
+  --m-energy:#F09A5E;
+  --m-track:#362C22;
+  --m-scrim:rgba(0,0,0,.62);
+  /* series */
+  --s1:#F08A6E;--s2:#E8C06A;--s3:#A9C48F;--s4:#93B4E4;--s5:#D8A7BE;
+  /* code syntax */
+  --sy-cmt:#988B79;
+  --sy-kw:#F08A6E;
+  --sy-str:#A9C48F;
+  --sy-num:#93B4E4;
+  --gutter:#6B5E4C;
+  --card-shadow:0 34px 70px -38px rgba(0,0,0,.8), 0 2px 6px -2px rgba(0,0,0,.5);
+  --field-shadow:0 0 0 4px rgba(240,138,110,.16);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  background:
+    radial-gradient(1200px 600px at 8% -8%, color-mix(in srgb,var(--m-page) 55%,transparent), transparent 60%),
+    radial-gradient(900px 500px at 100% 0%, color-mix(in srgb,var(--m-accent-tint) 45%,transparent), transparent 55%),
+    var(--m-canvas);
+  color:var(--m-t1);
+  font-family:"Source Sans 3","Segoe UI",system-ui,sans-serif;
+  font-size:16px;
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+a{color:var(--m-link)}
+:focus-visible{outline:2px solid var(--m-focus);outline-offset:3px;border-radius:2px}
+::selection{background:var(--m-accent-tint);color:var(--m-t1)}
+
+/* ---------- top bar ---------- */
+.topbar{border-bottom:1px solid var(--m-divider);background:color-mix(in srgb,var(--m-canvas) 88%,var(--m-page))}
+.topbar-inner{
+  max-width:1440px;margin:auto;padding:16px 4.5%;
+  display:flex;align-items:center;justify-content:space-between;gap:24px;
+}
+.brand{display:flex;align-items:center;gap:13px}
+.brand-mark{width:38px;height:38px;flex:none}
+.brand-name{
+  font-family:"Newsreader",Georgia,serif;font-optical-sizing:auto;
+  font-size:23px;font-weight:600;letter-spacing:-.01em;color:var(--m-t1);
+}
+.brand-sub{
+  font-family:"Fira Code",monospace;font-size:10px;font-weight:500;
+  letter-spacing:.22em;text-transform:uppercase;color:var(--m-t3);
+  display:block;margin-top:1px;
+}
+.nav{display:flex;align-items:center;gap:24px}
+.text-button{
+  border:0;background:none;padding:10px 2px;min-height:44px;color:var(--m-t2);
+  font-size:14.5px;font-weight:500;position:relative;
+}
+.text-button::after{
+  content:"";position:absolute;left:0;right:100%;bottom:6px;height:2px;
+  background:var(--m-accent);border-radius:2px;
+  transition:right .25s cubic-bezier(.22,1,.36,1);
+}
+.text-button:hover{color:var(--m-t1)}
+.text-button:hover::after{right:0}
+.theme{
+  border:1px solid var(--m-control-stroke);border-radius:999px;
+  padding:9px 18px;min-height:44px;background:var(--m-control-fill);
+  font-family:"Fira Code",monospace;font-size:12px;font-weight:500;
+  letter-spacing:.08em;text-transform:uppercase;color:var(--m-t2);
+  display:inline-flex;align-items:center;gap:8px;
+  transition:border-color .2s,color .2s;
+}
+.theme:hover{border-color:var(--m-accent);color:var(--m-t1)}
+.theme svg{width:14px;height:14px;stroke:currentColor}
+
+/* ---------- layout ---------- */
+main{max-width:1440px;margin:auto;padding:60px 4.5% 56px}
+.hero{margin-bottom:52px;position:relative}
+.kicker{
+  font-family:"Fira Code",monospace;font-size:11.5px;font-weight:600;
+  letter-spacing:.28em;text-transform:uppercase;color:var(--m-accent);
+  display:flex;align-items:center;gap:14px;margin:0 0 24px;
+}
+.kicker::before{content:"";width:44px;height:1px;background:var(--m-accent)}
+h1{
+  font-family:"Newsreader",Georgia,serif;font-optical-sizing:auto;
+  font-size:clamp(44px,6.2vw,82px);font-weight:400;line-height:1.05;
+  letter-spacing:-.015em;margin:0 0 20px;max-width:16ch;
+}
+h1 em{font-style:italic;font-weight:500;color:var(--m-accent)}
+.intro{
+  font-size:clamp(16px,1.5vw,19px);line-height:1.65;color:var(--m-t2);
+  margin:0;max-width:58ch;
+}
+
+/* ---------- workspace ---------- */
+.workspace{
+  display:grid;grid-template-columns:minmax(320px,420px) minmax(0,1fr);
+  gap:clamp(32px,4vw,60px);align-items:start;
+}
+
+/* settings */
+.settings{display:grid;gap:28px}
+.field label{
+  display:block;font-family:"Fira Code",monospace;font-size:11.5px;
+  font-weight:600;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--m-t2);margin-bottom:9px;
+}
+.field input,.field select{
+  width:100%;height:48px;padding:10px 16px;
+  border:1px solid var(--m-control-stroke);border-radius:8px;
+  background:var(--m-control-fill);color:var(--m-t1);
+  font-size:15.5px;
+  transition:border-color .18s,box-shadow .18s;
+}
+.field input:hover,.field select:hover{border-color:var(--m-strong)}
+.field input:focus,.field select:focus{
+  border-color:var(--m-accent);box-shadow:var(--field-shadow);outline:none;
+}
+.field select{
+  appearance:none;cursor:pointer;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23A63A24' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 16px center;padding-right:42px;
+}
+:root[data-theme="dark"] .field select{
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23F08A6E' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E");
+}
+.hint{margin:8px 0 0;font-size:13.5px;line-height:1.55;color:var(--m-t3)}
+
+.guidance{
+  border-top:1px solid var(--m-divider);padding-top:28px;
+  display:grid;gap:20px;
+}
+.guidance h2{
+  font-family:"Newsreader",Georgia,serif;font-optical-sizing:auto;
+  font-size:24px;font-weight:500;letter-spacing:-.005em;
+  margin:0;color:var(--m-t1);
+}
+.checks{list-style:none;padding:0;margin:0;display:grid;gap:17px}
+.checks li{display:flex;gap:14px;align-items:flex-start}
+.check-dot{
+  flex:none;width:26px;height:26px;border-radius:50%;
+  border:1.5px solid var(--m-accent);color:var(--m-accent);
+  display:grid;place-items:center;margin-top:2px;
+  font-size:13px;line-height:1;
+}
+.checks strong{display:block;font-size:15px;font-weight:600}
+.checks p{margin:3px 0 0;font-size:13.5px;line-height:1.5;color:var(--m-t3)}
+
+.primary{
+  width:100%;min-height:52px;border:1px solid var(--m-accent);border-radius:999px;
+  background:var(--m-accent);color:var(--m-on-accent);
+  display:flex;align-items:center;justify-content:center;gap:11px;
+  font-size:16px;font-weight:600;letter-spacing:.01em;
+  box-shadow:0 14px 30px -14px rgba(166,58,36,.55);
+  transition:background .18s,transform .18s,box-shadow .18s;
+}
+.primary span[aria-hidden]{font-size:18px;line-height:1}
+.primary:hover{background:var(--m-accent-h);transform:translateY(-1px)}
+.primary:active{transform:translateY(0);background:var(--m-accent-p)}
+.feedback{min-height:22px;margin:12px 0 0;font-size:13.5px;color:var(--m-accent);font-weight:500}
+
+/* editor */
+.editor{
+  border:1px solid var(--m-divider);border-radius:12px;
+  background:var(--m-card);box-shadow:var(--card-shadow);
+  display:flex;flex-direction:column;overflow:hidden;min-width:0;
+}
+.editor-top{
+  display:flex;justify-content:space-between;align-items:center;gap:16px;
+  padding:18px 22px;border-bottom:1px solid var(--m-divider);
+  background:var(--m-inset);
+}
+.editor-title{
+  font-family:"Fira Code",monospace;font-size:12.5px;font-weight:600;
+  color:var(--m-t2);letter-spacing:.02em;overflow-wrap:anywhere;
+}
+.included{
+  display:inline-flex;align-items:center;gap:8px;white-space:nowrap;
+  padding:7px 14px;border-radius:999px;
+  border:1px solid var(--m-accent-tint-stroke);
+  background:var(--m-accent-tint);color:var(--m-accent);
+  font-family:"Fira Code",monospace;
+  font-size:11px;font-weight:600;letter-spacing:.05em;
+}
+:root[data-theme="dark"] .included{color:#F4B8A6}
+.code-wrap{overflow:auto;padding:22px 0 26px;flex:1;tab-size:2}
+.code{
+  display:block;min-width:max-content;
+  font-family:"Fira Code",monospace;
+  font-size:clamp(13px,1vw,14.5px);line-height:2.05;
+  counter-reset:line;
+}
+.line{display:block;white-space:pre;padding-right:28px;counter-increment:line}
+.line::before{
+  content:counter(line);display:inline-block;
+  width:44px;padding-right:20px;margin-right:22px;
+  text-align:right;color:var(--gutter);
+  border-right:1px solid var(--m-divider);
+  font-size:11.5px;user-select:none;
+}
+.comment{color:var(--sy-cmt);font-style:italic}
+.keyword{color:var(--sy-kw);font-weight:600}
+.string{color:var(--sy-str)}
+.editor-note{
+  border-top:1px solid var(--m-divider);background:var(--m-inset);
+  padding:14px 22px;font-size:12.5px;color:var(--m-t3);
+}
+
+/* ---------- footer ---------- */
+footer{
+  border-top:1px solid var(--m-divider);
+  padding:26px 4.5%;display:flex;justify-content:space-between;
+  align-items:center;gap:24px;flex-wrap:wrap;
+  max-width:1440px;margin:auto;
+  font-size:13px;color:var(--m-t3);
+}
+.footer-note{display:flex;align-items:center;gap:11px}
+.footer-note .info{
+  flex:none;width:18px;height:18px;border-radius:50%;
+  border:1.5px solid var(--m-accent);color:var(--m-accent);
+  display:grid;place-items:center;font-size:11px;font-style:italic;
+}
+:root[data-theme="dark"] .footer-note .info{color:#F4B8A6}
+.footer-tag{font-family:"Fira Code",monospace;font-size:11.5px;letter-spacing:.14em;text-transform:uppercase}
+
+/* ---------- dialogs ---------- */
+dialog{
+  width:min(500px,calc(100% - 40px));
+  border:1px solid var(--m-divider);border-radius:14px;
+  background:var(--m-page);color:var(--m-t1);padding:34px;
+  box-shadow:var(--card-shadow);
+}
+dialog::backdrop{background:var(--m-scrim);backdrop-filter:blur(2px)}
+dialog h2{
+  font-family:"Newsreader",Georgia,serif;font-optical-sizing:auto;
+  font-size:27px;font-weight:500;letter-spacing:-.005em;margin:0 0 12px;
+}
+dialog p{margin:0 0 22px;color:var(--m-t2);font-size:15.5px;line-height:1.6}
+dialog .theme{
+  min-height:44px;padding:10px 26px;background:var(--m-accent);
+  border-color:var(--m-accent);color:var(--m-on-accent);
+  font-family:"Source Sans 3",sans-serif;font-size:14.5px;font-weight:600;
+  text-transform:none;letter-spacing:0;
+  transition:background .18s;
+}
+dialog .theme:hover{background:var(--m-accent-h);border-color:var(--m-accent-h)}
+
+/* ---------- motion ---------- */
+.reveal{opacity:0}
+@media (prefers-reduced-motion: no-preference){
+  .reveal{
+    animation:rise .6s cubic-bezier(.22,1,.36,1) forwards;
+    animation-delay:calc(var(--i,0) * 90ms + 120ms);
+  }
+  @keyframes rise{
+    from{opacity:0;transform:translateY(16px)}
+    to{opacity:1;transform:translateY(0)}
+  }
+}
+@media (prefers-reduced-motion: reduce){
+  .reveal{opacity:1}
+  *{transition:none!important;animation:none!important;scroll-behavior:auto}
+}
+
+/* ---------- responsive ---------- */
+@media (max-width:1020px){
+  .workspace{grid-template-columns:minmax(300px,.85fr) minmax(0,1fr);gap:36px}
+  .included{display:none}
+}
+@media (max-width:820px){
+  .workspace{grid-template-columns:1fr;gap:40px}
+  main{padding:44px 5% 40px}
+  .topbar-inner{padding:14px 5%;gap:14px}
+  .brand-name{font-size:20px}
+  .brand-sub{display:none}
+  .nav{gap:16px}
+  .included{display:inline-flex}
+  h1{max-width:none}
+  .code{font-size:12.5px}
+  .editor-top{padding:16px 14px;flex-direction:column;align-items:flex-start;gap:10px}
+  footer{flex-direction:column;align-items:flex-start;gap:12px;padding:22px 5%}
+}
+*{scrollbar-width:thin;scrollbar-color:var(--m-track) transparent}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" aria-hidden="true" style="position:absolute">
+  <symbol id="logo" viewBox="0 0 40 40">
+    <rect x="1.5" y="1.5" width="37" height="37" rx="8" fill="var(--m-accent-tint)" stroke="var(--m-accent-tint-stroke)" stroke-width="1.5"/>
+    <path d="M13 28.5 L20 11.5 L27 28.5 M16.2 23.2 h7.6" fill="none" stroke="var(--m-accent)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  </symbol>
+</svg>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <svg class="brand-mark" aria-hidden="true"><use href="#logo"/></svg>
+      <span>
+        <span class="brand-name">Server Logic</span>
+        <span class="brand-sub">Power Pages starters</span>
+      </span>
+    </div>
+    <nav class="nav" aria-label="Utility">
+      <button class="text-button" data-dialog="about">About</button>
+      <button class="text-button" data-dialog="help">Help</button>
+      <button class="theme" id="theme" aria-label="Switch to dark theme">
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg>
+        Dark
+      </button>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <p class="kicker reveal" style="--i:0">Starter generator</p>
+    <h1 class="reveal" style="--i:1">From idea to <em>server handler</em></h1>
+    <p class="intro reveal" style="--i:2">Create a starter for Power Pages server logic. Choose your settings and preview your code.</p>
+  </section>
+
+  <div class="workspace">
+    <section aria-label="Starter settings" class="settings reveal" style="--i:3">
+      <div class="field">
+        <label for="logic-name">Logic name</label>
+        <input id="logic-name" value="customer-summary" spellcheck="false" aria-describedby="name-hint">
+        <p class="hint" id="name-hint">Used for the file name and handler function.</p>
+      </div>
+      <div class="field">
+        <label for="method">HTTP method</label>
+        <select id="method" aria-describedby="method-hint">
+          <option>GET</option>
+          <option>POST</option>
+        </select>
+        <p class="hint" id="method-hint">The method this server logic will handle.</p>
+      </div>
+      <div class="field">
+        <label for="recipe">Recipe</label>
+        <select id="recipe" aria-describedby="recipe-hint">
+          <option>Read Dataverse records</option>
+          <option>Validate a request</option>
+        </select>
+        <p class="hint" id="recipe-hint">A starter outline for querying Dataverse and returning JSON.</p>
+      </div>
+
+      <section class="guidance">
+        <h2>Includes best practice guidance</h2>
+        <ul class="checks">
+          <li>
+            <span class="check-dot" aria-hidden="true">✓</span>
+            <div>
+              <strong>Browser API checks</strong>
+              <p>Guidance for calls from your Power Pages site.</p>
+            </div>
+          </li>
+          <li>
+            <span class="check-dot" aria-hidden="true">✓</span>
+            <div>
+              <strong>Input validation template</strong>
+              <p>A place to validate incoming request parameters.</p>
+            </div>
+          </li>
+          <li>
+            <span class="check-dot" aria-hidden="true">✓</span>
+            <div>
+              <strong>Permission setup checklist</strong>
+              <p>Review table permissions and web roles.</p>
+            </div>
+          </li>
+        </ul>
+        <button class="primary" id="download"><span aria-hidden="true">↓</span> Download starter</button>
+        <p class="feedback" id="feedback" role="status"></p>
+      </section>
+    </section>
+
+    <section class="editor reveal" style="--i:4" aria-label="Illustrative server handler">
+      <div class="editor-top">
+        <div class="editor-title">Server handler (customer-summary.js)</div>
+        <div class="included"><span aria-hidden="true">&lt;/&gt;</span> Client call planned</div>
+      </div>
+      <div class="code-wrap" tabindex="0" aria-label="Code outline, scroll horizontally if needed">
+        <code class="code">
+<span class="line comment">// customer-summary.js</span>
+<span class="line comment">// Illustrative outline · not executable starter code</span>
+<span class="line"> </span>
+<span class="line comment">/**</span>
+<span class="line comment"> * Return a summary of customer records.</span>
+<span class="line comment"> * Add site-specific logic before deployment.</span>
+<span class="line comment"> */</span>
+<span class="line"><span class="keyword">async function</span> get() {</span>
+<span class="line">  <span class="keyword">try</span> {</span>
+<span class="line comment">    // 1. Read and validate request parameters.</span>
+<span class="line comment">    //    Limit results and reject invalid input.</span>
+<span class="line"> </span>
+<span class="line comment">    // 2. Check the required table permissions.</span>
+<span class="line comment">    //    Confirm access for the intended web roles.</span>
+<span class="line"> </span>
+<span class="line comment">    // 3. Query Dataverse using the supported API.</span>
+<span class="line comment">    //    Replace this sample data with your query.</span>
+<span class="line">    <span class="keyword">const</span> records = [];</span>
+<span class="line"> </span>
+<span class="line comment">    // 4. Format the response for your handler.</span>
+<span class="line">    <span class="keyword">return</span> { value: records };</span>
+<span class="line">  } <span class="keyword">catch</span> (error) {</span>
+<span class="line comment">    // Log details securely; return a safe message.</span>
+<span class="line">    <span class="keyword">return</span> { message: <span class="string">"Unable to load records."</span> };</span>
+<span class="line">  }</span>
+<span class="line">}</span>
+        </code>
+      </div>
+      <div class="editor-note">Illustrative preview · settings and generation are mock only.</div>
+    </section>
+  </div>
+</main>
+
+<footer>
+  <span class="footer-note"><span class="info" aria-hidden="true">i</span>Validate generated files on your development site.</span>
+  <span class="footer-tag">Mock concept · Oxide</span>
+</footer>
+
+<dialog id="about">
+  <h2>About Server Logic</h2>
+  <p>A visual concept for a local Power Pages starter tool. Logic Inspector is planned for phase 2.</p>
+  <form method="dialog"><button class="theme">Close</button></form>
+</dialog>
+
+<dialog id="help">
+  <h2>Starter workflow</h2>
+  <p>Name your logic, choose a method and recipe, then review the server handler. This mock demonstrates the layout; it does not generate or deploy code.</p>
+  <form method="dialog"><button class="theme">Close</button></form>
+</dialog>
+
+<script>
+const themeButton=document.getElementById('theme');
+themeButton.addEventListener('click',()=>{const dark=document.documentElement.dataset.theme!=='dark';document.documentElement.dataset.theme=dark?'dark':'light';themeButton.textContent=dark?'Light':'Dark';themeButton.setAttribute('aria-label',`Switch to ${dark?'light':'dark'} theme`)});
+document.querySelectorAll('[data-dialog]').forEach(button=>button.addEventListener('click',()=>document.getElementById(button.dataset.dialog).showModal()));
+document.getElementById('download').addEventListener('click',()=>{document.getElementById('feedback').textContent='Mock only — starter generation is not connected.'});
+</script>
+
+</body></html>

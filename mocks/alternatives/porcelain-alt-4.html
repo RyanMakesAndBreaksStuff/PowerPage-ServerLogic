@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Server Logic — Glass Console</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* Glass Console — translucent aurora, dark default */
+  --bg:#050914;
+  --ink:#F1F5F9;
+  --t2:#AAB6CB;
+  --t3:#8B99B3;
+  --emerald:#34D399;
+  --on-emerald:#04150D;
+  --emerald-press:#4BE0A8;
+  --sky:#7DD3FC;
+  --focus:#7DD3FC;
+  --glass:rgba(148,163,184,.075);
+  --glass-strong:rgba(148,163,184,.12);
+  --glass-border:rgba(148,163,184,.2);
+  --glass-border-soft:rgba(148,163,184,.12);
+  --inner-highlight:inset 0 1px 0 rgba(255,255,255,.07);
+  --scrim:rgba(3,7,18,.72);
+  --shadow:0 28px 56px -28px rgba(2,8,20,.9);
+  --ring:0 0 0 4px rgba(125,211,252,.16);
+  --sy-cmt:#7C8AA5;
+  --sy-kw:#7DD3FC;
+  --sy-str:#6EE7B7;
+  --sy-num:#C4B5FD;
+  --gutter:#5A6A87;
+  --badge-bg:rgba(52,211,153,.14);
+  color-scheme:dark;
+}
+:root[data-theme="light"]{
+  --bg:#E7EEF8;
+  --ink:#0F1B33;
+  --t2:#44536F;
+  --t3:#5A6884;
+  --emerald:#0E7A5F;
+  --on-emerald:#FFFFFF;
+  --emerald-press:#0B6149;
+  --sky:#0B6EA8;
+  --focus:#0B6EA8;
+  --glass:rgba(255,255,255,.58);
+  --glass-strong:rgba(255,255,255,.76);
+  --glass-border:rgba(255,255,255,.9);
+  --glass-border-soft:rgba(15,27,51,.14);
+  --inner-highlight:inset 0 1px 0 rgba(255,255,255,.9);
+  --scrim:rgba(15,27,51,.4);
+  --shadow:0 26px 52px -30px rgba(31,58,110,.35);
+  --ring:0 0 0 4px rgba(11,110,168,.16);
+  --sy-cmt:#5F6E8C;
+  --sy-kw:#0B6EA8;
+  --sy-str:#0E7A5F;
+  --sy-num:#7A4FB5;
+  --gutter:#8492AC;
+  --badge-bg:rgba(14,122,95,.12);
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;color:var(--ink);
+  font-family:"IBM Plex Sans","Segoe UI",system-ui,sans-serif;
+  font-size:16px;line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+  background:var(--bg);
+  position:relative;min-height:100vh;
+}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--focus);outline-offset:3px;border-radius:6px}
+::selection{background:rgba(125,211,252,.35)}
+
+/* ---------- aurora mesh ---------- */
+.mesh{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.blob{position:absolute;border-radius:50%;filter:blur(90px);opacity:.55}
+:root[data-theme="light"] .blob{opacity:.5;filter:blur(80px)}
+.blob-1{width:52vw;height:52vw;left:-14vw;top:-18vw;background:radial-gradient(circle at 30% 30%,rgba(99,102,241,.5),transparent 70%)}
+.blob-2{width:44vw;height:44vw;right:-12vw;top:-6vw;background:radial-gradient(circle at 60% 40%,rgba(52,211,153,.34),transparent 70%)}
+.blob-3{width:50vw;height:50vw;right:-10vw;bottom:-22vw;background:radial-gradient(circle at 50% 50%,rgba(139,92,246,.38),transparent 70%)}
+.blob-4{width:38vw;height:38vw;left:-8vw;bottom:-12vw;background:radial-gradient(circle at 50% 50%,rgba(56,189,248,.3),transparent 70%)}
+:root[data-theme="light"] .blob-1{background:radial-gradient(circle at 30% 30%,rgba(129,140,248,.4),transparent 70%)}
+:root[data-theme="light"] .blob-2{background:radial-gradient(circle at 60% 40%,rgba(110,231,183,.45),transparent 70%)}
+:root[data-theme="light"] .blob-3{background:radial-gradient(circle at 50% 50%,rgba(196,181,253,.45),transparent 70%)}
+:root[data-theme="light"] .blob-4{background:radial-gradient(circle at 50% 50%,rgba(147,214,255,.5),transparent 70%)}
+.page{position:relative;z-index:1}
+
+/* ---------- glass panel base ---------- */
+.panel{
+  background:var(--glass);
+  -webkit-backdrop-filter:blur(18px) saturate(150%);
+  backdrop-filter:blur(18px) saturate(150%);
+  border:1px solid var(--glass-border-soft);
+  box-shadow:var(--inner-highlight),var(--shadow);
+  border-radius:18px;
+}
+@media (prefers-reduced-motion: no-preference){
+  .panel{transition:background .25s,border-color .25s}
+  .blob-1{animation:drift1 26s ease-in-out infinite alternate}
+  .blob-2{animation:drift2 31s ease-in-out infinite alternate}
+  .blob-3{animation:drift1 23s ease-in-out infinite alternate-reverse}
+  .blob-4{animation:drift2 29s ease-in-out infinite alternate-reverse}
+  @keyframes drift1{from{transform:translate(0,0) scale(1)}to{transform:translate(6vw,4vh) scale(1.12)}}
+  @keyframes drift2{from{transform:translate(0,0) scale(1)}to{transform:translate(-5vw,-5vh) scale(.92)}}
+}
+
+/* ---------- top bar ---------- */
+.topbar{
+  position:sticky;top:0;z-index:20;
+  background:var(--glass);
+  -webkit-backdrop-filter:blur(18px) saturate(150%);
+  backdrop-filter:blur(18px) saturate(150%);
+  border-bottom:1px solid var(--glass-border-soft);
+  box-shadow:var(--inner-highlight);
+}
+.topbar-inner{
+  max-width:1320px;margin:auto;padding:12px 4%;
+  display:flex;align-items:center;justify-content:space-between;gap:20px;
+}
+.brand{display:flex;align-items:center;gap:13px}
+.brand-mark{width:38px;height:38px;flex:none}
+.brand-name{
+  font-family:"Space Grotesk",sans-serif;
+  font-size:19px;font-weight:600;letter-spacing:-.02em;
+}
+.nav{display:flex;align-items:center;gap:8px}
+.text-button{
+  border:0;background:none;color:var(--t2);
+  min-height:44px;padding:8px 16px;border-radius:12px;
+  font-size:15px;font-weight:500;
+  transition:background .2s,color .2s;
+}
+.text-button:hover{background:var(--glass-strong);color:var(--ink)}
+.theme-toggle{
+  min-height:44px;padding:8px 18px 8px 14px;border-radius:12px;
+  border:1px solid var(--glass-border);
+  background:var(--glass);color:var(--ink);
+  display:inline-flex;align-items:center;gap:9px;
+  font-size:13.5px;font-weight:600;
+  transition:background .2s,border-color .2s;
+}
+.theme-toggle:hover{background:var(--glass-strong)}
+.theme-toggle svg{width:16px;height:16px;stroke:currentColor;stroke-width:2}
+
+/* ---------- hero ---------- */
+main{max-width:1320px;margin:auto;padding:76px 4% 64px}
+.hero{margin-bottom:60px}
+.kicker{
+  display:inline-flex;align-items:center;gap:9px;margin:0 0 24px;
+  padding:8px 16px;border-radius:999px;
+  border:1px solid var(--glass-border);background:var(--glass);
+  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+  font-family:"JetBrains Mono",monospace;font-size:11.5px;font-weight:500;
+  letter-spacing:.06em;color:var(--emerald);
+}
+.kicker svg{width:13px;height:13px;stroke:currentColor;stroke-width:2.4}
+h1{
+  font-family:"Space Grotesk",sans-serif;
+  font-size:clamp(42px,6vw,82px);font-weight:600;line-height:1.03;
+  letter-spacing:-.03em;margin:0 0 24px;max-width:13ch;
+}
+h1 em{font-style:normal;color:var(--sky)}
+@supports (background-clip:text) or (-webkit-background-clip:text){
+  h1 em{
+    background:linear-gradient(100deg,var(--sky),var(--emerald));
+    background-clip:text;-webkit-background-clip:text;color:transparent;
+  }
+}
+.intro{
+  font-size:clamp(16px,1.5vw,19.5px);line-height:1.65;color:var(--t2);
+  margin:0;max-width:56ch;
+}
+
+/* ---------- workspace ---------- */
+.workspace{
+  display:grid;grid-template-columns:minmax(330px,420px) minmax(0,1fr);
+  gap:clamp(24px,3vw,40px);align-items:start;
+}
+
+/* settings */
+.settings{padding:clamp(24px,2.6vw,34px);display:grid;gap:26px}
+.settings h2{
+  font-family:"Space Grotesk",sans-serif;font-size:20px;font-weight:600;
+  letter-spacing:-.015em;margin:0;
+}
+.field label{
+  display:block;margin-bottom:9px;font-size:14.5px;font-weight:600;
+}
+.field input,.field select{
+  width:100%;height:50px;padding:10px 16px;
+  border:1px solid var(--glass-border);border-radius:13px;
+  background:var(--glass-strong);color:var(--ink);font-size:16px;
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+  transition:border-color .2s,box-shadow .2s;
+}
+.field input:hover,.field select:hover{border-color:var(--focus)}
+.field input:focus,.field select:focus{
+  border-color:var(--focus);box-shadow:var(--ring);outline:none;
+}
+.field select{
+  appearance:none;cursor:pointer;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%237DD3FC' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 16px center;padding-right:42px;
+}
+:root[data-theme="light"] .field select{
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%230B6EA8' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+}
+.hint{margin:8px 0 0;font-size:13.5px;line-height:1.55;color:var(--t3)}
+
+.guidance{border-top:1px solid var(--glass-border-soft);padding-top:24px;display:grid;gap:20px}
+.checks{list-style:none;padding:0;margin:0;display:grid;gap:14px}
+.checks li{
+  display:flex;gap:15px;align-items:flex-start;
+  padding:15px 16px;border-radius:14px;
+  background:var(--glass);border:1px solid var(--glass-border-soft);
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+}
+.check-orb{
+  flex:none;width:27px;height:27px;border-radius:50%;
+  background:var(--badge-bg);color:var(--emerald);
+  border:1px solid transparent;display:grid;place-items:center;margin-top:2px;
+}
+.check-orb svg{width:14px;height:14px;stroke:currentColor;stroke-width:2.6}
+.checks strong{display:block;font-size:15px;font-weight:600}
+.checks p{margin:3px 0 0;font-size:13.5px;line-height:1.5;color:var(--t3)}
+
+.primary{
+  width:100%;min-height:54px;
+  border:0;border-radius:14px;background:var(--emerald);color:var(--on-emerald);
+  font-size:16.5px;font-weight:600;
+  display:flex;align-items:center;justify-content:center;gap:12px;
+  box-shadow:0 18px 38px -16px rgba(52,211,153,.45);
+  transition:background .2s,transform .2s,box-shadow .2s;
+}
+.primary svg{width:18px;height:18px;stroke:currentColor;stroke-width:2.2}
+.primary:hover{background:var(--emerald-press);transform:translateY(-1px);box-shadow:0 22px 44px -16px rgba(52,211,153,.55)}
+.primary:active{transform:translateY(0)}
+.feedback{min-height:22px;margin:0;font-size:14px;font-weight:500;color:var(--emerald)}
+
+/* editor */
+.editor{overflow:hidden;min-width:0;display:flex;flex-direction:column}
+.editor-top{
+  display:flex;justify-content:space-between;align-items:center;gap:14px;
+  padding:18px 22px;border-bottom:1px solid var(--glass-border-soft);
+}
+.editor-title{
+  font-family:"JetBrains Mono",monospace;font-size:13px;font-weight:500;
+  color:var(--t2);overflow-wrap:anywhere;
+}
+.included{
+  display:inline-flex;align-items:center;gap:8px;white-space:nowrap;
+  padding:8px 15px;border-radius:999px;
+  background:var(--badge-bg);color:var(--emerald);
+  border:1px solid rgba(52,211,153,.25);
+  font-family:"JetBrains Mono",monospace;font-size:11.5px;font-weight:600;
+}
+:root[data-theme="light"] .included{border-color:rgba(14,122,95,.3)}
+.included svg{width:14px;height:14px;stroke:currentColor;stroke-width:2.2}
+.code-wrap{overflow:auto;padding:20px 0 24px;flex:1;tab-size:2}
+.code{
+  display:block;min-width:max-content;
+  font-family:"JetBrains Mono",monospace;
+  font-size:clamp(13px,1vw,14.5px);line-height:2.05;
+  counter-reset:line;
+}
+.ln{display:block;white-space:pre;padding-right:28px;counter-increment:line}
+.ln::before{
+  content:counter(line);display:inline-block;
+  width:46px;padding-right:20px;margin-right:22px;
+  text-align:right;color:var(--gutter);
+  user-select:none;font-size:12px;
+}
+.c{color:var(--sy-cmt)}
+.k{color:var(--sy-kw);font-weight:600}
+.s{color:var(--sy-str)}
+.n{color:var(--sy-num)}
+.editor-note{
+  border-top:1px solid var(--glass-border-soft);
+  padding:14px 22px;font-size:13px;color:var(--t3);
+}
+
+/* ---------- footer ---------- */
+footer{
+  max-width:1320px;margin:auto;padding:26px 4% 46px;
+  display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap;
+  font-size:14px;color:var(--t2);
+}
+.footer-note{display:flex;align-items:center;gap:11px}
+.footer-note svg{width:16px;height:16px;stroke:var(--sky);stroke-width:2;flex:none}
+.footer-tag{
+  font-family:"JetBrains Mono",monospace;font-size:11.5px;
+  padding:7px 14px;border-radius:999px;
+  border:1px solid var(--glass-border);background:var(--glass);
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+}
+
+/* ---------- dialogs ---------- */
+dialog{
+  width:min(500px,calc(100% - 40px));
+  border:1px solid var(--glass-border);border-radius:20px;
+  background:var(--glass-strong);color:var(--ink);padding:34px;
+  -webkit-backdrop-filter:blur(24px) saturate(160%);
+  backdrop-filter:blur(24px) saturate(160%);
+  box-shadow:var(--inner-highlight),var(--shadow);
+}
+dialog::backdrop{background:var(--scrim);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
+dialog h2{
+  font-family:"Space Grotesk",sans-serif;font-size:26px;font-weight:600;
+  letter-spacing:-.02em;margin:0 0 12px;
+}
+dialog p{margin:0 0 26px;color:var(--t2);font-size:16px;line-height:1.6}
+dialog .close{
+  min-height:48px;padding:11px 30px;border:0;border-radius:13px;
+  background:var(--emerald);color:var(--on-emerald);
+  font-weight:600;font-size:15.5px;
+  transition:background .2s,transform .2s;
+}
+dialog .close:hover{background:var(--emerald-press);transform:translateY(-1px)}
+
+/* ---------- motion ---------- */
+.reveal{opacity:0}
+@media (prefers-reduced-motion: no-preference){
+  .reveal{
+    animation:float-in .55s cubic-bezier(.22,1,.36,1) forwards;
+    animation-delay:calc(var(--i,0) * 95ms + 130ms);
+  }
+  @keyframes float-in{
+    from{opacity:0;transform:translateY(20px) scale(.985)}
+    to{opacity:1;transform:translateY(0) scale(1)}
+  }
+}
+@media (prefers-reduced-motion: reduce){
+  .reveal{opacity:1}
+  *{transition:none!important;animation:none!important}
+}
+
+/* ---------- responsive ---------- */
+@media (max-width:1020px){
+  .workspace{grid-template-columns:minmax(300px,.8fr) minmax(0,1fr);gap:28px}
+  .included{display:none}
+}
+@media (max-width:840px){
+  .workspace{grid-template-columns:1fr;gap:28px}
+  main{padding:52px 5% 48px}
+  .topbar-inner{padding:12px 5%;gap:12px}
+  .brand-name{font-size:17px}
+  .nav{gap:2px}
+  .text-button{padding:8px 12px}
+  .theme-toggle{padding:8px 14px 8px 12px}
+  .included{display:inline-flex}
+  h1{max-width:none}
+  .code{font-size:12.5px}
+  .editor-top{padding:16px 14px;flex-direction:column;align-items:flex-start;gap:10px}
+  footer{flex-direction:column;align-items:flex-start;gap:14px;padding:22px 5% 36px}
+  .blob{filter:blur(60px)}
+}
+*{scrollbar-width:thin;scrollbar-color:var(--glass-border) transparent}
+</style>
+</head>
+<body>
+
+<div class="mesh" aria-hidden="true">
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+  <div class="blob blob-4"></div>
+</div>
+<div class="page">
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 38 38" aria-hidden="true">
+        <defs>
+          <linearGradient id="bm" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="var(--sky)"/>
+            <stop offset="1" stop-color="var(--emerald)"/>
+          </linearGradient>
+        </defs>
+        <rect x="3" y="3" width="32" height="32" rx="10" fill="none" stroke="url(#bm)" stroke-width="2.4"/>
+        <path d="M14 24V14l10 10V14" fill="none" stroke="url(#bm)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span class="brand-name">Server Logic</span>
+    </div>
+    <nav class="nav" aria-label="Utility">
+      <button class="text-button" data-dialog="about">About</button>
+      <button class="text-button" data-dialog="help">Help</button>
+      <button class="theme-toggle" id="theme" aria-label="Switch to light theme">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.6 4.6l2.1 2.1M17.3 17.3l2.1 2.1M19.4 4.6l-2.1 2.1M6.7 17.3l-2.1 2.1"/></svg>
+        <span id="theme-label">Light</span>
+      </button>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <p class="kicker reveal" style="--i:0">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 12.5l5.5 5.5L20 6.5"/></svg>
+      Power Pages starter console
+    </p>
+    <h1 class="reveal" style="--i:1">From idea to <em>server handler</em></h1>
+    <p class="intro reveal" style="--i:2">Create a starter for Power Pages server logic. Choose your settings and preview your code.</p>
+  </section>
+
+  <div class="workspace">
+    <section aria-label="Starter settings" class="settings panel reveal" style="--i:3">
+      <h2>Starter settings</h2>
+
+      <div class="field">
+        <label for="logic-name">Logic name</label>
+        <input id="logic-name" value="customer-summary" spellcheck="false" aria-describedby="name-hint">
+        <p class="hint" id="name-hint">Used for the file name and handler function.</p>
+      </div>
+
+      <div class="field">
+        <label for="method">HTTP method</label>
+        <select id="method" aria-describedby="method-hint">
+          <option>GET</option><option>POST</option>
+        </select>
+        <p class="hint" id="method-hint">The method this server logic will handle.</p>
+      </div>
+
+      <div class="field">
+        <label for="recipe">Recipe</label>
+        <select id="recipe" aria-describedby="recipe-hint">
+          <option>Read Dataverse records</option><option>Validate a request</option>
+        </select>
+        <p class="hint" id="recipe-hint">A starter outline for querying Dataverse and returning JSON.</p>
+      </div>
+
+      <section class="guidance">
+        <h2>Includes best practice guidance</h2>
+        <ul class="checks">
+          <li>
+            <span class="check-orb" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12.5l5.5 5.5L20 6.5"/></svg></span>
+            <div><strong>Browser API checks</strong><p>Guidance for calls from your Power Pages site.</p></div>
+          </li>
+          <li>
+            <span class="check-orb" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12.5l5.5 5.5L20 6.5"/></svg></span>
+            <div><strong>Input validation template</strong><p>A place to validate incoming request parameters.</p></div>
+          </li>
+          <li>
+            <span class="check-orb" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12.5l5.5 5.5L20 6.5"/></svg></span>
+            <div><strong>Permission setup checklist</strong><p>Review table permissions and web roles.</p></div>
+          </li>
+        </ul>
+        <button class="primary" id="download">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3v12m0 0l-4.5-4.5M12 15l4.5-4.5M4 20h16"/></svg>
+          Download starter
+        </button>
+        <p class="feedback" id="feedback" role="status"></p>
+      </section>
+    </section>
+
+    <section class="editor panel reveal" style="--i:4" aria-label="Illustrative server handler">
+      <div class="editor-top">
+        <div class="editor-title">Server handler (customer-summary.js)</div>
+        <div class="included">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 6l-6 6 6 6M16 6l6 6-6 6"/></svg>
+          Client call planned
+        </div>
+      </div>
+      <div class="code-wrap" tabindex="0" aria-label="Code outline, scroll horizontally if needed">
+        <code class="code"><span class="ln c">// customer-summary.js</span><span class="ln c">// Illustrative outline · not executable starter code</span><span class="ln"> </span><span class="ln c">/**</span><span class="ln c"> * Return a summary of customer records.</span><span class="ln c"> * Add site-specific logic before deployment.</span><span class="ln c"> */</span><span class="ln"><span class="k">async function</span> get() {</span><span class="ln">  <span class="k">try</span> {</span><span class="ln c">    // 1. Read and validate request parameters.</span><span class="ln c">    //    Limit results and reject invalid input.</span><span class="ln"> </span><span class="ln c">    // 2. Check the required table permissions.</span><span class="ln c">    //    Confirm access for the intended web roles.</span><span class="ln"> </span><span class="ln c">    // 3. Query Dataverse using the supported API.</span><span class="ln c">    //    Replace this sample data with your query.</span><span class="ln">    <span class="k">const</span> records = [];</span><span class="ln"> </span><span class="ln c">    // 4. Format the response for your handler.</span><span class="ln">    <span class="k">return</span> { value: records };</span><span class="ln">  } <span class="k">catch</span> (error) {</span><span class="ln c">    // Log details securely; return a safe message.</span><span class="ln">    <span class="k">return</span> { message: <span class="s">"Unable to load records."</span> };</span><span class="ln">  }</span><span class="ln">}</span></code>
+      </div>
+      <div class="editor-note">Illustrative preview — settings and generation are mock only.</div>
+    </section>
+  </div>
+</main>
+
+<footer>
+  <span class="footer-note">
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M12 11v5.5M12 7.6v.2"/></svg>
+    Validate generated files on your development site.
+  </span>
+  <span class="footer-tag">Mock concept · Glass Console</span>
+</footer>
+
+</div>
+
+<dialog id="about">
+  <h2>About Server Logic</h2>
+  <p>A visual concept for a local Power Pages starter tool. Logic Inspector is planned for phase 2.</p>
+  <form method="dialog"><button class="close">Close</button></form>
+</dialog>
+
+<dialog id="help">
+  <h2>Starter workflow</h2>
+  <p>Name your logic, choose a method and recipe, then review the server handler. This mock demonstrates the layout; it does not generate or deploy code.</p>
+  <form method="dialog"><button class="close">Close</button></form>
+</dialog>
+
+<script>
+const themeButton = document.getElementById('theme');
+const themeLabel = document.getElementById('theme-label');
+themeButton.addEventListener('click', () => {
+  const dark = document.documentElement.dataset.theme !== 'dark';
+  document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+  themeLabel.textContent = dark ? 'Light' : 'Dark';
+  themeButton.setAttribute('aria-label', `Switch to ${dark ? 'light' : 'dark'} theme`);
+});
+document.querySelectorAll('[data-dialog]').forEach(button =>
+  button.addEventListener('click', () => document.getElementById(button.dataset.dialog).showModal())
+);
+document.getElementById('download').addEventListener('click', () => {
+  document.getElementById('feedback').textContent = 'Mock only — starter generation is not connected.';
+});
+</script>
+
+</body>
+</html>

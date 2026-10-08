@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Server Logic — Alt 4 · Aurora</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EAF0F7;
+  --panel:rgba(255,255,255,.62); --panel-solid:#FFFFFF; --panel-soft:rgba(255,255,255,.45);
+  --border:rgba(255,255,255,.85); --border-soft:rgba(120,140,180,.22);
+  --t1:#1D2436; --t2:#4A5468; --muted:#5F6A80;
+  --accent:#6C5CE7; --accent-2:#0FA3A3; --on-accent:#FFFFFF;
+  --accent-tint:rgba(108,92,231,.10); --accent-border:rgba(108,92,231,.35);
+  --ok:#0E6B4C; --ok-tint:rgba(18,133,95,.12); --ok-border:rgba(18,133,95,.35);
+  --err:#C3392F; --err-tint:rgba(195,57,47,.10);
+  --focus:#6C5CE7;
+  --code-bg:rgba(255,255,255,.72);
+  --c-comment:#5E6875; --c-key:#7C5CD6; --c-str:#8A55C0; --c-num:#0E7C86; --c-fn:#1D2436;
+  --shadow:0 18px 50px -22px rgba(38,48,90,.35);
+  --blur:saturate(1.5) blur(22px);
+  color-scheme:light;
+}
+:root[data-theme="dark"]{
+  --bg:#0C101E;
+  --panel:rgba(24,29,48,.62); --panel-solid:#181D30; --panel-soft:rgba(24,29,48,.42);
+  --border:rgba(160,175,215,.22); --border-soft:rgba(160,175,215,.14);
+  --t1:#EDF0FA; --t2:#B9C1D9; --muted:#8B94AE;
+  --accent:#9D8CFF; --accent-2:#45D0C5; --on-accent:#14102B;
+  --accent-tint:rgba(157,140,255,.14); --accent-border:rgba(157,140,255,.45);
+  --ok:#4FD5A5; --ok-tint:rgba(79,213,165,.13); --ok-border:rgba(79,213,165,.4);
+  --err:#FF9088; --err-tint:rgba(255,144,136,.14);
+  --focus:#9D8CFF;
+  --code-bg:rgba(14,18,32,.6);
+  --c-comment:#7C8499; --c-key:#B7A5FF; --c-str:#CFA9FF; --c-num:#5FD8CE; --c-fn:#EDF0FA;
+  --shadow:0 22px 60px -24px rgba(0,0,0,.7);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--bg); color:var(--t1);
+  font-family:"Segoe UI","Segoe UI Variable Text",system-ui,sans-serif;
+  font-size:15px; line-height:1.55; min-height:100vh;
+}
+.mono{font-family:"JetBrains Mono",Consolas,monospace}
+a{color:var(--accent); text-decoration-thickness:1.5px; text-underline-offset:3px}
+:focus-visible{outline:2.5px solid var(--focus); outline-offset:3px; border-radius:8px}
+button{font:inherit; cursor:pointer}
+input,select{font:inherit}
+svg{display:block}
+
+/* ---------- aurora mesh ---------- */
+.mesh{position:fixed; inset:0; z-index:0; overflow:hidden; pointer-events:none}
+.blob{position:absolute; border-radius:50%; filter:blur(90px); opacity:.55}
+:root[data-theme="light"] .blob{opacity:.5}
+.blob-1{width:56vw; height:56vw; background:radial-gradient(circle,#B9C6FF 0%,transparent 68%); top:-18vw; left:-12vw}
+.blob-2{width:46vw; height:46vw; background:radial-gradient(circle,#C8F3EC 0%,transparent 68%); top:26vh; right:-14vw}
+.blob-3{width:40vw; height:40vw; background:radial-gradient(circle,#F3D9E8 0%,transparent 68%); bottom:-16vw; left:22vw}
+:root[data-theme="dark"] .blob-1{background:radial-gradient(circle,#3D3587 0%,transparent 68%)}
+:root[data-theme="dark"] .blob-2{background:radial-gradient(circle,#17554F 0%,transparent 68%)}
+:root[data-theme="dark"] .blob-3{background:radial-gradient(circle,#5C2A4E 0%,transparent 68%)}
+@media (prefers-reduced-motion:no-preference){
+  @keyframes drift1{0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(4vw,3vh) scale(1.06)}}
+  @keyframes drift2{0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(-3vw,-4vh) scale(1.08)}}
+  @keyframes drift3{0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(3vw,-3vh) scale(.95)}}
+  .blob-1{animation:drift1 26s ease-in-out infinite}
+  .blob-2{animation:drift2 32s ease-in-out infinite}
+  .blob-3{animation:drift3 38s ease-in-out infinite}
+}
+
+.wrap{position:relative; z-index:1; max-width:1180px; margin:0 auto; padding:18px clamp(16px,4vw,36px) 40px}
+
+/* ---------- floating pill topbar ---------- */
+.topbar{
+  display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+  background:var(--panel); backdrop-filter:var(--blur); -webkit-backdrop-filter:var(--blur);
+  border:1px solid var(--border); border-radius:999px; padding:10px 12px 10px 18px;
+  box-shadow:var(--shadow); position:sticky; top:12px; z-index:10;
+}
+.brand{display:flex; align-items:center; gap:11px; font-weight:600; font-size:15.5px; letter-spacing:-.01em}
+.brand-mark{
+  width:32px; height:32px; border-radius:10px; flex:none;
+  background:linear-gradient(135deg,var(--accent),var(--accent-2)); color:var(--on-accent);
+  display:grid; place-items:center; box-shadow:0 6px 16px -6px var(--accent);
+}
+.top-links{margin-left:auto; display:flex; align-items:center; gap:6px}
+.link-btn{
+  min-height:40px; padding:8px 14px; border:1px solid transparent; border-radius:999px;
+  background:none; color:var(--t2); font-size:13.5px;
+}
+.link-btn:hover{background:var(--accent-tint); color:var(--t1); border-color:var(--accent-border)}
+.theme{
+  min-height:40px; padding:8px 15px; border-radius:999px; border:1px solid var(--border);
+  background:var(--panel-soft); color:var(--t1); font-size:13.5px;
+  display:inline-flex; align-items:center; gap:8px;
+}
+.theme:hover{border-color:var(--accent-border); color:var(--accent)}
+
+/* ---------- hero ---------- */
+.hero{text-align:center; padding:clamp(44px,8vw,96px) 8px clamp(30px,5vw,52px)}
+.badge{
+  display:inline-flex; align-items:center; gap:9px; font-family:"JetBrains Mono",monospace;
+  font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--t2);
+  background:var(--panel); border:1px solid var(--border); border-radius:999px;
+  padding:7px 15px; backdrop-filter:var(--blur); -webkit-backdrop-filter:var(--blur);
+}
+.badge .dot{width:7px; height:7px; border-radius:50%; background:var(--accent-2)}
+h1{
+  margin:22px 0 0; font-size:clamp(34px,5.4vw,64px); line-height:1.06; font-weight:700; letter-spacing:-.03em;
+  max-width:18ch; margin-inline:auto;
+}
+h1 .grad{
+  background:linear-gradient(100deg,var(--accent),var(--accent-2));
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+}
+.lede{margin:18px auto 0; color:var(--t2); font-size:clamp(15px,1.4vw,18px); max-width:52ch}
+
+/* ---------- workspace: overlapping frosted cards ---------- */
+.workspace{
+  display:grid; grid-template-columns:minmax(320px,.95fr) minmax(0,1.15fr);
+  gap:clamp(18px,2.6vw,30px); align-items:start; padding-bottom:10px;
+}
+.card{
+  background:var(--panel); backdrop-filter:var(--blur); -webkit-backdrop-filter:var(--blur);
+  border:1px solid var(--border); border-radius:22px; box-shadow:var(--shadow);
+}
+.lift{transform:translateY(-16px)}
+.card-head{display:flex; justify-content:space-between; align-items:center; gap:12px; padding:18px 22px 0}
+.kicker{font-family:"JetBrains Mono",monospace; font-size:10.5px; letter-spacing:.2em; text-transform:uppercase; color:var(--muted)}
+.card-head h2{margin:4px 0 0; font-size:18px; font-weight:650; letter-spacing:-.01em}
+.card-body{padding:16px 22px 22px}
+
+/* form */
+.field{margin-bottom:16px}
+.field:last-child{margin-bottom:0}
+label{display:block; font-size:12px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--t2); margin-bottom:7px}
+input,select{
+  width:100%; min-height:46px; padding:11px 14px; border-radius:12px;
+  border:1px solid var(--border-soft); background:var(--panel-soft); color:var(--t1); font-size:15px;
+}
+input:hover,select:hover{border-color:var(--accent-border)}
+select{appearance:none; background-image:linear-gradient(45deg,transparent 50%,var(--t2) 50%),linear-gradient(135deg,var(--t2) 50%,transparent 50%); background-position:calc(100% - 20px) 50%,calc(100% - 14px) 50%; background-size:6px 6px; background-repeat:no-repeat; padding-right:38px}
+.hint{margin:7px 0 0; font-size:12px; color:var(--muted)}
+.field-error{margin:7px 0 0; font-size:12px; color:var(--err); display:none}
+.field-wrap.has-error .field-error{display:block}
+[aria-invalid="true"]{border-color:var(--err); background:var(--err-tint)}
+
+/* guidance */
+.guidance{margin:20px 0 0; padding-top:18px; border-top:1px solid var(--border-soft)}
+.guidance h3{margin:0; font-size:12px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--t2)}
+.checks{list-style:none; margin:12px 0 0; padding:0; display:grid; gap:11px}
+.checks li{display:flex; gap:12px; align-items:flex-start}
+.check{
+  flex:none; width:22px; height:22px; border-radius:8px; background:var(--ok-tint); color:var(--ok);
+  border:1px solid var(--ok-border); display:grid; place-items:center; margin-top:1px;
+}
+.checks strong{display:block; font-size:14px}
+.checks p{margin:1px 0 0; font-size:12px; color:var(--muted)}
+.primary{
+  width:100%; margin-top:20px; min-height:52px; border:none; border-radius:14px;
+  background:linear-gradient(100deg,var(--accent),var(--accent-2)); color:var(--on-accent);
+  font-weight:650; font-size:15.5px; letter-spacing:.01em;
+  display:flex; align-items:center; justify-content:center; gap:12px;
+  box-shadow:0 12px 28px -10px var(--accent);
+}
+.primary:hover{filter:brightness(1.07)}
+.primary:active{transform:translateY(1px)}
+.feedback{min-height:20px; margin:10px 0 0; text-align:center; font-size:12px; color:var(--muted); font-family:"JetBrains Mono",monospace}
+
+/* editor card */
+.editor{display:flex; flex-direction:column; min-width:0; overflow:hidden}
+.editor-head{display:flex; justify-content:space-between; align-items:center; gap:12px; padding:16px 22px 14px; flex-wrap:wrap}
+.editor-file{font-family:"JetBrains Mono",monospace; font-size:12.5px; color:var(--t2); overflow-wrap:anywhere}
+.plan-chip{
+  display:inline-flex; align-items:center; gap:7px; border-radius:999px;
+  border:1px solid var(--ok-border); background:var(--ok-tint); color:var(--ok);
+  font-family:"JetBrains Mono",monospace; font-size:10px; letter-spacing:.12em; text-transform:uppercase;
+  padding:5px 11px; white-space:nowrap;
+}
+.code-wrap{overflow:auto; border-top:1px solid var(--border-soft); background:var(--code-bg); padding:16px 0 20px}
+.code{
+  display:block; margin:0; min-width:max-content; counter-reset:line;
+  font-family:"JetBrains Mono",Consolas,monospace; font-size:clamp(12px,.95vw,14px); line-height:1.9;
+}
+.line{display:block; white-space:pre; padding-right:26px; counter-increment:line}
+.line::before{
+  content:counter(line); display:inline-block; width:42px; padding-right:15px; margin-right:15px;
+  text-align:right; color:var(--muted); opacity:.55; user-select:none; border-right:1px solid var(--border-soft);
+}
+.comment{color:var(--c-comment)} .keyword{color:var(--c-key)}
+.string{color:var(--c-str)} .number{color:var(--c-num)}
+.editor-foot{padding:12px 22px 16px; border-top:1px solid var(--border-soft); font-size:12px; color:var(--muted); display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+.editor-foot svg{flex:none}
+
+/* ---------- footer ---------- */
+footer{
+  margin-top:26px; border-radius:18px;
+  background:var(--panel); backdrop-filter:var(--blur); -webkit-backdrop-filter:var(--blur);
+  border:1px solid var(--border); box-shadow:var(--shadow);
+  padding:16px 22px; display:flex; justify-content:space-between; align-items:center; gap:16px; flex-wrap:wrap;
+}
+.foot-note{display:flex; align-items:center; gap:10px; font-size:12.5px; color:var(--t2)}
+.foot-note svg{flex:none; color:var(--accent-2)}
+.concepts{display:flex; gap:7px; flex-wrap:wrap}
+.concepts a{
+  font-family:"JetBrains Mono",monospace; font-size:10.5px; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--t2); text-decoration:none; border:1px solid var(--border-soft); border-radius:999px;
+  padding:12px 13px; min-height:44px; display:inline-flex; align-items:center; background:var(--panel-soft);
+}
+.concepts a:hover{border-color:var(--accent-border); color:var(--accent)}
+.concepts a[aria-current]{background:linear-gradient(100deg,var(--accent),var(--accent-2)); color:var(--on-accent); border-color:transparent}
+
+/* staggered entrance */
+@media (prefers-reduced-motion:no-preference){
+  @keyframes rise{from{opacity:0; transform:translateY(22px)} to{opacity:1; transform:none}}
+  .hero > *,.card,footer{animation:rise .55s cubic-bezier(.2,.65,.25,1) both}
+  .hero > *:nth-child(2){animation-delay:.08s}
+  .hero > *:nth-child(3){animation-delay:.16s}
+  .workspace .card:first-child{animation-delay:.1s}
+  .workspace .card:nth-child(2){animation-delay:.18s}
+  footer{animation-delay:.26s}
+  .link-btn,.theme,.primary,.concepts a{transition:background-color .18s ease,color .18s ease,border-color .18s ease,filter .18s ease}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation:none !important; transition:none !important}
+  .lift{transform:none}
+}
+
+/* responsive */
+@media (max-width:920px){
+  .workspace{grid-template-columns:1fr}
+  .lift{transform:none}
+  .topbar{position:static; border-radius:22px; padding:12px 16px}
+  .top-links{margin-left:0}
+}
+@media (max-width:560px){
+  .hero{padding:38px 4px 30px}
+  .code-wrap{max-height:68vh}
+  .card-head{padding:16px 18px 0}
+  .card-body{padding:14px 18px 18px}
+  .editor-head{padding:14px 18px 12px}
+  .brand{font-size:14.5px}
+  .badge{font-size:10px}
+}
+</style>
+</head>
+<body>
+
+<div class="mesh" aria-hidden="true">
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+</div>
+
+<div class="wrap">
+
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M8 4H6a2 2 0 0 0-2 2v3a2 2 0 0 1-2 2 2 2 0 0 1 2 2v3a2 2 0 0 0 2 2h2M16 4h2a2 2 0 0 1 2 2v3a2 2 0 0 0 2 2 2 2 0 0 0-2 2v3a2 2 0 0 1-2 2h-2"/></svg>
+      </span>
+      Server Logic
+    </div>
+    <div class="top-links">
+      <span class="badge"><span class="dot" aria-hidden="true"></span>local mock</span>
+      <button class="theme" type="button" id="theme" aria-pressed="false">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z"/></svg>
+        Dark
+      </button>
+    </div>
+  </header>
+
+  <section class="hero" aria-labelledby="page-title">
+    <span class="badge"><span class="dot" aria-hidden="true"></span>Power Pages starter tool</span>
+    <h1 id="page-title">From idea to <span class="grad">server handler</span></h1>
+    <p class="lede">Create a starter for Power Pages server logic. Choose your settings, preview your code, and take it from there.</p>
+  </section>
+
+  <div class="workspace">
+    <section class="card" aria-label="Starter settings">
+      <div class="card-head">
+        <div>
+          <p class="kicker">Step 1 · Configure</p>
+          <h2>Starter settings</h2>
+        </div>
+      </div>
+      <form class="card-body" id="starter-form" novalidate>
+        <div class="field field-wrap" id="wrap-name">
+          <label for="logic-name">Logic name</label>
+          <input id="logic-name" value="customer-summary" spellcheck="false" autocomplete="off" aria-describedby="name-hint name-error">
+          <p class="hint" id="name-hint">Used for the file name and handler function.</p>
+          <p class="field-error" id="name-error">Lowercase letters, numbers, and dashes only. Start with a letter.</p>
+        </div>
+        <div class="field">
+          <label for="method">HTTP method</label>
+          <select id="method" aria-describedby="method-hint">
+            <option value="get">GET · read</option>
+            <option value="post">POST · submit</option>
+          </select>
+          <p class="hint" id="method-hint">The method this server logic will handle.</p>
+        </div>
+        <div class="field">
+          <label for="recipe">Recipe</label>
+          <select id="recipe" aria-describedby="recipe-hint">
+            <option>Read Dataverse records</option>
+            <option>Validate a request</option>
+          </select>
+          <p class="hint" id="recipe-hint">A starter outline for querying Dataverse and returning JSON.</p>
+        </div>
+
+        <section class="guidance" aria-labelledby="guidance-title">
+          <h3 id="guidance-title">Best practice guidance included</h3>
+          <ul class="checks">
+            <li>
+              <span class="check" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M4 12.5 9.5 18 20 6"/></svg></span>
+              <div><strong>Browser API checks</strong><p>Guidance for calls from your Power Pages site.</p></div>
+            </li>
+            <li>
+              <span class="check" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M4 12.5 9.5 18 20 6"/></svg></span>
+              <div><strong>Input validation template</strong><p>A place to validate incoming request parameters.</p></div>
+            </li>
+            <li>
+              <span class="check" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M4 12.5 9.5 18 20 6"/></svg></span>
+              <div><strong>Permission setup checklist</strong><p>Review table permissions and web roles.</p></div>
+            </li>
+          </ul>
+          <button class="primary" type="submit" id="download">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M4 21h16"/></svg>
+            Download starter
+          </button>
+          <p class="feedback" id="feedback" role="status" aria-live="polite"></p>
+        </section>
+      </form>
+    </section>
+
+    <section class="card editor lift" aria-label="Illustrative server handler">
+      <div class="editor-head">
+        <p class="editor-file">Server handler (<span id="file-name">customer-summary</span>.js)</p>
+        <span class="plan-chip">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M8 4H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h3M16 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3"/></svg>
+          Client call planned
+        </span>
+      </div>
+      <div class="code-wrap" tabindex="0" aria-label="Code outline, scroll horizontally if needed">
+        <code class="code"><span class="line comment">// <span id="code-name">customer-summary</span>.js</span><span class="line comment">// Illustrative outline · not executable starter code</span><span class="line"> </span><span class="line comment">/**</span><span class="line comment"> * Return a summary of customer records.</span><span class="line comment"> * Add site-specific logic before deployment.</span><span class="line comment"> */</span><span class="line"><span class="keyword">async function</span> <span class="number" id="code-method">get</span>() {</span><span class="line">  <span class="keyword">try</span> {</span><span class="line comment">    // 1. Read and validate request parameters.</span><span class="line comment">    //    Limit results and reject invalid input.</span><span class="line"> </span><span class="line comment">    // 2. Check the required table permissions.</span><span class="line comment">    //    Confirm access for the intended web roles.</span><span class="line"> </span><span class="line comment">    // 3. Query Dataverse using the supported API.</span><span class="line comment">    //    Replace this sample data with your query.</span><span class="line">    <span class="keyword">const</span> records = [];</span><span class="line"> </span><span class="line comment">    // 4. Format the response for your handler.</span><span class="line">    <span class="keyword">return</span> { value: records };</span><span class="line">  } <span class="keyword">catch</span> (error) {</span><span class="line comment">    // Log details securely; return a safe message.</span><span class="line">    <span class="keyword">return</span> { message: <span class="string">"Unable to load records."</span> };</span><span class="line">  }</span><span class="line">}</span></code>
+      </div>
+      <p class="editor-foot">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M12 11v5" stroke-linecap="round"/></svg>
+        Illustrative outline — validate generated files on your development site.
+      </p>
+    </section>
+  </div>
+
+  <footer>
+    <span class="foot-note">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 12.5 9.5 18 20 6"/></svg>
+      Mock concept · no tenant connection
+    </span>
+    <nav class="concepts" aria-label="Compare proto-2 concepts">
+      <a href="proto2-alt-1.html">Alt 1 · Sheet</a>
+      <a href="proto2-alt-2.html">Alt 2 · Console</a>
+      <a href="proto2-alt-3.html">Alt 3 · Notes</a>
+      <a href="proto2-alt-4.html" aria-current="page">Alt 4 · Aurora</a>
+    </nav>
+  </footer>
+
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const nameInput = $('logic-name'), method = $('method'), recipe = $('recipe');
+const valid = (v) => /^[a-z][a-z0-9-]*$/.test(v.trim());
+
+const themeButton = $('theme');
+themeButton.addEventListener('click', () => {
+  const dark = document.documentElement.dataset.theme !== 'dark';
+  document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+  themeButton.textContent = dark ? 'Light' : 'Dark';
+  themeButton.setAttribute('aria-pressed', String(dark));
+  themeButton.setAttribute('aria-label', dark ? 'Switch to light theme' : 'Switch to dark theme');
+});
+
+const syncCode = () => {
+  const name = nameInput.value.trim() || 'untitled';
+  $('file-name').textContent = name;
+  $('code-name').textContent = name;
+  $('code-method').textContent = method.value;
+};
+nameInput.addEventListener('input', syncCode);
+method.addEventListener('change', syncCode);
+recipe.addEventListener('change', () => {
+  $('recipe-hint').textContent = recipe.value === 'Validate a request'
+    ? 'A starter outline for checking inputs and rejecting bad requests.'
+    : 'A starter outline for querying Dataverse and returning JSON.';
+});
+
+nameInput.addEventListener('blur', () => {
+  const bad = !valid(nameInput.value);
+  nameInput.setAttribute('aria-invalid', bad ? 'true' : 'false');
+  $('wrap-name').classList.toggle('has-error', bad);
+});
+
+$('starter-form').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const bad = !valid(nameInput.value);
+  nameInput.setAttribute('aria-invalid', bad ? 'true' : 'false');
+  $('wrap-name').classList.toggle('has-error', bad);
+  if (bad) {
+    nameInput.focus();
+    $('feedback').textContent = 'Fix the logic name before downloading.';
+    return;
+  }
+  $('feedback').textContent = 'Mock only — starter generation is not connected.';
+});
+
+syncCode();
+</script>
+</body>
+</html>
