@@ -12,17 +12,18 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Where things are
 
-- `docs/specs/001-server-logic-starter-inspector/spec.md` is the source of truth (v0.6.0). Its FRs, ACs, recipe table (R1–R10), numbered Learn corrections and spikes S1–S4 govern behaviour. `review.md` sits next to it.
-- `design_handoff_server_logic_tools/` holds the high-fidelity design: README plus `reference/01–05` (static HTML). Colours, type, spacing, radii and copy are final. `06-interactive-prototype.dc.html` is an **older layout**, so use it for behaviour only (state, toggles, export dialog), not visuals. It needs `support.js` in the same folder.
+- `docs/specs/001-server-logic-starter-inspector/spec.md` is the source of truth (v0.7.0). Its FRs, ACs, recipe table (R1–R10), numbered Learn corrections and spikes S1–S4 govern behaviour. `review.md` sits next to it.
+- **Layout 10a** in `design_handoff_server_logic_tools/Logic Tooling Design Directions/design_handoff_server_logic_tools/` is the high-fidelity design for the shell, Logic Starter, Server Objects, Logic Inspector and all UI tokens (README plus `reference/01–06`, light and dark). Its recipe list is **not** adopted: the spec's R1–R10 stand.
+- The original `design_handoff_server_logic_tools/` README §05 still governs **report** styling. Its other references are superseded by 10a. `06-interactive-prototype.dc.html` is an **older layout**, so use it for behaviour only (state, toggles, export dialog), not visuals. It needs `support.js` in the same folder.
 - `mocks/` contains visual explorations. They are reference only, not production code.
-- The root review files (`sol-review.md`, `Opus-review-of-Sol-review.md`, `Opus_*debate*.md`) are the review debate behind spec v0.6.0. The spec appendix records how each of the 59 findings (F01–F59) was resolved.
+- The root review files (`sol-review.md`, `Opus-review-of-Sol-review.md`, `Opus_*debate*.md`) are the review debate behind spec v0.6.0 and v0.7.0. The spec appendix records how each of the 59 findings (F01–F59) was resolved.
 - `.claude/memory/foundation.md` holds the mission and principles. `.claude/rules/*.md` holds the stack rules, and `pptb-host-and-output.md` is the critical one.
 
 ## Standing product rules (from the design handoff)
 
 - Always show all five HTTP methods: `GET`, `POST`, `PUT`, `PATCH`, `DELETE`.
 - Reports export to **Markdown and PDF only**, for two scopes: **This file** and **Site summary**. There is no JSON export.
-- Readiness colours: blue `#5aa9ff` means configured or OK, and orange `#ffa24a` means needs review. The segmented progress ring is the main readiness visual everywhere.
+- Two themes follow the host theme, with no in-tool toggle. Readiness colours: in dark, blue `#5aa9ff` means configured or OK and orange `#ffa24a` means needs review; reports use README §05's blue and orange with the spec's A8 adjustments; in light, ink `#111111` means OK and red `#c0261d` means needs review. Every status also carries a `✓`/`!` glyph and a word. The segmented progress ring is the main readiness visual everywhere.
 - The Inspector reviews configuration only. Every report says so and states that the tenant outbound policy is **not verified**.
 - The tool is read-only toward the environment. Starter only produces downloads, and Inspector only reads.
 
