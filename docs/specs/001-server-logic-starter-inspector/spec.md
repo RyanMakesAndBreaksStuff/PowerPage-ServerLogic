@@ -1,9 +1,9 @@
 # Feature 001: Power Pages Server Logic — Logic Starter & Logic Inspector
 
-**Status:** Draft
-**Version:** 0.7.0
+**Status:** Approved
+**Version:** 1.0.0
 **Created:** 2026-10-06
-**Updated:** 2026-10-08
+**Updated:** 2026-10-14
 **Branch:** `001-server-logic-starter-inspector`
 **Design source:** layout 10a, `design_handoff_server_logic_tools/Logic Tooling Design Directions/design_handoff_server_logic_tools/` (README + references 01–06, light and dark), for the shell, Logic Starter, Server Objects, Logic Inspector and all UI tokens. Report styling still follows the original handoff's README §05 (`design_handoff_server_logic_tools/README.md`). High fidelity: colours, type, spacing and copy are final except where this spec overrides them (recipe list, A8, F38 labels).
 
@@ -20,6 +20,7 @@
 | 0.5.0 | 2026-10-07 | Fixes from the second spec review (`001-server-logic-starter-inspector-review.md`), cross-checked against Learn and Microsoft's `power-platform-skills` plugin. **Corrections:** 8 rewritten (the envelope is lowercase: `success`, `data`), 11 rewritten (generated handlers accept a connector result as a string or an object), 14 extended (the runtime regex `with\s*\(` matches inside strings), and 19 added (Dataverse connector methods are synchronous). **FR-3:** a recipe contract table (inputs, validation, return shape, access type, logical and entity set names, whether Liquid is supported), and fail-closed handling of a missing site setting. **FR-4:** a general whitespace rule, `import … from`, and T15–T17. **FR-7:** facts from the enhanced data model are now verified on Learn; S1 is narrowed and S2 widened; Spike S4 is new. **FR-9:** the Web role check flags any assignment that *includes* the anonymous role; Outbound has a "no outbound calls in code" case and a settings decision table. **FR-11:** the site ring falls back to proportional arcs; four colour tokens are adjusted for AA (A8). Smaller fixes to AC-2.6, 2.8, 3.2, 3.7, 4.5–4.7, 4.11, 5.10, 5.11, 6.5, 6.8, 6.9, 7.2, 7.6, 8.8, 8.9, 9.2, 9.3, 9.4, 9.6, plus the error scenarios. |
 | 0.6.0 | 2026-10-08 | Fixes agreed in the Opus/Sol review debate (`Opus-review-of-Sol-review.md`, `Opus_debate_round1_opus_rebuttal.md`, `Opus_Sol_Debate_Round2_Sol_reponse.md`). **Generated handlers:** a logging rule that never logs bodies, exception messages, URLs or tokens (F09); R7 HTML escaping, ActivityId-prefixed ticket names, `conflictBehavior=fail`, stage-specific failures and explicit retry consequences (F05, F06); R4 option rules, with a `$top` default of 10 and a cap of 50 (F08). **Starter:** Permissions review is tied to the reviewed server text (F13, F15); the Liquid rule uses every HTTP-only property (F16); Insert only at a statement position, with a trial parse and a Copy fallback (F17); slug cap, device names and a collision warning (F21, AC-2.11). **Inspector:** token-based connector detection where "couldn't determine" overrides the no-use outcomes (F24, row O0); inactive table permissions and ancestors are ignored, and an unresolved parent chain is Needs review (F26). **Reports:** the scan interval, plus a statement that the scan isn't an atomic snapshot (F37). **Tests:** a behavior harness, shared client failure fixtures and per-demo-page cases (F56, AC-4.12). **Spikes:** S1 adds parent links and the name limit; S3 adds a collision probe. Added Out of Scope items and the appendix dispositioning all 59 review findings. |
 | 0.7.0 | 2026-10-08 | Applies the 40 deferred remedies and the 6 owner decisions from the review debate, plus design layout 10a. **Design (F53):** Server Objects is a top-level tab and the Starter sub-tab row is gone; the recipe tile is a searchable combobox (resolves A4); light (11c) and dark (12e) themes follow the host theme (reverses A2); dark uses aurora plus glass on every tile (reverses A1); the site pill in the title bar is Inspector's site picker; A8 keeps only the report tokens. **Owner decisions:** R4 `post` uses a Global Create-only permission until S4 proves the caller's account can be bound (F04); Account-scope checklists name the relationship; the write-on-read rule includes Append and Append To and is reworded (F25); no Mark as reviewed on read failures (F33); labels separate Configured from Reviewed with C/V/M/U/T counts (F38, F39); 1024×700 minimum viewport (F50). **Generated code:** per-recipe `Body` decoding (F01), three-branch Liquid (F02), Learn's R5 inputs (F03), R10 prerequisites (F07), example requests (F08), upstream-credentials note (F10), R8 wording (F11), server text depends only on the recipe (F12), `entityid ?? entityId` (F55), JSON missing-setting result (F57), R5 empty bodies (F58). **Checks:** T9 corrected and T18–T20 with a tokenizer fallback (F22, F23); grant set adds the Authenticated and Anonymous Users roles (F27); settings normalisation (F28); O1 and O6 wording (F30, F32); timeout is a site banner (F31). **Inspector and reports:** unconditional invalidation with scan IDs (F34), paging and "Inventory incomplete" (F35), AC-7.8 wording (F36), export eligibility, reasons, escaping, redaction, pagination, snapshot, timing and failure (F40–F46). **UX:** persistence versions (F19), LF model (F18), validation disclosure (F14), secrets scope (F20), `aria-disabled`, APG keyboard patterns, status toasts and search selection (F47–F49, F51), report fonts and stems (F52). **Spikes:** S1 evidence (F29), S4 probe design (F54), spike evidence rule and R7 pin (F59). |
+| 1.0.0 | 2026-10-14 | **MAJOR.** Owner decisions from the PPTB Desktop review, checked against the PPTB tool-development docs and Learn. **Removed:** Starter persistence (FR-5a, AC-5.8, F19): Starter state isn't kept between sessions, and PPTB's guidance is to store only user preferences in tool settings. **Changed:** notifications use `toolboxAPI.utils.showNotification`, with an in-tool Bootstrap-style fallback when the host call fails (FR-1); theme is read from the host at launch and re-read on `settings:updated`, focus and visibility, defaulting to light (AC-1.6); the tool owns Dataverse paging and a bounded retry (FR-7); the environment classification is the PPTB connection label (AC-7.5). **Added:** FR-12 PPTB host and manifest (Desktop App 1.2.7 or later, optional connection, validator and verification fields), external links through `openInConnectionBrowser`. **Plan deltas:** D1 jQuery `.fail()` (AC-4.6), D2 bundle JetBrains Mono only (FR-10, FR-11), D3 title-bar wording (AC-1.2). S2 no longer covers settings, theme or PDF. |
 
 ---
 
@@ -43,6 +44,7 @@ Power Pages server logic lets makers run JavaScript on the server, protected by 
 - Confirming effective access for a real site user. Inspector reviews configuration, not runtime behavior.
 - Reading or evaluating the tenant-level outbound network governance policy. It is always shown as "not verified".
 - Verifying that hand-edited handler code still validates its input.
+- Keeping Starter state between sessions. Closing the tool discards it; PPTB's Restore Session reopens the tab, not its state.
 
 ## Users and Context
 
@@ -54,7 +56,7 @@ Power Pages server logic lets makers run JavaScript on the server, protected by 
 - **Logic Inspector.**
 
 Starter is used at the start of a handler; Inspector is used before promoting a site or opening a release PR.
-**Host:** v1 ships only as a Power Platform ToolBox (PPTB) tool. The environment comes from the host's active connection, and the host handles sign-in. The code lives in a mono-repo so other hosts can be added later.
+**Host:** v1 ships only as a Power Platform ToolBox (PPTB) tool. The target is the PPTB Desktop App (Electron), version 1.2.7 or later; the PPTB VS Code extension isn't targeted or tested (FR-12). The environment comes from the host's active connection, and the host handles sign-in.
 **User mental model:** Users already think in Power Pages terms: *server logic*, *web role*, *table permission*, *access type*, *Anonymous Users / Authenticated Users roles*, *allowed domains*, *`Server.*` objects*, *entity set name*. The tool uses this vocabulary unchanged.
 
 ## Reference Documentation (source of truth for generated code)
@@ -114,11 +116,11 @@ Where the mocks and Learn disagree, Learn wins. The visual design still applies.
 **Acceptance criteria:**
 
 - [ ] **AC-1.1** Given the tool opens When it renders Then the title bar shows the app glyph, "Server Logic Tools" and the top tabs **Logic Starter** (`{ }`), **Server Objects** (`◇`, in the server-object colour) and **Logic Inspector** (`◎`), with Logic Starter active. There is no sub-tab row; Logic Starter is the Create Logic view (layout 10a §1).
-- [ ] **AC-1.2** Given any tab is active When the title bar renders Then, on the right before the window buttons, it shows the connection name with its environment classification (for example "Contoso · Development") and the site pill. The site pill is Inspector's site picker (AC-7.2). It reads "No site selected" until a site is chosen, and Logic Starter and Server Objects ignore it.
+- [ ] **AC-1.2** Given any tab is active When the title bar renders Then, on the right of the title bar, it shows the connection name with its environment classification (for example "Contoso · Development") and the site pill. The site pill is Inspector's site picker (AC-7.2). It reads "No site selected" until a site is chosen, and Logic Starter and Server Objects ignore it.
 - [ ] **AC-1.3** Given no connection is active When the shell renders Then the context area reads "Not connected", the site pill is disabled, and Starter and Server Objects remain fully usable.
 - [ ] **AC-1.4** Given any tab When the user selects another Then the content area swaps immediately with no transition, and the previous tab's state is kept.
 - [ ] **AC-1.5** Given any pill When it has keyboard focus Then it shows a 2px outline in the theme's primary colour at a 2px offset, and the selected pill never uses the needs-review colour (FR-11).
-- [ ] **AC-1.6** Given the host theme When the tool opens or the host theme changes (`settings:updated`) Then the tool renders in the matching theme, light (11c) or dark (12e), with no in-tool toggle (FR-11).
+- [ ] **AC-1.6** Given the host theme When the tool opens Then it reads `toolboxAPI.utils.getCurrentTheme()` and renders its first frame in that theme, light (11c) or dark (12e). It re-reads the theme on `settings:updated`, on window focus and when the document becomes visible, because PPTB has no dedicated theme event. If the host can't answer, the tool keeps its current theme, or uses light at launch, as PPTB does. There is no in-tool toggle (FR-11).
 
 ### Story 2: Configure a handler (Create Logic)
 
@@ -175,7 +177,7 @@ Where the mocks and Learn disagree, Learn wins. The visual design still applies.
 - [ ] **AC-4.3** Given the server pane When the user types in it Then the code is editable, the Browser checks readiness item re-runs on the edited code, and edits persist until the recipe changes (AC-2.9) or the user selects Start over.
 - [ ] **AC-4.4** Given the client call pane When it renders Then it offers single-select `fetch` (default), `jQuery` and `Liquid` pills. The footer reads "Paste into a page's custom JavaScript" for fetch and jQuery, or "Paste into a page or web template" for Liquid.
 - [ ] **AC-4.5** Given `fetch` is selected When the pane renders Then it calls `/_api/serverlogics/<slug>` with the selected method inside `shell.getTokenDeferred().done(...)`, sends the `__RequestVerificationToken` header, checks `success` (showing `error` when it's false), reads `data` from the response envelope (Learn correction 8), parses it with `JSON.parse` inside a try/catch, and branches on the handler's `status` (FR-3 contract table). The token is sent for every method, including GET. Microsoft's skill says GET is exempt, but sending the token is harmless.
-- [ ] **AC-4.6** Given `jQuery` is selected When the pane renders Then it calls `shell.safeAjax({ type, url, contentType, data?, success, error })` per Learn, and its `success` callback handles the envelope exactly as AC-4.5 does: it checks `success`, parses `data` and branches on `status`.
+- [ ] **AC-4.6** Given `jQuery` is selected When the pane renders Then it calls `shell.safeAjax({ type, url, contentType, data?, success }).fail(...)` per Learn, and its `success` callback handles the envelope exactly as AC-4.5 does: it checks `success`, parses `data` and branches on `status`. Transport and token failures are reported once, from `.fail()`: a token failure rejects the returned promise without calling an `error` option, so an `error` option would miss it.
 - [ ] **AC-4.7** The Liquid pill is enabled only when all three conditions hold: the recipe's "Liquid" column in the FR-3 contract table is "Yes", the server text contains no `async` function, and the server text references no `Server.Context` member that FR-6 marks HTTP only (`Body`, `Headers`, `HttpMethod`, `QueryParameters`, `Url`). The rule is evaluated on the current server text, so edits and inserts count as well as recipe changes.
   Given any condition fails When the client pills render Then the Liquid pill is disabled (`aria-disabled`, as in AC-2.10) with the tooltip "Liquid can't call this handler: it reads HTTP-only request properties or is async". Only R1 and R8 support Liquid. Liquid can't supply HTTP-only properties (correction 13), and Learn doesn't document calling `async` functions from Liquid.
   Given the pill becomes disabled while Liquid is selected When it happens Then the language resets to fetch and a toast reads "Switched to fetch: this code can't be called from Liquid". Undoing the change re-enables the pill but doesn't switch the language back (F16).
@@ -185,8 +187,8 @@ Where the mocks and Learn disagree, Learn wins. The visual design still applies.
   - `{% else %}` shows `result.status_code`;
   - a note that `result.raw_result` holds the unparsed output when the handler returns non-JSON. Given Liquid is selected When the server pane is generated or shown Then a note states that Liquid invocation needs no token and reads `Server.Context.Input` rather than `Body` or `QueryParameters` (Learn correction 13), and warns that long operations delay page rendering.
 - [ ] **AC-4.8** Given the request path strip When fetch or jQuery is selected Then it shows the five steps Page script → Token `__RequestVerificationToken` → Endpoint `/_api/serverlogics/<slug>` → Handler `function <name>()` → Returns `JSON string`. When Liquid is selected, it shows Page render → `serverlogic` tag → Handler `function <name>()` → Returns the `result` object, with no token step.
-- [ ] **AC-4.9** Given either pane When the user selects Copy Then the pane's plain text, without line numbers, is copied and a toast "Code copied" shows centred at the bottom for 2.6 s. If the clipboard write fails, an error toast reads "Couldn't copy" (F49).
-- [ ] **AC-4.10** Given the server pane When it renders Then the text matches the downloaded `<slug>.js` byte for byte, except that the download adds a final newline if one is missing. The editor model is LF-only: CRLF and CR are normalised to LF on load and paste. Copy, the edited-state comparison (AC-2.9), the Permissions review comparison (AC-5.4), persistence and download all use that normalised value. Files are UTF-8 without a BOM (F18).
+- [ ] **AC-4.9** Given either pane When the user selects Copy Then the pane's plain text, without line numbers, is copied and a success toast reads "Code copied" (FR-1). If the clipboard write fails, an error toast reads "Couldn't copy" (F49).
+- [ ] **AC-4.10** Given the server pane When it renders Then the text matches the downloaded `<slug>.js` byte for byte, except that the download adds a final newline if one is missing. The editor model is LF-only: CRLF and CR are normalised to LF on load and paste. Copy, the edited-state comparison (AC-2.9), the Permissions review comparison (AC-5.4) and download all use that normalised value. Files are UTF-8 without a BOM (F18).
 - [ ] **AC-4.11** Given any enabled recipe × method × client language When the client call is generated Then it parses as valid JavaScript (fetch, jQuery) or as a valid `serverlogic` tag (Liquid). A unit test asserts this for every combination, DELETE included (Learn correction 15).
 - [ ] **AC-4.12** Given a behavior harness (a fake `Server` whose connector stubs return canned results, plus fake `shell`, `fetch` and `$.ajax`) When the tests run Then:
   - each of the 36 enabled configurations (recipe × function × client language) runs two sets of cases. The handler runs against success, connector failure and an empty `Body`. The client runs against success, envelope `success: false` and `status: "error"`;
@@ -217,8 +219,8 @@ Where the mocks and Learn disagree, Learn wins. The visual design still applies.
   - `<slug>.page.html`, only for R4, R5 and R6 (AC-3.9).
   A toast confirms "<slug>.zip downloaded".
 - [ ] **AC-5.7** Given readiness is below 3/3 When the download completes Then the incomplete items are marked "Needs attention" in `README.md` and `permission-checklist.md`.
-- [ ] **AC-5.8** Given the user has set inputs, edited code and marked the review When the tool is closed and reopened on the same device Then the name, method, recipe, client language, edited code and review state are restored.
-- [ ] **AC-5.9** Given saved Starter state When the user selects **Start over** Then everything resets to defaults (`customer-summary`, Read Dataverse records, GET, fetch) and the saved state is cleared.
+- **AC-5.8** Removed in v1.0.0: Starter state isn't kept between sessions (Non-Goals).
+- [ ] **AC-5.9** Given any Starter state When the user selects **Start over** Then the name, method, recipe, client language, server text and review reset to defaults (`customer-summary`, Read Dataverse records, GET, fetch, unreviewed).
 - [ ] **AC-5.10** Given the host's save dialog fails or the zip can't be built When the user selects **Download starter** Then an error toast reads "Couldn't save <slug>.zip" with the reason, the inputs and edited code are untouched, and the tool leaves no partial file: it builds the zip in memory and hands the host the full bytes in one write. What the host does after a failed write is outside the tool's control. Cancelling the dialog writes nothing and shows no toast.
 - [ ] **AC-5.11** Given any download When it completes Then, for any recipe, it finishes within 2 s, measured from the user confirming the save dialog to the toast. Time the dialog is open doesn't count.
 
@@ -266,7 +268,7 @@ Where the mocks and Learn disagree, Learn wins. The visual design still applies.
 - [ ] **AC-7.2** Given a connection When sites load Then the title-bar site pill (AC-1.2) offers only the Power Pages sites in that environment for selection. Active sites (`powerpagesite` `statecode` = 0) are selectable; inactive sites are listed disabled with the label "Inactive". No site is preselected, and a single site is not auto-selected. Only enhanced data model sites appear, because sites are read from `powerpagesite`. Standard data model sites are out of scope.
 - [ ] **AC-7.3** Given a site is selected When the scan completes Then the files tile lists "Server logic (N)" with each record's file name and status ("Active" or "Inactive", from `statecode`). Inactive records are listed and checked like active ones, because they can be reactivated. If listing the records fails partway, the files tile shows "Inventory incomplete. Reconnect and rescan.", and the site result can't read as all Ready (F35).
 - [ ] **AC-7.4** Given the site has no server logic When the scan completes Then the empty state reads "No server logic found on this site" and Export report is disabled.
-- [ ] **AC-7.5** Given the connection is classified as Test, UAT or Production When Inspector connects Then a persistent warning reads "This isn't a development environment. Inspector is read-only but is designed for dev sites." and scanning stays available.
+- [ ] **AC-7.5** Given the PPTB connection is marked as Test, UAT or Production (its `environment` label, which the user sets in PPTB) When Inspector connects Then a persistent warning reads "This isn't a development environment. Inspector is read-only but is designed for dev sites." and scanning stays available.
 - [ ] **AC-7.6** Given the active connection changes, whichever tab is visible, Then Inspector's results and review marks are cleared and the site list reloads. Selecting a different site, or rescanning the same site, also clears results and review marks. Results from a superseded scan are discarded and never shown (FR-7 scan ID, F34).
 - [ ] **AC-7.7** Given the connected identity can't read some configuration When the scan runs Then the affected checks show "Needs review – couldn't read configuration" and never "Configured". These checks have the status Needs review, count toward M, and export as "Needs review" with that reason.
 - [ ] **AC-7.8** Given the environment has no Power Pages sites When Inspector loads Then the empty state reads "No enhanced data model Power Pages sites found in this environment. Standard data model sites aren't supported.", no scan runs and Export report is disabled (F36). "Couldn't load sites" stays a separate error (Error Scenarios).
@@ -355,11 +357,14 @@ Where the mocks and Learn disagree, Learn wins. The visual design still applies.
 ### FR-1: Shell
 
 **Must:**
-- Provide the three top tabs, the title-bar connection context and site picker, and bottom-centred toasts as in Story 1. The view state is `'starter' | 'objects' | 'inspector'`.
+- Provide the three top tabs and the title-bar connection context and site picker, as in Story 1. The view state is `'starter' | 'objects' | 'inspector'`.
 - Keep each tab's state while switching.
 - Keep Starter and Server Objects fully usable without a connection.
 - Follow the host theme (AC-1.6, FR-11).
-- Toasts use `role="status"`. Success toasts last 2.6 s; error toasts stay until dismissed. A button is disabled while its own action runs (F49).
+- Show every toast (success, info and error messages named in this spec) through `toolboxAPI.utils.showNotification({ title, body, type })`. Errors pass `duration: 0`, so they stay until dismissed. Success and info pass no `duration`, so they follow the user's PPTB notification duration setting. Toast text never includes stack traces.
+- **Fallback:** when `showNotification` is missing, throws or rejects, show the same message as an in-tool toast styled like a Bootstrap toast: a stack at the bottom right of the tool, each toast with a header (title and a close button) and a body, fading in and out (no animation under `prefers-reduced-motion`). Success and info toasts hide after 5 s; error toasts stay until closed. Success and info toasts use `role="status"`; error toasts use `role="alert"`. Log the host failure with `console.error`, by error name only. A failing fallback never calls the host again.
+- A button is disabled while its own action runs (F49).
+- Open external links (Learn or GitHub) only when the user selects them, through `toolboxAPI.utils.openInConnectionBrowser(url)`: the host blocks `target="_blank"` navigation. Never open a page on load.
 
 ### FR-2: Starter inputs
 
@@ -554,13 +559,7 @@ Each recipe defines:
 
 ### FR-5a: Starter persistence
 
-**Must:**
-- Persist the name, method, recipe, client language, edited code and review state in the host's tool settings, with `schemaVersion` and `catalogueVersion` (F19). `method` is `null` for R8 (F11). The review state includes the server text stored when Permissions was marked reviewed (AC-5.4).
-- Restore that state on launch. An unknown `schemaVersion`, an unknown recipe, or an invalid recipe, method and language combination falls back to defaults with the toast "Saved Starter state couldn't be restored". A changed `catalogueVersion` keeps the inputs and code but clears the review mark. A failed write is logged and doesn't interrupt the user (Spike S2 confirms host behaviour).
-- Offer Start over to clear it.
-
-**Must not:**
-- Persist Inspector results, review marks or environment data.
+Removed in v1.0.0. Starter state lives only while the tool is open (Non-Goals); Start over resets it (AC-5.9). The tool writes nothing to the host's tool settings. Inspector results, review marks and environment data are never persisted either.
 
 ### FR-6: Server Objects catalogue
 
@@ -599,7 +598,8 @@ Learn-verified objects (9). Only members that Learn documents are listed. The ex
 **Must:**
 - Use the host's active connection.
 - Give each scan an ID made of the connection, the site and a counter. Results carrying a stale ID are discarded, and starting a rescan supersedes the running one (F34).
-- Follow `@odata.nextLink` for every query. Retry and throttling are left to the host's Dataverse client (Spike S2) (F35).
+- Read every page of every query (F35). `dataverseAPI.queryData` documents only `value`, so Spike S2 checks whether it also returns `@odata.nextLink`. If it doesn't, list queries use `fetchXmlQuery` with its paging cookie.
+- Retry a read that fails with 429 or 5xx up to 3 times, waiting 1 s, 2 s and 4 s (PPTB's error object carries `status` but no `Retry-After`). After the last attempt the check is "Needs review – couldn't read configuration" (AC-7.7). PPTB's docs leave retries to the tool.
 - List the Power Pages sites, and list the server logic records with their status for the selected site.
 - For each record, read its web roles, the grant set's table permissions (table, access type, privileges), its code (to derive exported function names and connector use), and the `ServerLogic/Enabled`, `ServerLogic/AllowedDomains`, `ServerLogic/AllowNetworkingToAllDomains` and `ServerLogic/TimeoutInSeconds` site settings.
 - Read each fact from the source in the data-source table below.
@@ -642,7 +642,7 @@ Learn-verified objects (9). Only members that Learn documents are listed. The ex
 | Web roles assigned to a record | The server logic ↔ web role link. PAC CLI site metadata names it `adx_serverlogic_adx_webrole`; in the enhanced model it is probably the N:N relationship `powerpagecomponent_powerpagecomponent` | **Spike S1** |
 | Table permissions per role | `powerpagecomponent` type 18 (Table Permission). The table's logical name, access type, privileges (Read, Write, Create, Delete, Append, Append To), linked roles and, for Parent scope, the parent permission are stored in `content`; state from `statecode` | Component verified on Learn; **Spike S1** (JSON keys, role link and parent link) |
 | Site settings | `powerpagecomponent` type 9 (Site Setting), filtered to the site and the `ServerLogic/` prefix | Component verified on Learn; **Spike S1** (where the value is stored) |
-| Environment classification (Dev/Test/UAT/Prod) | The host's connection metadata if it provides one. Otherwise unknown (AC-7.11) | Host contract, **Spike S2** |
+| Environment classification (Dev/Test/UAT/Prod) | The PPTB connection's `environment` label (`Dev`, `Test`, `UAT`, `Production`), set by the user in PPTB, not Power Platform's environment type. Missing or unrecognised reads as Unknown (AC-7.11) | PPTB docs |
 
 **Spike S1 (first plan task):** on a sample enhanced-model site, confirm nine things:
 1. which `powerpagecomponent` column holds server logic code (`content` or `filecontent`);
@@ -660,10 +660,11 @@ S1 records the exact queries, one redacted sample record per component type, and
 **Spike S2 (before Inspector and download work):** confirm what the PPTB host exposes for:
 - the active connection: name, URL and environment type;
 - a connection-changed event (AC-7.6);
-- per-tool settings storage (FR-5a);
 - a save dialog that writes binary files, for the zip and the PDF (AC-5.6, AC-5.10, AC-9.3);
 - clipboard write (AC-4.9, AC-6.7);
-- whether PDF generation needs a library or the host provides one.
+- whether `dataverseAPI.queryData` returns `@odata.nextLink` (FR-7).
+
+Theme, notifications and external links are settled by working PPTB tools (AC-1.6, FR-1). The host has no PDF API, so the tool bundles a PDF library (FR-10).
 
 Also confirm whether the signed-in identity's read access to `powerpagecomponent` and `mspp_webrole` can be tested up front.
 **Spike S4 (before the client generator ships; a dev site):** deploy one throwaway probe server logic, not a shipped recipe (F54), with:
@@ -733,7 +734,7 @@ Each result either confirms the spec or becomes a PATCH or MINOR spec update.
 - Always include the configuration-only and tenant-policy-not-verified statements, the scan interval and the not-atomic statement (AC-9.2, F37).
 - Escape every configuration value (F42). In Markdown table cells, escape `\ | * _ ` [ ] < >` and replace newlines with spaces. In the PDF, HTML-escape every value when the PDF is rendered from HTML. Never fetch resources named by configuration values (AC-9.10).
 - Paginate the PDF: table headers repeat on each page, rows aren't split, and no content is truncated (F44).
-- Bundle the report fonts locally after checking their licences (DM Sans, Space Grotesk and JetBrains Mono are OFL). The app UI uses Segoe UI Variable with a `system-ui` fallback (F52).
+- Bundle the report fonts locally after checking their licences (DM Sans, Space Grotesk and JetBrains Mono are OFL). The app UI uses the Windows system font stack `'Segoe UI Variable Text', 'Segoe UI', system-ui, sans-serif`; Segoe UI isn't redistributable, so it isn't bundled (F52).
 
 **Must not:**
 - Export JSON or CSV.
@@ -741,7 +742,7 @@ Each result either confirms the spec or becomes a PATCH or MINOR spec update.
 ### FR-11: Visual design
 
 **Must:**
-- Ship two themes from layout 10a §4 and follow the host theme: `toolboxAPI.utils.getCurrentTheme()` at launch and the `settings:updated` event afterwards. There is no in-tool theme toggle (Assumption A2):
+- Ship two themes from layout 10a §4 and follow the host theme as AC-1.6 describes. There is no in-tool theme toggle (Assumption A2):
 
   | Token | Light (11c Paper & Signal) | Dark (12e Glass Bento) |
   |---|---|---|
@@ -760,12 +761,33 @@ Each result either confirms the spec or becomes a PATCH or MINOR spec update.
 
 - Use **primary** only for selected pills, the active recipe underline, the Download button and done ring segments, and **needs review** only for status: the `! Permissions` pill, unfinished ring segments, the `⇄` client-call icon and the Inspector tab icon.
 - In dark, apply the aurora background and glass to every tile (Assumption A1).
-- Type: Segoe UI Variable (with `system-ui` fallback) and JetBrains Mono, bundled locally.
+- Type: the system stack `'Segoe UI Variable Text', 'Segoe UI', system-ui, sans-serif` for UI text, and JetBrains Mono, bundled locally, for code.
 - Reports keep the original handoff's README §05 palette in both themes, with the A8 adjustments.
 - Lay out Create Logic per layout 10a §2: grid rows `129px / minmax(0,1fr) / auto`, columns `220px repeat(3, minmax(0,1fr))`.
 - Draw rings as SVG arcs with 4° gaps. A ring has one segment per check up to 30 checks. Above 30, the site ring draws three arcs whose sizes are proportional to Configured + Reviewed, Needs review and Not scanned. Empty arcs are omitted, and the 4° gaps fall only between the arcs drawn.
 - Apply the AA report-token adjustments in Assumption A8. Every other token is as listed above.
 - Replace glyphs with Fluent System Icons, bundled locally.
+
+### FR-12: PPTB host and manifest
+
+Sources: PPTB tool-development docs (manifest, `pptb-validate`, marketplace policy, security model).
+
+**Must:**
+- Target the PPTB Desktop App (Electron), version 1.2.7 or later. The tool uses no Desktop-only API (Terminal, Inter-Tool Invocation, MCP), but the VS Code extension isn't tested.
+- Declare in `package.json`:
+  - `features.connections: { "min": 0, "max": 1 }`, so the tool opens without a connection (AC-1.3). PPTB's default is one required connection;
+  - `features.minAPI: "1.2.7"`, the first version with optional connections;
+  - `name`, `version` (1.0.0 or later for release), `displayName` "Server Logic Tools", `description`, a `license` from PPTB's approved list, and `contributors`;
+  - `configurations.repository` (a GitHub URL) and `configurations.readmeUrl` (a `raw.githubusercontent.com` URL);
+  - `icon`: an SVG under `dist/` that uses `currentColor`.
+- Omit `cspExceptions`: every script, style, font and image is bundled, and all Dataverse traffic goes through the host. The default CSP allows only `'self'`, inline scripts and styles, and `data:` fonts and images.
+- Don't set `enabledForPowerPlatformAPI`; the tool reads only through `dataverseAPI`.
+- Pass `npx pptb-validate` with no errors before any release; `npm audit` is clean for a verified listing.
+- Register `toolboxAPI.events.on` once at start-up and remove the handler on unload.
+
+**Must not:**
+- Write to the host's tool settings (FR-5a).
+- Load anything from a CDN or another origin.
 
 ## Non-Functional Requirements
 
@@ -782,7 +804,7 @@ Each result either confirms the spec or becomes a PATCH or MINOR spec update.
 - Inspector uses only the signed-in user's permissions; the tool never handles access tokens, and all access goes through the host.
 - Inspector requests read-only access.
 - No configuration, findings or code are sent to third parties.
-- Files and reports the tool generates contain no tokens or secrets the tool obtained. Code the user edits is downloaded and persisted exactly as written; the tool doesn't scan or redact it (F20).
+- Files and reports the tool generates contain no tokens or secrets the tool obtained. Code the user edits is downloaded exactly as written; the tool doesn't scan or redact it (F20).
 - Generated code never contains literal secrets.
 - Generated code never logs bodies, exception messages, URLs, headers, tokens or site-setting values (the FR-3 logging rule).
 
@@ -826,7 +848,7 @@ Each result either confirms the spec or becomes a PATCH or MINOR spec update.
 | Method pill not exported by the recipe | Pill disabled with tooltip (AC-2.10) |
 | PDF generation fails | Error toast "Couldn't save <filename>" with the reason; the Markdown export is still available (AC-9.9) |
 | Clipboard write fails | Error toast "Couldn't copy" (AC-4.9) |
-| Saved Starter state invalid or from an unknown schema | Defaults restored with the toast "Saved Starter state couldn't be restored" (FR-5a) |
+| `showNotification` missing, throws or rejects | The message shows as an in-tool fallback toast; the host failure is logged by error name (FR-1) |
 | Listing server logic records fails partway | "Inventory incomplete. Reconnect and rescan."; the site can't read as all Ready (AC-7.3) |
 | A boolean `ServerLogic/*` setting can't be interpreted, or is duplicated | Needs review "Couldn't interpret `<setting>`" or "Duplicate `<setting>`" (FR-7, FR-9 O2) |
 | `ServerLogic/TimeoutInSeconds` out of range | Site banner, repeated in exports (AC-7.12) |
@@ -843,7 +865,7 @@ Each result either confirms the spec or becomes a PATCH or MINOR spec update.
 
 No blocking product decisions remain. All 59 review findings are adopted (appendix), and the owner approved the design decisions on 2026-10-08. One gate remains at UI acceptance, not planning: the dark glass contrast measurement (Accessibility). Four plan-time spikes are required, all in FR-7:
 - **S1:** the `powerpagecomponent` code column, role and parent links, JSON keys, setting values, name format and R10's Account relationship. Needed before Inspector work starts.
-- **S2:** the host's connection, settings, save, clipboard, theme and PDF APIs. Needed before Inspector and download work.
+- **S2:** the host's connection, connection-change event, binary save, clipboard and `queryData` paging. Needed before Inspector and download work.
 - **S3:** the full Graph/SharePoint script and the collision probe. Needed before R7 is built.
 - **S4:** the envelope casing, the connector result type, the outbound settings precedence and wildcards, Liquid and async, the caller's parent account and the custom API privilege identity, checked with a throwaway probe on a live site. Needed before the client generator ships.
 
@@ -863,7 +885,7 @@ Spike checks are proposals until they run. Nothing in this spec counts as verifi
 - the grant set with the Authenticated and Anonymous Users roles, and settings normalisation (FR-7);
 - the scan ID, paging and the inventory-incomplete state (FR-7, AC-7.3);
 - report escaping with the hostile-name fixture, PDF pagination, and export timing and failure (FR-10, AC-9.9, AC-9.10);
-- persisted-state versioning and the LF editor model (FR-5a, AC-4.10);
+- the LF editor model (AC-4.10);
 - the tokenizer fallback and T18–T20 (FR-4), and the 64-combination count test (AC-8.1).
 
 **Assumptions** (A1–A9 proposed on 2026-10-07; A1, A2, A4 and A8 decided by the owner on 2026-10-08):
@@ -904,6 +926,11 @@ Spike checks are proposals until they run. Nothing in this spec counts as verifi
 - 2026-10-08 (owner): Labels → Configured and Reviewed shown separately; "K/T checks addressed" (F38).
 - 2026-10-08 (owner): Minimum viewport → 1024×700, measured as the viewport (F50).
 - 2026-10-08 (owner): Site pill → Inspector's site picker in the title bar (AC-1.2).
+- 2026-10-14 (owner): Starter state → not persisted (FR-5a removed).
+- 2026-10-14 (owner): Toasts → `showNotification`, with an in-tool Bootstrap-style fallback (FR-1).
+- 2026-10-14 (owner): Theme → read from the host at launch; light when the host can't answer (AC-1.6).
+- 2026-10-14 (owner): External links → `openInConnectionBrowser` on user selection (FR-1).
+- 2026-10-14 (owner): Host → PPTB Desktop App 1.2.7 or later; the VS Code extension isn't targeted (FR-12).
 
 ## Out of Scope (Future Considerations)
 
@@ -914,7 +941,7 @@ Spike checks are proposals until they run. Nothing in this spec counts as verifi
 - CI/pipeline integration.
 - Verifying input validation in hand-edited code.
 - Reading the tenant-level outbound governance policy.
-- A standalone web host.
+- A standalone web host, or the PPTB VS Code extension.
 - The `$pages.ajax` client API (preview) as a fourth client language.
 - **REVISIT:** flagging Contact/Account/Self/Parent access types on sensitive tables (v1 flags Global only).
 - Comparing the tables a handler's code uses with the tables its roles are granted ("granted but unused" / "used but not granted"). v1 only checks whether the code uses Dataverse at all (AC-8.8).
@@ -945,15 +972,15 @@ All 59 findings from `sol-review.md`, with Opus's responses in `Opus-review-of-S
 | F08 | Validation rows aren't executable contracts | P2 / P3 | Adopted | Contract preamble ("parses to an object"), R4 options and `$top`, R10 `id` (v0.6.0); example requests and R5's input rules (v0.7.0, with F03) |
 | F09 | Logging raw exceptions and bodies | P1 / P1 | Adopted | FR-3 logging rule, AC-3.7, AC-4.12, Security |
 | F10 | Caller-permissions footer misstates upstream identity | P2 / P3 | Adopted (v0.7.0) | Add "Upstream calls use this integration's own credentials" for R3, R5, R6, R7 and R9; the footer is unchanged |
-| F11 | R8 inherits HTTP-only package wording | P3 / P3 | Adopted (v0.7.0) | The R8 README shows the Liquid tag; `method` is `null` in FR-5a |
+| F11 | R8 inherits HTTP-only package wording | P3 / P3 | Adopted (v0.7.0) | The R8 README shows the Liquid tag; `method` is `null` for R8 |
 | F12 | Regeneration vs. edit preservation | P2 / P2 | Adopted (v0.7.0) | Server text depends only on the recipe; reword AC-4.1 |
-| F13 | Permissions review not invalidated by code changes | P2 / P3 | Adopted | AC-5.4, FR-5a |
+| F13 | Permissions review not invalidated by code changes | P2 / P3 | Adopted | AC-5.4 |
 | F14 | Validation limitation invisible | P3 / P3 | Adopted (v0.7.0) | "Generated validation; edits aren't rechecked"; define Browser checks as a text-pattern check |
 | F15 | Marking Permissions forces 3/3 | P2 / P3 | Adopted | AC-5.4 (in the same sentence as F13) |
 | F16 | Async insertion invalidates Liquid | P2 / P2 | Adopted | AC-4.7, FR-2a, FR-6 Context marks |
 | F17 | No insertion applicability contract | P2 / P3 | Adopted | AC-6.8, Error Scenarios |
 | F18 | Byte-for-byte vs. normalisation | P2 / P3 | Adopted (v0.7.0) | LF-only editor model; download adds a missing final newline |
-| F19 | Persisted state lacks versioning | P2 / P3 | Adopted (v0.7.0) | `schemaVersion` and `catalogueVersion`; fallback toast; a catalogue change clears the review |
+| F19 | Persisted state lacks versioning | P2 / P3 | Adopted (v0.7.0) | Superseded in v1.0.0: Starter state isn't persisted, so there is nothing to version |
 | F20 | No-secrets promise vs. user code | P2 / P3 | Adopted (v0.7.0) | Scope the guarantee to generated files; user code is kept exactly as written |
 | F21 | Slug lacks limits and collision disclosure | P3 / P3 | Adopted | AC-2.11, Spike S1 item 6 |
 | F22 | T9 can't pass case-sensitive matching | P2 / P2 | Adopted (v0.7.0) | T9 → no match; delete the last sentence of FR-4's `with(` exception |
@@ -969,7 +996,7 @@ All 59 findings from `sol-review.md`, with Opus's responses in `Opus-review-of-S
 | F32 | "No outbound calls" excludes CloudFlow | P2 / P3 | Adopted (v0.7.0) | O1 → "No HttpClient calls in code", plus a CloudFlow detail line |
 | F33 | Reviewing unknown evidence | P2 / P2 | Adopted (v0.7.0, owner) | No Mark as reviewed when any reason is a read failure; analysis limits ("couldn't determine", a looping or missing parent chain) stay reviewable (AC-8.5, FR-8) |
 | F34 | Connection changes need unconditional invalidation | P1 / P1 | Adopted (v0.7.0) | AC-7.6: drop "When Inspector is open"; a scan ID discards stale results |
-| F35 | Inventory paging and recovery | P2 / P3 | Adopted (v0.7.0) | Follow `@odata.nextLink`; an "Inventory incomplete" state; retry handling belongs to the host (S2) |
+| F35 | Inventory paging and recovery | P2 / P3 | Adopted (v0.7.0) | Read every page (S2 checks `queryData` paging); a tool-owned bounded retry; an "Inventory incomplete" state (v1.0.0) |
 | F36 | No-sites message overstates inventory | P3 / P3 | Adopted (v0.7.0) | AC-7.8 names enhanced data model sites |
 | F37 | Scan provenance undefined | P2 / P3 | Adopted | AC-9.2, AC-9.3, FR-10; change detection is Out of Scope |
 | F38 | "Configured" labels erase review | P2 / P3 | Adopted (v0.7.0, owner) | Legend "C configured · V reviewed · M review"; "Ready · V reviewed"; "K/T checks addressed (C configured, V reviewed)"; design sign-off given (AC-8.1, AC-8.6, AC-9.3) |
@@ -983,7 +1010,7 @@ All 59 findings from `sol-review.md`, with Opus's responses in `Opus-review-of-S
 | F46 | Export timing and failure | P2 / P3 | Adopted (v0.7.0) | Mirror AC-5.10 and AC-5.11 for reports |
 | F47 | Disabled choices rely on tooltips | P2 / P2 | Adopted (v0.7.0) | `aria-disabled`, tooltip on focus and `aria-describedby`; also applies to the new Insert reasons (AC-6.8) |
 | F48 | Keyboard behavior loose | P2 / P3 | Adopted (v0.7.0) | APG radio group, tabs and modal dialog; Esc then Tab leaves the editor |
-| F49 | Async state and recovery | P2 / P3 | Adopted (v0.7.0) | `role="status"` toasts; error toasts stay until dismissed; always show "Scanned X of N"; "Couldn't copy" |
+| F49 | Async state and recovery | P2 / P3 | Adopted (v0.7.0) | Host notifications with an in-tool fallback (v1.0.0); error toasts stay until dismissed; always show "Scanned X of N"; "Couldn't copy" |
 | F50 | Smaller panels and enlarged text | P3 / P3 | Adopted (v0.7.0, owner) | Minimum viewport 1024×700, measured as the viewport; scrolls below it (Accessibility) |
 | F51 | Search and filter selection | P3 / P3 | Adopted (v0.7.0) | Select the first visible object; a member match selects that member |
 | F52 | Report file name and font scopes | P3 / P3 | Adopted (v0.7.0) | Separate the display name from the export stem; bundle the report fonts locally |

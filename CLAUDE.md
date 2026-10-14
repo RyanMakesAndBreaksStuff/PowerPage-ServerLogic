@@ -12,7 +12,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Where things are
 
-- `docs/specs/001-server-logic-starter-inspector/spec.md` is the source of truth (v0.7.0). Its FRs, ACs, recipe table (R1–R10), numbered Learn corrections and spikes S1–S4 govern behaviour. `review.md` sits next to it.
+- `docs/specs/001-server-logic-starter-inspector/spec.md` is the source of truth (v1.0.0). Its FRs, ACs, recipe table (R1–R10), numbered Learn corrections and spikes S1–S4 govern behaviour. `review.md` sits next to it.
 - **Layout 10a** in `design_handoff_server_logic_tools/Logic Tooling Design Directions/design_handoff_server_logic_tools/` is the high-fidelity design for the shell, Logic Starter, Server Objects, Logic Inspector and all UI tokens (README plus `reference/01–06`, light and dark). Its recipe list is **not** adopted: the spec's R1–R10 stand.
 - The original `design_handoff_server_logic_tools/` README §05 still governs **report** styling. Its other references are superseded by 10a. `06-interactive-prototype.dc.html` is an **older layout**, so use it for behaviour only (state, toggles, export dialog), not visuals. It needs `support.js` in the same folder.
 - `mocks/` contains visual explorations. They are reference only, not production code.
@@ -32,7 +32,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Host globals `window.toolboxAPI`, `dataverseAPI` and `powerplatformAPI` exist **only inside PPTB**. They are undefined in a normal browser tab, so test against a fake `services/pptb/` adapter.
 - There are no access tokens. All Dataverse calls go through `dataverseAPI`. Use only the read methods (`retrieve`, `queryData`, `fetchXmlQuery`, metadata).
 - The build must be a **single IIFE bundle**, with no `type="module"`, no `crossorigin` and no code-split chunks. Keep the generator's Vite config. The symptom of getting this wrong is a tool that works in dev but loads blank in PPTB.
-- Save files with `toolboxAPI.fileSystem.saveFile`. Show errors and status with `toolboxAPI.utils.showNotification`.
+- Save files with `toolboxAPI.fileSystem.saveFile`. Show errors and status with `toolboxAPI.utils.showNotification`, falling back to in-tool toasts if it fails (spec FR-1). The tool writes nothing to tool settings.
 - The default CSP is strict. Bundle every asset (no CDNs).
 
 ## Commands (once scaffolded)
