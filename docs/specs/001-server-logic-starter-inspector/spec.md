@@ -1,7 +1,7 @@
 # Feature 001: Power Pages Server Logic — Logic Starter & Logic Inspector
 
 **Status:** Approved
-**Version:** 1.0.0
+**Version:** 1.1.0
 **Created:** 2026-10-06
 **Updated:** 2026-10-14
 **Branch:** `001-server-logic-starter-inspector`
@@ -21,6 +21,7 @@
 | 0.6.0 | 2026-10-08 | Fixes agreed in the Opus/Sol review debate (`Opus-review-of-Sol-review.md`, `Opus_debate_round1_opus_rebuttal.md`, `Opus_Sol_Debate_Round2_Sol_reponse.md`). **Generated handlers:** a logging rule that never logs bodies, exception messages, URLs or tokens (F09); R7 HTML escaping, ActivityId-prefixed ticket names, `conflictBehavior=fail`, stage-specific failures and explicit retry consequences (F05, F06); R4 option rules, with a `$top` default of 10 and a cap of 50 (F08). **Starter:** Permissions review is tied to the reviewed server text (F13, F15); the Liquid rule uses every HTTP-only property (F16); Insert only at a statement position, with a trial parse and a Copy fallback (F17); slug cap, device names and a collision warning (F21, AC-2.11). **Inspector:** token-based connector detection where "couldn't determine" overrides the no-use outcomes (F24, row O0); inactive table permissions and ancestors are ignored, and an unresolved parent chain is Needs review (F26). **Reports:** the scan interval, plus a statement that the scan isn't an atomic snapshot (F37). **Tests:** a behavior harness, shared client failure fixtures and per-demo-page cases (F56, AC-4.12). **Spikes:** S1 adds parent links and the name limit; S3 adds a collision probe. Added Out of Scope items and the appendix dispositioning all 59 review findings. |
 | 0.7.0 | 2026-10-08 | Applies the 40 deferred remedies and the 6 owner decisions from the review debate, plus design layout 10a. **Design (F53):** Server Objects is a top-level tab and the Starter sub-tab row is gone; the recipe tile is a searchable combobox (resolves A4); light (11c) and dark (12e) themes follow the host theme (reverses A2); dark uses aurora plus glass on every tile (reverses A1); the site pill in the title bar is Inspector's site picker; A8 keeps only the report tokens. **Owner decisions:** R4 `post` uses a Global Create-only permission until S4 proves the caller's account can be bound (F04); Account-scope checklists name the relationship; the write-on-read rule includes Append and Append To and is reworded (F25); no Mark as reviewed on read failures (F33); labels separate Configured from Reviewed with C/V/M/U/T counts (F38, F39); 1024×700 minimum viewport (F50). **Generated code:** per-recipe `Body` decoding (F01), three-branch Liquid (F02), Learn's R5 inputs (F03), R10 prerequisites (F07), example requests (F08), upstream-credentials note (F10), R8 wording (F11), server text depends only on the recipe (F12), `entityid ?? entityId` (F55), JSON missing-setting result (F57), R5 empty bodies (F58). **Checks:** T9 corrected and T18–T20 with a tokenizer fallback (F22, F23); grant set adds the Authenticated and Anonymous Users roles (F27); settings normalisation (F28); O1 and O6 wording (F30, F32); timeout is a site banner (F31). **Inspector and reports:** unconditional invalidation with scan IDs (F34), paging and "Inventory incomplete" (F35), AC-7.8 wording (F36), export eligibility, reasons, escaping, redaction, pagination, snapshot, timing and failure (F40–F46). **UX:** persistence versions (F19), LF model (F18), validation disclosure (F14), secrets scope (F20), `aria-disabled`, APG keyboard patterns, status toasts and search selection (F47–F49, F51), report fonts and stems (F52). **Spikes:** S1 evidence (F29), S4 probe design (F54), spike evidence rule and R7 pin (F59). |
 | 1.0.0 | 2026-10-14 | **MAJOR.** Owner decisions from the PPTB Desktop review, checked against the PPTB tool-development docs and Learn. **Removed:** Starter persistence (FR-5a, AC-5.8, F19): Starter state isn't kept between sessions, and PPTB's guidance is to store only user preferences in tool settings. **Changed:** notifications use `toolboxAPI.utils.showNotification`, with an in-tool Bootstrap-style fallback when the host call fails (FR-1); theme is read from the host at launch and re-read on `settings:updated`, focus and visibility, defaulting to light (AC-1.6); the tool owns Dataverse paging and a bounded retry (FR-7); the environment classification is the PPTB connection label (AC-7.5). **Added:** FR-12 PPTB host and manifest (Desktop App 1.2.7 or later, optional connection, validator and verification fields), external links through `openInConnectionBrowser`. **Plan deltas:** D1 jQuery `.fail()` (AC-4.6), D2 bundle JetBrains Mono only (FR-10, FR-11), D3 title-bar wording (AC-1.2). S2 no longer covers settings, theme or PDF. |
+| 1.1.0 | 2026-10-14 | **MINOR.** Owner decisions on build phasing. **Added:** per-page releases (Starter, Server Objects, Inspector, in the order each completes), with unreleased pages' tabs shown disabled and their code left out of the build (AC-1.7, FR-1, FR-12); AC-1.1 and AC-6.8 note the exception. **Changed:** spike evidence goes in the plan of the phase that runs the spike, since each phase has its own plan file. **Resolved log:** PDF via jsPDF and jspdf-autotable in the web view (no .NET worker), the zip via fflate `zipSync`, the code editor via CodeMirror 6. |
 
 ---
 
@@ -115,12 +116,13 @@ Where the mocks and Learn disagree, Learn wins. The visual design still applies.
 
 **Acceptance criteria:**
 
-- [ ] **AC-1.1** Given the tool opens When it renders Then the title bar shows the app glyph, "Server Logic Tools" and the top tabs **Logic Starter** (`{ }`), **Server Objects** (`◇`, in the server-object colour) and **Logic Inspector** (`◎`), with Logic Starter active. There is no sub-tab row; Logic Starter is the Create Logic view (layout 10a §1).
+- [ ] **AC-1.1** Given the tool opens When it renders Then the title bar shows the app glyph, "Server Logic Tools" and the top tabs **Logic Starter** (`{ }`), **Server Objects** (`◇`, in the server-object colour) and **Logic Inspector** (`◎`), with Logic Starter active. There is no sub-tab row; Logic Starter is the Create Logic view (layout 10a §1). Until every page is released, AC-1.7 applies.
 - [ ] **AC-1.2** Given any tab is active When the title bar renders Then, on the right of the title bar, it shows the connection name with its environment classification (for example "Contoso · Development") and the site pill. The site pill is Inspector's site picker (AC-7.2). It reads "No site selected" until a site is chosen, and Logic Starter and Server Objects ignore it.
 - [ ] **AC-1.3** Given no connection is active When the shell renders Then the context area reads "Not connected", the site pill is disabled, and Starter and Server Objects remain fully usable.
 - [ ] **AC-1.4** Given any tab When the user selects another Then the content area swaps immediately with no transition, and the previous tab's state is kept.
 - [ ] **AC-1.5** Given any pill When it has keyboard focus Then it shows a 2px outline in the theme's primary colour at a 2px offset, and the selected pill never uses the needs-review colour (FR-11).
 - [ ] **AC-1.6** Given the host theme When the tool opens Then it reads `toolboxAPI.utils.getCurrentTheme()` and renders its first frame in that theme, light (11c) or dark (12e). It re-reads the theme on `settings:updated`, on window focus and when the document becomes visible, because PPTB has no dedicated theme event. If the host can't answer, the tool keeps its current theme, or uses light at launch, as PPTB does. There is no in-tool toggle (FR-11).
+- [ ] **AC-1.7** Given a build in which a page isn't released yet (FR-1 released pages) When the shell renders Then that page's top tab still shows with its glyph and label, in the disabled style, with `aria-disabled="true"`. It stays in the tab list's arrow-key order but can't be activated, and it has no tooltip; this is an owner-approved exception to F47 for unreleased pages only. The first released tab, in AC-1.1 order, is active instead of Logic Starter. While Logic Inspector is unreleased, the site pill is disabled as in AC-1.3. While Logic Starter is unreleased, Server Objects doesn't show **Insert into handler**; Copy stays (AC-6.8). The page's content never renders.
 
 ### Story 2: Configure a handler (Create Logic)
 
@@ -249,6 +251,7 @@ Where the mocks and Learn disagree, Learn wins. The visual design still applies.
     - "Move the cursor between statements inside a function, or use Copy" when the cursor isn't at a statement position;
     - "Inserting here would break the code; use Copy" when the trial parse fails (for example, a duplicate `let` or `const`).
   - **Fixture:** in `function get(){ /* cursor */ return "{}"; }`, with the cursor inside the comment, Insert is disabled with the statement-position tooltip.
+  - **Unreleased Starter.** In a build where Logic Starter isn't released, Insert isn't shown and Copy is the only action (AC-1.7).
   There is no snippet-form contract, variable-conflict analysis or reachability analysis beyond these rules.
 - [ ] **AC-6.9** Given the context column When it renders Then it shows:
   - "Used in <slug>": each used object with pills for the members called, plus a "← Back to Create Logic" link.
@@ -360,6 +363,7 @@ Where the mocks and Learn disagree, Learn wins. The visual design still applies.
 - Provide the three top tabs and the title-bar connection context and site picker, as in Story 1. The view state is `'starter' | 'objects' | 'inspector'`.
 - Keep each tab's state while switching.
 - Keep Starter and Server Objects fully usable without a connection.
+- **Released pages:** a build-time list names the released pages (`starter`, `objects`, `inspector`). An unreleased page's tab follows AC-1.7, and its code is left out of the bundle. The list isn't a runtime option or a tool setting, and users can't change it. Once all three pages are released, the list goes and AC-1.1 applies in full.
 - Follow the host theme (AC-1.6, FR-11).
 - Show every toast (success, info and error messages named in this spec) through `toolboxAPI.utils.showNotification({ title, body, type })`. Errors pass `duration: 0`, so they stay until dismissed. Success and info pass no `duration`, so they follow the user's PPTB notification duration setting. Toast text never includes stack traces.
 - **Fallback:** when `showNotification` is missing, throws or rejects, show the same message as an in-tool toast styled like a Bootstrap toast: a stack at the bottom right of the tool, each toast with a header (title and a close button) and a body, fading in and out (no animation under `prefers-reduced-motion`). Success and info toasts hide after 5 s; error toasts stay until closed. Success and info toasts use `role="status"`; error toasts use `role="alert"`. Log the host failure with `console.error`, by error name only. A failing fallback never calls the host again.
@@ -655,7 +659,7 @@ Learn-verified objects (9). Only members that Learn documents are listed. The ex
 8. whether a server logic record's stored `name` includes `.js` (F52);
 9. the relationship that Account access uses on the `account` table (R10, F04).
 
-S1 records the exact queries, one redacted sample record per component type, and a comparison against the studio UI for the same site (F29). Record the result in `plan.md`. Inspector ACs that read facts 1–5 are blocked until S1 is done. Other facts are verified on Learn.
+S1 records the exact queries, one redacted sample record per component type, and a comparison against the studio UI for the same site (F29). Record the result in the plan of the phase that runs S1. Inspector ACs that read facts 1–5 are blocked until S1 is done. Other facts are verified on Learn.
 **Spike S3 (before building R7):** unzip `event-registration.zip` from the GitHub sample package, pinned to commit `7efe699` (F59), read the full event-registration script, and reconcile R7 with it, including the form-encoded token request (Learn correction 17). Learn publishes only two excerpts. S3 also runs a **collision probe** on a test SharePoint site (F05). It uploads two files with the same name to the exact `root:/…:/content` path that R7 uses, with `@microsoft.graph.conflictBehavior=fail`, and confirms that the second upload fails and the first file is unchanged. Until the probe passes, R7's overwrite prevention is unverified. If the second upload doesn't fail, the spec is updated before R7 ships. This spike applies to Starter, not Inspector.
 **Spike S2 (before Inspector and download work):** confirm what the PPTB host exposes for:
 - the active connection: name, URL and environment type;
@@ -685,7 +689,7 @@ Call it from fetch, jQuery and Liquid, and toggle the two outbound settings thro
 
 Each result either confirms the spec or becomes a PATCH or MINOR spec update.
 
-**Spike evidence** (F59): each spike records in `plan.md` the queries or calls it made, the host and runtime versions, and the outcome. A result that contradicts the spec becomes a spec update before dependent work starts.
+**Spike evidence** (F59): each spike records, in the plan of the phase that runs it, the queries or calls it made, the host and runtime versions, and the outcome. A result that contradicts the spec becomes a spec update before dependent work starts.
 
 **Must not:**
 - Create, update or delete anything.
@@ -783,6 +787,7 @@ Sources: PPTB tool-development docs (manifest, `pptb-validate`, marketplace poli
 - Omit `cspExceptions`: every script, style, font and image is bundled, and all Dataverse traffic goes through the host. The default CSP allows only `'self'`, inline scripts and styles, and `data:` fonts and images.
 - Don't set `enabledForPowerPlatformAPI`; the tool reads only through `dataverseAPI`.
 - Pass `npx pptb-validate` with no errors before any release; `npm audit` is clean for a verified listing.
+- Release per page: Logic Starter, Server Objects and Logic Inspector are each published once complete, in whatever order they finish. Each release meets every AC of its released pages and of Story 1 (with AC-1.7 for unreleased pages), passes the validator, and is published only with the owner's explicit confirmation.
 - Register `toolboxAPI.events.on` once at start-up and remove the handler on unload.
 
 **Must not:**
@@ -869,7 +874,7 @@ No blocking product decisions remain. All 59 review findings are adopted (append
 - **S3:** the full Graph/SharePoint script and the collision probe. Needed before R7 is built.
 - **S4:** the envelope casing, the connector result type, the outbound settings precedence and wildcards, Liquid and async, the caller's parent account and the custom API privilege identity, checked with a throwaway probe on a live site. Needed before the client generator ships.
 
-Spike checks are proposals until they run. Nothing in this spec counts as verified on a live site or host until the spike result is recorded in `plan.md`. That includes S1's parent links, S3's collision probe and every S4 runtime check.
+Spike checks are proposals until they run. Nothing in this spec counts as verified on a live site or host until the spike result is recorded in the plan of the phase that runs it. That includes S1's parent links, S3's collision probe and every S4 runtime check.
 
 **Implementation work added in v0.6.0.** The plan should estimate each item as a bounded task with acceptance examples:
 - the shared code analysis (FR-4), connector token detection and fixtures (FR-7);
@@ -931,6 +936,11 @@ Spike checks are proposals until they run. Nothing in this spec counts as verifi
 - 2026-10-14 (owner): Theme → read from the host at launch; light when the host can't answer (AC-1.6).
 - 2026-10-14 (owner): External links → `openInConnectionBrowser` on user selection (FR-1).
 - 2026-10-14 (owner): Host → PPTB Desktop App 1.2.7 or later; the VS Code extension isn't targeted (FR-12).
+- 2026-10-14 (owner): Releases → per page, in completion order; unreleased tabs are shown disabled with no tooltip, and their code isn't built (AC-1.7, FR-1, FR-12).
+- 2026-10-14 (owner): Build planning → walking skeleton, then thin vertical slices; one plan file per phase, and spike evidence goes in the plan of the phase that runs it.
+- 2026-10-14 (owner): PDF → jsPDF and jspdf-autotable in the web view, drawn as vector text (never `html()` rasterising). Not a PPTB .NET worker: it needs a user-installed .NET 10 SDK, has a 1 MiB JSON-only message cap and runs unsandboxed (FR-10).
+- 2026-10-14 (owner): Zip → fflate `zipSync`, built in memory; the async API is unusable because the CSP blocks blob workers (AC-5.6, AC-5.10).
+- 2026-10-14 (owner): Code editor → CodeMirror 6, not Monaco, which needs separate worker files and is far larger; CodeMirror's tab-focus mode covers F48 (AC-4.10).
 
 ## Out of Scope (Future Considerations)
 
