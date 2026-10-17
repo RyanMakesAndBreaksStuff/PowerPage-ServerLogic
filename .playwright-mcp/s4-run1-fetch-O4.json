@@ -1,0 +1,29 @@
+{
+  "signedIn": true,
+  "roles": [],
+  "tokenFound": true,
+  "getAll": {
+    "status": 400,
+    "ms": 1585,
+    "text": "{\"requestId\":\"a3c2f871-4132-43b9-9cdc-8860f2c0b09d\",\"success\":false,\"serverLogicName\":\"s4-probe\",\"error\":\"Exception occurred while processing this request\"}",
+    "trace": null
+  },
+  "getNoToken": {
+    "status": 400,
+    "ms": 606,
+    "text": "{\"requestId\":\"a3670dff-d30d-4813-9473-7b7e44acf31d\",\"success\":false,\"serverLogicName\":\"s4-probe\",\"error\":\"Exception occurred while processing this request\"}",
+    "trace": null
+  },
+  "post": {
+    "status": 400,
+    "ms": 428,
+    "text": "{\"requestId\":\"a963f0c3-56b6-4e65-82f4-09d74688f98f\",\"success\":false,\"serverLogicName\":\"s4-probe\",\"error\":\"Exception occurred while processing this request\"}",
+    "trace": null
+  },
+  "postNoToken": {
+    "status": 401,
+    "ms": 148,
+    "text": "{\"success\":false,\"serverLogicName\":\"s4-probe\",\"error\":\"{\\u0022error\\u0022:{\\u0022code\\u0022:\\u002290040107\\u0022,\\u0022message\\u0022:\\u0022Request validation failed : The required anti-forgery form field \\\\\\u0022__RequestVerificationToken\\\\\\u0022 is not present.\\u0022}}\"}",
+    "trace": null
+  }
+}

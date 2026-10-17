@@ -1,0 +1,40 @@
+{
+  "ajaxSafePostSource": "function o(r,n){var i=a.Deferred();t().done(function(e){s(e,r,n);if(n){var t=r.complete;r.complete=function(e){validateLoginSession(null,null,e,t)};n.ajaxSubmit(r)}else{a.ajax(r).done(function(e,t,r){validateLoginSession(e,t,r,i.resolve)}).fail(i.reject)}}).fail(function(){i.rejectWith(this,arguments)});return i.promise()}",
+  "tokenFromDeferred": true,
+  "jqGet": {
+    "ok": true,
+    "status": 200,
+    "typeofData": "object",
+    "keys": [
+      "requestId",
+      "success",
+      "data",
+      "serverLogicName"
+    ],
+    "success": true
+  },
+  "jqPost": {
+    "ok": true,
+    "status": 200,
+    "typeofData": "object",
+    "keys": [
+      "requestId",
+      "success",
+      "data",
+      "serverLogicName"
+    ],
+    "success": true
+  },
+  "safePost": {
+    "ok": true,
+    "status": 200,
+    "typeofData": "object",
+    "keys": [
+      "requestId",
+      "success",
+      "data",
+      "serverLogicName"
+    ],
+    "success": true
+  }
+}

@@ -1,0 +1,46 @@
+[     123ms] [LOG] Initializing Client Telemetry @ https://content.powerapps.com/resource/powerappsportal/dist/client-telemetry.bundle-d490766e4f.js:29
+[     158ms] [LOG] Initialized Client Telemetry @ https://content.powerapps.com/resource/powerappsportal/dist/client-telemetry.bundle-d490766e4f.js:131
+[     213ms] [LOG] JQMIGRATE: Migrate is installed, version 3.4.0 @ https://content.powerapps.com/resource/powerappsportal/dist/preform.BootstrapV5.moment_2_29_4.bundle-e6db58f462.js:2
+[     480ms] [WARNING] Unsatisfied version 16.14.0 from @microsoft/powerpages-host of shared singleton module react-dom (required ^17.0.0) @ https://content.powerapps.com/resource/powerappsportal/controls/host/main.3ee2491f78.chunk.js:4
+[     787ms] [WARNING] Error: Invariant failed
+    at i (https://content.powerapps.com/resource/powerappsportal/controls/host/100.6355c1b517.chunk.js:1:48279)
+    at oe (https://content.powerapps.com/resource/powerappsportal/controls/host/170.23ec8e1e13.chunk.js:1:10684)
+    at ae (https://content.powerapps.com/resource/powerappsportal/controls/host/170.23ec8e1e13.chunk.js:1:10772)
+    at ie (https://content.powerapps.com/resource/powerappsportal/controls/host/170.23ec8e1e13.chunk.js:1:11060)
+    at https://content.powerapps.com/resource/powerappsportal/controls/host/170.23ec8e1e13.chunk.js:1:10999
+    at L (https://content.powerapps.com/resource/powerappsportal/controls/host/874.d64d28bc67.chunk.js:16:3428)
+    at I (https://content.powerapps.com/resource/powerappsportal/controls/host/874.d64d28bc67.chunk.js:16:2626)
+    at I (https://content.powerapps.com/resource/powerappsportal/controls/host/874.d64d28bc67.chunk.js:16:2749)
+    at q (https://content.powerapps.com/resource/powerappsportal/controls/host/874.d64d28bc67.chunk.js:16:3123)
+    at M (https://content.powerapps.com/resource/powerappsportal/controls/host/874.d64d28bc67.chunk.js:16:3770) @ https://content.powerapps.com/resource/powerappsportal/controls/host/100.6355c1b517.chunk.js:0
+[     808ms] [WARNING] Unsatisfied version 16.14.0 from @microsoft/powerpages-host of shared singleton module react-dom (required ^17.0.0) @ https://content.powerapps.com/resource/powerappsportal/controls/pcf_controls/remoteEntry.f87112f34a.js:0
+[    1830ms] [ERROR] Failed to load resource: the server responded with a status of 404 () @ https://pg-dev.powerappsportals.com/favicon.ico:0
+[    2689ms] [WARNING] Some icons were re-registered. Applications should only call registerIcons for any given icon once. Redefining what an icon is may have unintended consequences. Duplicates include: 
+GlobalNavButton, ChevronDown, ChevronUp, Edit, Add, Cancel, More, Settings, Mail, Filter (+ 5393 more) @ https://content.powerapps.com/resource/powerappsportal/controls/host/873.eb5b07913f.chunk.js:0
+[  692338ms] [LOG] Initializing Client Telemetry @ https://content.powerapps.com/resource/powerappsportal/dist/client-telemetry.bundle-d490766e4f.js:29
+[  692354ms] [LOG] Initialized Client Telemetry @ https://content.powerapps.com/resource/powerappsportal/dist/client-telemetry.bundle-d490766e4f.js:131
+[  692436ms] [LOG] JQMIGRATE: Migrate is installed, version 3.4.0 @ https://content.powerapps.com/resource/powerappsportal/dist/preform.BootstrapV5.moment_2_29_4.bundle-e6db58f462.js:2
+[  692800ms] [WARNING] Unsatisfied version 16.14.0 from @microsoft/powerpages-host of shared singleton module react-dom (required ^17.0.0) @ https://content.powerapps.com/resource/powerappsportal/controls/host/main.3ee2491f78.chunk.js:4
+[  693038ms] [ERROR] The source list for the Content Security Policy directive 'script-src' contains an invalid source: ''inject-hashes''. It will be ignored. @ https://pg-dev.powerappsportals.com/_webresource/msdyn_/RecordWall.htm:0
+[  693062ms] [ERROR] Executing inline script violates the following Content Security Policy directive 'script-src 'self' test.content.powerapps.com content.powerapps.com content.powerapps.us content.appsplatform.us content.powerapps.cn  'unsafe-eval' 'nonce-BRV98U6JLFtvqebg//G3vPLQuskqDS7BltbgmlOjCu4=' 'sha256-YpBM7xPJQJfSSthwTVGpeXpUbzvd1XmAqvdlDUvm/QM=' 'unsafe-hashes' 'inject-hashes''. Either the 'unsafe-inline' keyword, a hash ('sha256-yDgNaxThEnVlUtYtle/Pg/DAPDljZAab1Qe+IkLDsaY='), or a nonce ('nonce-...') is required to enable inline execution. The action has been blocked. @ https://pg-dev.powerappsportals.com/_webresource/msdyn_/RecordWall.htm:3
+[  693140ms] [WARNING] Error: Invariant failed
+    at i (https://content.powerapps.com/resource/powerappsportal/controls/host/100.6355c1b517.chunk.js:1:48279)
+    at oe (https://content.powerapps.com/resource/powerappsportal/controls/host/170.23ec8e1e13.chunk.js:1:10684)
+    at ae (https://content.powerapps.com/resource/powerappsportal/controls/host/170.23ec8e1e13.chunk.js:1:10772)
+    at ie (https://content.powerapps.com/resource/powerappsportal/controls/host/170.23ec8e1e13.chunk.js:1:11060)
+    at https://content.powerapps.com/resource/powerappsportal/controls/host/170.23ec8e1e13.chunk.js:1:10999
+    at L (https://content.powerapps.com/resource/powerappsportal/controls/host/874.d64d28bc67.chunk.js:16:3428)
+    at I (https://content.powerapps.com/resource/powerappsportal/controls/host/874.d64d28bc67.chunk.js:16:2626)
+    at I (https://content.powerapps.com/resource/powerappsportal/controls/host/874.d64d28bc67.chunk.js:16:2749)
+    at q (https://content.powerapps.com/resource/powerappsportal/controls/host/874.d64d28bc67.chunk.js:16:3123)
+    at M (https://content.powerapps.com/resource/powerappsportal/controls/host/874.d64d28bc67.chunk.js:16:3770) @ https://content.powerapps.com/resource/powerappsportal/controls/host/100.6355c1b517.chunk.js:0
+[  693161ms] [WARNING] Unsatisfied version 16.14.0 from @microsoft/powerpages-host of shared singleton module react-dom (required ^17.0.0) @ https://content.powerapps.com/resource/powerappsportal/controls/pcf_controls/remoteEntry.f87112f34a.js:0
+[  693866ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ https://pg-dev.powerappsportals.com/_webresource/msdyn_/styles/jQuery.UI.core.css:0
+[  693866ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ https://pg-dev.powerappsportals.com/_webresource/msdyn_/styles/jQuery.UI.theme.css:0
+[  693867ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ https://pg-dev.powerappsportals.com/_webresource/msdyn_/InstalledLocales.js?ver=892507189:0
+[  693868ms] [ERROR] Failed to load resource: the server responded with a status of 404 () @ https://pg-dev.powerappsportals.com/_webresource/ClientGlobalContext.js.aspx:0
+[  693884ms] [ERROR] Executing inline script violates the following Content Security Policy directive 'script-src 'self' test.content.powerapps.com content.powerapps.com content.powerapps.us content.appsplatform.us content.powerapps.cn  'unsafe-eval' 'nonce-BRV98U6JLFtvqebg//G3vPLQuskqDS7BltbgmlOjCu4=' 'sha256-YpBM7xPJQJfSSthwTVGpeXpUbzvd1XmAqvdlDUvm/QM=' 'unsafe-hashes' 'inject-hashes''. Either the 'unsafe-inline' keyword, a hash ('sha256-GeTrsQEzswdLGArAELW9yRLwNDeQGnKln/AHBX0ci+Y='), or a nonce ('nonce-...') is required to enable inline execution. The action has been blocked. @ https://pg-dev.powerappsportals.com/_webresource/msdyn_/RecordWall.htm:26
+[  693884ms] [ERROR] Executing inline script violates the following Content Security Policy directive 'script-src 'self' test.content.powerapps.com content.powerapps.com content.powerapps.us content.appsplatform.us content.powerapps.cn  'unsafe-eval' 'nonce-BRV98U6JLFtvqebg//G3vPLQuskqDS7BltbgmlOjCu4=' 'sha256-YpBM7xPJQJfSSthwTVGpeXpUbzvd1XmAqvdlDUvm/QM=' 'unsafe-hashes' 'inject-hashes''. Either the 'unsafe-inline' keyword, a hash ('sha256-S6ObPV+4hQ+KPiZ6S39TKl9iPJjvBMQBhZmrnGMQyKw='), or a nonce ('nonce-...') is required to enable inline execution. The action has been blocked. @ https://pg-dev.powerappsportals.com/_webresource/msdyn_/RecordWall.htm:103
+[  693884ms] [ERROR] Executing inline script violates the following Content Security Policy directive 'script-src 'self' test.content.powerapps.com content.powerapps.com content.powerapps.us content.appsplatform.us content.powerapps.cn  'unsafe-eval' 'nonce-BRV98U6JLFtvqebg//G3vPLQuskqDS7BltbgmlOjCu4=' 'sha256-YpBM7xPJQJfSSthwTVGpeXpUbzvd1XmAqvdlDUvm/QM=' 'unsafe-hashes' 'inject-hashes''. Either the 'unsafe-inline' keyword, a hash ('sha256-B3Wx3VveijsDkHGjcyMKSkc2/kmOHpyf+OOe6znO+qU='), or a nonce ('nonce-...') is required to enable inline execution. The action has been blocked. @ https://pg-dev.powerappsportals.com/_webresource/msdyn_/RecordWall.htm:140
+[  695034ms] [WARNING] Some icons were re-registered. Applications should only call registerIcons for any given icon once. Redefining what an icon is may have unintended consequences. Duplicates include: 
+GlobalNavButton, ChevronDown, ChevronUp, Edit, Add, Cancel, More, Settings, Mail, Filter (+ 5393 more) @ https://content.powerapps.com/resource/powerappsportal/controls/host/873.eb5b07913f.chunk.js:0

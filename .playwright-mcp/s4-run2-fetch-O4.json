@@ -1,0 +1,26 @@
+{
+  "url": "https://pg-dev.powerappsportals.com/",
+  "signedIn": true,
+  "getAll": {
+    "status": 400,
+    "ms": 939,
+    "text": "{\"requestId\":\"63953c7f-e436-48a2-ae53-5709c1c228b2\",\"success\":false,\"serverLogicName\":\"s4-probe\",\"error\":\"Exception occurred while processing this request\"}",
+    "trace": [
+      "Warning RTSS09: HTTP/X-Content-Type-Options site setting is missing or misconfigured.",
+      "Error RTSL01: Script validation failed: prohibited pattern found - Pattern: delete\\s+[a-zA-Z_$]",
+      "Info RTSL01: Server Logic Executed At: 10/15/2026 5:06:23 AM",
+      "Info RTSL01: Server Logic Execution Time Duration: 748.8069ms"
+    ]
+  },
+  "post": {
+    "status": 400,
+    "ms": 188,
+    "text": "{\"requestId\":\"0c59e6b8-b0fd-4fac-b780-147a08567498\",\"success\":false,\"serverLogicName\":\"s4-probe\",\"error\":\"Exception occurred while processing this request\"}",
+    "trace": [
+      "Warning RTSS09: HTTP/X-Content-Type-Options site setting is missing or misconfigured.",
+      "Error RTSL01: Script validation failed: prohibited pattern found - Pattern: delete\\s+[a-zA-Z_$]",
+      "Info RTSL01: Server Logic Executed At: 10/15/2026 5:06:24 AM",
+      "Info RTSL01: Server Logic Execution Time Duration: 11.1537ms"
+    ]
+  }
+}

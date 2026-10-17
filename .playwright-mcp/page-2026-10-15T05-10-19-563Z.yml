@@ -1,0 +1,76 @@
+- generic [active] [ref=f7e1]:
+  - generic [ref=f7e2]:
+    - generic [ref=f7e3]:
+      - img "lock" [ref=f7e4]
+      - generic [ref=f7e5]: "This site is private:"
+      - generic [ref=f7e6]: Only specific people can view this site.
+      - link "Learn more" [ref=f7e8] [cursor=pointer]:
+        - /url: https://go.microsoft.com/fwlink/?linkid=2204617
+    - generic [ref=f7e9]:
+      - text: Signed in as
+      - link "Ryan Makes Stuff" [ref=f7e12] [cursor=pointer]:
+        - /url: https://myaccount.microsoft.com?login_hint=Ryan@contactemailforryangmail.onmicrosoft.com
+  - navigation [ref=f7e13]:
+    - link "Skip to main content" [ref=f7e14] [cursor=pointer]:
+      - /url: "#mainContent"
+    - generic [ref=f7e15]:
+      - link [ref=f7e21] [cursor=pointer]:
+        - /url: ~/
+        - img "Company Name logo" [ref=f7e22]
+        - paragraph [ref=f7e23]: Company Name
+      - navigation [ref=f7e25]:
+        - menubar [ref=f7e26]:
+          - menuitem "ss4" [ref=f7e27] [cursor=pointer]
+          - listitem [ref=f7e28]
+          - menuitem "Home" [ref=f7e29] [cursor=pointer]:
+            - generic [ref=f7e30]: 
+          - listitem [ref=f7e31]
+          - menuitem "Partner Program" [ref=f7e32] [cursor=pointer]
+          - listitem [ref=f7e33]
+          - menuitem "Support" [ref=f7e34] [cursor=pointer]
+          - listitem [ref=f7e35]
+          - button "Search" [ref=f7e36] [cursor=pointer]:
+            - generic [ref=f7e37]: 
+          - text: 
+          - listitem [ref=f7e38]
+          - menuitem "Ryan Makes Stuff" [ref=f7e39] [cursor=pointer]
+  - main [ref=f7e41]:
+    - generic [ref=f7e42]: "sync: success=true status=200 raw={\"kind\":\"sync\",\"fn\":\"liquidSync\",\"input\":\"{\\\"probe\\\":\\\"liquid\\\"}\"} kind=sync async: success=true status=200 raw={\"kind\":\"async\",\"fn\":\"liquidAsync\",\"awaited\":\"awaited\"} kind=async"
+  - generic [ref=f7e55]:
+    - heading "Get Help" [level=3] [ref=f7e56]
+    - link "Browse the KB" [ref=f7e61] [cursor=pointer]:
+      - /url: /knowledgebase/
+    - link "Create Case" [ref=f7e63] [cursor=pointer]:
+      - /url: /support/create-case/
+    - link "Contact us" [ref=f7e65] [cursor=pointer]:
+      - /url: /contact-us/
+  - contentinfo [ref=f7e66]:
+    - generic [ref=f7e72]:
+      - heading "About Partner Portal" [level=3] [ref=f7e73]
+      - paragraph [ref=f7e74]: This site uses sample data for demonstration purposes.
+    - generic [ref=f7e77]:
+      - paragraph [ref=f7e81]: Copyright © 2026. All rights reserved.
+      - list [ref=f7e83]:
+        - listitem [ref=f7e84]:
+          - navigation "Partner Program" [ref=f7e85]:
+            - heading "Partner Program" [level=4] [ref=f7e86]
+            - list [ref=f7e87]:
+              - listitem [ref=f7e88]:
+                - link "Program details" [ref=f7e89] [cursor=pointer]:
+                  - /url: /partner-program/partner-program-details/
+              - listitem [ref=f7e90]:
+                - link "Become a partner" [ref=f7e91] [cursor=pointer]:
+                  - /url: /partner-program/become-a-partner/
+              - listitem [ref=f7e92]:
+                - link "Frequently asked questions" [ref=f7e93] [cursor=pointer]:
+                  - /url: /partner-program/partner-program-FAQs/
+        - listitem [ref=f7e94]:
+          - navigation "Support" [ref=f7e95]:
+            - heading "Support" [level=4] [ref=f7e96]
+            - list [ref=f7e97]:
+              - listitem [ref=f7e98]:
+                - link "Forums" [ref=f7e99] [cursor=pointer]:
+                  - /url: /forums/
+              - listitem [ref=f7e100]:
+                - link "Knowledge Base" [ref=f7e101] [cursor=pointer]:
+                  - /url: /knowledgebase/

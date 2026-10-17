@@ -1,0 +1,5 @@
+ERROR: The server or proxy was not found.. Status: Response_Status.Status_NoNetwork, Error code: 3399942148, Tag: 557973641
+Run the command below to authenticate interactively; additional arguments may be added as needed:
+az logout
+az login --tenant "03659a82-3efd-45b2-95e3-8fdb52e13287" --scope "https://policyguarddev.crm.dynamics.com/.default"
+Failed to get Azure CLI token. Run `az login --allow-no-subscriptions` first.
