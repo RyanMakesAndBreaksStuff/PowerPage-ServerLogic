@@ -1,6 +1,6 @@
 # Phase 01: PPTB host adapter + fake
 
-**Implements:** FR-7 (Dataverse reads: every page, a bounded 429/5xx retry at 1 s, 2 s and 4 s, read-only), FR-12 (one `toolboxAPI.events.on` registration, removed on unsubscribe), FR-1 (the host side of `showNotification` and `openInConnectionBrowser`: reject on failure so the app layer can fall back), NFR Security (no tokens, read-only, only error names logged) | **Satisfies:** no AC row of its own. It supplies the host behaviour that AC-1.6 (theme, light on failure), AC-4.9 and AC-6.7 (copy), AC-5.6, AC-5.10 and AC-9.3 (save, cancel), AC-7.5 and AC-7.11 (environment label, Unknown), AC-7.6 (connection events) and AC-7.7 (a failed read) build on, and the reject half of the Error Scenario "`showNotification` missing, throws or rejects".
+**Implements:** FR-7 (Dataverse reads: every page, a bounded 429/5xx retry at 1 s, 2 s and 4 s, read-only), FR-12 (one `toolboxAPI.events.on` registration, removed on unsubscribe), FR-1 (the host side of `showNotification` and `openInConnectionBrowser`: reject on failure so the app layer can fall back), NFR Security (no tokens, read-only, only error names logged) | **Satisfies:** no AC row of its own. It supplies the host behaviour that AC-1.6 (theme; a failed read rejects so the shell can choose light at launch or keep the current theme), AC-4.9 and AC-6.7 (copy), AC-5.6, AC-5.10 and AC-9.3 (save, cancel), AC-7.5 and AC-7.11 (environment label, Unknown), AC-7.6 (connection events) and AC-7.7 (a failed read) build on, and the reject half of the Error Scenario "`showNotification` missing, throws or rejects".
 **Depends on:** 00
 **Files:**
 - Replace the Phase 00 stubs: `src/services/pptb/pptbHost.ts`, `src/services/pptb/fakeHost.ts` (whole files).
@@ -16,7 +16,7 @@
   - Folder-internal, not for other folders: `hostErrors.ts` (`HostCallError`, `isRecord`, `errorName`, `statusOf`, `logHostFailure`, `messageForStatus`, `isRetryable`, `toHostReadError`) and `dataverseRead.ts` (`buildQueryPath`, `withRetry`, `fetchAllPages`, `queryAllRows`, `downloadColumnContent`, `RETRY_DELAYS_MS`, `NEXT_LINK_UNVERIFIED`). Phase 12 edits `dataverseRead.ts` and nothing else here.
 - **Behaviour later phases may rely on** (the real adapter and the fake both follow it):
   - No `PptbHost` method throws synchronously. A failure is always a rejected promise.
-  - `getTheme` never rejects: it resolves `'light'` when the host fails, is missing or answers with anything but `'dark'`.
+  - `getTheme` resolves `'dark'` only for a host answer of `'dark'` and `'light'` for any other answer. It rejects with a `HostCallError` when the host member is missing, throws or rejects, so the caller decides the fallback: Phase 06 uses light at launch and keeps the current theme on a re-read (AC-1.6). (Changed 2026-10-17 while writing Phase 06: resolving `'light'` on failure would flip a dark tool to light on a failed re-read.)
   - `notify`, `copyText`, `openExternal` and `saveFile` reject with a `HostCallError` (`name === 'HostCallError'`) when the host member is missing, throws or rejects. `getActiveConnection` does the same for a malformed answer, and resolves `null` for "no connection". The adapter has already logged the failure by error name, so the app layer (Phase 06's `useNotify`) shows its fallback toast and does not log it again.
   - `notify` passes `duration: 0` for `type: 'error'` and no `duration` for the other types.
   - `saveFile` resolves `{ status: 'cancelled' }` when the user cancels and `{ status: 'saved', path }` otherwise. Bytes go to the host as given.
@@ -594,9 +594,9 @@ Read from https://docs.powerplatformtoolbox.com/tool-development/api-reference (
       await expect(host.getTheme()).resolves.toBe('dark');
     });
 
-    it('falls back to light when the host call fails, logging only the error name', async () => {
+    it('rejects with a HostCallError when the host call fails, logging only the error name', async () => {
       stubs.getCurrentTheme.mockRejectedValue(new TypeError('SECRET-BODY https://org.example/x'));
-      await expect(host.getTheme()).resolves.toBe('light');
+      await expect(host.getTheme()).rejects.toMatchObject({ name: 'HostCallError' });
       expect(logged()).toContain('TypeError');
       expect(logged()).not.toContain('SECRET');
     });
@@ -606,9 +606,9 @@ Read from https://docs.powerplatformtoolbox.com/tool-development/api-reference (
       await expect(host.getTheme()).resolves.toBe('light');
     });
 
-    it('falls back to light when the host API is missing', async () => {
+    it('rejects with a HostCallError when the host API is missing', async () => {
       Reflect.deleteProperty(window, 'toolboxAPI');
-      await expect(host.getTheme()).resolves.toBe('light');
+      await expect(host.getTheme()).rejects.toMatchObject({ name: 'HostCallError' });
     });
   });
 
@@ -1193,13 +1193,10 @@ Read from https://docs.powerplatformtoolbox.com/tool-development/api-reference (
 
     return {
       async getTheme(): Promise<ThemeName> {
-        try {
-          const theme: unknown = await window.toolboxAPI.utils.getCurrentTheme();
-          return theme === 'dark' ? 'dark' : 'light';
-        } catch (error) {
-          logHostFailure('getCurrentTheme', error);
-          return 'light';
-        }
+        const theme: unknown = await hostCall('getCurrentTheme', () =>
+          window.toolboxAPI.utils.getCurrentTheme(),
+        );
+        return theme === 'dark' ? 'dark' : 'light';
       },
 
       notify: (n) =>

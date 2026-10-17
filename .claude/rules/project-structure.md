@@ -1,6 +1,6 @@
 # Project Structure & Naming
 
-- Convention: Scaffold with the official `yo pptb` generator (React). Its layout and Vite config are the base; these conventions layer on top of it.
+- Convention: Scaffold with the standard Vite template (`npm create vite` → `react-compiler-ts`, ESLint variant; owner decision 2026-10-17, the `yo pptb` generator is not used). Phase 00 adds the PPTB build shape and manifest by hand; these conventions layer on top of it.
 - Convention: Feature-first layout under `src/`:
   `app/` (entry, providers, shell layout) · `features/<feature>/` (components, hooks, actions, types for one slice) · `components/` (shared, feature-agnostic UI only) · `lib/` (pure utilities, no React) · `services/` (PPTB host adapter, generators) · `types/` (shared types).
 - Convention: Component files are PascalCase (`EntityList.tsx`); hooks and utility files are camelCase (`useEntityQuery.ts`, `generatePdf.ts`); folders are kebab-case. Hooks are `useXxx`; functions/variables camelCase; module-level constants UPPER_SNAKE_CASE; types/interfaces PascalCase with no `I` prefix. Never mix conventions.

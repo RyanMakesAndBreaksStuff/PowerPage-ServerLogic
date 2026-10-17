@@ -3,8 +3,8 @@
 **Implements:** FR-12 (PPTB manifest, single IIFE bundle, no CDN, no `cspExceptions`), FR-1 (released pages as a build-time constant; unreleased page code left out of the bundle), FR-10 and FR-11 (report fonts, JetBrains Mono and Fluent System Icons bundled locally), FR-7 (S1 and S4 evidence recorded under F59) | **Satisfies:** AC-1.7, build-time half only (an unreleased page's code is absent from the bundle; the disabled-tab behaviour is Phase 06). No other AC is owned here: this phase is the enabling skeleton that every later phase builds on.
 **Depends on:** none (Wave W0)
 **Files:**
-- Create or replace at the repo root: `package.json` (modify the generator's), `package-lock.json`, `index.html`, `tsconfig.json`, `tsconfig.app.json`, `tsconfig.node.json`, `vite.config.ts`, `eslint.config.ts`, `.prettierrc.json`, `.prettierignore`, `.gitignore` (append), `README.md`, `public/icons/server-logic-tools.svg`, `scripts/bundle-size.mjs`. The generator also writes `.npmignore`, which is kept as is.
-- Delete (the generator's demo): `src/App.tsx`, `src/components/ConnectionStatus.tsx`, `src/components/DataverseAPIDemo.tsx`, `src/components/EventLog.tsx`, `src/components/ToolboxAPIDemo.tsx`, `src/hooks/useToolboxAPI.ts`.
+- Create or replace at the repo root: `package.json` (from the template), `package-lock.json`, `index.html`, `tsconfig.json`, `tsconfig.app.json`, `tsconfig.node.json`, `vite.config.ts`, `eslint.config.ts`, `.prettierrc.json`, `.prettierignore`, `.gitignore` (append), `.npmignore`, `README.md`, `public/icons/server-logic-tools.svg`, `scripts/bundle-size.mjs`.
+- Delete (the template's demo and its JS ESLint config): `src/App.tsx`, `eslint.config.js`. The template's `App.css`, `src/assets/`, `public/` and README are never copied in (Step 3).
 - Create under `src/`: `main.tsx`, `index.css`, `vite-env.d.ts`, `skeleton.test.ts`.
   - `test/`: `setup.ts`, `toolchain.test.tsx`.
   - `assets/fonts/`: `fonts.css`, `jetbrains-mono-latin-{400,500,700}-normal.woff2`, `DMSans_{400Regular,500Medium,700Bold}.ttf`, `SpaceGrotesk_{400Regular,500Medium,700Bold}.ttf`, `OFL-JetBrainsMono.txt`, `OFL-DMSans.txt`, `OFL-SpaceGrotesk.txt`.
@@ -24,8 +24,8 @@
   - `features/inspector/`: `InspectorPage.tsx`, `model/rules.ts`, `scan/scan.ts`.
   - `features/inspector/report/`: `reportModel.types.ts`, `buildReportModel.ts`, `renderMarkdown.ts`, `renderPdf.ts`, `reportFileName.ts`.
 - Create under `tests/` (Node environment): `manifest.test.ts`, `buildShape.test.ts`.
-**Interfaces:** Consumes: nothing from earlier phases (this is the first). It consumes the `generator-pptb` React template, `@pptb/types`, and the contract text in `plan.md` (Contracts and Pinned function signatures), which it commits verbatim. Produces, with exact names:
-- every contract type and constant in `plan.md`: `HttpMethod`, `HTTP_METHODS`, `HandlerFunction`, `METHOD_FUNCTION`, `ClientLanguage`, `View`, the recipe types, the code-analysis types, the `host.types.ts` types and `HostReadError`, the inspector types, the report option types, and the Starter session types;
+**Interfaces:** Consumes: nothing from earlier phases (this is the first). It consumes the create-vite 9.2.1 `react-compiler-ts` template (ESLint variant), `@pptb/types`, and the contract text in `plan-starter.md` (Contracts and Pinned function signatures), which it commits verbatim. Produces, with exact names:
+- every contract type and constant in `plan-starter.md`: `HttpMethod`, `HTTP_METHODS`, `HandlerFunction`, `METHOD_FUNCTION`, `ClientLanguage`, `View`, the recipe types, the code-analysis types, the `host.types.ts` types and `HostReadError`, the inspector types, the report option types, and the Starter session types;
 - a stub for every pinned function, with the contract signature and the body `throw new Error('not implemented: phase NN')` (NN is the owning phase). The stub list is in Steps 37 to 39;
 - `RELEASED_PAGES: readonly View[]` from `@/app/releasedPages`;
 - the `@/` alias (`@/` maps to `src/`) in `tsconfig.app.json`, `vite.config.ts` and Vitest;
@@ -33,12 +33,13 @@
 - `src/test/setup.ts` (jest-dom matchers and RTL cleanup) and the build-shape test;
 - all runtime dependencies and the bundled fonts, so no later phase edits `package.json`.
 
-This phase scaffolds the PPTB tool with the official generator and layers the project's TypeScript, lint, format and test rules on top. It commits the cross-phase contracts and a stub for every pinned function, so Wave W1 and later phases can run in parallel with disjoint file ownership. It also proves, before any feature exists, that the build is a single IIFE bundle, that unreleased pages are dropped from it, and that jsPDF, CodeMirror, acorn, fflate, a TTF font and a Fluent icon bundle together. Finally, it records the S1 and S4 spike evidence.
+This phase scaffolds the PPTB tool with the standard Vite template (owner decision 2026-10-17: the `yo pptb` generator is not used), adds the PPTB build shape by hand, and layers the project's TypeScript, lint, format and test rules on top. It commits the cross-phase contracts and a stub for every pinned function, so Wave W1 and later phases can run in parallel with disjoint file ownership. It also proves, before any feature exists, that the build is a single IIFE bundle, that unreleased pages are dropped from it, and that jsPDF, CodeMirror, acorn, fflate, a TTF font and a Fluent icon bundle together. Finally, it records the S1 and S4 spike evidence.
 
-> **Complexity note.** Gate: Simplicity (at most 3 major components). Violation: this phase creates about 70 files, because every cross-phase function gets a stub and every runtime dependency is installed here. Justification: plan.md "Execution model" runs phases in one wave in separate worktrees with disjoint file ownership, and states that "No later phase edits `package.json`"; both are impossible unless the skeleton exists first. The Integration-First gate is met (contracts and their type test come before any implementation). Dependency gate: every package is named by the spec. jsPDF, jspdf-autotable, fflate and CodeMirror 6 come from the Resolved log (v1.1.0); acorn comes from FR-4 and FR-7; Fluent System Icons from FR-11; the fonts from FR-10 and FR-11.
+> **Complexity note.** Gate: Simplicity (at most 3 major components). Violation: this phase creates about 70 files, because every cross-phase function gets a stub and every runtime dependency is installed here. Justification: plan-starter.md "Execution model" runs phases in one wave in separate worktrees with disjoint file ownership, and states that "No later phase edits `package.json`"; both are impossible unless the skeleton exists first. The Integration-First gate is met (contracts and their type test come before any implementation). Dependency gate: every package is named by the spec. jsPDF, jspdf-autotable, fflate and CodeMirror 6 come from the Resolved log (v1.1.0); acorn comes from FR-4 and FR-7; Fluent System Icons from FR-11; the fonts from FR-10 and FR-11.
 
 > **Execution notes for the implementer.**
-> - The Vite and tooling versions below were chosen from the npm registry on 2026-10-16. The generator (`generator-pptb@1.0.6`) ships React 18, Vite 7 and `@vitejs/plugin-react` 4, so Steps 4 and 5 upgrade React to 19 and pin the tooling to versions that agree with each other. Pins that matter: `eslint@^9` (because `eslint-plugin-jsx-a11y` only supports ESLint up to 9), `typescript@~5.9` (because `typescript-eslint` supports TypeScript below 6.1), `vite@^7` (the generator's major) and `@vitejs/plugin-react@^5` (the last line that accepts a `babel` option for the React Compiler on Vite 7).
+> - Versions follow the template (create-vite 9.2.1, read from the npm registry on 2026-10-17): React 19.2, Vite 8 (Rolldown), `@vitejs/plugin-react` 6, TypeScript ~6.0. One deliberate deviation: ESLint is pinned to `^9` instead of the template's 10, because `eslint-plugin-jsx-a11y` only supports ESLint up to 9. `typescript-eslint` 8 supports TypeScript below 6.1, so the template's TypeScript stays.
+> - Vite 8 bundles with Rolldown. The IIFE options live in `build.rolldownOptions.output` and the single-bundle switch is `codeSplitting: false` (Rolldown deprecates `inlineDynamicImports`). The PPTB HTML fix-up is the `fixHtmlForPPTB` plugin, ported from the `yo pptb` 1.0.6 template because the PPTB loader needs it. This combination was not built while writing the plan (the scratch build was not allowed), so the build-shape tests in Step 41 are the proof: if one fails, fix the config they point at, never the test.
 > - The code in this plan was written without being run. Treat each "expect PASS" line as the check, and if a tool prints an error, fix the cause in the file shown, not by loosening a rule.
 > - The SDD hard gate ("no code without a prior failing test") has two exceptions: Step 1 (generated scaffold) and the config files of Step 11. The config files are covered by the red-first tests in Steps 7, 20, 29 and 41.
 
@@ -58,53 +59,61 @@ This phase scaffolds the PPTB tool with the official generator and layers the pr
   node --version
   npm --version
   ls package.json 2>&1
+  ls -d .scaffold 2>&1
   ```
 
-  Expect: branch `001-server-logic-starter-inspector`; the only untracked entries are `docs/specs/001-server-logic-starter-inspector/plan.md` and `plans/` (other phases' plan files may also be present); Node `v20.19` or later (v24 is fine); `ls: cannot access 'package.json'` (no scaffold yet). If `package.json` already exists, stop: the scaffold was already run.
+  Expect: branch `001-server-logic-starter-inspector`; a clean tree (other phases' plan files may be untracked); Node `v20.19` or later (v24 is fine, Vite 8 needs 20.19+); `ls: cannot access 'package.json'` and `ls: cannot access '.scaffold'`. If `package.json` already exists, stop: the scaffold was already run.
 
-- [ ] **Step 1: Run the official generator in the repo root**
+- [ ] **Step 1: Scaffold with create-vite into a temporary folder**
 
-  The generator writes `package.json`, `tsconfig*.json`, `vite.config.ts`, `index.html`, `README.md`, `.npmignore` and `src/`, then runs `npm install`. Passing `--gitInit false` stops it from running `git init` and from writing a `.gitignore` over the repo's own.
+  Owner decision 2026-10-17: the tool is scaffolded with the standard Vite template, not the `yo pptb` generator. The `react-compiler-ts` template with `--eslint` already wires the React Compiler (through `@rolldown/plugin-babel` and `reactCompilerPreset`) and an ESLint flat config with `typescript-eslint`, which matches `.claude/rules/tooling.md`. The version is pinned so the scaffold is reproducible. It writes into `.scaffold/` because create-vite only offers to empty a non-empty folder (`--overwrite`), and the repo root holds the specs and design files; **never pass `--overwrite`**.
 
   ```bash
-  npx --package yo --package generator-pptb -- yo pptb . --toolType react --toolDisplayName "Server Logic Tools" --toolId server-logic-tools --toolDescription "Generate Power Pages server logic and review its readiness" --pkgManager npm --gitInit false
+  npm create vite@9.2.1 .scaffold -- --no-interactive --no-immediate --template react-compiler-ts --eslint
   ```
 
-  Expect: the banner "Welcome to the Power Platform Tool Box generator!", then `Installing dependencies with npm install...`, then `Your tool has been created!`. If the generator still asks questions (a newer version may rename the flags), answer: type React, display name `Server Logic Tools`, id `server-logic-tools`, description as above, package manager npm, git init **No**.
+  Expect: `Scaffolding project in …/.scaffold...` and `Done.`, with no dependency install and no dev server (`--no-immediate`).
 
-- [ ] **Step 2: Inspect what the generator produced and confirm the Vite config is the IIFE one**
+- [ ] **Step 2: Inspect what the template produced**
 
   ```bash
-  git status --short
-  grep -n "iife\|inlineDynamicImports\|fixHtmlForPPTB\|crossorigin" vite.config.ts
-  grep -n "\"react\"\|\"vite\"\|\"@vitejs/plugin-react\"\|\"build\"" package.json
-  ls src src/components src/hooks
+  ls -a .scaffold .scaffold/src .scaffold/public
+  cat .scaffold/package.json .scaffold/vite.config.ts
   ```
 
-  Expect:
-  - `vite.config.ts` contains `format: 'iife'`, `inlineDynamicImports: true`, the `fixHtmlForPPTB` plugin, and the two regexes that remove `type="module"` and `crossorigin`. If any of the four is missing, stop and report to the owner: the generator changed and Steps 11 and 41 must be re-derived from the new config. Do not hand-write a replacement.
-  - `package.json` shows React `^18.3.1` and Vite `^7.1.11` (Step 4 upgrades React).
-  - `src/` holds `App.tsx`, `main.tsx`, `index.css`, `vite-env.d.ts`, `components/` (four demo components) and `hooks/useToolboxAPI.ts`.
+  Expect, as of create-vite 9.2.1 (read from the published package on 2026-10-17):
+  - root files `.gitignore`, `README.md`, `eslint.config.js`, `index.html`, `package.json`, `tsconfig.json`, `tsconfig.app.json`, `tsconfig.node.json`, `vite.config.ts`; `src/` with `App.tsx`, `App.css`, `index.css`, `main.tsx` and `assets/`; `public/` with `favicon.svg` and `icons.svg`; no `.oxlintrc.json`.
+  - `package.json`: `"type": "module"`, `"private": true`, React `^19.2`, `vite` `^8.3`, `@vitejs/plugin-react` `^6.1`, `typescript` `~6.0`, `@rolldown/plugin-babel`, `babel-plugin-react-compiler`, `@babel/core`, `eslint` `^10`, `@eslint/js` `^10`, `typescript-eslint`, `eslint-plugin-react-hooks` `^7`, `eslint-plugin-react-refresh`, `globals`, and `"lint": "eslint ."`.
+  - `vite.config.ts` imports `react, { reactCompilerPreset } from '@vitejs/plugin-react'` and `babel from '@rolldown/plugin-babel'`, with `plugins: [react(), babel({ presets: [reactCompilerPreset()] })]`.
 
-- [ ] **Step 3: Extend `.gitignore` and commit the untouched scaffold**
+  If the compiler wiring or the ESLint variant is missing (a newer create-vite changed the template), stop and report it to the owner. Do not hand-write a replacement.
 
-  Append, never replace (the repo's `.gitignore` already holds `.codegraph/`):
+- [ ] **Step 3: Move the scaffold into the repo root and commit it**
+
+  Kept: `package.json`, `index.html`, the three `tsconfig*.json`, `vite.config.ts` and `eslint.config.js` (Steps 9 to 11 rewrite them), and `src/main.tsx`, `src/index.css`, `src/App.tsx` (Step 9 removes them). Dropped: the template's README (Step 32 writes ours), its `.gitignore` (the repo's own is extended instead), `App.css`, `src/assets/` and `public/` (Step 32 adds the tool icon).
 
   ```bash
-  printf '%s\n' 'node_modules/' 'dist/' 'dist-probe/' 'coverage/' '*.tsbuildinfo' '.env' '.env.*' >> .gitignore
+  mv .scaffold/package.json .scaffold/index.html .scaffold/tsconfig.json .scaffold/tsconfig.app.json .scaffold/tsconfig.node.json .scaffold/vite.config.ts .scaffold/eslint.config.js .
+  mkdir -p src
+  mv .scaffold/src/main.tsx .scaffold/src/index.css .scaffold/src/App.tsx src/
+  rm -rf .scaffold
+  printf '%s\n' 'node_modules/' 'dist/' 'dist-probe/' 'dist-ssr/' 'coverage/' '*.tsbuildinfo' '*.local' '.env' '.env.*' '.scaffold/' >> .gitignore
+  printf '%s\n' 'src/' 'node_modules/' '.vscode/' '.git/' '.gitignore' 'tsconfig.json' 'vite.config.ts' 'index.html' '*.log' > .npmignore
+  npm install
   cat .gitignore
   git add -A
-  git commit -m "chore(scaffold): generate the PPTB React tool with yo pptb"
+  git commit -m "chore(scaffold): scaffold the React tool with create-vite (react-compiler-ts, ESLint)"
   ```
 
-  Expect: `.gitignore` lists `.codegraph/` first and then the seven new lines; the commit succeeds. `package-lock.json` is part of the commit and `node_modules/` is not.
+  Expect: `npm install` ends with `added N packages`; `.gitignore` lists `.codegraph/` first and then the ten new lines; the commit succeeds with `package-lock.json` in it and `node_modules/` not. `.npmignore` is the PPTB package convention (the `yo pptb` template's list): only `dist/`, `package.json`, the README and `npm-shrinkwrap.json` are published.
 
 ### B. Dependencies (every runtime dependency the project needs)
 
 - [ ] **Step 4: Install the runtime dependencies**
 
+  React 19 comes with the template. Add:
+
   ```bash
-  npm install react@^19.2.0 react-dom@^19.2.0
   npm install --save-exact jspdf@4.2.1 jspdf-autotable@5.0.8
   npm install fflate@^0.8.3 acorn@^8.19.0 acorn-walk@^8.3.5
   npm install @codemirror/state @codemirror/view @codemirror/commands @codemirror/language @codemirror/lang-javascript @lezer/highlight
@@ -115,36 +124,37 @@ This phase scaffolds the PPTB tool with the official generator and layers the pr
 
   | Package | Used for | Spec source |
   |---|---|---|
-  | `react`, `react-dom` 19 | UI with the React Compiler | stack rules |
+  | `react`, `react-dom` 19 (from the template) | UI with the React Compiler | stack rules |
   | `jspdf` 4.2.1, `jspdf-autotable` 5.0.8 | Inspector PDF reports in the web view, no .NET worker | Resolved log v1.1.0, FR-10 |
   | `fflate` | the Starter zip via `zipSync` | Resolved log v1.1.0, AC-5.6 |
   | `acorn`, `acorn-walk` | tokenizer and parser for FR-4 and the FR-7 structure analysis, the AC-6.8 trial parse. `acorn-walk` is installed so Phase 03 can walk the tree without touching `package.json` | FR-4, FR-7, AC-6.8 |
   | `@codemirror/state`, `view`, `commands`, `language`, `lang-javascript`, `@lezer/highlight` | the code panes: line numbers, line highlights, history, JavaScript highlighting, Esc-then-Tab (tab-focus mode is in `view`/`commands`). Not installed: `@codemirror/search`, `@codemirror/autocomplete` and the `codemirror` meta package (no AC needs them) | Resolved log v1.1.0, AC-4.10, F48 |
-  | `@fluentui/react-icons` | Fluent System Icons as tree-shakeable React components, MIT, one component per icon so only used icons are bundled. The alternative `@fluentui/svg-icons` would need our own wrapper component for every icon (an extra layer). Its runtime (`@griffel/react`) injects `<style>` rules, which the PPTB default CSP allows. The probe in Step 44 measures its cost, and the PPTB smoke gate confirms it renders | FR-11 |
+  | `@fluentui/react-icons` | Fluent System Icons as tree-shakeable React components (`<Name>16Regular`), MIT; only the icons imported are bundled. They render `fill="currentColor"`, `aria-hidden` without a `title`, and `role="img"` with an `aria-label` when given one. Their runtime (`@griffel/react`) injects `<style>` rules, which the PPTB default CSP allows. The probe in Step 44 measures its cost, and the PPTB smoke gate confirms it renders | FR-11 |
 
   jsPDF lists `html2canvas`, `canvg`, `dompurify` and `core-js` as optional dependencies. They stay installed (npm installs optional dependencies by default); Vite aliases the first three to an empty module in Step 11, so none of them reaches the bundle.
 
 - [ ] **Step 5: Install the development dependencies**
 
+  The template already brings TypeScript ~6.0, Vite 8, `@vitejs/plugin-react` 6, the React Compiler packages, `@types/react`, `@types/react-dom`, `@types/node`, `typescript-eslint`, `eslint-plugin-react-hooks`, `eslint-plugin-react-refresh` and `globals`. The first command **downgrades ESLint from the template's 10 to 9**, because `eslint-plugin-jsx-a11y` (required by `.claude/rules/tooling.md`) declares ESLint up to 9 only; `typescript-eslint` accepts both.
+
   ```bash
-  npm install --save-dev typescript@~5.9.3 vite@^7.1.11 @vitejs/plugin-react@^5.2.0 babel-plugin-react-compiler@^1.0.0
-  npm install --save-dev @types/react@^19 @types/react-dom@^19 @types/node@^24 @pptb/types
-  npm install --save-dev vitest@^5 jsdom @testing-library/react @testing-library/dom @testing-library/jest-dom @testing-library/user-event
-  npm install --save-dev eslint@^9.39 @eslint/js@^9.39 typescript-eslint eslint-plugin-react-hooks eslint-plugin-react-refresh eslint-plugin-jsx-a11y @types/eslint-plugin-jsx-a11y eslint-config-prettier prettier globals jiti
+  npm install --save-dev eslint@^9.39 @eslint/js@^9.39
+  npm install --save-dev eslint-plugin-jsx-a11y @types/eslint-plugin-jsx-a11y eslint-config-prettier prettier jiti
+  npm install --save-dev @pptb/types vitest@^5 jsdom @testing-library/react @testing-library/dom @testing-library/jest-dom @testing-library/user-event
   npm install --save-dev @fontsource/jetbrains-mono @expo-google-fonts/dm-sans @expo-google-fonts/space-grotesk
   ```
 
-  Expect: no `ERESOLVE`. If npm reports a peer-dependency conflict, resolve it by choosing the version the message names; do not use `--force` or `--legacy-peer-deps`. The three font packages are only the source of the font files copied in Step 43 (licence: SIL OFL 1.1 for all three fonts; the two `@expo-google-fonts` packages are MIT-and-OFL wrappers of Google Fonts' static TTFs, and `@fontsource/jetbrains-mono` is OFL). `@pptb/types` brings the `pptb-validate` binary (through `@pptb/validate`).
+  Expect: no `ERESOLVE`. If npm reports a peer-dependency conflict, resolve it by choosing the version the message names; do not use `--force` or `--legacy-peer-deps`. `jiti` lets ESLint 9 load `eslint.config.ts`. The three font packages are only the source of the font files copied in Step 43 (licence: SIL OFL 1.1 for all three fonts; the two `@expo-google-fonts` packages are MIT-and-OFL wrappers of Google Fonts' static TTFs, and `@fontsource/jetbrains-mono` is OFL). `@pptb/types` brings the `pptb-validate` binary (through `@pptb/validate`).
 
 - [ ] **Step 6: Commit the dependencies**
 
   ```bash
-  npm ls react jspdf jspdf-autotable fflate acorn @codemirror/view @fluentui/react-icons vite vitest eslint typescript --depth=0
+  npm ls react jspdf jspdf-autotable fflate acorn @codemirror/view @fluentui/react-icons vite @vitejs/plugin-react vitest eslint typescript typescript-eslint --depth=0
   git add package.json package-lock.json
   git commit -m "build(deps): install runtime and tooling dependencies"
   ```
 
-  Expect: `npm ls` prints `react@19.x`, `jspdf@4.2.1`, `jspdf-autotable@5.0.8`, `vite@7.x`, `vitest@5.x`, `eslint@9.x`, `typescript@5.9.x`, with no `UNMET` or `invalid` lines.
+  Expect: `npm ls` prints `react@19.x`, `jspdf@4.2.1`, `jspdf-autotable@5.0.8`, `vite@8.x`, `@vitejs/plugin-react@6.x`, `vitest@5.x`, `eslint@9.x`, `typescript@6.0.x`, `typescript-eslint@8.x`, with no `UNMET` or `invalid` lines.
 
 ### C. Tooling (TypeScript strict, ESLint, Prettier, Vitest, alias, React Compiler)
 
@@ -168,14 +178,14 @@ This phase scaffolds the PPTB tool with the official generator and layers the pr
 
   Run: `npx vitest run src/test/toolchain.test.tsx`
 
-  Expect: FAIL. The generator's config has no `test` section, so Vitest runs in the Node environment and the error is `ReferenceError: document is not defined` (or `React is not defined`).
+  Expect: FAIL. The template's config has no `test` section, so Vitest runs in the Node environment and the error is `ReferenceError: document is not defined` (or `React is not defined`).
 
-- [ ] **Step 9: Remove the generator's demo code and write the three TypeScript project files**
+- [ ] **Step 9: Remove the template's demo code and write the three TypeScript project files**
 
-  The demo components call `window.*API` directly and use `any`, which the project rules forbid, so they go. `main.tsx`, `index.css` and `vite-env.d.ts` are replaced (the new `main.tsx` and `index.css` arrive in Step 26).
+  The demo `App.tsx` goes, and `main.tsx` and `index.css` are replaced (the new ones arrive in Step 26). The template has no `vite-env.d.ts` (it lists `vite/client` in `types`); this step adds one for the page constants.
 
   ```bash
-  git rm -r src/App.tsx src/components src/hooks src/main.tsx src/index.css src/vite-env.d.ts
+  git rm src/App.tsx src/main.tsx src/index.css
   ```
 
   Create `tsconfig.json`:
@@ -187,16 +197,17 @@ This phase scaffolds the PPTB tool with the official generator and layers the pr
   }
   ```
 
-  Create `tsconfig.app.json`. The strict flags are the ones in `.claude/rules/typescript.md`. `node` is in `types` because later phases' tests use `node:vm` (AC-4.12) and `node:fs`; product code must still not use Node APIs:
+  Replace `tsconfig.app.json`. It keeps the template's ES2023 target and bundler mode and adds the strict flags from `.claude/rules/typescript.md`. Two template flags are dropped on purpose: `erasableSyntaxOnly`, because the pinned `HostReadError` contract uses a constructor parameter property, which is not erasable syntax; and `allowImportingTsExtensions`, because imports here never carry a `.ts` extension. `node` is in `types` because later phases' tests use `node:vm` (AC-4.12) and `node:fs`; product code must still not use Node APIs. TypeScript 6 defaults `types` to none, so the list is explicit:
 
   ```json
   {
     "compilerOptions": {
       "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
-      "target": "ES2022",
+      "target": "ES2023",
       "useDefineForClassFields": true,
-      "lib": ["ES2022", "DOM", "DOM.Iterable"],
+      "lib": ["ES2023", "DOM", "DOM.Iterable"],
       "module": "ESNext",
+      "moduleDetection": "force",
       "skipLibCheck": true,
       "types": ["@pptb/types", "vite/client", "node"],
       "moduleResolution": "bundler",
@@ -218,7 +229,7 @@ This phase scaffolds the PPTB tool with the official generator and layers the pr
   }
   ```
 
-  Create `tsconfig.node.json` (config files only):
+  Replace `tsconfig.node.json` (config files only; the template's version covers `vite.config.ts` alone and uses `nodenext`, which this project's config files do not need):
 
   ```json
   {
@@ -230,6 +241,7 @@ This phase scaffolds the PPTB tool with the official generator and layers the pr
       "skipLibCheck": true,
       "types": ["node"],
       "moduleResolution": "bundler",
+      "moduleDetection": "force",
       "isolatedModules": true,
       "verbatimModuleSyntax": true,
       "noEmit": true,
@@ -243,7 +255,7 @@ This phase scaffolds the PPTB tool with the official generator and layers the pr
   }
   ```
 
-  Create `src/vite-env.d.ts`. It declares the three build-time page constants that `vite.config.ts` defines (Step 11). The host globals are typed by `@pptb/types` and wrapped by Phase 01, so the generator's `Window` augmentation is not kept:
+  Create `src/vite-env.d.ts`. It declares the three build-time page constants that `vite.config.ts` defines (Step 11). The host globals are typed by `@pptb/types` and wrapped by Phase 01:
 
   ```ts
   /// <reference types="vite/client" />
@@ -289,7 +301,7 @@ This phase scaffolds the PPTB tool with the official generator and layers the pr
   *.md
   ```
 
-  Create `eslint.config.ts` (flat config per `.claude/rules/tooling.md`: `defineConfig`, `strictTypeChecked` plus `stylisticTypeChecked`, `projectService`, react-hooks, react-refresh, jsx-a11y, Prettier last). Two rule overrides need a reason: `consistent-type-definitions` is set to `type` because `.claude/rules/typescript.md` prefers `type` aliases (the stylistic preset prefers `interface`), and `no-unused-vars` ignores a leading underscore so stubs can keep their contract parameters:
+  Remove the template's `eslint.config.js` (`git rm eslint.config.js`) and create `eslint.config.ts` instead (flat config per `.claude/rules/tooling.md`, which extends the template's base: `defineConfig`, `strictTypeChecked` plus `stylisticTypeChecked`, `projectService`, react-hooks, react-refresh, jsx-a11y, Prettier last). Two rule overrides need a reason: `consistent-type-definitions` is set to `type` because `.claude/rules/typescript.md` prefers `type` aliases (the stylistic preset prefers `interface`), and `no-unused-vars` ignores a leading underscore so stubs can keep their contract parameters:
 
   ```ts
   import js from '@eslint/js';
@@ -360,13 +372,14 @@ This phase scaffolds the PPTB tool with the official generator and layers the pr
 
 - [ ] **Step 11: Write `vite.config.ts` and the two small files it needs**
 
-  This is the generator's config with everything kept (the `fixHtmlForPPTB` plugin, `base: './'`, the IIFE output, `inlineDynamicImports`) plus: the React Compiler through the `babel` option, the `@/` alias, the released-pages `define` constants (FR-1), the jsPDF optional-dependency stub, inlined assets (so fonts become `data:` URIs, which the PPTB default CSP allows), a `probe` mode for the library probe (Step 44), and the Vitest section. The `fixHtmlForPPTB` function body is the generator's, unchanged.
+  This is the template's config (the React plugin and the React Compiler through `@rolldown/plugin-babel` with `reactCompilerPreset()`) plus the PPTB build shape: the `fixHtmlForPPTB` plugin (ported unchanged from the `yo pptb` 1.0.6 template), `base: './'`, the IIFE output and `codeSplitting: false` in `rolldownOptions`; and: the `@/` alias, the released-pages `define` constants (FR-1), the jsPDF optional-dependency stub, inlined assets (so fonts become `data:` URIs, which the PPTB default CSP allows), a `probe` mode for the library probe (Step 44), and the Vitest section. The `fixHtmlForPPTB` function body is the `yo pptb` template's, unchanged.
 
   Replace `vite.config.ts` with:
 
   ```ts
   import { fileURLToPath } from 'node:url';
-  import react from '@vitejs/plugin-react';
+  import babel from '@rolldown/plugin-babel';
+  import react, { reactCompilerPreset } from '@vitejs/plugin-react';
   import { loadEnv } from 'vite';
   import type { Plugin } from 'vite';
   import { defineConfig } from 'vitest/config';
@@ -396,7 +409,7 @@ This phase scaffolds the PPTB tool with the official generator and layers the pr
   }
 
   /**
-   * Plugin to fix HTML for PPTB compatibility (from the yo pptb generator, unchanged)
+   * Plugin to fix HTML for PPTB compatibility (ported unchanged from the yo pptb 1.0.6 template)
    * - Removes type="module" and crossorigin attributes since we're using IIFE format
    * - Moves script tags from head to end of body so DOM is ready when IIFE executes
    */
@@ -445,7 +458,8 @@ This phase scaffolds the PPTB tool with the official generator and layers the pr
 
     return {
       plugins: [
-        react({ babel: { plugins: [['babel-plugin-react-compiler', {}]] } }),
+        react(),
+        babel({ presets: [reactCompilerPreset()] }),
         fixHtmlForPPTB(),
       ],
       base: './',
@@ -458,7 +472,7 @@ This phase scaffolds the PPTB tool with the official generator and layers the pr
           dompurify: EMPTY_MODULE,
         },
       },
-      // Static booleans: Rollup folds `__PAGE_X__ ? <XPage /> : null` and drops the unused page module.
+      // Static booleans: Rolldown folds `__PAGE_X__ ? <XPage /> : null` and drops the unused page module.
       define: {
         __PAGE_STARTER__: JSON.stringify(released.has('starter')),
         __PAGE_OBJECTS__: JSON.stringify(released.has('objects')),
@@ -478,15 +492,13 @@ This phase scaffolds the PPTB tool with the official generator and layers the pr
               fileName: () => 'probe.js',
             }
           : false,
-        rollupOptions: {
+        rolldownOptions: {
           output: {
             // Use IIFE format for compatibility with iframe srcdoc loading
             // ES modules can have issues when loaded via file:// URLs in iframes
             format: 'iife',
-            // Bundle everything into a single file to avoid module loading issues
-            inlineDynamicImports: true,
-            // Disable chunking since we're bundling everything
-            manualChunks: undefined,
+            // One file: dynamic imports are inlined (Rolldown's replacement for inlineDynamicImports)
+            codeSplitting: false,
           },
         },
       },
@@ -520,9 +532,14 @@ This phase scaffolds the PPTB tool with the official generator and layers the pr
 
 - [ ] **Step 12: Add the npm scripts**
 
-  `npm pkg set` edits only the named keys, so the saved dependency ranges are untouched. `publish-package` is deleted because it builds, bumps the version and publishes in one command, which the project forbids without the owner's explicit confirmation.
+  `npm pkg set` edits only the named keys, so the saved dependency ranges are untouched. The template has `dev`, `build`, `lint` and `preview`; the PPTB scripts the `yo pptb` template used to supply (`watch`, `dev-watch`, `finalize-package`, `validate`, `version-stable`) are added here by hand. There is deliberately no `publish-package` script: building, bumping and publishing in one command is forbidden without the owner's explicit confirmation.
 
   ```bash
+  npm pkg set scripts.watch="vite build --watch"
+  npm pkg set scripts.dev-watch="vite build --mode development --watch"
+  npm pkg set scripts.finalize-package="npm shrinkwrap"
+  npm pkg set scripts.validate="pptb-validate"
+  npm pkg set scripts.version-stable="npm version patch --no-git-tag-version"
   npm pkg set scripts.typecheck="tsc -b"
   npm pkg set scripts.lint="eslint . --max-warnings=0"
   npm pkg set scripts.format="prettier --write ."
@@ -530,12 +547,13 @@ This phase scaffolds the PPTB tool with the official generator and layers the pr
   npm pkg set scripts.test="vitest run"
   npm pkg set scripts.probe:size="vite build --mode probe && node scripts/bundle-size.mjs dist-probe"
   npm pkg set scripts.size="node scripts/bundle-size.mjs dist/assets"
-  npm pkg delete scripts.publish-package
   npm pkg set sideEffects='["**/*.css"]' --json
+  npm pkg set files='["dist","npm-shrinkwrap.json"]' --json
+  npm pkg set engines.node=">=20.19.0"
   npm pkg get scripts
   ```
 
-  Expect: `scripts` lists `build` (`tsc -b && vite build`), `dev`, `watch`, `dev-watch`, `preview`, `typecheck`, `lint`, `format`, `format:check`, `test`, `probe:size`, `size`, `finalize-package`, `validate`, `version-stable`, and no `publish-package`. `sideEffects` marks our own modules as side-effect free (except CSS) so Rollup can drop the unused page modules.
+  Expect: `scripts` lists `build` (`tsc -b && vite build`), `dev`, `watch`, `dev-watch`, `preview`, `typecheck`, `lint`, `format`, `format:check`, `test`, `probe:size`, `size`, `finalize-package`, `validate`, `version-stable`, and no `publish-package`. `sideEffects` marks our own modules as side-effect free (except CSS) so Rolldown can drop the unused page modules. `files` publishes only the build and the shrinkwrap, as PPTB tools do.
 
 - [ ] **Step 13: Run the toolchain test and confirm it passes**
 
@@ -556,7 +574,7 @@ This phase scaffolds the PPTB tool with the official generator and layers the pr
 
   Expect: `tsc -b` and `eslint` print nothing and exit 0; `prettier --check` prints `All matched files use Prettier code style!`. If ESLint reports `was not found by the project service` for `vite.config.ts` or `eslint.config.ts`, the solution-style `tsconfig.json` is not being followed: add `"allowDefaultProject": ["vite.config.ts", "eslint.config.ts"]` inside `parserOptions.projectService` (as `projectService: { allowDefaultProject: [...] }`), re-run, and note it in the commit body. If a rule name in `eslint.config.ts` is rejected (for example `reactHooks.configs.flat.recommended`), check the installed plugin version's README for the flat config name and use that one.
 
-### D. Contracts (verbatim from plan.md)
+### D. Contracts (verbatim from plan-starter.md)
 
 - [ ] **Step 15: Write the failing contract test**
 
@@ -714,7 +732,7 @@ This phase scaffolds the PPTB tool with the official generator and layers the pr
 
 - [ ] **Step 17: Commit the HTTP, recipe, code-analysis and host contracts verbatim**
 
-  Create four files. The type bodies are plan.md's Contracts text; only the `import type` lines are added.
+  Create four files. The type bodies are plan-starter.md's Contracts text; only the `import type` lines are added.
 
   `src/types/http.ts`:
 
@@ -779,7 +797,7 @@ This phase scaffolds the PPTB tool with the official generator and layers the pr
   export type ODataQuery = { entitySet: string; select: readonly string[]; filter: string | null; orderBy: string | null; pageSize: number };
   export class HostReadError extends Error { constructor(message: string, readonly status: number | null) { super(message); this.name = 'HostReadError'; } }
   export type PptbHost = {
-    getTheme(): Promise<ThemeName>;
+    getTheme(): Promise<ThemeName>;                          // rejects when the host call fails; the caller picks the fallback (AC-1.6)
     notify(n: Notice): Promise<void>;                        // rejects when host notify is missing/throws/rejects
     copyText(text: string): Promise<void>;
     saveFile(defaultName: string, content: string | Uint8Array, filters: readonly FileFilter[]): Promise<SaveResult>;
@@ -873,7 +891,7 @@ This phase scaffolds the PPTB tool with the official generator and layers the pr
   git commit -m "feat(contracts): commit the cross-phase types verbatim from the plan"
   ```
 
-  Expect: `13 passed`, then `tsc -b` and ESLint print nothing. Prettier reflows the long one-line types over several lines; that changes whitespace only, and the type text must still match `plan.md` token for token. If `tsc -b` rejects an `expectTypeOf` line, the contract file differs from `plan.md`; fix the contract file, never the assertion.
+  Expect: `13 passed`, then `tsc -b` and ESLint print nothing. Prettier reflows the long one-line types over several lines; that changes whitespace only, and the type text must still match `plan-starter.md` token for token. If `tsc -b` rejects an `expectTypeOf` line, the contract file differs from `plan-starter.md`; fix the contract file, never the assertion.
 
 ### E. Released pages and the shell skeleton
 
@@ -900,7 +918,7 @@ This phase scaffolds the PPTB tool with the official generator and layers the pr
 
 - [ ] **Step 22: Implement `RELEASED_PAGES`**
 
-  Create `src/app/releasedPages.ts`. How unreleased code is dropped: `vite.config.ts` replaces `__PAGE_STARTER__`, `__PAGE_OBJECTS__` and `__PAGE_INSPECTOR__` with the literals `true` or `false` at build time. Rollup folds `false ? <Page /> : null` to `null`, so the page's import binding is unused, and because `package.json` marks our modules side-effect free (Step 12) Rollup drops the page module and everything only it imports. Heavy page-only modules (PDF, code editor) are therefore excluded without any runtime check. If a page lazy-loads with `React.lazy`, the `import()` sits inside the same constant condition, and `inlineDynamicImports: true` keeps the result in the single bundle. The tool never reads this list from settings or the URL.
+  Create `src/app/releasedPages.ts`. How unreleased code is dropped: `vite.config.ts` replaces `__PAGE_STARTER__`, `__PAGE_OBJECTS__` and `__PAGE_INSPECTOR__` with the literals `true` or `false` at build time. Rolldown folds `false ? <Page /> : null` to `null`, so the page's import binding is unused, and because `package.json` marks our modules side-effect free (Step 12) Rolldown drops the page module and everything only it imports. Heavy page-only modules (PDF, code editor) are therefore excluded without any runtime check. If a page lazy-loads with `React.lazy`, the `import()` sits inside the same constant condition, and `codeSplitting: false` keeps the result in the single bundle. The tool never reads this list from settings or the URL.
 
   ```ts
   import type { View } from '@/types/http';
@@ -955,7 +973,7 @@ This phase scaffolds the PPTB tool with the official generator and layers the pr
 
 - [ ] **Step 26: Write the shell skeleton (App, three page placeholders, `main.tsx`, `index.css`, `index.html`)**
 
-  Phase 06 replaces `App.tsx`; Phases 18, 21, 22 and 23 replace the page files. The placeholder text is the marker that Step 41's build test searches for.
+  Phase 06 replaces `App.tsx`; Phases 18, 21, 22 and 23 replace the page files. The placeholder text is the marker that Step 41's build test searches for. Pages render a plain `<section>`: Phase 06's shell owns the `role="tabpanel"` wrapper around each page.
 
   `src/features/starter/StarterPage.tsx`:
 
@@ -965,7 +983,7 @@ This phase scaffolds the PPTB tool with the official generator and layers the pr
   // Placeholder. Phase 18 (session and inputs) and Phase 21 (code panes) build the real page.
   export function StarterPage(): ReactNode {
     return (
-      <section role="tabpanel" aria-label="Logic Starter">
+      <section aria-label="Logic Starter">
         <p>Logic Starter page placeholder</p>
       </section>
     );
@@ -980,7 +998,7 @@ This phase scaffolds the PPTB tool with the official generator and layers the pr
   // Placeholder. Phase 22 builds the real page.
   export function ServerObjectsPage(): ReactNode {
     return (
-      <section role="tabpanel" aria-label="Server Objects">
+      <section aria-label="Server Objects">
         <p>Server Objects page placeholder</p>
       </section>
     );
@@ -995,7 +1013,7 @@ This phase scaffolds the PPTB tool with the official generator and layers the pr
   // Placeholder. Phase 23 builds the real page.
   export function InspectorPage(): ReactNode {
     return (
-      <section role="tabpanel" aria-label="Logic Inspector">
+      <section aria-label="Logic Inspector">
         <p>Logic Inspector page placeholder</p>
       </section>
     );
@@ -1096,7 +1114,7 @@ This phase scaffolds the PPTB tool with the official generator and layers the pr
   }
   ```
 
-  `index.html` (the generator's, with the title fixed; `fixHtmlForPPTB` rewrites the script tag at build time):
+  `index.html` (the template's, with the title fixed and the favicon link removed; `fixHtmlForPPTB` rewrites the script tag at build time):
 
   ```html
   <!doctype html>
@@ -1239,14 +1257,15 @@ This phase scaffolds the PPTB tool with the official generator and layers the pr
 
   Run: `npx vitest run tests/manifest.test.ts`
 
-  Expect: FAIL: `features` is `undefined` (the generator wrote none), `contributors`/`configurations` are missing, and `public/icons/server-logic-tools.svg` does not exist. The dependency test already passes.
+  Expect: FAIL: `features` is `undefined` (the template wrote none), `contributors`/`configurations` are missing, and `public/icons/server-logic-tools.svg` does not exist. The dependency test already passes.
 
 - [ ] **Step 31: Add the manifest fields**
 
-  The `name` scope is a placeholder for the owner's npm scope (see the report: it must match the owner's npm user or org before publishing).
+  The package name is the owner's choice (2026-10-17): `@ryanmakes/powerpages-serverlogic`. The template's `"private": true` is removed, because PPTB tools are published to npm (publishing itself still needs the owner's explicit confirmation).
 
   ```bash
-  npm pkg set name="@ryanmakesandbreaksstuff/server-logic-tools"
+  npm pkg set name="@ryanmakes/powerpages-serverlogic"
+  npm pkg delete private
   npm pkg set version="1.0.0"
   npm pkg set displayName="Server Logic Tools"
   npm pkg set description="Generate Power Pages server logic handlers and review a site's existing server logic for web role, table permission and outbound networking gaps."
@@ -1274,7 +1293,7 @@ This phase scaffolds the PPTB tool with the official generator and layers the pr
   </svg>
   ```
 
-  Replace `README.md` (the manifest's `readmeUrl` points at it; the generator's README describes React 18 and a different layout). The outer fence below uses four backticks because the README contains a fenced block:
+  Create `README.md` (the manifest's `readmeUrl` points at it; the template's README was not copied in Step 3). The outer fence below uses four backticks because the README contains a fenced block:
 
   ````markdown
   # Server Logic Tools
@@ -1377,6 +1396,7 @@ This phase scaffolds the PPTB tool with the official generator and layers the pr
   } from '@/services/pptb/host.types';
   import { createFakeHost } from '@/services/pptb/fakeHost';
   import { createPptbHost } from '@/services/pptb/pptbHost';
+  import type { PptbHostOptions } from '@/services/pptb/pptbHost';
   import type { ClientLanguage, HttpMethod, View } from '@/types/http';
   import type {
     Counts,
@@ -1440,7 +1460,7 @@ This phase scaffolds the PPTB tool with the official generator and layers the pr
     });
 
     it('host adapter (phase 01)', () => {
-      expectTypeOf(createPptbHost).toEqualTypeOf<() => PptbHost>();
+      expectTypeOf(createPptbHost).toEqualTypeOf<(options?: PptbHostOptions) => PptbHost>();
       expectTypeOf(createFakeHost).returns.toExtend<PptbHost>();
     });
 
@@ -1471,7 +1491,7 @@ This phase scaffolds the PPTB tool with the official generator and layers the pr
       expectTypeOf(reportFileName).toEqualTypeOf<(m: ReportModel) => string>();
     });
 
-    it('app hooks and context (phases 06, 18)', () => {
+    it('app hooks and context (phases 06, 18a)', () => {
       expectTypeOf(useHost).toEqualTypeOf<() => PptbHost>();
       expectTypeOf(useNotify).toEqualTypeOf<() => (n: Notice) => void>();
       expectTypeOf(useView).toEqualTypeOf<() => [View, (v: View) => void]>();
@@ -1705,7 +1725,10 @@ This phase scaffolds the PPTB tool with the official generator and layers the pr
   ```ts
   import type { PptbHost } from '@/services/pptb/host.types';
 
-  export function createPptbHost(): PptbHost {
+  // Phase 01 keeps this options type; `sleep` lets its tests skip the retry waits.
+  export type PptbHostOptions = { sleep?: (ms: number) => Promise<void> };
+
+  export function createPptbHost(_options?: PptbHostOptions): PptbHost {
     throw new Error('not implemented: phase 01');
   }
   ```
@@ -1767,7 +1790,7 @@ This phase scaffolds the PPTB tool with the official generator and layers the pr
   }
   ```
 
-  `src/features/inspector/report/reportModel.types.ts` (plan.md pins `ReportModel` in signatures but not its shape; Phase 16 owns the real type in this file):
+  `src/features/inspector/report/reportModel.types.ts` (plan-starter.md pins `ReportModel` in signatures but not its shape; Phase 16 owns the real type in this file):
 
   ```ts
   // Placeholder. Phase 16 defines the real ReportModel in this file.
@@ -1855,17 +1878,17 @@ This phase scaffolds the PPTB tool with the official generator and layers the pr
   }
   ```
 
-  `src/app/starter-session/StarterSessionProvider.tsx` (Phase 18):
+  `src/app/starter-session/StarterSessionProvider.tsx` (Phase 18a):
 
   ```tsx
   import type { ReactNode } from 'react';
 
   export function StarterSessionProvider(_props: { readonly children: ReactNode }): ReactNode {
-    throw new Error('not implemented: phase 18');
+    throw new Error('not implemented: phase 18a');
   }
   ```
 
-  `src/app/starter-session/useStarterSession.ts` (Phase 18):
+  `src/app/starter-session/useStarterSession.ts` (Phase 18a):
 
   ```ts
   import type {
@@ -1879,7 +1902,7 @@ This phase scaffolds the PPTB tool with the official generator and layers the pr
     dispatch: (a: StarterAction) => void;
     derived: StarterDerived;
   } {
-    throw new Error('not implemented: phase 18');
+    throw new Error('not implemented: phase 18a');
   }
   ```
 
@@ -1894,7 +1917,7 @@ This phase scaffolds the PPTB tool with the official generator and layers the pr
   git commit -m "feat(skeleton): add a contract-signature stub for every cross-phase function"
   ```
 
-  Expect: `5 passed` for `skeleton.test.ts`; `tsc -b` and ESLint print nothing. If ESLint reports `@typescript-eslint/no-unused-vars` for a stub parameter, the leading underscore pattern in `eslint.config.ts` (Step 10) is missing. If `tsc -b` reports that a stub function "lacks ending return statement", the return type includes `undefined`; the contract signatures do not, so recheck the signature against `plan.md`.
+  Expect: `5 passed` for `skeleton.test.ts`; `tsc -b` and ESLint print nothing. If ESLint reports `@typescript-eslint/no-unused-vars` for a stub parameter, the leading underscore pattern in `eslint.config.ts` (Step 10) is missing. If `tsc -b` reports that a stub function "lacks ending return statement", the return type includes `undefined`; the contract signatures do not, so recheck the signature against `plan-starter.md`.
 
 ### H. Fonts, library probe and build shape
 
@@ -2388,7 +2411,7 @@ Expected:
 - `tsc -b` and `eslint` print nothing; `prettier --check` prints `All matched files use Prettier code style!`.
 - `vitest run` reports all test files passed: `src/test/toolchain.test.tsx` (1), `src/types/contracts.test.ts` (13), `src/app/releasedPages.test.ts` (1), `src/app/App.test.tsx` (1), `src/skeleton.test.ts` (5), `src/probe/libraryProbe.test.ts` (4), `tests/manifest.test.ts` (6), `tests/buildShape.test.ts` (11).
 - `npm run build` ends with `built in`, and `dist/` holds `index.html`, one `assets/index-<hash>.js`, one `assets/index-<hash>.css` and `icons/server-logic-tools.svg`.
-- `pptb-validate --skip-url-checks` reports no errors. URL checks are skipped because the repository and the raw README URL may not be public yet. If it reports a missing field, fix the manifest field it names in `package.json` and add the matching assertion to `tests/manifest.test.ts` first. A warning about the scoped package name is expected until the owner confirms the npm scope.
+- `pptb-validate --skip-url-checks` reports no errors. URL checks are skipped because the repository and the raw README URL may not be public yet. If it reports a missing field, fix the manifest field it names in `package.json` and add the matching assertion to `tests/manifest.test.ts` first. The package name `@ryanmakes/powerpages-serverlogic` is the owner's choice; publishing needs an npm account that owns the `@ryanmakes` scope.
 - `git status --short` prints nothing (everything committed), and `git ls-files` lists the 10 committed spike files (`s1/t11.json`, `t18.json`, `t35.json`, `t9-sl.json`, `t9.json`, `s4/envvar.json`, `page.json`, `s4-liquid-page.html`, `s4-probe.js`, `scan-restricted.js`).
 - Phase-specific: `npm run probe:size` prints a `probe.js` size line, and the table in Step 47 has no `_fill_` cells left.
 
@@ -2397,7 +2420,7 @@ Expected:
 - `package.json` has `features.connections {min:0,max:1}`, `features.minAPI "1.2.7"`, `displayName "Server Logic Tools"`, an approved licence, `contributors`, `configurations.repository` and `readmeUrl`, a `currentColor` SVG `icon` copied into `dist/`, no `cspExceptions` and no `enabledForPowerPlatformAPI` (FR-12; `tests/manifest.test.ts`).
 - `npm run build` produces exactly one JavaScript file that compiles as a classic script, an `index.html` with no `type="module"`, no `crossorigin` and no external URL, scripts at the end of the body, and fonts as `data:` URIs (`tests/buildShape.test.ts`).
 - A build with `VITE_RELEASED_PAGES=starter` contains the Starter page and neither of the other two page modules, and an unknown page name fails the build (FR-1; the build-time half of AC-1.7).
-- Every contract in `plan.md` is committed unchanged in meaning, and every pinned function exists at its pinned path with its contract signature and a `not implemented: phase NN` body (`src/types/contracts.test.ts`, `src/skeleton.test.ts`); `generateHandler` dispatches to `r1.ts` to `r10.ts` through a registry that no later phase edits.
+- Every contract in `plan-starter.md` is committed unchanged in meaning, and every pinned function exists at its pinned path with its contract signature and a `not implemented: phase NN` body (`src/types/contracts.test.ts`, `src/skeleton.test.ts`); `generateHandler` dispatches to `r1.ts` to `r10.ts` through a registry that no later phase edits.
 - `App` renders three tabs and three page placeholders with no PPTB host present, and importing every stub never throws (`src/app/App.test.tsx`).
 - jsPDF 4.2.1, jspdf-autotable 5.0.8, a TTF font, fflate, CodeMirror, acorn and a Fluent icon bundle into one IIFE with jsPDF's optional dependencies aliased out, work together at runtime, and their measured size is recorded (`src/probe/libraryProbe.test.ts`, Step 47).
 - All runtime dependencies and the fonts are installed and committed, so `package.json` is not edited by any later phase.

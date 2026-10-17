@@ -9,7 +9,7 @@ loaded-by: sdd-specify, sdd-plan, sdd-execute, sdd-review
 PascalCase component files (`EntityList.tsx`); camelCase hooks/utilities (`useEntityQuery.ts`); kebab-case folders. See `.claude/rules/project-structure.md`.
 
 ## Directory Structure
-`yo pptb` scaffold as the base; feature-first `src/` (`app/`, `features/<feature>/`, `components/`, `lib/`, `services/`, `types/`). Specs in `docs/specs/NNN-slug/`. Design references in `design_handoff_server_logic_tools/` and `mocks/` (reference only, not production code).
+Vite `react-compiler-ts` scaffold plus the PPTB build shape (Phase 00) as the base; feature-first `src/` (`app/`, `features/<feature>/`, `components/`, `lib/`, `services/`, `types/`). Specs in `docs/specs/NNN-slug/`. Design references in `design_handoff_server_logic_tools/` and `mocks/` (reference only, not production code).
 
 ## Code Style
 Strict TypeScript, ESLint flat config (typescript-eslint strictTypeChecked) + Prettier. See `.claude/rules/typescript.md`, `react.md`, `tooling.md`.

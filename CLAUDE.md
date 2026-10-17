@@ -8,11 +8,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Logic Starter** generates a handler (`Server.*` objects, endpoint `/_api/serverlogics/<name>`), a client call and a permission checklist from a name, an HTTP method and a recipe. It also hosts a `Server.*` object reference.
 - **Logic Inspector** reviews a dev site's existing server logic (web roles, table permissions, outbound networking) and exports readiness reports.
 
-**Status: pre-code.** The repo holds the spec, design references and review history only. Scaffold with the official generator, never by hand: `npx --package yo --package generator-pptb -- yo pptb` (React), then `npm install --save-dev @pptb/types`.
+**Status: pre-code.** The repo holds the spec, design references and review history only. Scaffold with the standard Vite template, not the `yo pptb` generator (owner decision 2026-10-17): `npm create vite@9.2.1` with `--template react-compiler-ts --eslint`, then add the PPTB build shape, manifest and `@pptb/types` by hand. Phase 00 (`docs/specs/001-server-logic-starter-inspector/plans/phase-00-skeleton.md`) has the exact steps.
 
 ## Where things are
 
 - `docs/specs/001-server-logic-starter-inspector/spec.md` is the source of truth (v2.0.0). Its FRs, ACs, recipe table (R1–R10), numbered Learn corrections and spikes S1–S4 govern behaviour. `review.md` sits next to it.
+- The implementation plan sits next to it: `plan.md` is the index, `plan-starter.md` holds Part A (the shared foundation), the Contracts every phase consumes and the Starter phases, and `plan-server-objects.md` and `plan-inspector.md` cover the other two pages. Phase files are in `plans/`.
 - **Layout 10a** in `design_handoff_server_logic_tools/Logic Tooling Design Directions/design_handoff_server_logic_tools/` is the high-fidelity design for the shell, Logic Starter, Server Objects, Logic Inspector and all UI tokens (README plus `reference/01–06`, light and dark). Its recipe list is **not** adopted: the spec's R1–R10 stand.
 - The original `design_handoff_server_logic_tools/` README §05 still governs **report** styling. Its other references are superseded by 10a. `06-interactive-prototype.dc.html` is an **older layout**, so use it for behaviour only (state, toggles, export dialog), not visuals. It needs `support.js` in the same folder.
 - `mocks/` contains visual explorations. They are reference only, not production code.
@@ -31,7 +32,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - Host globals `window.toolboxAPI`, `dataverseAPI` and `powerplatformAPI` exist **only inside PPTB**. They are undefined in a normal browser tab, so test against a fake `services/pptb/` adapter.
 - There are no access tokens. All Dataverse calls go through `dataverseAPI`. Use only the read methods (`retrieve`, `queryData`, `fetchXmlQuery`, metadata).
-- The build must be a **single IIFE bundle**, with no `type="module"`, no `crossorigin` and no code-split chunks. Keep the generator's Vite config. The symptom of getting this wrong is a tool that works in dev but loads blank in PPTB.
+- The build must be a **single IIFE bundle**, with no `type="module"`, no `crossorigin` and no code-split chunks. Keep Phase 00's Vite config (`rolldownOptions.output: { format: 'iife', codeSplitting: false }` plus the `fixHtmlForPPTB` plugin). The symptom of getting this wrong is a tool that works in dev but loads blank in PPTB.
 - Save files with `toolboxAPI.fileSystem.saveFile`. Show errors and status with `toolboxAPI.utils.showNotification`, falling back to in-tool toasts if it fails (spec FR-1). The tool writes nothing to tool settings.
 - The default CSP is strict. Bundle every asset (no CDNs).
 

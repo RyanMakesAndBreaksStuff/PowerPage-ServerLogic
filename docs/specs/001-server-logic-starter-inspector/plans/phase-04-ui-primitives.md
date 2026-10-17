@@ -4,23 +4,22 @@
 **Depends on:** 00
 **Files:**
 - Create tokens and styles: `src/app/theme/tokens.css`, `src/components/primitives.css`, `src/app/theme/tokens.test.ts`.
-- Create lib (pure, no React): `src/lib/classNames.ts`, `src/lib/svgPathData.ts`, `src/lib/ringGeometry.ts`, each with a colocated `*.test.ts`.
+- Create lib (pure, no React): `src/lib/classNames.ts`, `src/lib/ringGeometry.ts`, each with a colocated `*.test.ts`.
 - Create components, one PascalCase file each with a colocated `*.test.tsx`: `src/components/Icon.tsx`, `Pill.tsx`, `PillGroup.tsx`, `DisabledReason.tsx`, `Button.tsx`, `StatusBadge.tsx`, `Ring.tsx`, `Tile.tsx`, `Modal.tsx`, `ToastStack.tsx`.
-- Create non-component helpers (kept out of component files so `react-refresh/only-export-components` stays at zero warnings): `src/components/iconSvg.ts`, `src/components/useDisabledReason.tsx`, `src/components/usePrefersReducedMotion.ts`, `src/components/checkStatusBadge.ts`.
+- Create non-component helpers (kept out of component files so `react-refresh/only-export-components` stays at zero warnings): `src/components/icons.ts`, `src/components/useDisabledReason.tsx`, `src/components/usePrefersReducedMotion.ts`, `src/components/checkStatusBadge.ts`.
 - Conditional, only if Step 0 shows it missing: `src/vite-env.d.ts` containing `/// <reference types="vite/client" />`.
 - Edits no other file. No barrel `index.ts`; consumers import each file by path.
 
 **Interfaces:**
 - **Consumes** (Phase 00; nothing from phases 01–03 or 05):
   - `src/types/inspector.ts`: `CheckStatus` (`'configured' | 'needs-review' | 'reviewed' | 'not-scanned'`), type-only, used by `checkStatusBadge`.
-  - Installed by Phase 00: `@fluentui/svg-icons` (files `icons/<name>_16_regular.svg`, each a single `<path d="…">`), the static TTFs `src/assets/fonts/JetBrainsMono-Regular.ttf` and `src/assets/fonts/JetBrainsMono-Bold.ttf`, React 19.2 or later (`useEffectEvent`, `useSyncExternalStore`), Vitest, jsdom and `@testing-library/react`. The `@/` alias and `vite/client` types come from the generator setup.
+  - Installed by Phase 00: `@fluentui/react-icons` (one React component per icon, `<Name>16Regular`, rendering `fill="currentColor"`; `aria-hidden` without a `title`, `role="img"` plus `aria-label` with one), the JetBrains Mono woff2 files and their `@font-face` rules in `src/assets/fonts/fonts.css` (weights 400, 500 and 700, imported by `src/index.css`), React 19.2 or later (`useEffectEvent`, `useSyncExternalStore`), Vitest, jsdom and `@testing-library/react`. The `@/` alias and `vite/client` types come from Phase 00's tsconfig.
 - **Produces** (exact names; phases 06, 18, 21, 22, 23 and 24 rely on them):
-  - Theme contract: `src/app/theme/tokens.css`. Phase 06 imports it once from the entry and sets `document.documentElement.dataset.theme = 'light' | 'dark'`. With no attribute the light theme applies. Custom properties (both themes define all of them): `--window --window-bg --surface --tile --tile-glass --tile-blur --tile-shadow --code --border --control-border --text --text-2 --muted --primary --primary-text --on-primary --ok-tint --review --review-tint --server --server-tint --string --keyword --comment --ghost --tooltip-bg --tooltip-text --scrim --code-highlight`, plus `--font-ui` and `--font-mono` on `:root`. Global classes: `.ui-code-highlight` (10% primary over the code surface plus a 2px inset primary bar; Phase 21 applies it to highlighted lines) and `.ui-mono`. The `body` rule paints the window background and sets `min-width: 1024px; min-height: 700px`.
+  - Theme contract: `src/app/theme/tokens.css`. It declares no `@font-face`: the code font comes from Phase 00's `fonts.css`, and `--font-mono` names it. Phase 06 imports `tokens.css` once from the entry and sets `document.documentElement.dataset.theme = 'light' | 'dark'`. With no attribute the light theme applies. Custom properties (both themes define all of them): `--window --window-bg --surface --tile --tile-glass --tile-blur --tile-shadow --code --border --control-border --text --text-2 --muted --primary --primary-text --on-primary --ok-tint --review --review-tint --server --server-tint --string --keyword --comment --ghost --tooltip-bg --tooltip-text --scrim --code-highlight`, plus `--font-ui` and `--font-mono` on `:root`. Global classes: `.ui-code-highlight` (10% primary over the code surface plus a 2px inset primary bar; Phase 21 applies it to highlighted lines) and `.ui-mono`. The `body` rule paints the window background and sets `min-width: 1024px; min-height: 700px`.
   - `src/components/primitives.css`: the component styles; every component file imports it.
   - `src/lib/classNames.ts`: `classNames(...parts: readonly (string | false | null | undefined)[]): string`.
-  - `src/lib/svgPathData.ts`: `svgPathData(svg: string): readonly string[]`.
   - `src/lib/ringGeometry.ts`: `type RingState = 'done' | 'review' | 'not-scanned'`; `type RingArc = { readonly state: RingState; readonly startDeg: number; readonly endDeg: number }`; `RING_GAP_DEG = 4`; `RING_MAX_SEGMENTS = 30`; `ringArcs(segments: readonly RingState[]): readonly RingArc[]`; `arcPath(cx: number, cy: number, r: number, startDeg: number, endDeg: number): string`.
-  - `src/components/Icon.tsx`: `type IconProps = { name: IconName; size?: number; title?: string }`; `Icon(props: IconProps): ReactElement`. `IconName` (from `iconSvg.ts`) is one of `'add' | 'arrow-clockwise' | 'arrow-download' | 'arrow-export' | 'arrow-left' | 'arrow-right' | 'arrow-swap' | 'arrow-undo' | 'checkmark' | 'checkmark-circle' | 'chevron-down' | 'chevron-right' | 'code' | 'copy' | 'cube' | 'dismiss' | 'document' | 'error-circle' | 'important' | 'info' | 'open' | 'search' | 'subtract' | 'target' | 'warning'`. Without `title` the icon is `aria-hidden`; with `title` it is `role="img"` with that name.
+  - `src/components/Icon.tsx`: `type IconProps = { name: IconName; size?: number; title?: string }`; `Icon(props: IconProps): ReactElement`. `IconName` (from `icons.ts`, which also exports the `ICONS` name-to-component map) is one of `'add' | 'arrow-clockwise' | 'arrow-download' | 'arrow-export' | 'arrow-left' | 'arrow-right' | 'arrow-swap' | 'arrow-undo' | 'checkmark' | 'checkmark-circle' | 'chevron-down' | 'chevron-right' | 'code' | 'copy' | 'cube' | 'dismiss' | 'document' | 'error-circle' | 'important' | 'info' | 'open' | 'search' | 'subtract' | 'target' | 'warning'`. Without `title` the icon is `aria-hidden`; with `title` it is `role="img"` with that name.
   - `src/components/Pill.tsx`: `type PillTone = 'neutral' | 'selected' | 'ok' | 'review' | 'server'`; `type PillProps = ComponentProps<'span'> & { tone?: PillTone; compact?: boolean; mono?: boolean }`; `Pill(props: PillProps): ReactElement`. A static capsule: status pills, endpoint chips, the `Server` tag.
   - `src/components/PillGroup.tsx`: `type PillOption<V extends string> = { value: V; label: string; disabledReason?: string | null }`; `type PillGroupProps<V extends string> = { label: string; options: readonly PillOption<V>[]; value: V | null; onChange: (value: V) => void; compact?: boolean }`; `PillGroup<V extends string>(props: PillGroupProps<V>): ReactElement`. APG radio group. A non-empty `disabledReason` makes the option `aria-disabled="true"`, still focusable, never calls `onChange`, and exposes the reason through `aria-describedby` on hover and focus. The caller decides which options are disabled and why (HTTP methods, client language, and so on).
   - `src/components/DisabledReason.tsx`: `type DisabledReasonProps = { id: string; text: string; visible: boolean }`; `DisabledReason(props: DisabledReasonProps): ReactElement` (the `role="tooltip"` element).
@@ -43,8 +42,9 @@ This phase builds the theme and the shared building blocks every UI phase compos
 4. **Warning toasts behave like error toasts** (`role="alert"`, no auto-hide). The spec names only success, info and error.
 5. **The modal listens for keys on `document`**, not on the dialog element, so Esc and the Tab trap still work after a click on the scrim moved focus to `body`.
 6. **Native `<dialog>` is not used.** It would be less code, but jsdom has no `showModal`, so the focus trap, Esc and focus return could not be tested.
-7. **Icons are rendered from the package's SVG path data** (`?raw` import, then `svgPathData`), not with `dangerouslySetInnerHTML`.
+7. **Icons are `@fluentui/react-icons` components** (Phase 00's choice), mapped by name in `icons.ts`. The package renders each icon's path data as React elements, so there is no `dangerouslySetInnerHTML` and no hand-written SVG parsing. Sized components (`16Regular`) carry a fixed 16px `width` and `height`, so `Icon` scales with an inline `style`, which wins over the attributes.
 8. **A small `Button` exists** although the brief did not list it: Copy, Download, Insert, Export and the Inspector actions all need the same capsule, the `busy` rule (F49) and the `aria-disabled` reason (AC-6.8). Writing it once here avoids five copies.
+9. **Fonts come from Phase 00, not this phase.** JetBrains Mono is bundled as woff2 through `src/assets/fonts/fonts.css` (400, 500, 700). This phase only names it in `--font-mono` and never adds an `@font-face` of its own.
 
 ---
 
@@ -54,8 +54,9 @@ This phase builds the theme and the shared building blocks every UI phase compos
 
   ```bash
   git status --short
-  ls src/assets/fonts | grep -i JetBrainsMono
-  ls node_modules/@fluentui/svg-icons/icons/checkmark_16_regular.svg
+  grep -c "font-family: 'JetBrains Mono'" src/assets/fonts/fonts.css
+  grep -n "fonts.css" src/index.css
+  npm ls @fluentui/react-icons
   node -e "const r=require('react');console.log(r.version, typeof r.useEffectEvent, typeof r.useSyncExternalStore)"
   npm ls @testing-library/react jsdom vitest
   grep -rn "vite/client" src tsconfig*.json
@@ -64,13 +65,13 @@ This phase builds the theme and the shared building blocks every UI phase compos
   grep -n "CheckStatus" src/types/inspector.ts
   ```
 
-  Expect: a clean tree apart from `docs/`; `JetBrainsMono-Regular.ttf` and `JetBrainsMono-Bold.ttf` listed; the checkmark SVG found; `19.2.x function function`; the three packages listed; at least one `vite/client` hit; the `@/*` path and the Vite alias printed; `CheckStatus` exported. Then handle each gap and nothing else:
+  Expect: a clean tree apart from `docs/`; `3` (three JetBrains Mono `@font-face` rules) and the `@import './assets/fonts/fonts.css'` line in `src/index.css`; `@fluentui/react-icons` listed; `19.2.x function function`; the three packages listed; at least one `vite/client` hit; the `@/*` path and the Vite alias printed; `CheckStatus` exported. Then handle each gap and nothing else:
   - If neither `src/vite-env.d.ts` nor a tsconfig `types` entry references `vite/client`, create `src/vite-env.d.ts` with the single line `/// <reference types="vite/client" />`.
-  - If Phase 00 stored the fonts under another folder or names, change only the two `url(...)` lines in `tokens.css` in Step 3. `tokens.test.ts` checks that every referenced font file exists, so a wrong path fails there.
+  - If `fonts.css` or its import is missing, stop and report it: the fonts are Phase 00's, and this phase must not add its own.
   - If `useEffectEvent` is `undefined` (React older than 19.2), stop and report it; the react rule and this phase both depend on it.
   - Tests in this phase use only `@testing-library/react` (`fireEvent`, `render`, `screen`, `within`, `act`, `cleanup`) and plain DOM assertions. They do not need `user-event` or `jest-dom`, and each file declares its own `// @vitest-environment` and calls `cleanup` itself, so they pass whatever Phase 00's Vitest setup file does.
 
-- [ ] **Step 1: Write the pure lib tests (classNames, svgPathData, ringGeometry)**
+- [ ] **Step 1: Write the pure lib tests (classNames, ringGeometry)**
 
   ```ts file=src/lib/classNames.test.ts
   import { describe, expect, it } from 'vitest';
@@ -83,32 +84,6 @@ This phase builds the theme and the shared building blocks every UI phase compos
 
     it('returns an empty string when nothing is left', () => {
       expect(classNames(false, undefined)).toBe('');
-    });
-  });
-  ```
-
-  ```ts file=src/lib/svgPathData.test.ts
-  import { describe, expect, it } from 'vitest';
-  import { svgPathData } from './svgPathData';
-
-  const CHECKMARK =
-    '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16"><path d="M13.86 3.66a.5.5 0 0 1-.02.7l-7.93 7.48z"/></svg>';
-
-  describe('svgPathData', () => {
-    it('returns the d attribute of a single-path Fluent icon', () => {
-      expect(svgPathData(CHECKMARK)).toEqual(['M13.86 3.66a.5.5 0 0 1-.02.7l-7.93 7.48z']);
-    });
-
-    it('returns every path in document order', () => {
-      expect(svgPathData('<svg><path d="M0 0"/><path fill="none" d="M1 1h2"/></svg>')).toEqual([
-        'M0 0',
-        'M1 1h2',
-      ]);
-    });
-
-    it('returns nothing when there is no path or the d attribute is empty', () => {
-      expect(svgPathData('<svg><circle r="1"/></svg>')).toEqual([]);
-      expect(svgPathData('<svg><path d=""/></svg>')).toEqual([]);
     });
   });
   ```
@@ -207,25 +182,16 @@ This phase builds the theme and the shared building blocks every UI phase compos
 - [ ] **Step 2: Run the lib tests, expect FAIL**
 
   ```bash
-  npx vitest run src/lib/classNames.test.ts src/lib/svgPathData.test.ts src/lib/ringGeometry.test.ts
+  npx vitest run src/lib/classNames.test.ts src/lib/ringGeometry.test.ts
   ```
 
-  Expect: FAIL, three suites, each with `Failed to resolve import "./classNames"` (and the other two modules).
+  Expect: FAIL, two suites, each with `Failed to resolve import "./classNames"` (and `./ringGeometry`).
 
 - [ ] **Step 3: Implement the lib files**
 
   ```ts file=src/lib/classNames.ts
   export function classNames(...parts: readonly (string | false | null | undefined)[]): string {
     return parts.filter((part): part is string => typeof part === 'string' && part !== '').join(' ');
-  }
-  ```
-
-  ```ts file=src/lib/svgPathData.ts
-  // Fluent System Icons ship as one or more <path d="..."/> in a 16x16 box, filled with currentColor.
-  const PATH_D = /<path\b[^>]*?\sd="([^"]*)"/g;
-
-  export function svgPathData(svg: string): readonly string[] {
-    return Array.from(svg.matchAll(PATH_D), (match) => match[1] ?? '').filter((d) => d !== '');
   }
   ```
 
@@ -291,31 +257,30 @@ This phase builds the theme and the shared building blocks every UI phase compos
 - [ ] **Step 4: Run the lib tests, expect PASS**
 
   ```bash
-  npx vitest run src/lib/classNames.test.ts src/lib/svgPathData.test.ts src/lib/ringGeometry.test.ts
+  npx vitest run src/lib/classNames.test.ts src/lib/ringGeometry.test.ts
   ```
 
-  Expect: PASS, 3 files, 18 tests.
+  Expect: PASS, 2 files, 15 tests.
 
 - [ ] **Step 5: Commit the lib files**
 
   ```bash
-  npx prettier --write src/lib/classNames.ts src/lib/classNames.test.ts src/lib/svgPathData.ts src/lib/svgPathData.test.ts src/lib/ringGeometry.ts src/lib/ringGeometry.test.ts
+  npx prettier --write src/lib/classNames.ts src/lib/classNames.test.ts src/lib/ringGeometry.ts src/lib/ringGeometry.test.ts
   npx eslint src/lib --max-warnings=0
-  git add src/lib/classNames.ts src/lib/classNames.test.ts src/lib/svgPathData.ts src/lib/svgPathData.test.ts src/lib/ringGeometry.ts src/lib/ringGeometry.test.ts
-  git commit -m "feat(ui): add ring arc geometry, svg path and class name helpers"
+  git add src/lib/classNames.ts src/lib/classNames.test.ts src/lib/ringGeometry.ts src/lib/ringGeometry.test.ts
+  git commit -m "feat(ui): add ring arc geometry and class name helpers"
   ```
 
 - [ ] **Step 6: Write the token test**
 
-  It reads the CSS files as text, checks both themes against FR-11's table, the focus ring, the highlight rule, glass, no external URLs, that every referenced font file exists, and that every foreground and background pair the design uses reaches 4.5:1.
+  It reads the CSS files as text, checks both themes against FR-11's table, the focus ring, the highlight rule, glass, no external URLs, that `tokens.css` names JetBrains Mono without declaring its own `@font-face` (Phase 00's `fonts.css` owns the files), and that every foreground and background pair the design uses reaches 4.5:1.
 
   ```ts file=src/app/theme/tokens.test.ts
   // @vitest-environment node
   import { existsSync, readFileSync } from 'node:fs';
   import { describe, expect, it } from 'vitest';
 
-  const TOKENS_URL = new URL('./tokens.css', import.meta.url);
-  const tokens = readFileSync(TOKENS_URL, 'utf8');
+  const tokens = readFileSync(new URL('./tokens.css', import.meta.url), 'utf8');
   const primitives = readFileSync(new URL('../../components/primitives.css', import.meta.url), 'utf8');
 
   type Theme = 'light' | 'dark';
@@ -439,11 +404,16 @@ This phase builds the theme and the shared building blocks every UI phase compos
       expect(tokens + primitives).not.toMatch(/https?:\/\//);
     });
 
-    it('references only font files that exist', () => {
-      const urls = Array.from(tokens.matchAll(/url\("([^"]+\.ttf)"\)/g), (m) => m[1] ?? '');
-      expect(urls.length).toBeGreaterThanOrEqual(2);
+    it('uses the Phase 00 woff2 fonts and declares no font files of its own', () => {
+      expect(tokens).not.toContain('@font-face');
+      const fontsUrl = new URL('../../assets/fonts/fonts.css', import.meta.url);
+      const urls = Array.from(
+        readFileSync(fontsUrl, 'utf8').matchAll(/url\('([^']+\.woff2)'\)/g),
+        (m) => m[1] ?? '',
+      );
+      expect(urls).toHaveLength(3);
       for (const url of urls) {
-        expect(existsSync(new URL(url, TOKENS_URL)), url).toBe(true);
+        expect(existsSync(new URL(url, fontsUrl)), url).toBe(true);
       }
     });
   });
@@ -530,22 +500,7 @@ This phase builds the theme and the shared building blocks every UI phase compos
    * light theme applies, which is also the launch default when the host cannot answer (AC-1.6).
    */
 
-  @font-face {
-    font-family: "JetBrains Mono";
-    src: url("../../assets/fonts/JetBrainsMono-Regular.ttf") format("truetype");
-    font-weight: 400;
-    font-style: normal;
-    font-display: swap;
-  }
-
-  @font-face {
-    font-family: "JetBrains Mono";
-    src: url("../../assets/fonts/JetBrainsMono-Bold.ttf") format("truetype");
-    font-weight: 700;
-    font-style: normal;
-    font-display: swap;
-  }
-
+  /* JetBrains Mono's @font-face rules live in src/assets/fonts/fonts.css (Phase 00, woff2). */
   :root {
     --font-ui: "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
     --font-mono: "JetBrains Mono", ui-monospace, monospace;
@@ -1055,7 +1010,7 @@ This phase builds the theme and the shared building blocks every UI phase compos
   npx vitest run src/app/theme/tokens.test.ts
   ```
 
-  Expect: PASS, 63 tests (18 spec tokens, 5 design tokens, 4 token-structure checks, 2 focus checks, 4 glass, window and asset checks, and 15 contrast pairs in each of the two themes). If prettier changed the value spelling of a token (for example spacing inside `rgba(...)`), fix the expected string in the test to match prettier's output, not the other way round. If the font test fails, apply the Step 0 font-path rule.
+  Expect: PASS, 63 tests (18 spec tokens, 5 design tokens, 4 token-structure checks, 2 focus checks, 4 glass, window and asset checks, and 15 contrast pairs in each of the two themes). If prettier changed the value spelling of a token (for example spacing inside `rgba(...)`), fix the expected string in the test to match prettier's output, not the other way round. If the font test fails, Phase 00's `fonts.css` is missing or changed: report it, do not add fonts here.
 
 - [ ] **Step 11: Commit the theme**
 
@@ -1071,19 +1026,20 @@ This phase builds the theme and the shared building blocks every UI phase compos
   // @vitest-environment jsdom
   import { cleanup, render, screen } from '@testing-library/react';
   import { afterEach, describe, expect, it } from 'vitest';
-  import { svgPathData } from '@/lib/svgPathData';
   import { Icon } from './Icon';
-  import { ICON_SVG } from './iconSvg';
-  import type { IconName } from './iconSvg';
+  import { ICONS } from './icons';
+  import type { IconName } from './icons';
 
   afterEach(cleanup);
 
   describe('Icon', () => {
-    it('has path data for every bundled Fluent icon', () => {
-      const entries = Object.entries(ICON_SVG);
-      expect(entries.length).toBeGreaterThanOrEqual(25);
-      for (const [name, svg] of entries) {
-        expect(svgPathData(svg).length, name).toBeGreaterThan(0);
+    it('renders path data for every mapped Fluent icon', () => {
+      const names = Object.keys(ICONS).filter((key): key is IconName => key in ICONS);
+      expect(names.length).toBeGreaterThanOrEqual(25);
+      for (const name of names) {
+        const { container, unmount } = render(<Icon name={name} />);
+        expect(container.querySelectorAll('svg path').length, name).toBeGreaterThan(0);
+        unmount();
       }
     });
 
@@ -1093,7 +1049,6 @@ This phase builds the theme and the shared building blocks every UI phase compos
       expect(svg?.getAttribute('aria-hidden')).toBe('true');
       expect(svg?.getAttribute('role')).toBeNull();
       expect(svg?.getAttribute('viewBox')).toBe('0 0 16 16');
-      expect(svg?.querySelectorAll('path').length).toBeGreaterThan(0);
     });
 
     it('becomes a named image when given a title', () => {
@@ -1104,11 +1059,15 @@ This phase builds the theme and the shared building blocks every UI phase compos
     it('scales with size and inherits the text colour', () => {
       const { container } = render(<Icon name={'copy' satisfies IconName} size={24} />);
       const svg = container.querySelector('svg');
-      expect(svg?.getAttribute('width')).toBe('24');
+      expect(svg?.style.width).toBe('24px');
+      expect(svg?.style.height).toBe('24px');
       expect(svg?.getAttribute('fill')).toBe('currentColor');
+      expect(svg?.classList.contains('ui-icon')).toBe(true);
     });
   });
   ```
+
+  `Object.keys` is typed `string[]`, so the first test narrows it with a type guard rather than a cast.
 
 - [ ] **Step 13: Run, expect FAIL, then implement Icon**
 
@@ -1118,91 +1077,86 @@ This phase builds the theme and the shared building blocks every UI phase compos
 
   Expect: FAIL, `Failed to resolve import "./Icon"`.
 
-  ```ts file=src/components/iconSvg.ts
-  import add from '@fluentui/svg-icons/icons/add_16_regular.svg?raw';
-  import arrowClockwise from '@fluentui/svg-icons/icons/arrow_clockwise_16_regular.svg?raw';
-  import arrowDownload from '@fluentui/svg-icons/icons/arrow_download_16_regular.svg?raw';
-  import arrowExport from '@fluentui/svg-icons/icons/arrow_export_16_regular.svg?raw';
-  import arrowLeft from '@fluentui/svg-icons/icons/arrow_left_16_regular.svg?raw';
-  import arrowRight from '@fluentui/svg-icons/icons/arrow_right_16_regular.svg?raw';
-  import arrowSwap from '@fluentui/svg-icons/icons/arrow_swap_16_regular.svg?raw';
-  import arrowUndo from '@fluentui/svg-icons/icons/arrow_undo_16_regular.svg?raw';
-  import checkmark from '@fluentui/svg-icons/icons/checkmark_16_regular.svg?raw';
-  import checkmarkCircle from '@fluentui/svg-icons/icons/checkmark_circle_16_regular.svg?raw';
-  import chevronDown from '@fluentui/svg-icons/icons/chevron_down_16_regular.svg?raw';
-  import chevronRight from '@fluentui/svg-icons/icons/chevron_right_16_regular.svg?raw';
-  import code from '@fluentui/svg-icons/icons/code_16_regular.svg?raw';
-  import copy from '@fluentui/svg-icons/icons/copy_16_regular.svg?raw';
-  import cube from '@fluentui/svg-icons/icons/cube_16_regular.svg?raw';
-  import dismiss from '@fluentui/svg-icons/icons/dismiss_16_regular.svg?raw';
-  import documentIcon from '@fluentui/svg-icons/icons/document_16_regular.svg?raw';
-  import errorCircle from '@fluentui/svg-icons/icons/error_circle_16_regular.svg?raw';
-  import important from '@fluentui/svg-icons/icons/important_16_regular.svg?raw';
-  import info from '@fluentui/svg-icons/icons/info_16_regular.svg?raw';
-  import open from '@fluentui/svg-icons/icons/open_16_regular.svg?raw';
-  import search from '@fluentui/svg-icons/icons/search_16_regular.svg?raw';
-  import subtract from '@fluentui/svg-icons/icons/subtract_16_regular.svg?raw';
-  import target from '@fluentui/svg-icons/icons/target_16_regular.svg?raw';
-  import warning from '@fluentui/svg-icons/icons/warning_16_regular.svg?raw';
+  ```ts file=src/components/icons.ts
+  import {
+    Add16Regular,
+    ArrowClockwise16Regular,
+    ArrowDownload16Regular,
+    ArrowExport16Regular,
+    ArrowLeft16Regular,
+    ArrowRight16Regular,
+    ArrowSwap16Regular,
+    ArrowUndo16Regular,
+    Checkmark16Regular,
+    CheckmarkCircle16Regular,
+    ChevronDown16Regular,
+    ChevronRight16Regular,
+    Code16Regular,
+    Copy16Regular,
+    Cube16Regular,
+    Dismiss16Regular,
+    Document16Regular,
+    ErrorCircle16Regular,
+    Important16Regular,
+    Info16Regular,
+    Open16Regular,
+    Search16Regular,
+    Subtract16Regular,
+    Target16Regular,
+    Warning16Regular,
+  } from '@fluentui/react-icons';
 
   // Fluent System Icons, bundled locally (FR-11). Replaces the design's text glyphs: { } is "code",
   // the server-object diamond is "cube", the Inspector circle is "target", the client-call arrows are "arrow-swap".
-  export const ICON_SVG = {
-    add,
-    'arrow-clockwise': arrowClockwise,
-    'arrow-download': arrowDownload,
-    'arrow-export': arrowExport,
-    'arrow-left': arrowLeft,
-    'arrow-right': arrowRight,
-    'arrow-swap': arrowSwap,
-    'arrow-undo': arrowUndo,
-    checkmark,
-    'checkmark-circle': checkmarkCircle,
-    'chevron-down': chevronDown,
-    'chevron-right': chevronRight,
-    code,
-    copy,
-    cube,
-    dismiss,
-    document: documentIcon,
-    'error-circle': errorCircle,
-    important,
-    info,
-    open,
-    search,
-    subtract,
-    target,
-    warning,
+  export const ICONS = {
+    add: Add16Regular,
+    'arrow-clockwise': ArrowClockwise16Regular,
+    'arrow-download': ArrowDownload16Regular,
+    'arrow-export': ArrowExport16Regular,
+    'arrow-left': ArrowLeft16Regular,
+    'arrow-right': ArrowRight16Regular,
+    'arrow-swap': ArrowSwap16Regular,
+    'arrow-undo': ArrowUndo16Regular,
+    checkmark: Checkmark16Regular,
+    'checkmark-circle': CheckmarkCircle16Regular,
+    'chevron-down': ChevronDown16Regular,
+    'chevron-right': ChevronRight16Regular,
+    code: Code16Regular,
+    copy: Copy16Regular,
+    cube: Cube16Regular,
+    dismiss: Dismiss16Regular,
+    document: Document16Regular,
+    'error-circle': ErrorCircle16Regular,
+    important: Important16Regular,
+    info: Info16Regular,
+    open: Open16Regular,
+    search: Search16Regular,
+    subtract: Subtract16Regular,
+    target: Target16Regular,
+    warning: Warning16Regular,
   } as const;
 
-  export type IconName = keyof typeof ICON_SVG;
+  export type IconName = keyof typeof ICONS;
   ```
 
   ```tsx file=src/components/Icon.tsx
   import type { ReactElement } from 'react';
-  import { svgPathData } from '@/lib/svgPathData';
-  import { ICON_SVG } from './iconSvg';
-  import type { IconName } from './iconSvg';
+  import { ICONS } from './icons';
+  import type { IconName } from './icons';
   import './primitives.css';
 
   export type IconProps = { name: IconName; size?: number; title?: string };
 
+  // The Fluent component sets aria-hidden, or role="img" plus aria-label when given a title.
   export function Icon({ name, size = 16, title }: IconProps): ReactElement {
-    const labelled = title !== undefined;
+    const Glyph = ICONS[name];
     return (
-      <svg
+      <Glyph
         className="ui-icon"
-        viewBox="0 0 16 16"
-        width={size}
-        height={size}
-        fill="currentColor"
+        style={{ width: size, height: size }}
         focusable="false"
-        {...(labelled ? { role: 'img', 'aria-label': title } : { 'aria-hidden': true })}
-      >
-        {svgPathData(ICON_SVG[name]).map((d) => (
-          <path key={d} d={d} />
-        ))}
-      </svg>
+        {...(title === undefined ? {} : { title })}
+      />
     );
   }
   ```
@@ -1213,12 +1167,12 @@ This phase builds the theme and the shared building blocks every UI phase compos
   npx vitest run src/components/Icon.test.tsx
   ```
 
-  Expect: PASS, 4 tests.
+  Expect: PASS, 4 tests. If the role test fails because the installed version no longer maps `title` to `aria-label`, pass `aria-label={title}` explicitly (the package keeps `role="img"` whenever an `aria-label` is present).
 
   ```bash
-  npx prettier --write src/components/Icon.tsx src/components/Icon.test.tsx src/components/iconSvg.ts
+  npx prettier --write src/components/Icon.tsx src/components/Icon.test.tsx src/components/icons.ts
   npx eslint src/components --max-warnings=0
-  git add src/components/Icon.tsx src/components/Icon.test.tsx src/components/iconSvg.ts
+  git add src/components/Icon.tsx src/components/Icon.test.tsx src/components/icons.ts
   git commit -m "feat(ui): add Icon backed by bundled Fluent System Icons"
   ```
 
@@ -1990,7 +1944,7 @@ This phase builds the theme and the shared building blocks every UI phase compos
   ```tsx file=src/components/StatusBadge.tsx
   import type { ReactElement } from 'react';
   import { Icon } from './Icon';
-  import type { IconName } from './iconSvg';
+  import type { IconName } from './icons';
   import { Pill } from './Pill';
   import type { PillTone } from './Pill';
 
@@ -2604,7 +2558,7 @@ This phase builds the theme and the shared building blocks every UI phase compos
   import type { ReactElement } from 'react';
   import { classNames } from '@/lib/classNames';
   import { Icon } from './Icon';
-  import type { IconName } from './iconSvg';
+  import type { IconName } from './icons';
   import { usePrefersReducedMotion } from './usePrefersReducedMotion';
   import './primitives.css';
 
@@ -2723,21 +2677,21 @@ npx tsc -b
 npx eslint . --max-warnings=0
 npx prettier --check .
 npx vitest run
-npx vitest run src/lib/classNames.test.ts src/lib/svgPathData.test.ts src/lib/ringGeometry.test.ts src/app/theme/tokens.test.ts src/components
+npx vitest run src/lib/classNames.test.ts src/lib/ringGeometry.test.ts src/app/theme/tokens.test.ts src/components
 npm run build
-grep -rl "JetBrainsMono-Regular\|font/ttf" dist
+grep -rl "font/woff2\|jetbrains-mono-latin" dist
 git status --short
 ```
 
 Expect:
-- `tsc`, `eslint` and `prettier --check` print nothing and exit 0. No `any`, no `!`, no `forwardRef`, no `useMemo`/`useCallback`, and no `dangerouslySetInnerHTML` appear in the files this phase added (`grep -rn "forwardRef\|useMemo\|useCallback\|dangerouslySetInnerHTML\|: any\b" src/components src/lib/ringGeometry.ts src/lib/svgPathData.ts src/lib/classNames.ts` prints nothing).
-- The full suite passes, including the focused run: 3 lib files, the token file and 10 component files, roughly 145 tests.
+- `tsc`, `eslint` and `prettier --check` print nothing and exit 0. No `any`, no `!`, no `forwardRef`, no `useMemo`/`useCallback`, and no `dangerouslySetInnerHTML` appear in the files this phase added (`grep -rn "forwardRef\|useMemo\|useCallback\|dangerouslySetInnerHTML\|: any\b" src/components src/lib/ringGeometry.ts src/lib/classNames.ts` prints nothing).
+- The full suite passes, including the focused run: 2 lib files, the token file and 10 component files, roughly 145 tests.
 - `npm run build` still produces the single IIFE bundle (Phase 00's build-shape test is part of `npx vitest run`). The `grep` lists at least one file under `dist/`, which confirms the JetBrains Mono files are referenced in the build output, either as emitted font files or as `data:` URIs. If Vite emitted them as separate files, the Starter PPTB smoke gate must confirm the code panes render in JetBrains Mono, because the host's CSP allows `'self'` and `data:` fonts only.
 - `git status --short` shows only untracked or unchanged docs; nothing outside this phase's files changed.
 
 ## Done when
 
-- `tokens.css` carries both themes with the FR-11 values (`tokens.test.ts` checks every one), the dark aurora and glass tile, the 2px primary focus ring at a 2px offset, the 10% highlight rule with a 2px inset bar, and the bundled JetBrains Mono `@font-face`; nothing loads from another origin.
+- `tokens.css` carries both themes with the FR-11 values (`tokens.test.ts` checks every one), the dark aurora and glass tile, the 2px primary focus ring at a 2px offset, the 10% highlight rule with a 2px inset bar, and `--font-mono` naming the JetBrains Mono woff2 fonts that Phase 00 bundles (no `@font-face` of its own); nothing loads from another origin.
 - `Ring` draws one SVG arc per check up to 30 with 4° gaps, three proportional arcs above 30 with empty arcs omitted, and always shows the text count.
 - `PillGroup` is an APG radio group (roving tabindex, arrows, Home and End, `aria-checked`), and a blocked option is `aria-disabled`, focusable, never selected, and described by its reason on hover and focus. `Button` does the same for `disabledReason` and sets `busy` natively.
 - `StatusBadge` always shows a glyph and a word. `Modal` traps focus, closes on Esc and returns focus to its opener. `ToastStack` gives success and info `role="status"` and a 5 s auto-hide, gives error and warning `role="alert"` and no auto-hide, and drops the fade class under `prefers-reduced-motion`.
