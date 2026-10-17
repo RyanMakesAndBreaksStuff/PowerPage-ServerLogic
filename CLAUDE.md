@@ -12,7 +12,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Where things are
 
-- `docs/specs/001-server-logic-starter-inspector/spec.md` is the source of truth (v1.1.0). Its FRs, ACs, recipe table (R1–R10), numbered Learn corrections and spikes S1–S4 govern behaviour. `review.md` sits next to it.
+- `docs/specs/001-server-logic-starter-inspector/spec.md` is the source of truth (v2.0.0). Its FRs, ACs, recipe table (R1–R10), numbered Learn corrections and spikes S1–S4 govern behaviour. `review.md` sits next to it.
 - **Layout 10a** in `design_handoff_server_logic_tools/Logic Tooling Design Directions/design_handoff_server_logic_tools/` is the high-fidelity design for the shell, Logic Starter, Server Objects, Logic Inspector and all UI tokens (README plus `reference/01–06`, light and dark). Its recipe list is **not** adopted: the spec's R1–R10 stand.
 - The original `design_handoff_server_logic_tools/` README §05 still governs **report** styling. Its other references are superseded by 10a. `06-interactive-prototype.dc.html` is an **older layout**, so use it for behaviour only (state, toggles, export dialog), not visuals. It needs `support.js` in the same folder.
 - `mocks/` contains visual explorations. They are reference only, not production code.

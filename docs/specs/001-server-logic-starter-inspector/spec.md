@@ -1,9 +1,9 @@
 # Feature 001: Power Pages Server Logic — Logic Starter & Logic Inspector
 
 **Status:** Approved
-**Version:** 1.1.0
+**Version:** 2.0.0
 **Created:** 2026-10-06
-**Updated:** 2026-10-14
+**Updated:** 2026-10-16
 **Branch:** `001-server-logic-starter-inspector`
 **Design source:** layout 10a, `design_handoff_server_logic_tools/Logic Tooling Design Directions/design_handoff_server_logic_tools/` (README + references 01–06, light and dark), for the shell, Logic Starter, Server Objects, Logic Inspector and all UI tokens. Report styling still follows the original handoff's README §05 (`design_handoff_server_logic_tools/README.md`). High fidelity: colours, type, spacing and copy are final except where this spec overrides them (recipe list, A8, F38 labels).
 
@@ -22,6 +22,7 @@
 | 0.7.0 | 2026-10-08 | Applies the 40 deferred remedies and the 6 owner decisions from the review debate, plus design layout 10a. **Design (F53):** Server Objects is a top-level tab and the Starter sub-tab row is gone; the recipe tile is a searchable combobox (resolves A4); light (11c) and dark (12e) themes follow the host theme (reverses A2); dark uses aurora plus glass on every tile (reverses A1); the site pill in the title bar is Inspector's site picker; A8 keeps only the report tokens. **Owner decisions:** R4 `post` uses a Global Create-only permission until S4 proves the caller's account can be bound (F04); Account-scope checklists name the relationship; the write-on-read rule includes Append and Append To and is reworded (F25); no Mark as reviewed on read failures (F33); labels separate Configured from Reviewed with C/V/M/U/T counts (F38, F39); 1024×700 minimum viewport (F50). **Generated code:** per-recipe `Body` decoding (F01), three-branch Liquid (F02), Learn's R5 inputs (F03), R10 prerequisites (F07), example requests (F08), upstream-credentials note (F10), R8 wording (F11), server text depends only on the recipe (F12), `entityid ?? entityId` (F55), JSON missing-setting result (F57), R5 empty bodies (F58). **Checks:** T9 corrected and T18–T20 with a tokenizer fallback (F22, F23); grant set adds the Authenticated and Anonymous Users roles (F27); settings normalisation (F28); O1 and O6 wording (F30, F32); timeout is a site banner (F31). **Inspector and reports:** unconditional invalidation with scan IDs (F34), paging and "Inventory incomplete" (F35), AC-7.8 wording (F36), export eligibility, reasons, escaping, redaction, pagination, snapshot, timing and failure (F40–F46). **UX:** persistence versions (F19), LF model (F18), validation disclosure (F14), secrets scope (F20), `aria-disabled`, APG keyboard patterns, status toasts and search selection (F47–F49, F51), report fonts and stems (F52). **Spikes:** S1 evidence (F29), S4 probe design (F54), spike evidence rule and R7 pin (F59). |
 | 1.0.0 | 2026-10-14 | **MAJOR.** Owner decisions from the PPTB Desktop review, checked against the PPTB tool-development docs and Learn. **Removed:** Starter persistence (FR-5a, AC-5.8, F19): Starter state isn't kept between sessions, and PPTB's guidance is to store only user preferences in tool settings. **Changed:** notifications use `toolboxAPI.utils.showNotification`, with an in-tool Bootstrap-style fallback when the host call fails (FR-1); theme is read from the host at launch and re-read on `settings:updated`, focus and visibility, defaulting to light (AC-1.6); the tool owns Dataverse paging and a bounded retry (FR-7); the environment classification is the PPTB connection label (AC-7.5). **Added:** FR-12 PPTB host and manifest (Desktop App 1.2.7 or later, optional connection, validator and verification fields), external links through `openInConnectionBrowser`. **Plan deltas:** D1 jQuery `.fail()` (AC-4.6), D2 bundle JetBrains Mono only (FR-10, FR-11), D3 title-bar wording (AC-1.2). S2 no longer covers settings, theme or PDF. |
 | 1.1.0 | 2026-10-14 | **MINOR.** Owner decisions on build phasing. **Added:** per-page releases (Starter, Server Objects, Inspector, in the order each completes), with unreleased pages' tabs shown disabled and their code left out of the build (AC-1.7, FR-1, FR-12); AC-1.1 and AC-6.8 note the exception. **Changed:** spike evidence goes in the plan of the phase that runs the spike, since each phase has its own plan file. **Resolved log:** PDF via jsPDF and jspdf-autotable in the web view (no .NET worker), the zip via fflate `zipSync`, the code editor via CodeMirror 6. |
+| 2.0.0 | 2026-10-16 | **MAJOR.** Results of Spike S1 (PG DEV, enhanced data model, 2026-10-14) and Spike S4 (live probe on PG DEV, 2026-10-15/16); evidence is in the phase-0 plan. **Rewritten:** FR-4 matching: the runtime matches Learn's restricted list as case-insensitive regexes over the raw text, so every hit is Blocked, including inside comments, strings and identifiers (correction 14, T6/T9–T11/T14, new T21–T22); the jQuery client calls `shell.ajaxSafePost`, because `shell.safeAjax` doesn't exist on a live site (correction 9, AC-4.6, FR-2a); FR-7's grant set follows a Parent-scope permission's chain to the roles of its top permission. **Changed:** corrections 8 and 11 confirmed live (failure envelopes have no `data`; connector results are JSON strings); AC-4.7 drops the `async` condition (Liquid calls async functions); FR-7 data sources record where S1 found each fact, read settings backed by environment variables, and flag `*.` entries in `AllowedDomains`, which match no host (FR-9). **Added:** corrections 20–23 (blocked HttpClient calls return `StatusCode` 0, `Server.User` is the whole contact record, top-level helpers are accepted, the `x-ms-user-trace` header) and a README troubleshooting note; S2 checks file-column download and environment-variable read access. **Unchanged:** R4 `post` keeps Global Create-only: S4 proved the caller's parent account is readable, not that a bound create works (F04). S4 item 6 and `CloudFlow.TriggerAsync` stay untested. |
 
 ---
 
@@ -89,13 +90,13 @@ Where the mocks and Learn disagree, Learn wins. The visual design still applies.
 5. **`Server.Context` properties** follow Learn: ActivityId, Body, FunctionName, Headers, HttpMethod, Input, QueryParameters, ServerLogicName, Url.
 6. **OData options** passed to `RetrieveRecord` / `RetrieveMultipleRecords` follow Learn's form: `"$select=…&$top=…"`, with no leading `?`.
 7. **`HttpClient` methods and `CloudFlow.TriggerAsync` are asynchronous.** Handlers that use them are generated as `async function` and use `await`.
-8. **Client responses are wrapped** in an envelope, and its keys are **lowercase**: `{ requestId, success, serverLogicName, data, error }`. Client samples check `success`, read `error` on failure, and read `data`, which is the string the handler returned. Learn contradicts itself here. The Author page's example response uses PascalCase (`Success`, `Data`), but all three tutorial demo pages read lowercase `res.data` / `resp.data` / `data?.data`, and Microsoft's `add-server-logic` frontend reference documents the lowercase envelope. The lowercase form is used; Spike S4 confirms it on a live site. On failure, `success` is `false`, `data` is `null` and `error` holds the message.
-9. **The jQuery client variant uses `shell.safeAjax`** (per Author server logic). The fetch variant uses `shell.getTokenDeferred()` plus the `__RequestVerificationToken` header (per the tutorial's CSRF wrapper).
+8. **Client responses are wrapped** in an envelope, and its keys are **lowercase**: `{ requestId, success, serverLogicName, data, error }`. Client samples check `success`, read `error` on failure, and read `data`, which is the string the handler returned. Learn contradicts itself here. The Author page's example response uses PascalCase (`Success`, `Data`), but all three tutorial demo pages read lowercase `res.data` / `resp.data` / `data?.data`, and Microsoft's `add-server-logic` frontend reference documents the lowercase envelope. The lowercase form is used, and Spike S4 confirmed it on a live site. A success envelope is `{ requestId, success, data, serverLogicName }` with no `error` key. On failure, `success` is `false`, the `data` key is absent (not `null`) and `error` holds the message. An anti-forgery rejection (HTTP 401) also has no `requestId`, and its `error` is itself a JSON string (`{"error":{"code":"90040107",…}}`). Clients therefore read `data` only after `success` is `true`, and show `error` as text.
+9. **The jQuery client variant uses `shell.ajaxSafePost`.** Learn's Author page shows `shell.safeAjax`, but Spike S4 found it doesn't exist on a live site: `shell` exposes only `ajaxSafePost`, `getTokenDeferred` and `refreshToken`. `shell.ajaxSafePost(options)` gets the token, adds the `__RequestVerificationToken` header and runs `$.ajax` with the given `type`, so it works for every method despite its name, and returns a promise whose `.fail()` receives token and transport failures. The fetch variant uses `shell.getTokenDeferred()` plus the `__RequestVerificationToken` header (per the tutorial's CSRF wrapper).
 10. **Prototype 06's generated code is not a reference.** Its `context.table(...)` and `fetch()` calls are invalid in server logic; README §01 and Learn are the references.
-11. **Connector results have the shape `{ StatusCode, Body, IsSuccessStatusCode, ReasonPhrase, ServerError, ServerErrorMessage, Headers }`** (`CloudFlow` has no `Headers`), and `Body` is a JSON string. Sources disagree on whether the result itself is a string: Learn's `CloudFlow` sample calls `JSON.parse(response)`, but Microsoft's `add-server-logic` reference reads `dvResponse.Body` directly. Generated handlers therefore normalise it with one helper, `const toResult = r => typeof r === "string" ? JSON.parse(r) : r;`. They then check `IsSuccessStatusCode`, log `ReasonPhrase` on failure, and on success decode a non-empty `Body` as the recipe's contract row says (FR-3): JSON for most recipes, raw text for R6, and JSON-or-text for R9. `Body` is usually, not always, JSON (F01). Spike S4 confirms the actual type. On the client, the envelope's `data` is the string the handler returned, so generated client code `JSON.parse`s it (FR-3 contract table).
+11. **Connector results have the shape `{ StatusCode, Body, IsSuccessStatusCode, ReasonPhrase, ServerError, ServerErrorMessage, Headers }`** (`CloudFlow` has no `Headers`), and `Body` is a JSON string. Sources disagree on whether the result itself is a string: Learn's `CloudFlow` sample calls `JSON.parse(response)`, but Microsoft's `add-server-logic` reference reads `dvResponse.Body` directly. Generated handlers therefore normalise it with one helper, `const toResult = r => typeof r === "string" ? JSON.parse(r) : r;`. They then check `IsSuccessStatusCode`, log `ReasonPhrase` on failure, and on success decode a non-empty `Body` as the recipe's contract row says (FR-3): JSON for most recipes, raw text for R6, and JSON-or-text for R9. `Body` is usually, not always, JSON (F01). Spike S4 found that Dataverse and HttpClient results both arrive as JSON strings whose parsed `Body` is a string; HttpClient results also carry an undocumented `IsBinaryBody` key. `toResult` stays, because a string result is the observed case and an object costs nothing to accept. On the client, the envelope's `data` is the string the handler returned, so generated client code `JSON.parse`s it (FR-3 contract table).
 12. **`HttpClient` request bodies support only `application/json`, `text/html` and `application/x-www-form-urlencoded`.** Generated calls pass one of these as `contentType`. Signatures are `GetAsync(url, headers)`, `DeleteAsync(url, headers)`, and `PostAsync`/`PutAsync`/`PatchAsync(url, body, headers, contentType)`.
 13. **Liquid and HTTP expose different `Server.Context` properties.** `ActivityId`, `FunctionName` and `ServerLogicName` exist in both. `Body`, `Headers`, `HttpMethod`, `QueryParameters` and `Url` are HTTP only. `Input` is Liquid only. A handler invoked from Liquid reads `JSON.parse(Server.Context.Input || "{}")`.
-14. **The restricted-pattern list is matched by Learn's validator, whose exact rules aren't documented.** Learn's own sample warns that the `delete` keyword "should not be used in script file", and its sample comments are written around that. Inspector therefore treats pattern text inside comments and strings as a risk, not as safe (FR-4). One rule is confirmed outside Learn: Microsoft's `add-server-logic` skill reports that the runtime rejects the regex `with\s*\(` **anywhere in the file**, including inside string literals. The rejection appears as `RTSL01: Script validation failed: prohibited pattern found`, and the function doesn't run. So the OData filter text `"startswith(name,'a')"` inside a string breaks the script. Generated code splits such literals (`"startswith" + "(name,'a')"`), and FR-4 treats `with(` in any position as Blocked.
+14. **The runtime matches Learn's restricted list as case-insensitive regexes over the raw file text.** Learn lists the patterns but not how they're matched. Spike S4 saw the validator reject a file for `Function\s*\(` on the anonymous callback `forEach(function (k) {…})`, and for `delete\s+[a-zA-Z_$]` on the comment `// Delete after the spike`. Neither text is a capital-F `Function(` or code, so matching ignores case and covers comments, strings and identifiers. Microsoft's `add-server-logic` skill reports the same for `with\s*\(`. The rejection appears as `RTSL01: Script validation failed: prohibited pattern found - Pattern: <regex>`, the whole file doesn't run, and the caller gets HTTP 400 "Exception occurred while processing this request". Consequences: the OData filter text `"startswith(name,'a')"` and the method calls `.startsWith(` and `.endsWith(` break the script; generated code splits such literals (`"startswith" + "(name,'a')"`) and uses no anonymous `function (…)` expressions. `delete` needs whitespace and a name after it, so `DeleteRecord(` is safe. FR-4 treats every match as Blocked.
 15. **Learn's jQuery DELETE example is invalid JavaScript** (a comma is missing after `contentType`). The generated client sample must parse.
 16. **`Server.User` returns `null` for anonymous callers**, so samples guard `Server.User` before reading `fullname`. `Server.SiteSetting` is for secrets and endpoints; Learn says to hold secrets in Azure Key Vault, surface them through an environment variable, and reference them through a site setting.
 17. **Defects in Learn's tutorial server code**, which the recipes fix and list under "Differences from Learn" (AC-3.7):
@@ -105,6 +106,10 @@ Where the mocks and Learn disagree, Learn wins. The visual design still applies.
     - *Graph and SharePoint tutorial:* the token request `JSON.stringify`s the body but declares `application/x-www-form-urlencoded`. The Microsoft identity platform token endpoint expects a form-encoded body, so the recipe form-encodes it. The excerpt also has a stray `;;`. **Unverified against a live tenant**: confirm in Spike S3.
 18. **Defects in Learn's tutorial demo pages**, fixed in `<slug>.page.html` (AC-3.9): the Azure Function page calls `fetch` without the CSRF token (add `shell.getTokenDeferred()` + `__RequestVerificationToken`); the External services page derives `serviceSession` from `@odata.context` with a regex that is fragile (use a documented parse and fall back to an empty session); the Dataverse and External services pages build HTML from record values without escaping (escape them); and the External services page runs `JSON.parse` on `resp.data` and `parsed.Body` without a guard, so a non-JSON error body throws (wrap it in try/catch, as the Dataverse page already does). Each demo page is also adapted to the recipe's return shape (FR-3 contract table), so it doesn't double-parse `Body`.
 19. **`Server.Connector.Dataverse.*` methods are synchronous.** Learn shows them without `await`, and Microsoft's `add-server-logic` skill says not to `await` them. Generated handlers mark a function `async` only when it awaits `HttpClient` or `CloudFlow` (correction 7). Learn's Dataverse tutorial and the server objects page don't contradict this.
+20. **An `HttpClient` call to a host the outbound settings don't allow doesn't throw** (Spike S4). It returns a result with `StatusCode` 0, and the runtime log reads "URL '<url>' is not allowed based on domain restrictions." (or "AllowNetworkingToAllDomains is disabled and no AllowedDomains are configured."). Generated handlers already check `IsSuccessStatusCode` (FR-3), which catches it; `try`/`catch` alone wouldn't.
+21. **`Server.User` is the whole contact record** (Spike S4): about 70 attributes, including `adx_identity_*` fields such as the security stamp. `contactid` is a GUID string; `parentcustomerid` and `Roles` are objects. These members are observed, not documented, so samples read only `fullname` (correction 16), and generated code never returns or logs `Server.User` itself.
+22. **Top-level helper functions are accepted** (Spike S4). A file with helper functions next to `get`/`post` and custom Liquid operations ran on a live site. Microsoft's `add-server-logic` validator allows only the five handler names, so it's stricter than the runtime and isn't used as an oracle for R7's helpers or R8's operation.
+23. **Runtime diagnostics come back in the `x-ms-user-trace` response header** (Spike S4): base64-encoded JSON, a list of `{ Level, MessageCode, Message }` entries, including `Server.Logger` output and `RTSL01` validation errors. The header is listed in `access-control-expose-headers`, so page script can read it. Microsoft's skill spells it `X-Ms-UserTrace`; the observed name is `x-ms-user-trace`. Generated READMEs point to it for troubleshooting.
 
 ## User Stories
 
@@ -143,7 +148,7 @@ Where the mocks and Learn disagree, Learn wins. The visual design still applies.
 - [ ] **AC-2.9** Given the server pane text differs from the text generated for the current recipe When the user selects a different recipe Then a confirmation asks before discarding their edits, and Cancel keeps both the edits and the current recipe. Editing and then restoring the exact generated text clears the edited state.
 - [ ] **AC-2.10** Given any recipe When the method pills render Then a pill is enabled only if the recipe exports that method's function (FR-3 table, "Functions" column). A disabled pill uses `aria-disabled="true"` and stays focusable. It shows the tooltip "<Recipe> doesn't export `<function>()`" on hover and on focus, exposed through `aria-describedby` (F47). R4 and R5 enable GET, POST, PUT and DELETE (not PATCH). R10 enables GET, POST and PATCH. R8 enables none: it has no HTTP method, and its helper line shows "Liquid only" as visible text (AC-3.8).
 - [ ] **AC-2.11** Given any logic name When it is slugified (AC-2.2) Then:
-  - the slug is at most 64 characters. It's cut at the last `-` at or before character 64, or at 64 if there's none, and trailing dashes are trimmed. Spike S1 confirms the Power Pages name limit;
+  - the slug is at most 64 characters. It's cut at the last `-` at or before character 64, or at 64 if there's none, and trailing dashes are trimmed. Spike S1 found studio accepts at least 189 characters and the `name` column allows 400, so 64 always fits;
   - a slug that is a Windows device name (`con`, `prn`, `aux`, `nul`, `com1`–`com9`, `lpt1`–`lpt9`) gets `-logic` appended, because a file such as `con.js` breaks zip extraction on Windows;
   - when the slug differs from the typed name, the helper line adds "Different names can produce the same slug, and so the same endpoint. Check that `<slug>` isn't already used on your site." Starter is offline and doesn't check the site (F21).
 
@@ -178,10 +183,10 @@ Where the mocks and Learn disagree, Learn wins. The visual design still applies.
 - [ ] **AC-4.2** Given the server pane When it renders Then its header shows `<slug>.js` and a `Server` pill in the server-object colour. The lines that do the recipe's data access are highlighted with 10% of the primary colour over the code surface and a 2px inset primary bar (layout 10a §4). The footer reads "Runs on Power Pages with the caller's permissions".
 - [ ] **AC-4.3** Given the server pane When the user types in it Then the code is editable, the Browser checks readiness item re-runs on the edited code, and edits persist until the recipe changes (AC-2.9) or the user selects Start over.
 - [ ] **AC-4.4** Given the client call pane When it renders Then it offers single-select `fetch` (default), `jQuery` and `Liquid` pills. The footer reads "Paste into a page's custom JavaScript" for fetch and jQuery, or "Paste into a page or web template" for Liquid.
-- [ ] **AC-4.5** Given `fetch` is selected When the pane renders Then it calls `/_api/serverlogics/<slug>` with the selected method inside `shell.getTokenDeferred().done(...)`, sends the `__RequestVerificationToken` header, checks `success` (showing `error` when it's false), reads `data` from the response envelope (Learn correction 8), parses it with `JSON.parse` inside a try/catch, and branches on the handler's `status` (FR-3 contract table). The token is sent for every method, including GET. Microsoft's skill says GET is exempt, but sending the token is harmless.
-- [ ] **AC-4.6** Given `jQuery` is selected When the pane renders Then it calls `shell.safeAjax({ type, url, contentType, data?, success }).fail(...)` per Learn, and its `success` callback handles the envelope exactly as AC-4.5 does: it checks `success`, parses `data` and branches on `status`. Transport and token failures are reported once, from `.fail()`: a token failure rejects the returned promise without calling an `error` option, so an `error` option would miss it.
-- [ ] **AC-4.7** The Liquid pill is enabled only when all three conditions hold: the recipe's "Liquid" column in the FR-3 contract table is "Yes", the server text contains no `async` function, and the server text references no `Server.Context` member that FR-6 marks HTTP only (`Body`, `Headers`, `HttpMethod`, `QueryParameters`, `Url`). The rule is evaluated on the current server text, so edits and inserts count as well as recipe changes.
-  Given any condition fails When the client pills render Then the Liquid pill is disabled (`aria-disabled`, as in AC-2.10) with the tooltip "Liquid can't call this handler: it reads HTTP-only request properties or is async". Only R1 and R8 support Liquid. Liquid can't supply HTTP-only properties (correction 13), and Learn doesn't document calling `async` functions from Liquid.
+- [ ] **AC-4.5** Given `fetch` is selected When the pane renders Then it calls `/_api/serverlogics/<slug>` with the selected method inside `shell.getTokenDeferred().done(...)`, sends the `__RequestVerificationToken` header, checks `success` (showing `error` when it's false), reads `data` from the response envelope (Learn correction 8), parses it with `JSON.parse` inside a try/catch, and branches on the handler's `status` (FR-3 contract table). The token is sent for every method, including GET. Spike S4 found a GET passes without it and a POST without it fails with HTTP 401, so sending it on GET is harmless.
+- [ ] **AC-4.6** Given `jQuery` is selected When the pane renders Then it calls `shell.ajaxSafePost({ type, url, contentType, data?, success }).fail(...)` (Learn correction 9), and its `success` callback handles the envelope exactly as AC-4.5 does: it checks `success`, parses `data` and branches on `status`. Transport and token failures are reported once, from `.fail()`: a token failure rejects the returned promise without calling an `error` option, so an `error` option would miss it.
+- [ ] **AC-4.7** The Liquid pill is enabled only when both conditions hold: the recipe's "Liquid" column in the FR-3 contract table is "Yes", and the server text references no `Server.Context` member that FR-6 marks HTTP only (`Body`, `Headers`, `HttpMethod`, `QueryParameters`, `Url`). The rule is evaluated on the current server text, so edits and inserts count as well as recipe changes.
+  Given either condition fails When the client pills render Then the Liquid pill is disabled (`aria-disabled`, as in AC-2.10) with the tooltip "Liquid can't call this handler: it reads HTTP-only request properties". Only R1 and R8 support Liquid. Liquid can't supply HTTP-only properties (correction 13). An `async` function doesn't disable the pill: Spike S4 called sync and async operations from Liquid on a live site, and both returned `success` true with parsed `data`.
   Given the pill becomes disabled while Liquid is selected When it happens Then the language resets to fetch and a toast reads "Switched to fetch: this code can't be called from Liquid". Undoing the change re-enables the pill but doesn't switch the language back (F16).
   Given `Liquid` is selected When the pane renders Then it emits `{% serverlogic name: '<slug>', operation: '<function>', output: result %}`, adding `input:` when the recipe reads `Input`. The output has three branches (F02), because `result.success` only means the operation ran:
   - `{% if result.success and result.data.status == 'success' %}` renders the payload, escaping every value read from `result.data`, which Learn says is the parsed JSON;
@@ -216,7 +221,7 @@ Where the mocks and Learn disagree, Learn wins. The visual design still applies.
 - [ ] **AC-5.6** Given any readiness state When the user selects **Download starter** Then `<slug>.zip` is saved through the host's save dialog, containing:
   - `<slug>.js`: the server pane content.
   - `<slug>.client.<js|liquid>`: the client call in the selected language.
-  - `README.md`: setup steps, the endpoint (for R8, the Liquid tag instead; F11), the request path, Learn links, the browser-check result and, for R3, R5, R6, R7 and R9, the upstream-credentials line (FR-3, F10).
+  - `README.md`: setup steps, the endpoint (for R8, the Liquid tag instead; F11), the request path, Learn links, the browser-check result, a troubleshooting note (the `x-ms-user-trace` response header, `RTSL01` validation errors, and HTTP 403 when the tenant blocks outbound calls; corrections 14, 23) and, for R3, R5, R6, R7 and R9, the upstream-credentials line (FR-3, F10).
   - `permission-checklist.md`: web role, table permissions with privileges, access type and, for Account access, the relationship and the test-user prerequisite (FR-3), allowed domains, site settings and recipe prerequisites (R10, F07), each as `- [ ]`.
   - `<slug>.page.html`, only for R4, R5 and R6 (AC-3.9).
   A toast confirms "<slug>.zip downloaded".
@@ -302,7 +307,7 @@ Where the mocks and Learn disagree, Learn wins. The visual design still applies.
 - [ ] **AC-8.7** Given the files tile When it renders Then its footer always shows "Tenant outbound policy: not verified. This tool doesn't read tenant network policy."
 - [ ] **AC-8.8** Given the check rules (FR-9) When a file is evaluated Then:
   - With no role assigned, Web role is "Needs review: No web role assigned. No site user can call it yet."
-  - When the assigned roles **include** the site's anonymous role (`mspp_anonymoususersrole` = true), whatever other roles are assigned, Web role is "Needs review: Callable by unauthenticated visitors." Roles are identified by that flag, never by name, because roles can be renamed.
+  - When the assigned roles **include** the site's anonymous role (`anonymoususersrole` = true in its `content`), whatever other roles are assigned, Web role is "Needs review: Callable by unauthenticated visitors." Roles are identified by that flag, never by name, because roles can be renamed.
   - Table permissions are evaluated over the grant set (FR-7): permissions linked to the file's roles, plus the Authenticated Users role's permissions when any assigned role isn't anonymous, plus the Anonymous Users role's permissions when the anonymous role is assigned (F27).
   - With any Global access in the grant set, Table permissions is "Needs review" and names the table, access type and the role it comes from.
   - A file that only exports `get()` whose grant set holds Create, Write, Delete, Append or Append To is "Needs review" with the summary "Change privileges on a handler that only exports `get()`". The detail lists the privileges found and adds "Based on exported function names, not on what the code does." (F25)
@@ -339,7 +344,7 @@ Where the mocks and Learn disagree, Learn wins. The visual design still applies.
   - An H3 "Configuration snapshot" (web roles, tables with privileges, outbound), when that option is on.
   - The closing blockquote "Configuration review only. Tenant outbound policy not verified."
   
-  The H2 and the screen show the record name as stored. `<file>` in the file name is the export stem: the record name without a trailing `.js`, sanitised per AC-9.4 (F52). Spike S1 confirms whether stored names include `.js`.
+  The H2 and the screen show the record name as stored. `<file>` in the file name is the export stem: the record name without a trailing `.js`, sanitised per AC-9.4 (F52). Spike S1 found stored names have no `.js`; the trim stays for names a maker typed with it.
 - [ ] **AC-9.3** Given Site summary + PDF When the user exports Then `<site>-site-readiness.pdf` is saved with:
   - A header row (glyph, "Logic Inspector", "Site readiness report · <date>").
   - A hero: the site ring covering every check across all files (FR-11), "K/T checks addressed (C configured, V reviewed)" with the AC-8.1 variables summed over the site (F38, F39), the environment/site path, the scan interval and not-atomic statement from AC-9.2, the headline "<F> server logic files, <R> findings to review" (R counts Needs review checks), and Ready, Needs review, Incomplete (AC-8.10) and "Not verified: Tenant outbound policy" counts.
@@ -383,9 +388,9 @@ Where the mocks and Learn disagree, Learn wins. The visual design still applies.
 **Must:**
 - Generate the client call for the selected slug, method, recipe function and language per AC-4.4–4.8.
 - Generate the request path strip per AC-4.8.
-- Use `shell.getTokenDeferred()` + `__RequestVerificationToken` for fetch, `shell.safeAjax` for jQuery and the `serverlogic` tag for Liquid.
+- Use `shell.getTokenDeferred()` + `__RequestVerificationToken` for fetch, `shell.ajaxSafePost` for jQuery (correction 9) and the `serverlogic` tag for Liquid.
 - Emit a body only for POST, PUT and PATCH (AC-2.7), using the recipe's example request (FR-3). Check `success` and parse `data` per Learn corrections 8 and 11, then branch on the handler's `status` (FR-3 contract table). The Liquid client uses the three branches in AC-4.7.
-- Offer Liquid only when the AC-4.7 rule holds: the recipe's "Liquid" column is "Yes", and the current server text has no `async` function and no HTTP-only `Server.Context` member.
+- Offer Liquid only when the AC-4.7 rule holds: the recipe's "Liquid" column is "Yes", and the current server text has no HTTP-only `Server.Context` member.
 - Produce output that parses as valid JavaScript or Liquid (AC-4.11).
 
 **Must not:**
@@ -403,7 +408,7 @@ Each recipe defines:
 
 **Main object** (AC-3.1): R1, R4, R10 `Server.Connector.Dataverse`; R2, R8 `Server.Context`; R3, R5, R6, R7 `Server.Connector.HttpClient`; R9 `Server.Connector.CloudFlow`. Recipes that call several objects show one; the Server objects column lists them all.
 
-**Account access setup** (F04). Every Account-scoped grant (R1, R4, R10) adds two checklist lines: the relationship, and "Test users' contacts must have a parent account." The relationship for `contact` (R1, R4) is `contact_customer_accounts` (account → contact via `parentcustomerid`). For `account` (R10) it reads "maker verifies" until Spike S1 records it.
+**Account access setup** (F04). Every Account-scoped grant (R1, R4, R10) adds two checklist lines: the relationship, and "Test users' contacts must have a parent account." The relationship for `contact` (R1, R4) is `contact_customer_accounts` (account → contact via `parentcustomerid`). For `account` (R10) it reads "maker verifies": Spike S1 found no single standard relationship (the sample site uses its own `msa_account_managingpartner`).
 
 **Upstream credentials** (F10). R3, R5, R6, R7 and R9 add one line to the permission note and `README.md`: "Upstream calls use this integration's own credentials (site setting, app registration or flow connection), not the caller's." The server pane footer is unchanged.
 
@@ -412,7 +417,7 @@ Each recipe defines:
 | R1 | Read Dataverse records | Core | GET | `get` | Logger, Connector.Dataverse.RetrieveMultipleRecords | Read on `contact` (entity set `contacts`), access type Account (relationship per Account access setup) |
 | R2 | Validate a request | Core | POST | `post` | Context.Body, Logger | Web role only; rejects invalid input before any data access |
 | R3 | Call an external API | Core | GET | `get` (async) | Connector.HttpClient.GetAsync, SiteSetting | Allowed domain for the target host; base URL in the site setting `ExternalApi/BaseUrl` |
-| R4 | Dataverse CRUD | Learn tutorial: Dataverse tables | GET | `get`, `post`, `put`, `del`, each in `try`/`catch` with `Logger.Log` and `Logger.Error` | Context.QueryParameters/Body, Dataverse RetrieveRecord, RetrieveMultipleRecords (with `additionalParameters`), CreateRecord, UpdateRecord, DeleteRecord, Logger | Two table permissions on `contact` (entity set `contacts`), both on the recipe's web role: (1) Read, Write and Delete, access type Account (relationship per Account access setup); (2) Create only, access type Global, for `post` (F04). Learn binds no account on create, so an Account-scoped Create can't place the new contact in the caller's scope. Inspector flags the Global Create grant, and the README says this is expected and that the new contact isn't readable through the Account-scoped permission until it's linked to the caller's account. Learn's tutorial uses Global for all four privileges; the narrower setup is a listed difference. **If Spike S4 confirms** that the server can read the caller's parent account (for example `Server.User.parentcustomerid`), `post` instead binds `parentcustomerid_account@odata.bind` to that account, never to a value from the request; Create moves into the Account permission; and the checklist adds Append on `contact` and Append To on `account`. That change lands as a spec update. The entity set comes from an allowlist (default `["contacts"]`), and `id` must be a GUID (correction 17). Demo page: the Learn contacts CRUD table |
+| R4 | Dataverse CRUD | Learn tutorial: Dataverse tables | GET | `get`, `post`, `put`, `del`, each in `try`/`catch` with `Logger.Log` and `Logger.Error` | Context.QueryParameters/Body, Dataverse RetrieveRecord, RetrieveMultipleRecords (with `additionalParameters`), CreateRecord, UpdateRecord, DeleteRecord, Logger | Two table permissions on `contact` (entity set `contacts`), both on the recipe's web role: (1) Read, Write and Delete, access type Account (relationship per Account access setup); (2) Create only, access type Global, for `post` (F04). Learn binds no account on create, so an Account-scoped Create can't place the new contact in the caller's scope. Inspector flags the Global Create grant, and the README says this is expected and that the new contact isn't readable through the Account-scoped permission until it's linked to the caller's account. Learn's tutorial uses Global for all four privileges; the narrower setup is a listed difference. Spike S4 confirmed the server can read the caller's parent account (`RetrieveRecord("contacts", <contactid>, "$select=_parentcustomerid_value")`), but didn't try a bound create. **If the phase that builds R4 shows** that a create binding `parentcustomerid_account@odata.bind` to that account succeeds under an Account-scope Create permission, `post` binds it, never to a value from the request; Create moves into the Account permission; and the checklist adds Append on `contact` and Append To on `account`. That change lands as a spec update. The entity set comes from an allowlist (default `["contacts"]`), and `id` must be a GUID (correction 17). Demo page: the Learn contacts CRUD table |
 | R5 | External service CRUD | Learn tutorial: External services | GET | `get`, `post`, `put` (uses `PatchAsync`), `del` (all async) | HttpClient GetAsync, PostAsync, PatchAsync, DeleteAsync, Context, Logger | Allowed domain `services.odata.org` (replaceable); `baseUrl` constant `https://services.odata.org/TripPinRESTierService` (public demo, the allowed literal in AC-3.5); web role Administrators in Learn. Demo page: the Learn OData people table |
 | R6 | Call an Azure Function | Learn tutorial: Azure Function | GET | `get` (async) | HttpClient.GetAsync, Context.QueryParameters, SiteSetting | Function URL including key from the site setting `AZURE_FUNCTION_URL`, never a literal (correction 17); the `name` parameter is URL-encoded and sent; web role Authenticated Users; allowed domain `<function-app>.azurewebsites.net`, a placeholder the maker replaces with their function app's host. Learn doesn't document wildcard support in `AllowedDomains`, so no wildcard is suggested. Demo page: the Learn "Test Server Logic" card |
 | R7 | Microsoft Graph & SharePoint | Learn tutorial: Graph and SharePoint | POST | `post` (async) plus a `getAccessToken` helper | SiteSetting (CLIENT_ID, CLIENT_SECRET, TENANT_ID, HOSTNAME, SITE_PATH), HttpClient PostAsync, GetAsync, PutAsync, Dataverse.CreateRecord | Allowed domains `login.microsoftonline.com` and `graph.microsoft.com`; Create on the registration table: logical name `crd69_eventregistration`, entity set `crd69_eventregistrations` (from Learn's sample solution, replaceable), access type Global with Create only. Inspector will flag the Global access for review, and the README says this is expected. The secret is held in Key Vault behind an environment variable. The README notes `Sites.Selected` as a least-privilege alternative to `Sites.ReadWrite.All`. Built from the two script excerpts Learn publishes; the full script is inside the GitHub sample package (Spike S3). The optional "Send confirmation email" step is not generated: Learn publishes no code for it. Ticket HTML escaping, file naming and failure stages follow the R7 Must below. No demo page |
@@ -439,7 +444,7 @@ Each recipe defines:
 - **GUID** means `^[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}$`.
 - Every free-text value placed in a URL is passed through `encodeURIComponent`.
 - **Body decoding** (F01): JSON means `JSON.parse` of the non-empty `Body`; a parse failure is a caught error that returns `status: "error"`. Raw means the `Body` string unchanged. Only R9 tries JSON and falls back to text.
-- **Created record ID** (F55): `const id = r.Headers && (r.Headers.entityid ?? r.Headers.entityId);`. A missing `id` returns `status: "error"`. Spike S4 records the casing the runtime uses.
+- **Created record ID** (F55): `const id = r.Headers && (r.Headers.entityid ?? r.Headers.entityId);`, where `r` is the `toResult` value. A missing `id` returns `status: "error"`. Spike S4 found the runtime sends `entityId` (camelCase), next to `OData-EntityId` and `Location`.
 - `README.md` notes "Validation isn't authorization; table permissions are." (F08)
 
 | # | Inputs | Validation (before any data access or outbound call) | Success payload | Liquid |
@@ -502,47 +507,56 @@ Each recipe defines:
 
   - **Retry consequences:** the handler never deletes, reuses or reconciles files. A retry is a new request with a new ActivityId, so it uploads another ticket. A ticket from a failed create stays in SharePoint as an orphan. The README states this and tells the maker to find orphans by ActivityId and delete them manually. Compensation and idempotent retries are out of scope.
 - Guard `Server.User` against `null` wherever it is read.
-- Use only identifiers and comments that contain none of the FR-4 patterns as substrings (for example, avoid the word `delete` in comments).
+- Use only identifiers, comments and strings that match none of the FR-4 patterns, ignoring case (correction 14). For example, avoid "Delete the record" in comments, the methods `.startsWith(` and `.endsWith(`, and anonymous `function (…)` expressions; use arrow functions or named functions instead.
 
 **Must not:**
 - Emit browser APIs or restricted patterns (FR-4).
 
 ### FR-4: Browser and restricted-pattern checks
 
-**Code analysis.** Every rule that reads code structure uses one JavaScript tokenizer and parser at ECMAScript 2023, for example acorn. Those rules are FR-6 used-member detection, AC-4.7's Liquid rule, AC-6.8 insertion and FR-7's function names and connector detection. Comments are excluded from those rules' tokens. Code is never evaluated. The pattern matching below uses the same tokenizer (for example acorn's tokenizer, `ecmaVersion: 2023`) to classify code, comments, strings, template interpolations and regex literals, and to report line numbers. **Tokenizer fallback** (F23): if tokenizing fails, the check falls back to raw substring matching, reports every hit as "May be rejected" and adds the note "Couldn't parse this code". Browser checks still needs attention, so a parse failure never passes.
+**Code analysis.** Every rule that reads code structure uses one JavaScript tokenizer and parser at ECMAScript 2023, for example acorn. Those rules are FR-6 used-member detection, AC-4.7's Liquid rule, AC-6.8 insertion, FR-7's function names and connector detection, and the browser-API check below. Comments are excluded from those rules' tokens. Code is never evaluated.
 
-**Matching rules** (Learn doesn't document the validator's exact rules, so the check is deliberately conservative: it flags what the validator might reject, in two severities):
+**Restricted patterns** (correction 14): each pattern on Learn's list is matched the way the runtime matches it, as a case-insensitive regex over the raw text. So every match is **Blocked**, wherever it appears: code, a comment, a string, template text, a regex literal or the inside of a longer identifier. This check doesn't use the tokenizer, so a file that doesn't parse is still checked in full. The regex forms:
 
-- **Blocked:** the pattern appears in code, meaning outside comments and string literals, as a whole token. Whole token means the match isn't preceded or followed by an identifier character `[A-Za-z0-9_$]`, except where the pattern itself ends in `(` or `.`. Matching is **case-sensitive**.
-- **May be rejected:** the pattern appears as a plain substring anywhere, whether inside a comment, a string literal or a longer identifier (for example `startsWith(` contains `with(`). The message reads "May be rejected by Power Pages validation".
-- **Whitespace:** for every pattern that ends in `(`, any whitespace between the name and `(` still matches (`with (`, `eval (`), mirroring the runtime regex `with\s*\(` (correction 14). This applies to both severities. Patterns ending in `.` allow no whitespace.
-- **Exception, `with(`:** any occurrence counts as **Blocked**, including inside strings, comments and identifiers, because the runtime rejects it anywhere (correction 14).
-- **`import from`** matches a static import, `import` followed on the same statement by `from` (for example `import x from "y"`), and is Blocked.
-- Both severities make Browser checks "needs attention" and flag the lines. `Server.Connector.*` member names (for example `DeleteRecord`, `DeleteAsync`) are not patterns: `delete` is case-sensitive, so `Delete…` doesn't match.
-- Generated recipes must have **zero** matches of either severity (AC-3.2).
+- A pattern ending in `(` is its name, optional whitespace, then `(` (for example `with\s*\(`, `Function\s*\(`, `eval\s*\(`).
+- `delete` is `delete\s+[a-zA-Z_$]`, so `DeleteRecord(` doesn't match.
+- `import from` is `import`, whitespace, then `from` as a word later in the same statement (for example `import x from "y"`).
+- Every other pattern is its literal text, with `.` matched literally (for example `fs\.`, `Reflect\.`, `__proto__`, `prototype`, `debugger`).
+
+Spike S4 observed the `with(`, `Function(` and `delete` forms on a live site; the other forms are inferred from them.
+
+**Browser APIs** aren't on Learn's restricted list: the runtime doesn't define them, so code that calls them fails when it runs. They use the tokenizer (for example acorn's tokenizer, `ecmaVersion: 2023`) to classify code, comments, strings, template interpolations and regex literals, and to report line numbers:
+
+- **Blocked:** the name appears in code, meaning outside comments and string literals, as a whole token. Whole token means the match isn't preceded or followed by an identifier character `[A-Za-z0-9_$]`. Matching is case-sensitive.
+- **May be rejected:** the name appears inside a comment, a string literal or a regex literal. The message reads "May be rejected by Power Pages validation".
+- **Tokenizer fallback** (F23): if tokenizing fails, the browser-API check falls back to raw substring matching, reports every hit as "May be rejected" and adds the note "Couldn't parse this code".
+
+Both severities make Browser checks "needs attention" and flag the lines, so a parse failure never passes. Generated recipes must have **zero** matches of either severity (AC-3.2).
 
 | # | Input text | Expected |
 |---|---|---|
 | T1 | Every generated recipe, any method or language | no matches |
-| T2 | `Server.Connector.Dataverse.DeleteRecord(a, b)` | no match |
+| T2 | `Server.Connector.Dataverse.DeleteRecord(a, b)` | no match (`delete` needs whitespace and a name after it) |
 | T3 | `Server.Connector.HttpClient.DeleteAsync(u, h)` | no match |
 | T4 | `function del() {}` | no match |
 | T5 | `delete obj.x;` | Blocked, `delete` |
-| T6 | `// never delete this` | May be rejected, `delete` |
+| T6 | `// never delete this` | Blocked, `delete` (comments count; correction 14) |
 | T7 | `const s = "fetch";` | May be rejected, `fetch` |
 | T8 | `fetch(url)` | Blocked, `fetch` |
-| T9 | `name.startsWith("a")` | no match (case-sensitive: `With(` isn't `with(`; F22) |
-| T10 | `getFunction(x)` | May be rejected, `Function(` |
-| T11 | `const n = refs.length;` | May be rejected, `fs.` (inside the identifier `refs`) |
-| T12 | `if (x) { with (o) {} }` | Blocked, `with(`; the space before `(` is normalised |
+| T9 | `name.startsWith("a")` | Blocked, `with(` (matching ignores case; correction 14) |
+| T10 | `getFunction(x)` | Blocked, `Function(` (inside a longer identifier) |
+| T11 | `const n = refs.length;` | Blocked, `fs.` (inside the identifier `refs`) |
+| T12 | `if (x) { with (o) {} }` | Blocked, `with(`; the space before `(` still matches |
 | T13 | `Object.getPrototypeOf(x)` | Blocked, `Object.getPrototypeOf` |
-| T14 | `Server.Logger.Log("prototype")` | May be rejected, `prototype` |
+| T14 | `Server.Logger.Log("prototype")` | Blocked, `prototype` (strings count) |
 | T15 | `const q = "$filter=startswith(name,'a')";` | Blocked, `with(` (inside a string; correction 14) |
 | T16 | `import x from "y";` | Blocked, `import from` |
-| T17 | `const r = eval ("1");` | Blocked, `eval(`; the space before `(` is normalised |
+| T17 | `const r = eval ("1");` | Blocked, `eval(`; the space before `(` still matches |
 | T18 | `` const s = `${fetch(u)}`; `` | Blocked, `fetch` (a template interpolation is code) |
 | T19 | `/fetch/.test(s)` | May be rejected, `fetch` (inside a regex literal) |
-| T20 | `function get( { eval(x) }` (doesn't parse) | May be rejected, `eval(`, with "Couldn't parse this code" (tokenizer fallback) |
+| T20 | `function get( { eval(x) }` (doesn't parse) | Blocked, `eval(` (restricted patterns don't need the tokenizer), with "Couldn't parse this code" |
+| T21 | `list.forEach(function (k) {})` | Blocked, `Function(` (rejected live with `RTSL01`, Spike S4) |
+| T22 | `// Delete after the spike` | Blocked, `delete` (rejected live with `RTSL01`, Spike S4) |
 
 **Must:**
 - Flag every occurrence in the server pane of:
@@ -622,17 +636,18 @@ Learn-verified objects (9). Only members that Learn documents are listed. The ex
     | `const c = Server.Connector; c[name](…)` | Couldn't determine |
     | `const { Connector } = Server;` | Couldn't determine |
     | `// Server.Connector.Dataverse` only | No use |
-- Build each file's **grant set** (F27): the table permissions linked to the file's roles, plus those linked to the Authenticated Users role (`mspp_authenticatedusersrole`) when any assigned role isn't anonymous, plus those linked to the Anonymous Users role when the anonymous role is assigned. Learn assigns every authenticated user the Authenticated Users role, so its grants always apply. The snapshot labels each permission with the role it comes from and states "Other roles a user may hold aren't assessed."
+- Build each file's **grant set** (F27): the table permissions linked to the file's roles, plus those linked to the Authenticated Users role (`authenticatedusersrole`) when any assigned role isn't anonymous, plus those linked to the Anonymous Users role when the anonymous role is assigned. Learn assigns every authenticated user the Authenticated Users role, so its grants always apply. A Parent-scope permission is linked to the roles of the top permission in its chain, plus any roles listed on the permission itself: Spike S1 found 41 of 42 Parent-scope permissions carry no roles of their own. The snapshot labels each permission with the role it comes from and states "Other roles a user may hold aren't assessed."
 - Count a table permission as linked only when it's active (`statecode` = 0). A Parent-scope permission also needs its parent chain followed (F26):
   - **Known inactive:** if the permission or any ancestor is inactive (`statecode` = 1), the permission is ignored. The snapshot lists it as "(inactive, ignored)" or "(parent inactive, ignored)".
   - **Unknown:** an ancestor can't be read, the parent reference resolves to no readable record, or the chain loops. Table permissions is then Needs review, "Couldn't evaluate parent permission `<name>`", whatever other permissions are linked. An unresolved chain never leaves a clean Configured result.
-  - If Spike S1 can't locate the parent link, every Parent-scope permission is Unknown.
+  - The parent link is `content.parententitypermission`, the parent permission's `powerpagecomponentid` on the same site (Spike S1: 42 of 42 resolved).
   - The chain uses the type-18 components Inspector already reads, so it adds no query.
-- Parse `ServerLogic/AllowedDomains` as a comma-separated list of hosts, trimmed, where a leading `*.` is accepted as written. Learn doesn't document the format; if the value can't be parsed as that list, the Outbound check is "Needs review – couldn't interpret `ServerLogic/AllowedDomains`" (FR-9, O2).
+- Parse `ServerLogic/AllowedDomains` as a comma-separated list of hosts, each trimmed (Spike S4: entries with a leading space matched). Learn doesn't document the format; if the value can't be parsed as that list, the Outbound check is "Needs review – couldn't interpret `ServerLogic/AllowedDomains`" (FR-9, O2). An entry that starts with `*.` is a **wildcard entry**: Spike S4 found `*.example.com` matched neither `www.example.com` nor `example.com`, so wildcard entries are reported (FR-9) and don't count toward the list.
+- Read a setting whose `content` has `source` 1 and an `envvar_schema` from its environment variable: the `environmentvariabledefinitions` row with that `schemaname`, its `environmentvariablevalue` `value`, or the definition's `defaultvalue` when there's no value (Spike S1). A Secret-type variable (`type` 100000005), a missing variable or a failed read is Needs review "Couldn't read `<setting>` from its environment variable" on the check that uses it. The finding's detail notes that the site uses a cached copy of environment-variable values until it restarts (Spike S4), so a recent change may not be live yet.
 - Treat `ServerLogic/AllowNetworkingToAllDomains` as `true` when the setting is absent (Learn default), and `ServerLogic/Enabled` as `true` when absent. Treat `ServerLogic/AllowedDomains` as "no allow list" when it is absent, empty or Learn's default text "All domains allowed". These defaults apply only after the settings query succeeded; a failed read is AC-7.7.
 - Normalise boolean settings (F28): trim, then match `true` or `false` case-insensitively. Any other value, empty included, is Needs review "Couldn't interpret `<setting>`" on the check that uses it (Outbound for `AllowNetworkingToAllDomains`; a site banner for `Enabled`). Two active settings with the same name on the same site are Needs review "Duplicate `<setting>`".
 - Scan every server logic record on the site, with no cap. The 30 s NFR applies up to 50 records. The scan always shows a progress count, "Scanned X of N" (F49).
-- Identify the default roles by the `mspp_anonymoususersrole` and `mspp_authenticatedusersrole` flags, never by name.
+- Identify the default roles by the `anonymoususersrole` and `authenticatedusersrole` flags in each web role's `content`, never by name.
 - Warn, without blocking, on a non-Dev connection, or when the type is unknown (AC-7.5, AC-7.11).
 
 **Data sources:**
@@ -641,11 +656,12 @@ Learn-verified objects (9). Only members that Learn documents are listed. The ex
 |---|---|---|
 | Sites | Dataverse `powerpagesites` (`powerpagesite`): `powerpagesiteid`, `name`, `primarydomainname`, `statecode` (0 Active, 1 Inactive) | Verified on Learn |
 | Server logic records and their status | `powerpagecomponents` (`powerpagecomponent`) where `powerpagecomponenttype` = 35 (Server Logic) and `powerpagesiteid` = the site: `name`, `statecode` (0 Active, 1 Inactive) | Verified on Learn |
-| Server logic code | `powerpagecomponent` `content` (JSON) or `filecontent` (File) | **Spike S1** (which column) |
-| Web roles | `powerpagecomponent` type 11 (Web Role), and `mspp_webrole` with `mspp_anonymoususersrole` and `mspp_authenticatedusersrole` | Verified on Learn |
-| Web roles assigned to a record | The server logic ↔ web role link. PAC CLI site metadata names it `adx_serverlogic_adx_webrole`; in the enhanced model it is probably the N:N relationship `powerpagecomponent_powerpagecomponent` | **Spike S1** |
-| Table permissions per role | `powerpagecomponent` type 18 (Table Permission). The table's logical name, access type, privileges (Read, Write, Create, Delete, Append, Append To), linked roles and, for Parent scope, the parent permission are stored in `content`; state from `statecode` | Component verified on Learn; **Spike S1** (JSON keys, role link and parent link) |
-| Site settings | `powerpagecomponent` type 9 (Site Setting), filtered to the site and the `ServerLogic/` prefix | Component verified on Learn; **Spike S1** (where the value is stored) |
+| Server logic code | `powerpagecomponent` `filecontent`, a File column holding `<name>.sl`, downloaded from `powerpagecomponents(<id>)/filecontent/$value`. `content` holds only `display_name`, `description` and the role link | Spike S1; Spike S2 checks that the host can download a file column |
+| Web roles | `powerpagecomponent` type 11 (Web Role). `content` keys `anonymoususersrole` and `authenticatedusersrole` (booleans) and an optional `key` | Spike S1 |
+| Web roles assigned to a record | `content.adx_serverlogic_adx_webrole` on the server logic record: an array of web role `powerpagecomponentid`s. The N:N relationship `powerpagecomponent_powerpagecomponent` is empty for these links | Spike S1 |
+| Table permissions per role | `powerpagecomponent` type 18 (Table Permission), state from `statecode`. `content` keys: `entitylogicalname`, `entityname`, `scope` (756150000 Global, 756150001 Contact, 756150002 Account, 756150003 Parent, 756150004 Self), the booleans `read`, `write`, `create`, `delete`, `append` and `appendto`, `contactrelationship` or `accountrelationship` for those scopes, roles in `adx_entitypermission_webrole` (an array of web role IDs), and for Parent scope `parententitypermission` (the parent's ID) and `parentrelationship` | Spike S1 |
+| Site settings | `powerpagecomponent` type 9 (Site Setting), filtered to the site and the `ServerLogic/` prefix. `content.value` (a string) with `source` 0, or `envvar_schema` with `source` 1 and no `value` | Spike S1 |
+| Environment-variable values | `environmentvariabledefinitions` (`schemaname`, `type`, `defaultvalue`) with `environmentvariabledefinition_environmentvariablevalue` (`value`) | Spike S1; Spike S2 checks read access |
 | Environment classification (Dev/Test/UAT/Prod) | The PPTB connection's `environment` label (`Dev`, `Test`, `UAT`, `Production`), set by the user in PPTB, not Power Platform's environment type. Missing or unrecognised reads as Unknown (AC-7.11) | PPTB docs |
 
 **Spike S1 (first plan task):** on a sample enhanced-model site, confirm nine things:
@@ -660,17 +676,21 @@ Learn-verified objects (9). Only members that Learn documents are listed. The ex
 9. the relationship that Account access uses on the `account` table (R10, F04).
 
 S1 records the exact queries, one redacted sample record per component type, and a comparison against the studio UI for the same site (F29). Record the result in the plan of the phase that runs S1. Inspector ACs that read facts 1–5 are blocked until S1 is done. Other facts are verified on Learn.
+
+**S1 result (done 2026-10-14, PG DEV, enhanced model; evidence in the phase-0 plan):** facts 1–5 and 7 are in the data-source table and FR-7. Fact 6: studio stored a 189-character name and the `name` column allows 400, so the 64-character slug always fits (AC-2.11). Fact 8: the stored `name` has no `.js`; only the code file has an extension (`.sl`). Fact 9: there's no single standard relationship for Account access on `account` (the sample site uses its own `msa_account_managingpartner`), so R10's checklist keeps "maker verifies". The studio comparison matched (display name and two roles).
 **Spike S3 (before building R7):** unzip `event-registration.zip` from the GitHub sample package, pinned to commit `7efe699` (F59), read the full event-registration script, and reconcile R7 with it, including the form-encoded token request (Learn correction 17). Learn publishes only two excerpts. S3 also runs a **collision probe** on a test SharePoint site (F05). It uploads two files with the same name to the exact `root:/…:/content` path that R7 uses, with `@microsoft.graph.conflictBehavior=fail`, and confirms that the second upload fails and the first file is unchanged. Until the probe passes, R7's overwrite prevention is unverified. If the second upload doesn't fail, the spec is updated before R7 ships. This spike applies to Starter, not Inspector.
 **Spike S2 (before Inspector and download work):** confirm what the PPTB host exposes for:
 - the active connection: name, URL and environment type;
 - a connection-changed event (AC-7.6);
 - a save dialog that writes binary files, for the zip and the PDF (AC-5.6, AC-5.10, AC-9.3);
 - clipboard write (AC-4.9, AC-6.7);
-- whether `dataverseAPI.queryData` returns `@odata.nextLink` (FR-7).
+- whether `dataverseAPI.queryData` returns `@odata.nextLink` (FR-7);
+- a way to download a file column, for the server logic code in `filecontent` (Spike S1). Without one, every check that needs the code is "Needs review – couldn't read handler code";
+- read access to `environmentvariabledefinitions` and `environmentvariablevalues` for settings backed by environment variables (FR-7).
 
 Theme, notifications and external links are settled by working PPTB tools (AC-1.6, FR-1). The host has no PDF API, so the tool bundles a PDF library (FR-10).
 
-Also confirm whether the signed-in identity's read access to `powerpagecomponent` and `mspp_webrole` can be tested up front.
+Also confirm whether the signed-in identity's read access to `powerpagecomponent` and the environment-variable tables can be tested up front.
 **Spike S4 (before the client generator ships; a dev site):** deploy one throwaway probe server logic, not a shipped recipe (F54), with:
 - `get`: Dataverse `RetrieveMultipleRecords`, an HttpClient GET of a JSON endpoint and of a text endpoint, and the raw `typeof` of each result;
 - `post`: `CreateRecord`, recording the exact `entityid` header casing (F55);
@@ -687,7 +707,17 @@ Call it from fetch, jQuery and Liquid, and toggle the two outbound settings thro
 5. whether the caller's parent account is readable server-side (F04);
 6. which identity the custom API privilege check uses (F07).
 
-Each result either confirms the spec or becomes a PATCH or MINOR spec update.
+Each result either confirms the spec or becomes a spec update.
+
+**S4 result (done 2026-10-15/16, PG DEV; evidence in the phase-0 plan):**
+1. Lowercase envelope keys, confirmed (correction 8).
+2. Connector results are JSON strings, for Dataverse and HttpClient (correction 11). `CreateRecord` returns `entityId` (F55).
+3. O4: the list doesn't restrict while all-domains is on. O5: every call blocked. O6: the list applies, entries trimmed. `*.` entries match no host (FR-7, FR-9). Blocked calls return `StatusCode` 0 (correction 20). Environment-variable values stay cached until the site restarts.
+4. Liquid calls sync and async operations (AC-4.7).
+5. The caller's parent account is readable: `Server.User.parentcustomerid` is an object, and `RetrieveRecord("contacts", <contactid>, "$select=_parentcustomerid_value")` returns its GUID. A create bound to it under an Account-scope permission wasn't tried, so R4 `post` keeps Global Create-only (F04); the phase that builds R4 probes the bound create.
+6. Not tested: the only custom APIs on the site were Microsoft's own, and some of them write data. `CloudFlow.TriggerAsync` wasn't tested either, because no flow was registered. R9 and R10 keep their current checklists.
+
+The probe also found that the runtime matches the restricted list case-insensitively over the raw text (correction 14), that `shell.safeAjax` doesn't exist (correction 9), and that top-level helpers are accepted (correction 22).
 
 **Spike evidence** (F59): each spike records, in the plan of the phase that runs it, the queries or calls it made, the host and runtime versions, and the outcome. A result that contradicts the spec becomes a spec update before dependent work starts.
 
@@ -709,7 +739,7 @@ Each result either confirms the spec or becomes a PATCH or MINOR spec update.
 ### FR-9: Check rules
 
 **Must:**
-- **Web role:** Needs review when no role is assigned, or when the assigned roles include the anonymous role (`mspp_anonymoususersrole` = true).
+- **Web role:** Needs review when no role is assigned, or when the assigned roles include the anonymous role (`anonymoususersrole` = true in its `content`).
 - **Table permissions:** evaluated over the grant set (FR-7, F27). Needs review in four cases:
   - any Global access;
   - Create, Write, Delete, Append or Append To privileges for a handler that only exports `get()` (F25);
@@ -717,7 +747,7 @@ Each result either confirms the spec or becomes a PATCH or MINOR spec update.
   - a Parent-scope chain can't be resolved (FR-7).
 
   Configured, with the "no table permissions needed" summary, when the grant set is empty and no Dataverse use is detected, unless connector use couldn't be determined (AC-8.8). Only active permissions count, and inactive ones and those with inactive ancestors are ignored. Non-Global access types aren't otherwise flagged in v1.
-- **Outbound networking:** evaluate the first row that matches. "All" means `AllowNetworkingToAllDomains` is `true` or absent. "List" means `AllowedDomains` parses to at least one host (FR-7).
+- **Outbound networking:** evaluate the first row that matches. "All" means `AllowNetworkingToAllDomains` is `true` or absent. "List" means `AllowedDomains` parses to at least one host that isn't a wildcard entry (FR-7). If any entry is a wildcard entry, Outbound is Needs review and adds the reason "Wildcard entries aren't supported: `<entry>` matches no host." The row below is still chosen with those entries left out, and its message shows as well, so a list of only wildcard entries reads as O5.
 
   | # | Condition | Result |
   |---|---|---|
@@ -725,11 +755,11 @@ Each result either confirms the spec or becomes a PATCH or MINOR spec update.
   | O1 | No HttpClient use detected (FR-7) | Configured: "No HttpClient calls in code." Detail: cloud flows aren't checked (AC-8.8, F32) |
   | O2 | `AllowedDomains` is set but can't be parsed, `AllowNetworkingToAllDomains` can't be interpreted, or either setting is duplicated (FR-7, F28) | Needs review: "Couldn't interpret `<setting>`" or "Duplicate `<setting>`" |
   | O3 | All, no List | Needs review: "All domains allowed. Limit to the hosts it calls." |
-  | O4 | All, with a List | Needs review: "`AllowedDomains` is set but `AllowNetworkingToAllDomains` isn't `false`, so the list may not apply." |
+  | O4 | All, with a List | Needs review: "`AllowedDomains` is set but `AllowNetworkingToAllDomains` isn't `false`, so the list doesn't apply and all domains are allowed." |
   | O5 | `AllowNetworkingToAllDomains` = `false`, no List | Needs review: "Outbound calls are blocked. The handler calls HttpClient, but no domains are allowed." |
   | O6 | `AllowNetworkingToAllDomains` = `false`, with a List | Configured: "Allowed domains `a`, `b`. Whether they cover every host the handler calls isn't checked." The questions add "Do these domains cover every host this handler calls?" (F30) |
 
-  Learn doesn't document how the two settings interact. O4 follows Microsoft's `add-server-logic` guidance ("Set to `false` when restricting via AllowedDomains"), and Spike S4 confirms it. `ServerLogic/TimeoutInSeconds` isn't part of this table; it's a site banner (AC-7.12, F31).
+  Learn doesn't document how the two settings interact. O4 followed Microsoft's `add-server-logic` guidance ("Set to `false` when restricting via AllowedDomains"), and Spike S4 confirmed O4, O5 and O6 on a live site on 2026-10-16. `ServerLogic/TimeoutInSeconds` isn't part of this table; it's a site banner (AC-7.12, F31).
 
 ### FR-10: Reports
 
@@ -836,7 +866,7 @@ Sources: PPTB tool-development docs (manifest, `pptb-validate`, marketplace poli
 | Recipe change after edits | Confirm before discarding (AC-2.9) |
 | Insert with no cursor position | Insert into the method's function, before its last top-level `return` (AC-6.8) |
 | Insert target invalid (code doesn't parse, cursor not at a statement position, or the trial parse fails) | Insert disabled with a reason; Copy still works (AC-6.8) |
-| Liquid selected and an edit or insert makes the code async or HTTP-only | Language resets to fetch with a toast (AC-4.7) |
+| Liquid selected and an edit or insert makes the code read HTTP-only properties | Language resets to fetch with a toast (AC-4.7) |
 | R7 `CreateRecord` fails after the ticket uploaded | Logs `R7 create after upload` with ActivityId; returns "Registration failed after the ticket was uploaded."; the ticket stays as an orphan (FR-3 R7 Must) |
 | Inspector can't determine connector use | Table permissions and Outbound can't report a no-use Configured; they're Needs review (FR-7, O0) |
 | A Parent-scope permission's chain can't be resolved | Table permissions: "Needs review – Couldn't evaluate parent permission `<name>`" (FR-7) |
@@ -858,7 +888,7 @@ Sources: PPTB tool-development docs (manifest, `pptb-validate`, marketplace poli
 | A boolean `ServerLogic/*` setting can't be interpreted, or is duplicated | Needs review "Couldn't interpret `<setting>`" or "Duplicate `<setting>`" (FR-7, FR-9 O2) |
 | `ServerLogic/TimeoutInSeconds` out of range | Site banner, repeated in exports (AC-7.12) |
 | Connection changes while another tab is visible | Inspector results and review marks are cleared; stale scan results are discarded (AC-7.6) |
-| Code can't be tokenized | Browser checks falls back to substring matching, reports "May be rejected" and notes "Couldn't parse this code" (FR-4) |
+| Code can't be tokenized | Restricted patterns are still matched in full and reported as Blocked; the browser-API check falls back to substring matching and reports "May be rejected"; Browser checks notes "Couldn't parse this code" (FR-4) |
 | Site list can't be read | Error state "Couldn't load sites" with the reason and a Retry button; no scan runs |
 | A record's code is empty or can't be parsed | Function names are treated as unknown, so the Table permissions write-on-read rule can't apply. Table permissions and Outbound are "Needs review – couldn't read handler code"; Web role is evaluated normally |
 | Server Objects search matches nothing | "No objects or members match '<query>'", with a Clear search link |
@@ -874,7 +904,7 @@ No blocking product decisions remain. All 59 review findings are adopted (append
 - **S3:** the full Graph/SharePoint script and the collision probe. Needed before R7 is built.
 - **S4:** the envelope casing, the connector result type, the outbound settings precedence and wildcards, Liquid and async, the caller's parent account and the custom API privilege identity, checked with a throwaway probe on a live site. Needed before the client generator ships.
 
-Spike checks are proposals until they run. Nothing in this spec counts as verified on a live site or host until the spike result is recorded in the plan of the phase that runs it. That includes S1's parent links, S3's collision probe and every S4 runtime check.
+Spike checks are proposals until they run. Nothing in this spec counts as verified on a live site or host until the spike result is recorded in the plan of the phase that runs it. S1 (2026-10-14) and S4 (2026-10-15/16) are done, with their results in FR-7 and the corrections, and their evidence in the phase-0 plan; S4 item 6 and `CloudFlow.TriggerAsync` stay untested. S2 and S3, including S3's collision probe, are still open.
 
 **Implementation work added in v0.6.0.** The plan should estimate each item as a bounded task with acceptance examples:
 - the shared code analysis (FR-4), connector token detection and fixtures (FR-7);
@@ -910,7 +940,7 @@ Spike checks are proposals until they run. Nothing in this spec counts as verifi
   | Report blue chip on tint `#eaf2fd` | `#1f6fd1` (4.38) | `#1e6dcd` | 4.51 |
 
   The v0.6.0 code-comment and line-number rows are obsolete: layout 10a's code tokens pass (FR-11). The 10a report screenshots still show the old orange.
-- **A9: Outbound settings precedence.** As in FR-9 O3–O6, based on Microsoft's `add-server-logic` guidance. Spike S4 confirms it.
+- **A9: Outbound settings precedence.** As in FR-9 O3–O6, based on Microsoft's `add-server-logic` guidance. Spike S4 confirmed it on 2026-10-16.
 
 **Resolved:**
 - 2026-10-07: Non-dev environment → warn, don't block.
@@ -920,7 +950,7 @@ Spike checks are proposals until they run. Nothing in this spec counts as verifi
 - 2026-10-07: Methods → all five (design rule; supersedes GET/POST only).
 - 2026-10-07: Recipes → the 3 core, all 4 Learn tutorials, and the 3 scenario samples from the author and server objects pages (10 in total).
 - 2026-10-07: Review marks → session-only (AC-8.9), and also cleared on a rescan or a site switch.
-- 2026-10-07: Response envelope → lowercase keys (correction 8). Learn's tutorials and Microsoft's `add-server-logic` reference agree; S4 confirms on a live site.
+- 2026-10-07: Response envelope → lowercase keys (correction 8). Learn's tutorials and Microsoft's `add-server-logic` reference agree; S4 confirmed it on a live site on 2026-10-16.
 - 2026-10-07: Liquid client → R1 and R8 only (AC-4.7).
 - 2026-10-07: Inspector → enhanced data model sites only (AC-7.2).
 - 2026-10-08 (owner): Design source → layout 10a for UI and tokens; reports keep the original README §05 (F53).
@@ -941,6 +971,10 @@ Spike checks are proposals until they run. Nothing in this spec counts as verifi
 - 2026-10-14 (owner): PDF → jsPDF and jspdf-autotable in the web view, drawn as vector text (never `html()` rasterising). Not a PPTB .NET worker: it needs a user-installed .NET 10 SDK, has a 1 MiB JSON-only message cap and runs unsandboxed (FR-10).
 - 2026-10-14 (owner): Zip → fflate `zipSync`, built in memory; the async API is unusable because the CSP blocks blob workers (AC-5.6, AC-5.10).
 - 2026-10-14 (owner): Code editor → CodeMirror 6, not Monaco, which needs separate worker files and is far larger; CodeMirror's tab-focus mode covers F48 (AC-4.10).
+- 2026-10-16 (owner): Spec version for the S1 and S4 results → 2.0.0, because FR-4 matching and the jQuery client are rewritten. Nothing downstream existed to invalidate.
+- 2026-10-16 (owner): R4 `post` → keeps Global Create-only. S4 proved the caller's parent account is readable, not that a bound create works; the phase that builds R4 probes it (F04).
+- 2026-10-16 (owner): `AllowedDomains` wildcard entries → Needs review "Wildcard entries aren't supported", and left out of the list (FR-9), because `*.` matched no host in S4.
+- 2026-10-16 (owner): FR-4 restricted patterns → every match is Blocked, matched case-insensitively over the raw text as the runtime does. "May be rejected" stays only for browser APIs in comments, strings and regex literals.
 
 ## Out of Scope (Future Considerations)
 
