@@ -41,7 +41,7 @@ This phase builds the pure Starter domain that the handler, client, package and 
 8. **Slug cap boundary (AC-2.11).** The cut point is `lastIndexOf('-', 64)`, so a dash at index 64 keeps the first 64 characters, and a dash earlier gives the shorter word-boundary slug. No dash at or before index 64 cuts at 64.
 9. **Validation failure top-level message.** The spec fixes `errors: [{ field, message }]` but not the top-level `message`, so the shared constant `VALIDATION_MESSAGE` is `The request isn't valid.` and every handler uses it.
 
-- [ ] **Step 1: Check the Phase 00 stubs and branch**
+- [x] **Step 1: Check the Phase 00 stubs and branch**
 
   Run: `git branch --show-current` — expect: `001-server-logic-starter-inspector`.
 
@@ -51,7 +51,7 @@ This phase builds the pure Starter domain that the handler, client, package and 
 
 ## Task 1: `slugify` (AC-2.2, AC-2.3, AC-2.11)
 
-- [ ] **Step 2: Write the failing test** `src/lib/slug.test.ts`
+- [x] **Step 2: Write the failing test** `src/lib/slug.test.ts`
 
   ```ts
   import { describe, expect, it } from 'vitest';
@@ -144,11 +144,11 @@ This phase builds the pure Starter domain that the handler, client, package and 
 
   Note: `endsWith` and `startsWith` here are in a test file, not in generated server code, so FR-4 does not apply.
 
-- [ ] **Step 3: Run it — expect FAIL**
+- [x] **Step 3: Run it — expect FAIL**
 
   Run: `npx vitest run src/lib/slug.test.ts` — expect: FAIL, with `not implemented: phase 05` thrown by the Phase 00 stub (or `slugify is not a function` if the stub is absent).
 
-- [ ] **Step 4: Implement** `src/lib/slug.ts` (replace the stub entirely)
+- [x] **Step 4: Implement** `src/lib/slug.ts` (replace the stub entirely)
 
   ```ts
   const MAX_SLUG_LENGTH = 64;
@@ -174,11 +174,11 @@ This phase builds the pure Starter domain that the handler, client, package and 
   }
   ```
 
-- [ ] **Step 5: Format, lint and run — expect PASS**
+- [x] **Step 5: Format, lint and run — expect PASS**
 
   Run: `npx prettier --write src/lib/slug.ts src/lib/slug.test.ts && npx eslint src/lib/slug.ts src/lib/slug.test.ts --max-warnings=0 && npx vitest run src/lib/slug.test.ts` — expect: no lint output, all tests PASS.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
   `git add src/lib/slug.ts src/lib/slug.test.ts && git commit -m "feat(lib): add slugify with length cap and device-name rules"`
 
@@ -186,7 +186,7 @@ This phase builds the pure Starter domain that the handler, client, package and 
 
 ## Task 2: `normalizeLf` (AC-4.10)
 
-- [ ] **Step 7: Write the failing test** `src/lib/text.test.ts`
+- [x] **Step 7: Write the failing test** `src/lib/text.test.ts`
 
   ```ts
   import { describe, expect, it } from 'vitest';
@@ -218,11 +218,11 @@ This phase builds the pure Starter domain that the handler, client, package and 
   });
   ```
 
-- [ ] **Step 8: Run it — expect FAIL**
+- [x] **Step 8: Run it — expect FAIL**
 
   Run: `npx vitest run src/lib/text.test.ts` — expect: FAIL (`not implemented: phase 05` from the stub).
 
-- [ ] **Step 9: Implement** `src/lib/text.ts` (replace the stub entirely)
+- [x] **Step 9: Implement** `src/lib/text.ts` (replace the stub entirely)
 
   ```ts
   /** AC-4.10: the editor model is LF-only. CRLF and a lone CR both become LF. */
@@ -231,11 +231,11 @@ This phase builds the pure Starter domain that the handler, client, package and 
   }
   ```
 
-- [ ] **Step 10: Format, lint and run — expect PASS**
+- [x] **Step 10: Format, lint and run — expect PASS**
 
   Run: `npx prettier --write src/lib/text.ts src/lib/text.test.ts && npx eslint src/lib/text.ts src/lib/text.test.ts --max-warnings=0 && npx vitest run src/lib/text.test.ts` — expect: all tests PASS.
 
-- [ ] **Step 11: Commit**
+- [x] **Step 11: Commit**
 
   `git add src/lib/text.ts src/lib/text.test.ts && git commit -m "feat(lib): add normalizeLf for the LF-only editor model"`
 
@@ -243,7 +243,7 @@ This phase builds the pure Starter domain that the handler, client, package and 
 
 ## Task 3: Recipe catalogue (FR-3 tables, AC-2.6, AC-2.10, AC-3.1, AC-3.5, AC-3.6, AC-5.5, AC-5.6)
 
-- [ ] **Step 12: Write the failing test** `src/services/catalogue/recipes.test.ts`
+- [x] **Step 12: Write the failing test** `src/services/catalogue/recipes.test.ts`
 
   ```ts
   import { describe, expect, it } from 'vitest';
@@ -766,11 +766,11 @@ This phase builds the pure Starter domain that the handler, client, package and 
   });
   ```
 
-- [ ] **Step 13: Run it — expect FAIL**
+- [x] **Step 13: Run it — expect FAIL**
 
   Run: `npx vitest run src/services/catalogue/recipes.test.ts` — expect: FAIL (the Phase 00 stub throws `not implemented: phase 05`, or `RECIPES` is empty and `methodEnabled` / `checklistLines` are not exports).
 
-- [ ] **Step 14: Implement** `src/services/catalogue/recipes.ts` (replace the stub entirely)
+- [x] **Step 14: Implement** `src/services/catalogue/recipes.ts` (replace the stub entirely)
 
   ```ts
   import { METHOD_FUNCTION } from '@/types/http';
@@ -1202,11 +1202,11 @@ This phase builds the pure Starter domain that the handler, client, package and 
   }
   ```
 
-- [ ] **Step 15: Format, lint and run — expect PASS**
+- [x] **Step 15: Format, lint and run — expect PASS**
 
   Run: `npx prettier --write src/services/catalogue/recipes.ts src/services/catalogue/recipes.test.ts && npx eslint src/services/catalogue --max-warnings=0 && npx vitest run src/services/catalogue/recipes.test.ts` — expect: no lint output, all tests PASS. If the R4 `lines[3]` regex test fails, compare the line with `RECIPES` R4's second table note: the line is `Table permission: contact (entity set contacts): Create, access type Global. ` followed by the note.
 
-- [ ] **Step 16: Commit**
+- [x] **Step 16: Commit**
 
   `git add src/services/catalogue/recipes.ts src/services/catalogue/recipes.test.ts && git commit -m "feat(catalogue): add the ten-recipe catalogue, method enablement and checklist lines"`
 
@@ -1214,7 +1214,7 @@ This phase builds the pure Starter domain that the handler, client, package and 
 
 ## Task 4: Shared handler snippets (FR-3 Musts, correction 11, AC-3.3, AC-3.10)
 
-- [ ] **Step 17: Write the failing test** `src/services/generators/handlers/snippets.test.ts`
+- [x] **Step 17: Write the failing test** `src/services/generators/handlers/snippets.test.ts`
 
   ```ts
   import { describe, expect, it } from 'vitest';
@@ -1480,11 +1480,11 @@ This phase builds the pure Starter domain that the handler, client, package and 
   ```
 
 
-- [ ] **Step 18: Run it — expect FAIL**
+- [x] **Step 18: Run it — expect FAIL**
 
   Run: `npx vitest run src/services/generators/handlers/snippets.test.ts` — expect: FAIL, `Failed to resolve import "@/services/generators/handlers/snippets"` (the file does not exist yet).
 
-- [ ] **Step 19: Implement** `src/services/generators/handlers/snippets.ts`
+- [x] **Step 19: Implement** `src/services/generators/handlers/snippets.ts`
 
   ```ts
   import type { RecipeMeta } from '@/types/recipe';
@@ -1612,11 +1612,11 @@ This phase builds the pure Starter domain that the handler, client, package and 
   }
   ```
 
-- [ ] **Step 20: Format, lint and run — expect PASS**
+- [x] **Step 20: Format, lint and run — expect PASS**
 
   Run: `npx prettier --write src/services/generators/handlers/snippets.ts src/services/generators/handlers/snippets.test.ts && npx eslint src/services/generators/handlers/snippets.ts src/services/generators/handlers/snippets.test.ts --max-warnings=0 && npx vitest run src/services/generators/handlers/snippets.test.ts` — expect: no lint output, all tests PASS.
 
-- [ ] **Step 21: Commit**
+- [x] **Step 21: Commit**
 
   `git add src/services/generators/handlers/snippets.ts src/services/generators/handlers/snippets.test.ts && git commit -m "feat(handlers): add shared snippets for toResult, GUID, settings, failures and logging"`
 
@@ -1626,7 +1626,7 @@ This phase builds the pure Starter domain that the handler, client, package and 
 
 This test imports `runBrowserChecks` from Phase 02, which runs in the same wave. In this phase's own worktree `runBrowserChecks` is still the Phase 00 stub, so **this one test is expected to FAIL with `not implemented: phase 02` until Phase 02 merges at the wave boundary.** It is the only red test this phase may leave.
 
-- [ ] **Step 22: Write the test** `src/services/generators/handlers/snippets.fr4.test.ts`
+- [x] **Step 22: Write the test** `src/services/generators/handlers/snippets.fr4.test.ts`
 
   ```ts
   import { describe, expect, it } from 'vitest';
@@ -1693,19 +1693,19 @@ This test imports `runBrowserChecks` from Phase 02, which runs in the same wave.
   });
   ```
 
-- [ ] **Step 23: Run it in this worktree — expect the one allowed FAIL**
+- [x] **Step 23: Run it in this worktree — expect the one allowed FAIL**
 
   Run: `npx vitest run src/services/generators/handlers/snippets.fr4.test.ts` — expect: FAIL on every test with `not implemented: phase 02` (stub). That is the documented, accepted red state for this single file.
 
   Run: `npx vitest run src/lib src/services/catalogue src/services/generators/handlers/snippets.test.ts` — expect: PASS (all of Tasks 1 to 4 stay green).
 
-- [ ] **Step 24: Format, lint and commit**
+- [x] **Step 24: Format, lint and commit**
 
   Run: `npx prettier --write src/services/generators/handlers/snippets.fr4.test.ts && npx eslint src/services/generators/handlers/snippets.fr4.test.ts --max-warnings=0` — expect: no output.
 
   `git add src/services/generators/handlers/snippets.fr4.test.ts && git commit -m "test(handlers): guard shared snippets against FR-4 hits (green once phase 02 merges)"`
 
-- [ ] **Step 25: Re-run after the wave merge — expect PASS**
+- [x] **Step 25: Re-run after the wave merge — expect PASS**
 
   After the orchestrator merges Phase 02 into the integration branch at the wave boundary, run: `npx vitest run src/services/generators/handlers/snippets.fr4.test.ts` — expect: PASS (zero hits, `parseFailed` false for every snippet). If a snippet fails, the failing text is the bug: reword it in `snippets.ts` or `recipes.ts` (never weaken the test). Likely causes are a header or message containing a restricted word, or `Function` followed by `(`; the spec correction 14 matching ignores case and covers comments and strings.
 

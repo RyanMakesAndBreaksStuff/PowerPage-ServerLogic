@@ -75,7 +75,7 @@ Read from https://docs.powerplatformtoolbox.com/tool-development/api-reference (
 
 ---
 
-- [ ] **Step 0: Preflight**
+- [x] **Step 0: Preflight**
 
   Run from the repo root:
 
@@ -88,7 +88,7 @@ Read from https://docs.powerplatformtoolbox.com/tool-development/api-reference (
 
   Expect: `host.types.ts`, `pptbHost.ts` and `fakeHost.ts` are present, the grep prints each stub's `throw`, and `npm ls` lists `@pptb/types@1.2.7` or later, `vitest` and `jsdom`. If Phase 00 left a test that asserts a stub throws (`grep -rn "not implemented: phase 01" src --include=*.test.ts`), delete that one assertion in the first commit of this phase. Do not touch any other file. The tests here start with `// @vitest-environment jsdom` where they need `window`, so they pass whatever the project's default Vitest environment is.
 
-- [ ] **Step 1: Write the Dataverse read tests**
+- [x] **Step 1: Write the Dataverse read tests**
 
   Create `src/services/pptb/dataverseRead.test.ts`. It covers the error mapping, query building, the retry schedule, the paging strategy and the file read without any `window` stub, because `dataverseRead.ts` receives `read` and `sleep` as arguments.
 
@@ -263,7 +263,7 @@ Read from https://docs.powerplatformtoolbox.com/tool-development/api-reference (
   });
   ```
 
-- [ ] **Step 2: Run the tests and confirm they FAIL**
+- [x] **Step 2: Run the tests and confirm they FAIL**
 
   ```bash
   npx vitest run src/services/pptb/dataverseRead.test.ts
@@ -271,7 +271,7 @@ Read from https://docs.powerplatformtoolbox.com/tool-development/api-reference (
 
   Expect: FAIL. The file does not load: `Failed to resolve import "./dataverseRead" from "src/services/pptb/dataverseRead.test.ts"`, with "Test Files 1 failed" and no tests run, because neither `dataverseRead.ts` nor `hostErrors.ts` exists yet.
 
-- [ ] **Step 3: Implement `hostErrors.ts`**
+- [x] **Step 3: Implement `hostErrors.ts`**
 
   Create `src/services/pptb/hostErrors.ts` (whole file).
 
@@ -330,7 +330,7 @@ Read from https://docs.powerplatformtoolbox.com/tool-development/api-reference (
   }
   ```
 
-- [ ] **Step 4: Implement `dataverseRead.ts`**
+- [x] **Step 4: Implement `dataverseRead.ts`**
 
   Create `src/services/pptb/dataverseRead.ts` (whole file).
 
@@ -481,7 +481,7 @@ Read from https://docs.powerplatformtoolbox.com/tool-development/api-reference (
   }
   ```
 
-- [ ] **Step 5: Run the tests and confirm they PASS**
+- [x] **Step 5: Run the tests and confirm they PASS**
 
   ```bash
   npx vitest run src/services/pptb/dataverseRead.test.ts
@@ -489,7 +489,7 @@ Read from https://docs.powerplatformtoolbox.com/tool-development/api-reference (
 
   Expect: PASS, 1 test file and 29 tests. If a test fails, fix the implementation, never the test: the retry delays, the `Prefer` header and the fail-closed gate are spec behaviour.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
   ```bash
   npx prettier --write src/services/pptb
@@ -500,7 +500,7 @@ Read from https://docs.powerplatformtoolbox.com/tool-development/api-reference (
 
   Expect: `tsc` and ESLint print nothing, and the commit lists three files. If ESLint reports `@typescript-eslint/consistent-type-definitions` on a `type X = { … }`, the repo's ESLint config is missing the `type` preference that `.claude/rules/typescript.md` and the pinned contracts assume. That is a Phase 00 defect: stop and report it, and do not rewrite types as interfaces.
 
-- [ ] **Step 7: Write the `createPptbHost` tests**
+- [x] **Step 7: Write the `createPptbHost` tests**
 
   Create `src/services/pptb/pptbHost.test.ts`. Every test installs a stub `window.toolboxAPI` and `window.dataverseAPI` with `Object.defineProperty` and removes them afterwards. The last `describe` swaps in a Proxy that records and refuses any member outside the read-only list, then drives every `PptbHost` method.
 
@@ -1069,7 +1069,7 @@ Read from https://docs.powerplatformtoolbox.com/tool-development/api-reference (
   });
   ```
 
-- [ ] **Step 8: Run the tests and confirm they FAIL**
+- [x] **Step 8: Run the tests and confirm they FAIL**
 
   ```bash
   npx vitest run src/services/pptb/pptbHost.test.ts
@@ -1077,7 +1077,7 @@ Read from https://docs.powerplatformtoolbox.com/tool-development/api-reference (
 
   Expect: FAIL. "Test Files 1 failed", "Tests 62 failed (62)", each with `Error: not implemented: phase 01`, thrown by Phase 00's stub `createPptbHost` in `beforeEach`. If any test passes, the stub is not the one this plan assumes: stop and check Step 0.
 
-- [ ] **Step 9: Implement `pptbHost.ts`**
+- [x] **Step 9: Implement `pptbHost.ts`**
 
   Replace the whole of `src/services/pptb/pptbHost.ts`.
 
@@ -1249,7 +1249,7 @@ Read from https://docs.powerplatformtoolbox.com/tool-development/api-reference (
   }
   ```
 
-- [ ] **Step 10: Run the tests and confirm they PASS**
+- [x] **Step 10: Run the tests and confirm they PASS**
 
   ```bash
   npx vitest run src/services/pptb/pptbHost.test.ts src/services/pptb/dataverseRead.test.ts
@@ -1257,7 +1257,7 @@ Read from https://docs.powerplatformtoolbox.com/tool-development/api-reference (
 
   Expect: PASS, 2 test files and 91 tests (62 and 29). If the read-only test fails with "Forbidden host member", the adapter reached a member outside the read-only list: remove that call, never widen the list.
 
-- [ ] **Step 11: Commit**
+- [x] **Step 11: Commit**
 
   ```bash
   npx prettier --write src/services/pptb
@@ -1268,7 +1268,7 @@ Read from https://docs.powerplatformtoolbox.com/tool-development/api-reference (
 
   Expect: no `tsc` or ESLint output, and the commit lists two files.
 
-- [ ] **Step 12: Write the fake host tests**
+- [x] **Step 12: Write the fake host tests**
 
   Create `src/services/pptb/fakeHost.test.ts`. These are the behaviour tests that pin what phases 06, 14, 15, 18, 21 and 24 depend on: notify modes, save and cancel, copy, events, responders, paged results, scripted failures and file columns.
 
@@ -1515,7 +1515,7 @@ Read from https://docs.powerplatformtoolbox.com/tool-development/api-reference (
   });
   ```
 
-- [ ] **Step 13: Run the tests and confirm they FAIL**
+- [x] **Step 13: Run the tests and confirm they FAIL**
 
   ```bash
   npx vitest run src/services/pptb/fakeHost.test.ts
@@ -1523,7 +1523,7 @@ Read from https://docs.powerplatformtoolbox.com/tool-development/api-reference (
 
   Expect: FAIL. "Test Files 1 failed", "Tests 21 failed (21)", each with `Error: not implemented: phase 01`, thrown by Phase 00's stub `createFakeHost`.
 
-- [ ] **Step 14: Implement `fakeHost.ts`**
+- [x] **Step 14: Implement `fakeHost.ts`**
 
   Replace the whole of `src/services/pptb/fakeHost.ts`. Delete any placeholder `FakeHostInit` or `FakeHostControls` Phase 00 declared in the stub: they are defined here now.
 
@@ -1762,7 +1762,7 @@ Read from https://docs.powerplatformtoolbox.com/tool-development/api-reference (
   }
   ```
 
-- [ ] **Step 15: Run the tests and confirm they PASS**
+- [x] **Step 15: Run the tests and confirm they PASS**
 
   ```bash
   npx vitest run src/services/pptb
@@ -1770,7 +1770,7 @@ Read from https://docs.powerplatformtoolbox.com/tool-development/api-reference (
 
   Expect: PASS, 3 test files and 112 tests (29, 62 and 21).
 
-- [ ] **Step 16: Run the gate and commit**
+- [x] **Step 16: Run the gate and commit**
 
   ```bash
   npx prettier --write src/services/pptb
@@ -1783,14 +1783,14 @@ Read from https://docs.powerplatformtoolbox.com/tool-development/api-reference (
 
 ## Phase verification
 
-- [ ] `npx vitest run src/services/pptb` passes: 3 files, 112 tests (29 in `dataverseRead.test.ts`, 62 in `pptbHost.test.ts`, 21 in `fakeHost.test.ts`).
-- [ ] The gate set passes: `npx tsc -b && npx eslint . --max-warnings=0 && npx prettier --check . && npx vitest run`.
-- [ ] Host globals are touched in one file: `grep -rlE "window\.(toolboxAPI|dataverseAPI)" src --include=*.ts --include=*.tsx` prints exactly `src/services/pptb/pptbHost.ts`.
-- [ ] Dataverse is read-only: `grep -o "dataverseAPI\.[A-Za-z]*" src/services/pptb/pptbHost.ts | sort -u` prints only `dataverseAPI.queryData`, and `grep -rnE "dataverseAPI\.(create|update|delete|execute|associate|disassociate|publishCustomizations|deploySolution|[a-zA-Z]*Multiple)" src/services/pptb --include=*.ts --exclude=*.test.ts` prints nothing.
-- [ ] The toolbox surface is the documented one: `grep -o "toolboxAPI\.[A-Za-z.]*" src/services/pptb/pptbHost.ts | sort -u` prints exactly `toolboxAPI.connections.getActiveConnection`, `toolboxAPI.events.off`, `toolboxAPI.events.on`, `toolboxAPI.fileSystem.saveFile`, `toolboxAPI.utils.copyToClipboard`, `toolboxAPI.utils.getCurrentTheme`, `toolboxAPI.utils.openInConnectionBrowser` and `toolboxAPI.utils.showNotification`.
-- [ ] Nothing noisy is logged: `grep -rnE "console\.(log|warn|info|debug)" src/services/pptb` prints nothing; the only `console.error` calls are the fixed-label lines in `hostErrors.ts` and the event-handler line in `fakeHost.ts`.
-- [ ] Only this phase's files changed: `git log --stat -3` lists `hostErrors.ts`, `dataverseRead.ts`, `pptbHost.ts`, `fakeHost.ts` and the three test files (plus a deleted stub assertion, if Step 0 removed one), and no file outside `src/services/pptb/`.
-- [ ] The Spike S2 hand-off table above names every host behaviour this phase had to assume (`@odata.nextLink`, `Prefer` header, `$value` download, `events.off`, `Uint8Array` save, `status` on errors), and each has a file and function for Phase 12 to edit.
+- [x] `npx vitest run src/services/pptb` passes: 3 files, 112 tests (29 in `dataverseRead.test.ts`, 62 in `pptbHost.test.ts`, 21 in `fakeHost.test.ts`).
+- [x] The gate set passes: `npx tsc -b && npx eslint . --max-warnings=0 && npx prettier --check . && npx vitest run`.
+- [x] Host globals are touched in one file: `grep -rlE "window\.(toolboxAPI|dataverseAPI)" src --include=*.ts --include=*.tsx` prints exactly `src/services/pptb/pptbHost.ts`.
+- [x] Dataverse is read-only: `grep -o "dataverseAPI\.[A-Za-z]*" src/services/pptb/pptbHost.ts | sort -u` prints only `dataverseAPI.queryData`, and `grep -rnE "dataverseAPI\.(create|update|delete|execute|associate|disassociate|publishCustomizations|deploySolution|[a-zA-Z]*Multiple)" src/services/pptb --include=*.ts --exclude=*.test.ts` prints nothing.
+- [x] The toolbox surface is the documented one: `grep -o "toolboxAPI\.[A-Za-z.]*" src/services/pptb/pptbHost.ts | sort -u` prints exactly `toolboxAPI.connections.getActiveConnection`, `toolboxAPI.events.off`, `toolboxAPI.events.on`, `toolboxAPI.fileSystem.saveFile`, `toolboxAPI.utils.copyToClipboard`, `toolboxAPI.utils.getCurrentTheme`, `toolboxAPI.utils.openInConnectionBrowser` and `toolboxAPI.utils.showNotification`.
+- [x] Nothing noisy is logged: `grep -rnE "console\.(log|warn|info|debug)" src/services/pptb` prints nothing; the only `console.error` calls are the fixed-label lines in `hostErrors.ts` and the event-handler line in `fakeHost.ts`.
+- [x] Only this phase's files changed: `git log --stat -3` lists `hostErrors.ts`, `dataverseRead.ts`, `pptbHost.ts`, `fakeHost.ts` and the three test files (plus a deleted stub assertion, if Step 0 removed one), and no file outside `src/services/pptb/`.
+- [x] The Spike S2 hand-off table above names every host behaviour this phase had to assume (`@odata.nextLink`, `Prefer` header, `$value` download, `events.off`, `Uint8Array` save, `status` on errors), and each has a file and function for Phase 12 to edit.
 
 ## Done when
 

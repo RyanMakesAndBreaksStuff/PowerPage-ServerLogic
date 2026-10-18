@@ -48,7 +48,7 @@ This phase builds the theme and the shared building blocks every UI phase compos
 
 ---
 
-- [ ] **Step 0: Preflight**
+- [x] **Step 0: Preflight**
 
   Run from the repo root:
 
@@ -71,7 +71,7 @@ This phase builds the theme and the shared building blocks every UI phase compos
   - If `useEffectEvent` is `undefined` (React older than 19.2), stop and report it; the react rule and this phase both depend on it.
   - Tests in this phase use only `@testing-library/react` (`fireEvent`, `render`, `screen`, `within`, `act`, `cleanup`) and plain DOM assertions. They do not need `user-event` or `jest-dom`, and each file declares its own `// @vitest-environment` and calls `cleanup` itself, so they pass whatever Phase 00's Vitest setup file does.
 
-- [ ] **Step 1: Write the pure lib tests (classNames, ringGeometry)**
+- [x] **Step 1: Write the pure lib tests (classNames, ringGeometry)**
 
   ```ts file=src/lib/classNames.test.ts
   import { describe, expect, it } from 'vitest';
@@ -179,7 +179,7 @@ This phase builds the theme and the shared building blocks every UI phase compos
   });
   ```
 
-- [ ] **Step 2: Run the lib tests, expect FAIL**
+- [x] **Step 2: Run the lib tests, expect FAIL**
 
   ```bash
   npx vitest run src/lib/classNames.test.ts src/lib/ringGeometry.test.ts
@@ -187,7 +187,7 @@ This phase builds the theme and the shared building blocks every UI phase compos
 
   Expect: FAIL, two suites, each with `Failed to resolve import "./classNames"` (and `./ringGeometry`).
 
-- [ ] **Step 3: Implement the lib files**
+- [x] **Step 3: Implement the lib files**
 
   ```ts file=src/lib/classNames.ts
   export function classNames(...parts: readonly (string | false | null | undefined)[]): string {
@@ -254,7 +254,7 @@ This phase builds the theme and the shared building blocks every UI phase compos
   }
   ```
 
-- [ ] **Step 4: Run the lib tests, expect PASS**
+- [x] **Step 4: Run the lib tests, expect PASS**
 
   ```bash
   npx vitest run src/lib/classNames.test.ts src/lib/ringGeometry.test.ts
@@ -262,7 +262,7 @@ This phase builds the theme and the shared building blocks every UI phase compos
 
   Expect: PASS, 2 files, 15 tests.
 
-- [ ] **Step 5: Commit the lib files**
+- [x] **Step 5: Commit the lib files**
 
   ```bash
   npx prettier --write src/lib/classNames.ts src/lib/classNames.test.ts src/lib/ringGeometry.ts src/lib/ringGeometry.test.ts
@@ -271,7 +271,7 @@ This phase builds the theme and the shared building blocks every UI phase compos
   git commit -m "feat(ui): add ring arc geometry and class name helpers"
   ```
 
-- [ ] **Step 6: Write the token test**
+- [x] **Step 6: Write the token test**
 
   It reads the CSS files as text, checks both themes against FR-11's table, the focus ring, the highlight rule, glass, no external URLs, that `tokens.css` names JetBrains Mono without declaring its own `@font-face` (Phase 00's `fonts.css` owns the files), and that every foreground and background pair the design uses reaches 4.5:1.
 
@@ -483,7 +483,7 @@ This phase builds the theme and the shared building blocks every UI phase compos
 
   The pair list covers the pill tones, the selected pill, the ghost button and the tooltip.
 
-- [ ] **Step 7: Run the token test, expect FAIL**
+- [x] **Step 7: Run the token test, expect FAIL**
 
   ```bash
   npx vitest run src/app/theme/tokens.test.ts
@@ -491,7 +491,7 @@ This phase builds the theme and the shared building blocks every UI phase compos
 
   Expect: FAIL with `ENOENT … tokens.css` at module load (the file does not exist yet).
 
-- [ ] **Step 8: Write `tokens.css`**
+- [x] **Step 8: Write `tokens.css`**
 
   ```css file=src/app/theme/tokens.css
   /*
@@ -608,7 +608,7 @@ This phase builds the theme and the shared building blocks every UI phase compos
   }
   ```
 
-- [ ] **Step 9: Write `primitives.css`**
+- [x] **Step 9: Write `primitives.css`**
 
   ```css file=src/components/primitives.css
   /* Styles for the shared primitives. Colours come only from the theme tokens in app/theme/tokens.css. */
@@ -1003,7 +1003,7 @@ This phase builds the theme and the shared building blocks every UI phase compos
   }
   ```
 
-- [ ] **Step 10: Run the token test, expect PASS**
+- [x] **Step 10: Run the token test, expect PASS**
 
   ```bash
   npx prettier --write src/app/theme/tokens.css src/components/primitives.css src/app/theme/tokens.test.ts
@@ -1012,7 +1012,7 @@ This phase builds the theme and the shared building blocks every UI phase compos
 
   Expect: PASS, 63 tests (18 spec tokens, 5 design tokens, 4 token-structure checks, 2 focus checks, 4 glass, window and asset checks, and 15 contrast pairs in each of the two themes). If prettier changed the value spelling of a token (for example spacing inside `rgba(...)`), fix the expected string in the test to match prettier's output, not the other way round. If the font test fails, Phase 00's `fonts.css` is missing or changed: report it, do not add fonts here.
 
-- [ ] **Step 11: Commit the theme**
+- [x] **Step 11: Commit the theme**
 
   ```bash
   npx eslint src/app/theme --max-warnings=0
@@ -1020,7 +1020,7 @@ This phase builds the theme and the shared building blocks every UI phase compos
   git commit -m "feat(ui): add light and dark design tokens, aurora, glass and focus ring"
   ```
 
-- [ ] **Step 12: Write the Icon test**
+- [x] **Step 12: Write the Icon test**
 
   ```tsx file=src/components/Icon.test.tsx
   // @vitest-environment jsdom
@@ -1069,7 +1069,7 @@ This phase builds the theme and the shared building blocks every UI phase compos
 
   `Object.keys` is typed `string[]`, so the first test narrows it with a type guard rather than a cast.
 
-- [ ] **Step 13: Run, expect FAIL, then implement Icon**
+- [x] **Step 13: Run, expect FAIL, then implement Icon**
 
   ```bash
   npx vitest run src/components/Icon.test.tsx
@@ -1161,7 +1161,7 @@ This phase builds the theme and the shared building blocks every UI phase compos
   }
   ```
 
-- [ ] **Step 14: Run Icon tests, expect PASS, commit**
+- [x] **Step 14: Run Icon tests, expect PASS, commit**
 
   ```bash
   npx vitest run src/components/Icon.test.tsx
@@ -1176,7 +1176,7 @@ This phase builds the theme and the shared building blocks every UI phase compos
   git commit -m "feat(ui): add Icon backed by bundled Fluent System Icons"
   ```
 
-- [ ] **Step 15: Write the DisabledReason, Button and Pill tests**
+- [x] **Step 15: Write the DisabledReason, Button and Pill tests**
 
   ```tsx file=src/components/Button.test.tsx
   // @vitest-environment jsdom
@@ -1299,7 +1299,7 @@ This phase builds the theme and the shared building blocks every UI phase compos
   });
   ```
 
-- [ ] **Step 16: Run, expect FAIL, then implement DisabledReason, useDisabledReason, Button, Pill**
+- [x] **Step 16: Run, expect FAIL, then implement DisabledReason, useDisabledReason, Button, Pill**
 
   ```bash
   npx vitest run src/components/Button.test.tsx src/components/Pill.test.tsx
@@ -1452,7 +1452,7 @@ This phase builds the theme and the shared building blocks every UI phase compos
   }
   ```
 
-- [ ] **Step 17: Run, expect PASS, commit**
+- [x] **Step 17: Run, expect PASS, commit**
 
   ```bash
   npx vitest run src/components/Button.test.tsx src/components/Pill.test.tsx
@@ -1467,7 +1467,7 @@ This phase builds the theme and the shared building blocks every UI phase compos
   git commit -m "feat(ui): add Pill, Button and the aria-disabled reason tooltip"
   ```
 
-- [ ] **Step 18: Write the PillGroup test (APG radio group)**
+- [x] **Step 18: Write the PillGroup test (APG radio group)**
 
   ```tsx file=src/components/PillGroup.test.tsx
   // @vitest-environment jsdom
@@ -1623,7 +1623,7 @@ This phase builds the theme and the shared building blocks every UI phase compos
   });
   ```
 
-- [ ] **Step 19: Run, expect FAIL, then implement PillGroup**
+- [x] **Step 19: Run, expect FAIL, then implement PillGroup**
 
   ```bash
   npx vitest run src/components/PillGroup.test.tsx
@@ -1775,7 +1775,7 @@ This phase builds the theme and the shared building blocks every UI phase compos
   }
   ```
 
-- [ ] **Step 20: Run, expect PASS, commit**
+- [x] **Step 20: Run, expect PASS, commit**
 
   ```bash
   npx vitest run src/components/PillGroup.test.tsx
@@ -1790,7 +1790,7 @@ This phase builds the theme and the shared building blocks every UI phase compos
   git commit -m "feat(ui): add PillGroup as an APG radio group with focusable disabled options"
   ```
 
-- [ ] **Step 21: Write the StatusBadge, Ring and Tile tests**
+- [x] **Step 21: Write the StatusBadge, Ring and Tile tests**
 
   ```tsx file=src/components/StatusBadge.test.tsx
   // @vitest-environment jsdom
@@ -1933,7 +1933,7 @@ This phase builds the theme and the shared building blocks every UI phase compos
   });
   ```
 
-- [ ] **Step 22: Run, expect FAIL, then implement StatusBadge, checkStatusBadge, Ring, Tile**
+- [x] **Step 22: Run, expect FAIL, then implement StatusBadge, checkStatusBadge, Ring, Tile**
 
   ```bash
   npx vitest run src/components/StatusBadge.test.tsx src/components/Ring.test.tsx src/components/Tile.test.tsx
@@ -2067,7 +2067,7 @@ This phase builds the theme and the shared building blocks every UI phase compos
   }
   ```
 
-- [ ] **Step 23: Run, expect PASS, commit**
+- [x] **Step 23: Run, expect PASS, commit**
 
   ```bash
   npx vitest run src/components/StatusBadge.test.tsx src/components/Ring.test.tsx src/components/Tile.test.tsx
@@ -2082,7 +2082,7 @@ This phase builds the theme and the shared building blocks every UI phase compos
   git commit -m "feat(ui): add StatusBadge, segmented Ring and glass Tile"
   ```
 
-- [ ] **Step 24: Write the Modal test (APG modal dialog)**
+- [x] **Step 24: Write the Modal test (APG modal dialog)**
 
   ```tsx file=src/components/Modal.test.tsx
   // @vitest-environment jsdom
@@ -2226,7 +2226,7 @@ This phase builds the theme and the shared building blocks every UI phase compos
   });
   ```
 
-- [ ] **Step 25: Run, expect FAIL, then implement Modal**
+- [x] **Step 25: Run, expect FAIL, then implement Modal**
 
   ```bash
   npx vitest run src/components/Modal.test.tsx
@@ -2340,7 +2340,7 @@ This phase builds the theme and the shared building blocks every UI phase compos
   }
   ```
 
-- [ ] **Step 26: Run, expect PASS, commit**
+- [x] **Step 26: Run, expect PASS, commit**
 
   ```bash
   npx vitest run src/components/Modal.test.tsx
@@ -2355,7 +2355,7 @@ This phase builds the theme and the shared building blocks every UI phase compos
   git commit -m "feat(ui): add Modal following the APG modal dialog pattern"
   ```
 
-- [ ] **Step 27: Write the ToastStack test**
+- [x] **Step 27: Write the ToastStack test**
 
   Uses fake timers and a stubbed `matchMedia` (jsdom has none; the hook treats a missing `matchMedia` as "motion allowed").
 
@@ -2521,7 +2521,7 @@ This phase builds the theme and the shared building blocks every UI phase compos
   });
   ```
 
-- [ ] **Step 28: Run, expect FAIL, then implement the hook and ToastStack**
+- [x] **Step 28: Run, expect FAIL, then implement the hook and ToastStack**
 
   ```bash
   npx vitest run src/components/ToastStack.test.tsx
@@ -2651,7 +2651,7 @@ This phase builds the theme and the shared building blocks every UI phase compos
   }
   ```
 
-- [ ] **Step 29: Run, expect PASS, commit**
+- [x] **Step 29: Run, expect PASS, commit**
 
   ```bash
   npx vitest run src/components/ToastStack.test.tsx

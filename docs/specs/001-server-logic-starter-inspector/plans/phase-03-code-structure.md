@@ -34,7 +34,7 @@ The phase turns Phase 00's stub into the complete code-structure analysis. All f
 
 ---
 
-- [ ] **Step 0: Preflight**
+- [x] **Step 0: Preflight**
 
   Run from the repo root:
 
@@ -47,7 +47,7 @@ The phase turns Phase 00's stub into the complete code-structure analysis. All f
 
   Expect: `codeAnalysis.types.ts` and the stub `structure.ts` are present, the grep prints the stub's `throw` lines (one per function), and `npm ls acorn` lists `acorn@8.x`. If Phase 00 left a test that asserts the stub throws (`grep -rn "not implemented: phase 03" src --include=*.test.ts`), delete that one assertion in this phase's commit; it is the stub's own test. Do not touch any other file.
 
-- [ ] **Step 1: Write the connector detection test (FR-7 fixtures, plus bracket, destructure and alias cases)**
+- [x] **Step 1: Write the connector detection test (FR-7 fixtures, plus bracket, destructure and alias cases)**
 
   Create `src/lib/code-analysis/structure.connector.test.ts`. The first block is FR-7's fixtures table, one row each. The spec writes the arguments of the first and third rows as an ellipsis; the test uses real ones, because detection reads tokens and an ellipsis would not tokenize.
 
@@ -171,7 +171,7 @@ The phase turns Phase 00's stub into the complete code-structure analysis. All f
   });
   ```
 
-- [ ] **Step 2: Write the exported-function-names test**
+- [x] **Step 2: Write the exported-function-names test**
 
   Create `src/lib/code-analysis/structure.names.test.ts`. It pins that helpers are included (the HTTP-mapped filter is phase 11's), that only top-level declarations count, and the `null` cases.
 
@@ -240,7 +240,7 @@ The phase turns Phase 00's stub into the complete code-structure analysis. All f
   });
   ```
 
-- [ ] **Step 3: Write the used-members and HTTP-only-context test**
+- [x] **Step 3: Write the used-members and HTTP-only-context test**
 
   Create `src/lib/code-analysis/structure.members.test.ts`. It covers the nine objects, first-use order, comments and strings excluded, bracket access, optional chaining, destructuring, the no-alias limit, the token fallback for code that does not parse, and the AC-4.7 rule.
 
@@ -418,7 +418,7 @@ The phase turns Phase 00's stub into the complete code-structure analysis. All f
   });
   ```
 
-- [ ] **Step 4: Write the insertion test (AC-6.8)**
+- [x] **Step 4: Write the insertion test (AC-6.8)**
 
   Create `src/lib/code-analysis/structure.insertion.test.ts`. A `§` in a test source marks the cursor. `expectOk` checks every successful plan twice: the changes applied together (an independent implementation, with offsets into the original text) must equal `text`, and `text` must parse. The first test is the spec fixture.
 
@@ -857,7 +857,7 @@ The phase turns Phase 00's stub into the complete code-structure analysis. All f
   });
   ```
 
-- [ ] **Step 5: Run the tests and confirm they FAIL**
+- [x] **Step 5: Run the tests and confirm they FAIL**
 
   ```bash
   npx vitest run src/lib/code-analysis/structure
@@ -865,7 +865,7 @@ The phase turns Phase 00's stub into the complete code-structure analysis. All f
 
   Expect: FAIL. 4 test files, 125 tests, all failing with `not implemented: phase 03` (24 in `structure.connector.test.ts`, 14 in `structure.names.test.ts`, 29 in `structure.members.test.ts`, 58 in `structure.insertion.test.ts`). If any test passes, the stub is not the one this plan assumes: stop and check Step 0.
 
-- [ ] **Step 6: Implement `structureAst.ts` (private parser and tokenizer helpers)**
+- [x] **Step 6: Implement `structureAst.ts` (private parser and tokenizer helpers)**
 
   Create the file. It is the only place that touches acorn. `AstNode` is an acorn node seen as plain data (every property `unknown` until an accessor narrows it), so no cast is needed. `scanTokens` keeps the tokens read before a failure, which the used-members fallback uses. acorn's `Token` type omits `value`, so `toTok` reads it behind an `in` check.
 
@@ -978,7 +978,7 @@ The phase turns Phase 00's stub into the complete code-structure analysis. All f
   }
   ```
 
-- [ ] **Step 7: Implement `structureInsert.ts` (private layout helpers)**
+- [x] **Step 7: Implement `structureInsert.ts` (private layout helpers)**
 
   Create the file. `buildInsertion` returns the one `TextChange` that places the sample, and `applyChanges` applies a change list the way a single editor transaction does (all offsets against the original text). Neither reads or decides anything about the code's meaning; that is `planInsertion`'s job.
 
@@ -1060,7 +1060,7 @@ The phase turns Phase 00's stub into the complete code-structure analysis. All f
   }
   ```
 
-- [ ] **Step 8: Implement `structure.ts`**
+- [x] **Step 8: Implement `structure.ts`**
 
   Replace the whole file (it is Phase 00's stub). The design in brief:
 
@@ -1376,7 +1376,7 @@ The phase turns Phase 00's stub into the complete code-structure analysis. All f
   }
   ```
 
-- [ ] **Step 9: Run the tests and confirm they PASS**
+- [x] **Step 9: Run the tests and confirm they PASS**
 
   ```bash
   npx vitest run src/lib/code-analysis/structure
@@ -1384,7 +1384,7 @@ The phase turns Phase 00's stub into the complete code-structure analysis. All f
 
   Expect: PASS, 4 test files and 125 tests (24, 14, 29 and 58). If a test fails, fix the implementation, never the fixture: the FR-7 rows, the AC-4.7 member list and the AC-6.8 fixture are the spec.
 
-- [ ] **Step 10: Typecheck, lint and format**
+- [x] **Step 10: Typecheck, lint and format**
 
   ```bash
   npx prettier --write src/lib/code-analysis/structure.ts src/lib/code-analysis/structureAst.ts src/lib/code-analysis/structureInsert.ts src/lib/code-analysis/structure.connector.test.ts src/lib/code-analysis/structure.names.test.ts src/lib/code-analysis/structure.members.test.ts src/lib/code-analysis/structure.insertion.test.ts
@@ -1396,7 +1396,7 @@ The phase turns Phase 00's stub into the complete code-structure analysis. All f
 
   Expect: all succeed with no output other than Prettier's "All matched files use Prettier code style!" and the test summary (125 passed). The files were checked with `strict`, `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, `verbatimModuleSyntax` and typescript-eslint `strictTypeChecked` plus `stylisticTypeChecked` with `consistent-type-definitions` set to `type` (the project prefers `type` aliases, `.claude/rules/typescript.md`). If ESLint reports `consistent-type-definitions` for a `type` alias, that is a defect in Phase 00's `eslint.config.ts`: stop and report it to the orchestrator instead of converting the aliases or adding `eslint-disable`. For any other rule, fix the code at that line. Do not add `eslint-disable` or `@ts-ignore`.
 
-- [ ] **Step 11: Commit**
+- [x] **Step 11: Commit**
 
   ```bash
   git add src/lib/code-analysis/structure.ts src/lib/code-analysis/structureAst.ts src/lib/code-analysis/structureInsert.ts src/lib/code-analysis/structure.connector.test.ts src/lib/code-analysis/structure.names.test.ts src/lib/code-analysis/structure.members.test.ts src/lib/code-analysis/structure.insertion.test.ts
@@ -1409,13 +1409,13 @@ The phase turns Phase 00's stub into the complete code-structure analysis. All f
 
 ## Phase verification
 
-- [ ] `npx vitest run src/lib/code-analysis/structure` passes: 4 files and 125 tests, including all five FR-7 fixture rows (one `it.each` case each) and the AC-6.8 fixture (the first insertion test).
-- [ ] The gate set passes: `npx tsc -b && npx eslint . --max-warnings=0 && npx prettier --check . && npx vitest run`.
-- [ ] The module stays pure: `grep -n "^import" src/lib/code-analysis/structure.ts src/lib/code-analysis/structureAst.ts src/lib/code-analysis/structureInsert.ts` lists only `acorn`, `./codeAnalysis.types`, `./structureAst` and `./structureInsert`.
-- [ ] The helpers stay private: `grep -rln "structureAst\|structureInsert" src` lists only `structure.ts`, `structureAst.ts` and `structureInsert.ts`.
-- [ ] Nothing evaluates code: `grep -rnE "eval\(|new Function|\bvm\b" src/lib/code-analysis/structure*.ts` prints nothing.
-- [ ] Only this phase's files changed: `git show --stat HEAD` lists the seven files above (plus a stub test, if Step 0 removed one).
-- [ ] The hand-offs are recorded in this plan's Interfaces: phase 11 filters HTTP-mapped names and decides "couldn't read handler code" from `exportedFunctionNames`; phase 13 asserts its nine object paths against `usedServerMembers`'s; phases 21 and 22 dispatch `result.changes` as one transaction.
+- [x] `npx vitest run src/lib/code-analysis/structure` passes: 4 files and 125 tests, including all five FR-7 fixture rows (one `it.each` case each) and the AC-6.8 fixture (the first insertion test).
+- [x] The gate set passes: `npx tsc -b && npx eslint . --max-warnings=0 && npx prettier --check . && npx vitest run`.
+- [x] The module stays pure: `grep -n "^import" src/lib/code-analysis/structure.ts src/lib/code-analysis/structureAst.ts src/lib/code-analysis/structureInsert.ts` lists only `acorn`, `./codeAnalysis.types`, `./structureAst` and `./structureInsert`.
+- [x] The helpers stay private: `grep -rln "structureAst\|structureInsert" src` lists only `structure.ts`, `structureAst.ts` and `structureInsert.ts`.
+- [x] Nothing evaluates code: `grep -rnE "eval\(|new Function|\bvm\b" src/lib/code-analysis/structure*.ts` prints nothing.
+- [x] Only this phase's files changed: `git show --stat HEAD` lists the seven files above (plus a stub test, if Step 0 removed one).
+- [x] The hand-offs are recorded in this plan's Interfaces: phase 11 filters HTTP-mapped names and decides "couldn't read handler code" from `exportedFunctionNames`; phase 13 asserts its nine object paths against `usedServerMembers`'s; phases 21 and 22 dispatch `result.changes` as one transaction.
 
 ## Done when
 

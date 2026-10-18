@@ -18,7 +18,7 @@ The phase turns Phase 00's stub into the complete FR-4 check. Restricted pattern
 
 ---
 
-- [ ] **Step 0: Preflight**
+- [x] **Step 0: Preflight**
 
   Run from the repo root:
 
@@ -31,7 +31,7 @@ The phase turns Phase 00's stub into the complete FR-4 check. Restricted pattern
 
   Expect: `codeAnalysis.types.ts` and the stub `browserChecks.ts` are present, the grep prints the stub's `throw`, and `npm ls acorn` lists `acorn@8.x`. If Phase 00 left a test that asserts the stub throws (`grep -rn "not implemented: phase 02" src --include=*.test.ts`), delete that one assertion in this phase's commit; it is the stub's own test. Do not touch any other file.
 
-- [ ] **Step 1: Write the FR-4 table test (T2–T22, one row each)**
+- [x] **Step 1: Write the FR-4 table test (T2–T22, one row each)**
 
   Create `src/lib/code-analysis/browserChecks.table.test.ts`. Each row's `expected` is the table's Expected column. Two rows need a note: T13's input also matches `prototype`, because the runtime's regex is case-insensitive and "getPrototypeOf" contains it (spec Learn correction 14), so that row lists it under `alsoMatches`. T20 also asserts `parseFailed` (the "Couldn't parse this code" note).
 
@@ -101,7 +101,7 @@ The phase turns Phase 00's stub into the complete FR-4 check. Restricted pattern
   });
   ```
 
-- [ ] **Step 2: Write the behaviour, line-number, CRLF, fallback and performance tests**
+- [x] **Step 2: Write the behaviour, line-number, CRLF, fallback and performance tests**
 
   Create `src/lib/code-analysis/browserChecks.test.ts`. It pins the 27 labels, one sample each (also upper- and lower-cased), whole-token and case rules, templates, regex versus division, the fallback, line numbers (multi-line comments and templates, CRLF, lone CR), ordering and de-duplication, and the NFR (300 ms for a 2 000-line file, plus a worst case for the `import from` regex).
 
@@ -334,7 +334,7 @@ The phase turns Phase 00's stub into the complete FR-4 check. Restricted pattern
   });
   ```
 
-- [ ] **Step 3: Run the tests and confirm they FAIL**
+- [x] **Step 3: Run the tests and confirm they FAIL**
 
   ```bash
   npx vitest run src/lib/code-analysis/browserChecks
@@ -342,7 +342,7 @@ The phase turns Phase 00's stub into the complete FR-4 check. Restricted pattern
 
   Expect: FAIL. Every test that calls `runBrowserChecks` fails with `not implemented: phase 02`, and the tests that use `RESTRICTED_PATTERNS` fail because the stub doesn't export it. Only "covers every row from T2 to T22 exactly once" passes. If any other test passes, the stub is not the one this plan assumes: stop and check Step 0.
 
-- [ ] **Step 4: Implement `browserChecks.ts`**
+- [x] **Step 4: Implement `browserChecks.ts`**
 
   Replace the whole file. The design in brief:
 
@@ -529,7 +529,7 @@ The phase turns Phase 00's stub into the complete FR-4 check. Restricted pattern
   }
   ```
 
-- [ ] **Step 5: Run the tests and confirm they PASS**
+- [x] **Step 5: Run the tests and confirm they PASS**
 
   ```bash
   npx vitest run src/lib/code-analysis/browserChecks
@@ -537,7 +537,7 @@ The phase turns Phase 00's stub into the complete FR-4 check. Restricted pattern
 
   Expect: PASS, 2 test files and 77 tests (22 in `browserChecks.table.test.ts`, 55 in `browserChecks.test.ts`). The two performance tests finish well under 300 ms (about 50 ms and 30 ms on a developer machine). If a table row fails, fix the implementation, never the row: the rows are the spec.
 
-- [ ] **Step 6: Typecheck, lint and format**
+- [x] **Step 6: Typecheck, lint and format**
 
   ```bash
   npx prettier --write src/lib/code-analysis/browserChecks.ts src/lib/code-analysis/browserChecks.test.ts src/lib/code-analysis/browserChecks.table.test.ts
@@ -548,7 +548,7 @@ The phase turns Phase 00's stub into the complete FR-4 check. Restricted pattern
 
   Expect: all four succeed with no output other than Prettier's "All matched files use Prettier code style!". If ESLint reports a rule, fix the code at that line (for example wrap a number in `String(...)` for `restrict-template-expressions`). Do not add `eslint-disable` or `@ts-ignore`.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
   ```bash
   git add src/lib/code-analysis/browserChecks.ts src/lib/code-analysis/browserChecks.test.ts src/lib/code-analysis/browserChecks.table.test.ts
@@ -561,12 +561,12 @@ The phase turns Phase 00's stub into the complete FR-4 check. Restricted pattern
 
 ## Phase verification
 
-- [ ] `npx vitest run src/lib/code-analysis/browserChecks` passes: 77 tests, including every FR-4 row T2–T22 (one `it.each` case each, plus the coverage check that names T2…T22 once).
-- [ ] The gate set passes: `npx tsc -b && npx eslint . --max-warnings=0 && npx prettier --check . && npx vitest run`.
-- [ ] The module stays pure: `grep -n "^import" src/lib/code-analysis/browserChecks.ts` lists only `acorn` and `./codeAnalysis.types`.
-- [ ] Only this phase's files changed: `git show --stat HEAD` lists `browserChecks.ts` and the two test files (plus a stub test, if Step 0 removed one).
-- [ ] The label list is the Learn list: the first test in `browserChecks.test.ts` compares `RESTRICTED_PATTERNS` labels with the 27 FR-4 Must entries in order.
-- [ ] The hand-off to T1 is recorded: no test here asserts "zero hits for generated code". Phases 07, 08, 09, 13 and 19 each import `runBrowserChecks` and assert `{ hits: [], parseFailed: false }` for their output.
+- [x] `npx vitest run src/lib/code-analysis/browserChecks` passes: 77 tests, including every FR-4 row T2–T22 (one `it.each` case each, plus the coverage check that names T2…T22 once).
+- [x] The gate set passes: `npx tsc -b && npx eslint . --max-warnings=0 && npx prettier --check . && npx vitest run`.
+- [x] The module stays pure: `grep -n "^import" src/lib/code-analysis/browserChecks.ts` lists only `acorn` and `./codeAnalysis.types`.
+- [x] Only this phase's files changed: `git show --stat HEAD` lists `browserChecks.ts` and the two test files (plus a stub test, if Step 0 removed one).
+- [x] The label list is the Learn list: the first test in `browserChecks.test.ts` compares `RESTRICTED_PATTERNS` labels with the 27 FR-4 Must entries in order.
+- [x] The hand-off to T1 is recorded: no test here asserts "zero hits for generated code". Phases 07, 08, 09, 13 and 19 each import `runBrowserChecks` and assert `{ hits: [], parseFailed: false }` for their output.
 
 ## Done when
 
