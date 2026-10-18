@@ -1,7 +1,6 @@
 {
-  "name": "scaffold",
-  "private": true,
-  "version": "0.0.0",
+  "name": "@ryanmakes/powerpages-serverlogic",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -78,5 +77,39 @@
   ],
   "engines": {
     "node": ">=20.19.0"
-  }
+  },
+  "displayName": "Server Logic Tools",
+  "description": "Generate Power Pages server logic handlers and review a site's existing server logic for web role, table permission and outbound networking gaps.",
+  "main": "index.html",
+  "icon": "icons/server-logic-tools.svg",
+  "license": "MIT",
+  "author": "Ryan Christopher",
+  "contributors": [
+    {
+      "name": "Ryan Christopher",
+      "url": "https://github.com/RyanMakesAndBreaksStuff"
+    }
+  ],
+  "configurations": {
+    "repository": "https://github.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic",
+    "readmeUrl": "https://raw.githubusercontent.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/main/README.md"
+  },
+  "features": {
+    "connections": {
+      "min": 0,
+      "max": 1
+    },
+    "minAPI": "1.2.7"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic.git"
+  },
+  "keywords": [
+    "powerplatform",
+    "dataverse",
+    "toolbox",
+    "power-pages",
+    "server-logic"
+  ]
 }
