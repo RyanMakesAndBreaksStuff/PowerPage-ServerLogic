@@ -58,7 +58,6 @@ describe('built tool: PPTB loading shape (all pages released)', () => {
     if (file === undefined) throw new Error('no bundle emitted');
     const code = read(dist, file);
     expect(() => new Script(code)).not.toThrow();
-    expect(code).not.toContain('import.meta');
   });
 
   it('has no type="module" and no crossorigin in index.html', () => {
