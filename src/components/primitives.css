@@ -1,0 +1,388 @@
+/* Styles for the shared primitives. Colours come only from the theme tokens in app/theme/tokens.css. */
+
+.ui-icon {
+  flex: none;
+}
+
+/* Tile */
+.ui-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-sizing: border-box;
+  min-width: 0;
+  min-height: 0;
+  padding: 14px 16px;
+  overflow: hidden;
+  background: linear-gradient(var(--tile-glass), var(--tile-glass)), var(--tile);
+  backdrop-filter: var(--tile-blur);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: var(--tile-shadow);
+  color: var(--text);
+}
+
+.ui-tile--flush {
+  gap: 0;
+  padding: 0;
+}
+
+.ui-tile__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.ui-tile__label {
+  color: var(--muted);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* Pill */
+.ui-pill {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  background: transparent;
+  border: 1px solid var(--control-border);
+  border-radius: 99px;
+  color: var(--text-2);
+  font-family: inherit;
+  font-size: 11.5px;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+
+.ui-pill--compact {
+  padding: 1px 9px;
+  font-size: 10.5px;
+}
+
+.ui-pill--mono {
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+.ui-pill--selected {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--on-primary);
+  font-weight: 700;
+}
+
+.ui-pill--ok {
+  background: var(--ok-tint);
+  border-color: var(--primary);
+  color: var(--primary-text);
+}
+
+.ui-pill--review {
+  background: var(--review-tint);
+  border-color: var(--review);
+  color: var(--review);
+  font-weight: 700;
+}
+
+.ui-pill--server {
+  background: var(--server-tint);
+  border-color: var(--server);
+  color: var(--server);
+}
+
+.ui-pill--control {
+  cursor: pointer;
+}
+
+/* A blocked choice: dashed outline and muted text, so the state is not colour alone. */
+.ui-pill[aria-disabled='true'] {
+  border-style: dashed;
+  color: var(--muted);
+  cursor: not-allowed;
+}
+
+.ui-pill-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.ui-badge__glyph {
+  display: inline-flex;
+}
+
+/* Disabled reason tooltip: always in the DOM for aria-describedby, shown on hover and focus. */
+.ui-reason-anchor {
+  position: relative;
+  display: inline-flex;
+}
+
+.ui-reason-anchor--block {
+  display: flex;
+}
+
+.ui-reason {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 50;
+  width: max-content;
+  max-width: 280px;
+  padding: 6px 10px;
+  background: var(--tooltip-bg);
+  border-radius: 6px;
+  color: var(--tooltip-text);
+  font-size: 11.5px;
+  line-height: 1.4;
+  pointer-events: none;
+  visibility: hidden;
+  white-space: normal;
+}
+
+.ui-reason[data-visible='true'] {
+  visibility: visible;
+}
+
+/* Button */
+.ui-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: inherit;
+  border-radius: 99px;
+  cursor: pointer;
+}
+
+.ui-button--ghost {
+  padding: 4px 12px;
+  background: var(--ghost);
+  border: 1px solid var(--control-border);
+  color: var(--text);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.ui-button--primary {
+  justify-content: space-between;
+  padding: 12px 20px;
+  background: var(--primary);
+  border: 1px solid var(--primary);
+  color: var(--on-primary);
+  font-size: 14px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.ui-button--block {
+  width: 100%;
+}
+
+.ui-button[aria-disabled='true'],
+.ui-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.ui-icon-button {
+  display: inline-flex;
+  padding: 4px;
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  color: inherit;
+  cursor: pointer;
+}
+
+/* Ring */
+.ui-ring {
+  position: relative;
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+}
+
+.ui-ring svg {
+  position: absolute;
+  inset: 0;
+}
+
+.ui-ring__arc {
+  fill: none;
+}
+
+.ui-ring__arc--done {
+  stroke: var(--primary);
+}
+
+.ui-ring__arc--review {
+  stroke: var(--review);
+}
+
+.ui-ring__arc--not-scanned {
+  opacity: 0.5;
+  stroke: var(--muted);
+}
+
+.ui-ring__text {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: var(--text);
+  line-height: 1;
+}
+
+.ui-ring__count {
+  font-weight: 700;
+}
+
+.ui-ring__label {
+  margin-top: 4px;
+  color: var(--muted);
+}
+
+/* Modal */
+.ui-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: var(--scrim);
+}
+
+.ui-modal {
+  display: flex;
+  flex-direction: column;
+  max-width: 100%;
+  max-height: 100%;
+  background: var(--tile);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+  color: var(--text);
+}
+
+.ui-modal__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.ui-modal__title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.ui-modal__body {
+  padding: 16px;
+  overflow: auto;
+}
+
+.ui-modal__foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+}
+
+/* Fallback toast stack (FR-1), Bootstrap-style. */
+.ui-toast-stack {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: min(340px, calc(100vw - 32px));
+  pointer-events: none;
+}
+
+.ui-toast {
+  background: var(--tile);
+  border: 1px solid var(--border);
+  border-left-width: 4px;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  color: var(--text);
+  font-size: 12.5px;
+  pointer-events: auto;
+}
+
+.ui-toast--success {
+  border-left-color: var(--primary);
+}
+
+.ui-toast--info {
+  border-left-color: var(--muted);
+}
+
+.ui-toast--warning,
+.ui-toast--error {
+  border-left-color: var(--review);
+}
+
+.ui-toast__header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 8px 4px 12px;
+}
+
+.ui-toast__title {
+  flex: 1;
+  min-width: 0;
+}
+
+.ui-toast__body {
+  padding: 0 12px 10px;
+  color: var(--text-2);
+  overflow-wrap: anywhere;
+}
+
+.ui-toast--fade {
+  animation: ui-toast-in 150ms ease-out;
+  transition: opacity 150ms ease-out;
+}
+
+.ui-toast--leaving {
+  opacity: 0;
+}
+
+@keyframes ui-toast-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ui-toast {
+    animation: none;
+    transition: none;
+  }
+}
+
+/* Dark tiles fall back to the opaque tile colour where backdrop-filter is missing. */
+@supports not (backdrop-filter: blur(1px)) {
+  [data-theme='dark'] .ui-tile {
+    background: var(--tile);
+  }
+}
