@@ -1,1 +1,11 @@
 .codegraph/
+node_modules/
+dist/
+dist-probe/
+dist-ssr/
+coverage/
+*.tsbuildinfo
+*.local
+.env
+.env.*
+.scaffold/
