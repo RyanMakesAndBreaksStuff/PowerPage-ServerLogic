@@ -2,6 +2,7 @@
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { App } from '@/app/App';
+import { FAKE_STARTER_DEPS } from '@/app/starter-session/fakeStarterDeps';
 import { createFakeHost } from '@/services/pptb/fakeHost';
 import type { Connection } from '@/services/pptb/host.types';
 
@@ -16,7 +17,7 @@ const CONTOSO: Connection = {
 
 async function mount(connection: Connection | null = null) {
   const host = createFakeHost({ connection });
-  render(<App host={host} />);
+  render(<App host={host} starterDeps={FAKE_STARTER_DEPS} />);
   await act(async () => {
     await Promise.resolve();
   });
@@ -69,7 +70,7 @@ describe('App shell', () => {
 
   it('registers one host event listener for the whole app and removes it on unload (FR-12)', async () => {
     const host = createFakeHost();
-    const { unmount } = render(<App host={host} />);
+    const { unmount } = render(<App host={host} starterDeps={FAKE_STARTER_DEPS} />);
     await act(async () => {
       await Promise.resolve();
     });

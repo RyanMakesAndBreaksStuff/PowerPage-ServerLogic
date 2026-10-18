@@ -6,6 +6,9 @@ import { NotifyProvider } from '@/app/NotifyProvider';
 import { PageErrorBoundary } from '@/app/PageErrorBoundary';
 import { RELEASED_PAGES } from '@/app/releasedPages';
 import { TitleBar } from '@/app/shell/TitleBar';
+import { StarterSessionProvider } from '@/app/starter-session/StarterSessionProvider';
+import { STARTER_DEPS } from '@/app/starter-session/starterDeps';
+import type { StarterDeps } from '@/app/starter-session/starterDeps';
 import { useHostTheme } from '@/app/useHostTheme';
 import { ViewContext } from '@/app/useView';
 import { InspectorPage } from '@/features/inspector/InspectorPage';
@@ -14,7 +17,7 @@ import { StarterPage } from '@/features/starter/StarterPage';
 import type { PptbHost } from '@/services/pptb/host.types';
 import type { View } from '@/types/http';
 
-export type AppProps = { host: PptbHost };
+export type AppProps = { host: PptbHost; starterDeps?: StarterDeps };
 
 function Panel({
   id,
@@ -34,7 +37,7 @@ function Panel({
   );
 }
 
-export function App({ host }: AppProps): ReactElement {
+export function App({ host, starterDeps = STARTER_DEPS }: AppProps): ReactElement {
   const [view, setViewState] = useState<View>(RELEASED_PAGES[0] ?? 'starter');
   useHostTheme(host);
 
@@ -52,11 +55,17 @@ export function App({ host }: AppProps): ReactElement {
               <main className="shell__content">
                 {/* Constant conditions: unreleased pages are dropped from the bundle (FR-1, Phase 00). */}
                 {__PAGE_STARTER__ ? (
-                  <Panel id="starter" label="Logic Starter" view={view}>
-                    <StarterPage />
-                  </Panel>
-                ) : null}
-                {__PAGE_OBJECTS__ ? (
+                  <StarterSessionProvider deps={starterDeps}>
+                    <Panel id="starter" label="Logic Starter" view={view}>
+                      <StarterPage />
+                    </Panel>
+                    {__PAGE_OBJECTS__ ? (
+                      <Panel id="objects" label="Server Objects" view={view}>
+                        <ServerObjectsPage />
+                      </Panel>
+                    ) : null}
+                  </StarterSessionProvider>
+                ) : __PAGE_OBJECTS__ ? (
                   <Panel id="objects" label="Server Objects" view={view}>
                     <ServerObjectsPage />
                   </Panel>
