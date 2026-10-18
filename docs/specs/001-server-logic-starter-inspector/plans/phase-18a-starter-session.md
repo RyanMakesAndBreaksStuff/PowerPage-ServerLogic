@@ -41,7 +41,7 @@ This phase builds the one state store both Logic Starter and Server Objects shar
 
 ---
 
-- [ ] **Step 0: Preflight**
+- [x] **Step 0: Preflight**
 
   ```bash
   git status --short
@@ -54,7 +54,7 @@ This phase builds the one state store both Logic Starter and Server Objects shar
 
   Expect: a clean tree and every export found (Phases 02, 03, 05 and 06 merged). If any is still a Phase 00 stub (`not implemented`), stop: this phase runs in the wave after them.
 
-- [ ] **Step 1: Write the text-change test**
+- [x] **Step 1: Write the text-change test**
 
   ```ts file=src/app/starter-session/applyTextChanges.test.ts
   import { describe, expect, it } from 'vitest';
@@ -89,7 +89,7 @@ This phase builds the one state store both Logic Starter and Server Objects shar
 
   Run: `npx vitest run src/app/starter-session/applyTextChanges.test.ts`. Expect: FAIL, `Failed to resolve import "./applyTextChanges"`.
 
-- [ ] **Step 2: Implement `applyTextChanges`, run, commit**
+- [x] **Step 2: Implement `applyTextChanges`, run, commit**
 
   ```ts file=src/app/starter-session/applyTextChanges.ts
   import type { TextChange } from '@/lib/code-analysis/codeAnalysis.types';
@@ -115,7 +115,7 @@ This phase builds the one state store both Logic Starter and Server Objects shar
 
   Expect: PASS, 3 tests.
 
-- [ ] **Step 3: Write the deps, the fake deps and the reducer test**
+- [x] **Step 3: Write the deps, the fake deps and the reducer test**
 
   ```ts file=src/app/starter-session/starterDeps.ts
   import { isLiquidAllowed } from '@/services/generators/client/client';
@@ -360,7 +360,7 @@ This phase builds the one state store both Logic Starter and Server Objects shar
 
   Run: `npx vitest run src/app/starter-session/starterReducer.test.ts`. Expect: FAIL, `Failed to resolve import "./starterReducer"`.
 
-- [ ] **Step 4: Implement the reducer, run, commit**
+- [x] **Step 4: Implement the reducer, run, commit**
 
   ```ts file=src/app/starter-session/starterReducer.ts
   import { getRecipe, methodEnabled } from '@/services/catalogue/recipes';
@@ -477,7 +477,7 @@ This phase builds the one state store both Logic Starter and Server Objects shar
 
   Expect: PASS, 22 tests. The `never` default satisfies `switch-exhaustiveness-check`. If ESLint reports `@typescript-eslint/no-unnecessary-condition` on the `default` branch, the switch is already exhaustive: keep the `never` check (`.claude/rules/typescript.md` asks for it) and add `// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- exhaustiveness check` above `default:`.
 
-- [ ] **Step 5: Write the derived-values test**
+- [x] **Step 5: Write the derived-values test**
 
   ```ts file=src/app/starter-session/deriveStarter.test.ts
   import { describe, expect, it } from 'vitest';
@@ -555,7 +555,7 @@ This phase builds the one state store both Logic Starter and Server Objects shar
 
   Run: `npx vitest run src/app/starter-session/deriveStarter.test.ts`. Expect: FAIL, `Failed to resolve import "./deriveStarter"`.
 
-- [ ] **Step 6: Implement `deriveStarter`, run, commit**
+- [x] **Step 6: Implement `deriveStarter`, run, commit**
 
   ```ts file=src/app/starter-session/deriveStarter.ts
   import { runBrowserChecks } from '@/lib/code-analysis/browserChecks';
@@ -602,7 +602,7 @@ This phase builds the one state store both Logic Starter and Server Objects shar
 
   Expect: PASS, 8 tests.
 
-- [ ] **Step 7: Write the provider test**
+- [x] **Step 7: Write the provider test**
 
   ```tsx file=src/app/starter-session/StarterSessionProvider.test.tsx
   // @vitest-environment jsdom
@@ -682,7 +682,7 @@ This phase builds the one state store both Logic Starter and Server Objects shar
 
   Run: `npx vitest run src/app/starter-session/StarterSessionProvider.test.tsx`. Expect: FAIL: the provider and hook are Phase 00 stubs (`not implemented: phase 18a`).
 
-- [ ] **Step 8: Implement the hook and the provider, run, commit**
+- [x] **Step 8: Implement the hook and the provider, run, commit**
 
   ```ts file=src/app/starter-session/useStarterSession.ts
   import { createContext, use } from 'react';
@@ -746,7 +746,7 @@ This phase builds the one state store both Logic Starter and Server Objects shar
 
   Expect: PASS, all four test files (3 + 22 + 8 + 3 = 36 tests). The pinned `useStarterSession` signature in `src/skeleton.test.ts` still matches. React Compiler memoizes `deriveStarter` on `state`; do not add `useMemo` (`.claude/rules/react.md`). The notify identity from `NotifyProvider` changes per render, which only re-runs the effect while a notice is pending, and the effect clears it, so it sends once. If `react-hooks/set-state-in-effect` (react-hooks v7) reports the `dispatch` in the effect, this is the case the rule allows for: the effect syncs with an external system (the host notification) and then acknowledges it. Add `// eslint-disable-next-line react-hooks/set-state-in-effect -- acknowledges a notice already sent to the host` above that line rather than moving the side effect into the reducer.
 
-- [ ] **Step 9: Mount the provider in `App` and update the App test**
+- [x] **Step 9: Mount the provider in `App` and update the App test**
 
   In `src/app/App.tsx` (Phase 06's file; this is its only other editor):
 
