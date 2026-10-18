@@ -6,10 +6,12 @@
 **Created:** 2026-10-16. **Split from `plan.md`:** 2026-10-17.
 **Phase plans:** one file per phase in `plans/phase-NN-<slug>.md`. Phase numbers are the stable IDs from the original 25-phase layout, so cross-references in the phase files stay valid; `18a` is the session state moved out of old Phase 18.
 
-## Status (2026-10-17)
+## Status (2026-10-18)
 
-- **Part A is fully planned:** phases 00–06 and 18a have plan files. No code exists yet. Building starts with Phase 00.
-- **Part B and Part C are outlined below;** their phase files (07–10, 14, 17, 18, 19, 21) are not written yet. Write each before its wave starts.
+- **Part A is fully planned:** phases 00–06 and 18a have plan files.
+- **Part A is built** (waves A0–A3 merged and green).
+- **Wave B1 is planned (2026-10-18):** phases 07–10 have task-level plan files (tasks, red-first tests and acceptance criteria; no code). Goldens are hand-written `__golden__/<id>.*.txt` files compared with `toBe`, ending in one LF.
+- **The rest of Part B and Part C are outlined below;** their phase files (14, 17, 18, 19, 21) are not written yet. Write each before its wave starts.
 - **Open risk (Inspector, not Starter):** a file-column download through `queryData` is unverified until Spike S2 (`plan-inspector.md`). If it fails, reading handler code needs `execute`, which the read-only rule forbids, so that would need a spec and rules change.
 
 ## Scope
@@ -230,7 +232,7 @@ export type StarterPackageInput = { state: StarterState; derived: StarterDerived
 
 **Part A is done when** waves A0–A3 are merged and green, and `npm run build` still produces one IIFE bundle. From then on `plan-server-objects.md`, `plan-inspector.md` and Parts B and C of this plan can run in parallel.
 
-## Part B: Generators (outline; phase files to write)
+## Part B: Generators (B1 planned; B2 outline, phase files to write)
 
 | Wave | Phase | Title | Depends on | Implements / Satisfies (summary) |
 |---|---|---|---|---|
@@ -240,7 +242,7 @@ export type StarterPackageInput = { state: StarterState; derived: StarterDerived
 | B1 | 10 | Client generator + request path | 03, 05 | FR-2a, AC-2.7, AC-4.4–4.8, AC-4.11; `isLiquidAllowed` for `STARTER_DEPS` |
 | ◆→B2 | 19 | Spike S3 + Handler R7 | 05, 02, ◆S3 | S3 evidence (commit `7efe699`, collision probe); R7 Musts (F05/F06). Extends the 14 and 17 test tables with R7 |
 | B2 | 14 | Starter package + Download | 07, 08, 09, 10, 18a | AC-5.6, 5.7, 5.10, 5.11; FR-5 |
-| B2 | 17 | Behavior harness | 07, 08, 09, 10 | AC-4.12: 36 configurations, 6 shared client failure cases, demo-page cases, sentinel secret |
+| B2 | 17 | Behavior harness | 07, 08, 09, 10 | AC-4.12: 36 configurations, 6 shared client failure cases, demo-page cases, sentinel secret; also the R4 F08 option cases handed over by Phase 08 (Task 2) |
 
 ## Part C: Starter UI (outline; phase files to write)
 
@@ -289,10 +291,10 @@ ACs, by story. Where a phase owns the state half and another the UI half, both a
 | 05 | A | `plans/phase-05-starter-domain.md` |
 | 06 | A | `plans/phase-06-shell.md` |
 | 18a | A | `plans/phase-18a-starter-session.md` |
-| 07 | B | `plans/phase-07-handlers-core.md` (to write) |
-| 08 | B | `plans/phase-08-handlers-tutorials.md` (to write) |
-| 09 | B | `plans/phase-09-handlers-reference.md` (to write) |
-| 10 | B | `plans/phase-10-client-generator.md` (to write) |
+| 07 | B | `plans/phase-07-handlers-core.md` |
+| 08 | B | `plans/phase-08-handlers-tutorials.md` |
+| 09 | B | `plans/phase-09-handlers-reference.md` |
+| 10 | B | `plans/phase-10-client-generator.md` |
 | 14 | B | `plans/phase-14-starter-package.md` (to write) |
 | 17 | B | `plans/phase-17-behavior-harness.md` (to write) |
 | 19 | B | `plans/phase-19-handler-r7.md` (to write) |
