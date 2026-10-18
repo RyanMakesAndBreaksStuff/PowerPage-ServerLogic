@@ -2306,9 +2306,9 @@ This phase scaffolds the PPTB tool with the standard Vite template (owner decisi
 
   | Measurement | Command | Planning estimate (unverified) | Measured raw KiB | Measured gzip KiB |
   |---|---|---|---|---|
-  | Probe bundle: jsPDF 4.2.1 + jspdf-autotable 5.0.8 + DM Sans Regular TTF (as base64) + fflate + CodeMirror (state, view, commands, language, lang-javascript, lezer highlight) + acorn + one Fluent icon | `npm run probe:size` | about 1 MiB raw, 350 to 450 KiB gzip | _fill from the command_ | _fill from the command_ |
-  | App bundle with the stubs only (React 19 + placeholders + 3 JetBrains Mono fonts in CSS) | `npm run build && npm run size` | about 190 KiB raw, 60 KiB gzip | _fill from the command_ | _fill from the command_ |
-  | Estimated final bundle = app bundle + probe bundle (an upper bound: React and the TTF-as-base64 are shared or smaller once only the needed weights are imported) | sum of the two rows | about 1.2 MiB raw | _fill (sum)_ | _fill (sum)_ |
+  | Probe bundle: jsPDF 4.2.1 + jspdf-autotable 5.0.8 + DM Sans Regular TTF (as base64) + fflate + CodeMirror (state, view, commands, language, lang-javascript, lezer highlight) + acorn + one Fluent icon | `npm run probe:size` | about 1 MiB raw, 350 to 450 KiB gzip | 1046.2 | 351.8 |
+  | App bundle with the stubs only (React 19 + placeholders + 3 JetBrains Mono fonts in CSS) | `npm run build && npm run size` | about 190 KiB raw, 60 KiB gzip | 215.3 | 66.5 |
+  | Estimated final bundle = app bundle + probe bundle (an upper bound: React and the TTF-as-base64 are shared or smaller once only the needed weights are imported) | sum of the two rows | about 1.2 MiB raw | 1261.5 | 418.3 |
 
   There is no size budget in the spec. If the probe's gzip size is above 800 KiB, or the app bundle with stubs is above 400 KiB, report it to the owner before Wave W1: it would affect load time inside the PPTB webview, and the mitigations (loading jsPDF and CodeMirror only through `React.lazy`, still inlined) belong to Phases 20 and 21.
 
