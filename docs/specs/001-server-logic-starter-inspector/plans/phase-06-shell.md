@@ -46,7 +46,7 @@ This phase builds the window every page sits in: the title bar with the glyph, t
 
 ---
 
-- [ ] **Step 0: Preflight**
+- [x] **Step 0: Preflight**
 
   ```bash
   git status --short
@@ -58,7 +58,7 @@ This phase builds the window every page sits in: the title bar with the glyph, t
 
   Expect: a clean tree; both factories found (Phase 01 merged, not stubs); the `getTheme` rejection tests present; the four Phase 04 files listed; `RELEASED_PAGES` exported. If Phase 01's `getTheme` still resolves `'light'` on failure, stop: Decision 3 depends on the rejection.
 
-- [ ] **Step 1: Write the connection label test**
+- [x] **Step 1: Write the connection label test**
 
   ```ts file=src/app/shell/connectionLabel.test.ts
   import { describe, expect, it } from 'vitest';
@@ -91,7 +91,7 @@ This phase builds the window every page sits in: the title bar with the glyph, t
 
   Run: `npx vitest run src/app/shell/connectionLabel.test.ts`. Expect: FAIL, `Failed to resolve import "./connectionLabel"`.
 
-- [ ] **Step 2: Implement `connectionLabel`, run, commit**
+- [x] **Step 2: Implement `connectionLabel`, run, commit**
 
   ```ts file=src/app/shell/connectionLabel.ts
   import type { Connection, EnvironmentLabel } from '@/services/pptb/host.types';
@@ -118,7 +118,7 @@ This phase builds the window every page sits in: the title bar with the glyph, t
 
   Expect: PASS, 6 tests.
 
-- [ ] **Step 3: Write the host-context, notify and fallback tests**
+- [x] **Step 3: Write the host-context, notify and fallback tests**
 
   ```tsx file=src/app/NotifyProvider.test.tsx
   // @vitest-environment jsdom
@@ -222,7 +222,7 @@ This phase builds the window every page sits in: the title bar with the glyph, t
 
   Run: `npx vitest run src/app/NotifyProvider.test.tsx`. Expect: FAIL, `Failed to resolve import "@/app/NotifyProvider"` (and `useHost` throws `not implemented: phase 06`).
 
-- [ ] **Step 4: Implement `HostContext`, `useNotify` and `NotifyProvider`**
+- [x] **Step 4: Implement `HostContext`, `useNotify` and `NotifyProvider`**
 
   ```ts file=src/app/HostContext.ts
   import { createContext, use } from 'react';
@@ -295,7 +295,7 @@ This phase builds the window every page sits in: the title bar with the glyph, t
   git commit -m "feat(shell): route notices through the host with an in-tool fallback toast"
   ```
 
-- [ ] **Step 5: Write the active-connection test**
+- [x] **Step 5: Write the active-connection test**
 
   ```tsx file=src/app/ConnectionProvider.test.tsx
   // @vitest-environment jsdom
@@ -369,7 +369,7 @@ This phase builds the window every page sits in: the title bar with the glyph, t
 
   Run: `npx vitest run src/app/ConnectionProvider.test.tsx`. Expect: FAIL, `Failed to resolve import "@/app/ConnectionProvider"`.
 
-- [ ] **Step 6: Implement the connection provider, run, commit**
+- [x] **Step 6: Implement the connection provider, run, commit**
 
   ```ts file=src/app/useActiveConnection.ts
   import { createContext, use } from 'react';
@@ -432,7 +432,7 @@ This phase builds the window every page sits in: the title bar with the glyph, t
 
   Expect: PASS, 4 tests. The request counter discards a slow answer that a newer read has superseded.
 
-- [ ] **Step 7: Write the host-theme test**
+- [x] **Step 7: Write the host-theme test**
 
   ```tsx file=src/app/useHostTheme.test.tsx
   // @vitest-environment jsdom
@@ -505,7 +505,7 @@ This phase builds the window every page sits in: the title bar with the glyph, t
 
   jsdom reports `document.visibilityState` as `'visible'`, so the visibility event counts. Run: `npx vitest run src/app/useHostTheme.test.tsx`. Expect: FAIL, `Failed to resolve import "@/app/useHostTheme"`.
 
-- [ ] **Step 8: Implement `useHostTheme`, run, commit**
+- [x] **Step 8: Implement `useHostTheme`, run, commit**
 
   ```ts file=src/app/useHostTheme.ts
   import { useEffect } from 'react';
@@ -555,7 +555,7 @@ This phase builds the window every page sits in: the title bar with the glyph, t
 
   Expect: PASS, 4 tests.
 
-- [ ] **Step 9: Write the external-link and error-boundary tests**
+- [x] **Step 9: Write the external-link and error-boundary tests**
 
   ```tsx file=src/app/ExternalLink.test.tsx
   // @vitest-environment jsdom
@@ -655,7 +655,7 @@ This phase builds the window every page sits in: the title bar with the glyph, t
 
   Run: `npx vitest run src/app/ExternalLink.test.tsx src/app/PageErrorBoundary.test.tsx`. Expect: FAIL, both imports unresolved.
 
-- [ ] **Step 10: Implement `ExternalLink` and `PageErrorBoundary`, run, commit**
+- [x] **Step 10: Implement `ExternalLink` and `PageErrorBoundary`, run, commit**
 
   ```tsx file=src/app/ExternalLink.tsx
   import type { ComponentProps, MouseEvent, ReactElement } from 'react';
@@ -722,7 +722,7 @@ This phase builds the window every page sits in: the title bar with the glyph, t
 
   Expect: PASS, 5 tests. `react-refresh/only-export-components` accepts a class component export.
 
-- [ ] **Step 11: Write the top-tabs test (APG tabs, AC-1.1, AC-1.5, AC-1.7)**
+- [x] **Step 11: Write the top-tabs test (APG tabs, AC-1.1, AC-1.5, AC-1.7)**
 
   `TopTabs` takes the released list as a prop, so AC-1.7 is tested with any subset and no build constant or module mock.
 
@@ -810,7 +810,7 @@ This phase builds the window every page sits in: the title bar with the glyph, t
 
   Run: `npx vitest run src/app/shell/TopTabs.test.tsx`. Expect: FAIL, `Failed to resolve import "./TopTabs"`.
 
-- [ ] **Step 12: Implement `TopTabs`, `SitePill`, `TitleBar` and `shell.css`**
+- [x] **Step 12: Implement `TopTabs`, `SitePill`, `TitleBar` and `shell.css`**
 
   ```tsx file=src/app/shell/TopTabs.tsx
   import type { KeyboardEvent, ReactElement } from 'react';
@@ -1060,7 +1060,7 @@ This phase builds the window every page sits in: the title bar with the glyph, t
 
   Expect: PASS, 13 tests (6 label, 7 tabs). `useView` is still a stub here; `TitleBar` is exercised in Step 13.
 
-- [ ] **Step 13: Write the App test**
+- [x] **Step 13: Write the App test**
 
   Replaces Phase 00's skeleton test. `RELEASED_PAGES` is all three pages under Vitest (no `VITE_RELEASED_PAGES`), so the AC-1.7 cases live in `TopTabs.test.tsx`.
 
@@ -1145,7 +1145,7 @@ This phase builds the window every page sits in: the title bar with the glyph, t
 
   Run: `npx vitest run src/app/App.test.tsx`. Expect: FAIL: `App` is still Phase 00's skeleton (no `host` prop, no `panel-*` ids, `useView` throws).
 
-- [ ] **Step 14: Implement `useView`, `App`, `main.tsx` and `index.css`**
+- [x] **Step 14: Implement `useView`, `App`, `main.tsx` and `index.css`**
 
   ```ts file=src/app/useView.ts
   import { createContext, use } from 'react';
@@ -1283,7 +1283,7 @@ This phase builds the window every page sits in: the title bar with the glyph, t
 
   If the listener test counts differently, check Phase 01's fake: `listenerCount()` counts app handlers. Two handlers (theme and connection) on one host is FR-12's "one registration" because the adapter forwards one `toolboxAPI.events.on` to all handlers (Phase 01 test "subscribes once").
 
-- [ ] **Step 15: Run the gate and commit**
+- [x] **Step 15: Run the gate and commit**
 
   ```bash
   npx prettier --write src
