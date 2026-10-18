@@ -49,7 +49,7 @@ This phase scaffolds the PPTB tool with the standard Vite template (owner decisi
 
 ### A. Scaffold
 
-- [ ] **Step 0: Preflight**
+- [x] **Step 0: Preflight**
 
   Run from the repo root:
 
@@ -64,7 +64,7 @@ This phase scaffolds the PPTB tool with the standard Vite template (owner decisi
 
   Expect: branch `001-server-logic-starter-inspector`; a clean tree (other phases' plan files may be untracked); Node `v20.19` or later (v24 is fine, Vite 8 needs 20.19+); `ls: cannot access 'package.json'` and `ls: cannot access '.scaffold'`. If `package.json` already exists, stop: the scaffold was already run.
 
-- [ ] **Step 1: Scaffold with create-vite into a temporary folder**
+- [x] **Step 1: Scaffold with create-vite into a temporary folder**
 
   Owner decision 2026-10-17: the tool is scaffolded with the standard Vite template, not the `yo pptb` generator. The `react-compiler-ts` template with `--eslint` already wires the React Compiler (through `@rolldown/plugin-babel` and `reactCompilerPreset`) and an ESLint flat config with `typescript-eslint`, which matches `.claude/rules/tooling.md`. The version is pinned so the scaffold is reproducible. It writes into `.scaffold/` because create-vite only offers to empty a non-empty folder (`--overwrite`), and the repo root holds the specs and design files; **never pass `--overwrite`**.
 
@@ -74,7 +74,7 @@ This phase scaffolds the PPTB tool with the standard Vite template (owner decisi
 
   Expect: `Scaffolding project in …/.scaffold...` and `Done.`, with no dependency install and no dev server (`--no-immediate`).
 
-- [ ] **Step 2: Inspect what the template produced**
+- [x] **Step 2: Inspect what the template produced**
 
   ```bash
   ls -a .scaffold .scaffold/src .scaffold/public
@@ -88,7 +88,7 @@ This phase scaffolds the PPTB tool with the standard Vite template (owner decisi
 
   If the compiler wiring or the ESLint variant is missing (a newer create-vite changed the template), stop and report it to the owner. Do not hand-write a replacement.
 
-- [ ] **Step 3: Move the scaffold into the repo root and commit it**
+- [x] **Step 3: Move the scaffold into the repo root and commit it**
 
   Kept: `package.json`, `index.html`, the three `tsconfig*.json`, `vite.config.ts` and `eslint.config.js` (Steps 9 to 11 rewrite them), and `src/main.tsx`, `src/index.css`, `src/App.tsx` (Step 9 removes them). Dropped: the template's README (Step 32 writes ours), its `.gitignore` (the repo's own is extended instead), `App.css`, `src/assets/` and `public/` (Step 32 adds the tool icon).
 
@@ -109,7 +109,7 @@ This phase scaffolds the PPTB tool with the standard Vite template (owner decisi
 
 ### B. Dependencies (every runtime dependency the project needs)
 
-- [ ] **Step 4: Install the runtime dependencies**
+- [x] **Step 4: Install the runtime dependencies**
 
   React 19 comes with the template. Add:
 
@@ -133,7 +133,7 @@ This phase scaffolds the PPTB tool with the standard Vite template (owner decisi
 
   jsPDF lists `html2canvas`, `canvg`, `dompurify` and `core-js` as optional dependencies. They stay installed (npm installs optional dependencies by default); Vite aliases the first three to an empty module in Step 11, so none of them reaches the bundle.
 
-- [ ] **Step 5: Install the development dependencies**
+- [x] **Step 5: Install the development dependencies**
 
   The template already brings TypeScript ~6.0, Vite 8, `@vitejs/plugin-react` 6, the React Compiler packages, `@types/react`, `@types/react-dom`, `@types/node`, `typescript-eslint`, `eslint-plugin-react-hooks`, `eslint-plugin-react-refresh` and `globals`. The first command **downgrades ESLint from the template's 10 to 9**, because `eslint-plugin-jsx-a11y` (required by `.claude/rules/tooling.md`) declares ESLint up to 9 only; `typescript-eslint` accepts both.
 
@@ -146,7 +146,7 @@ This phase scaffolds the PPTB tool with the standard Vite template (owner decisi
 
   Expect: no `ERESOLVE`. If npm reports a peer-dependency conflict, resolve it by choosing the version the message names; do not use `--force` or `--legacy-peer-deps`. `jiti` lets ESLint 9 load `eslint.config.ts`. The three font packages are only the source of the font files copied in Step 43 (licence: SIL OFL 1.1 for all three fonts; the two `@expo-google-fonts` packages are MIT-and-OFL wrappers of Google Fonts' static TTFs, and `@fontsource/jetbrains-mono` is OFL). `@pptb/types` brings the `pptb-validate` binary (through `@pptb/validate`).
 
-- [ ] **Step 6: Commit the dependencies**
+- [x] **Step 6: Commit the dependencies**
 
   ```bash
   npm ls react jspdf jspdf-autotable fflate acorn @codemirror/view @fluentui/react-icons vite @vitejs/plugin-react vitest eslint typescript typescript-eslint --depth=0
@@ -158,7 +158,7 @@ This phase scaffolds the PPTB tool with the standard Vite template (owner decisi
 
 ### C. Tooling (TypeScript strict, ESLint, Prettier, Vitest, alias, React Compiler)
 
-- [ ] **Step 7: Write the failing toolchain test**
+- [x] **Step 7: Write the failing toolchain test**
 
   Create `src/test/toolchain.test.tsx`. It needs jsdom, the React JSX transform and the jest-dom matchers, none of which are configured yet:
 
@@ -174,13 +174,13 @@ This phase scaffolds the PPTB tool with the standard Vite template (owner decisi
   });
   ```
 
-- [ ] **Step 8: Run it and confirm it fails**
+- [x] **Step 8: Run it and confirm it fails**
 
   Run: `npx vitest run src/test/toolchain.test.tsx`
 
   Expect: FAIL. The template's config has no `test` section, so Vitest runs in the Node environment and the error is `ReferenceError: document is not defined` (or `React is not defined`).
 
-- [ ] **Step 9: Remove the template's demo code and write the three TypeScript project files**
+- [x] **Step 9: Remove the template's demo code and write the three TypeScript project files**
 
   The demo `App.tsx` goes, and `main.tsx` and `index.css` are replaced (the new ones arrive in Step 26). The template has no `vite-env.d.ts` (it lists `vite/client` in `types`); this step adds one for the page constants.
 
@@ -266,7 +266,7 @@ This phase scaffolds the PPTB tool with the standard Vite template (owner decisi
   declare const __PAGE_INSPECTOR__: boolean;
   ```
 
-- [ ] **Step 10: Write the Prettier and ESLint configs**
+- [x] **Step 10: Write the Prettier and ESLint configs**
 
   Create `.prettierrc.json`:
 
@@ -370,7 +370,7 @@ This phase scaffolds the PPTB tool with the standard Vite template (owner decisi
   ]);
   ```
 
-- [ ] **Step 11: Write `vite.config.ts` and the two small files it needs**
+- [x] **Step 11: Write `vite.config.ts` and the two small files it needs**
 
   This is the template's config (the React plugin and the React Compiler through `@rolldown/plugin-babel` with `reactCompilerPreset()`) plus the PPTB build shape: the `fixHtmlForPPTB` plugin (ported unchanged from the `yo pptb` 1.0.6 template), `base: './'`, the IIFE output and `codeSplitting: false` in `rolldownOptions`; and: the `@/` alias, the released-pages `define` constants (FR-1), the jsPDF optional-dependency stub, inlined assets (so fonts become `data:` URIs, which the PPTB default CSP allows), a `probe` mode for the library probe (Step 44), and the Vitest section. The `fixHtmlForPPTB` function body is the `yo pptb` template's, unchanged.
 
@@ -530,7 +530,7 @@ This phase scaffolds the PPTB tool with the standard Vite template (owner decisi
   });
   ```
 
-- [ ] **Step 12: Add the npm scripts**
+- [x] **Step 12: Add the npm scripts**
 
   `npm pkg set` edits only the named keys, so the saved dependency ranges are untouched. The template has `dev`, `build`, `lint` and `preview`; the PPTB scripts the `yo pptb` template used to supply (`watch`, `dev-watch`, `finalize-package`, `validate`, `version-stable`) are added here by hand. There is deliberately no `publish-package` script: building, bumping and publishing in one command is forbidden without the owner's explicit confirmation.
 
@@ -555,13 +555,13 @@ This phase scaffolds the PPTB tool with the standard Vite template (owner decisi
 
   Expect: `scripts` lists `build` (`tsc -b && vite build`), `dev`, `watch`, `dev-watch`, `preview`, `typecheck`, `lint`, `format`, `format:check`, `test`, `probe:size`, `size`, `finalize-package`, `validate`, `version-stable`, and no `publish-package`. `sideEffects` marks our own modules as side-effect free (except CSS) so Rolldown can drop the unused page modules. `files` publishes only the build and the shrinkwrap, as PPTB tools do.
 
-- [ ] **Step 13: Run the toolchain test and confirm it passes**
+- [x] **Step 13: Run the toolchain test and confirm it passes**
 
   Run: `npx vitest run src/test/toolchain.test.tsx`
 
   Expect: PASS, `1 passed`. If it fails with `ReferenceError: __PAGE_STARTER__ is not defined`, nothing imports it yet, so that is not this test. If it fails with `Cannot find module 'vitest/config'`, re-run Step 5.
 
-- [ ] **Step 14: Format, check and commit the tooling**
+- [x] **Step 14: Format, check and commit the tooling**
 
   ```bash
   npx prettier --write tsconfig.json tsconfig.app.json tsconfig.node.json vite.config.ts eslint.config.ts .prettierrc.json src
@@ -576,7 +576,7 @@ This phase scaffolds the PPTB tool with the standard Vite template (owner decisi
 
 ### D. Contracts (verbatim from plan-starter.md)
 
-- [ ] **Step 15: Write the failing contract test**
+- [x] **Step 15: Write the failing contract test**
 
   Create `src/types/contracts.test.ts`. The type assertions are enforced by `npx tsc -b`; the runtime assertions by Vitest.
 
@@ -724,13 +724,13 @@ This phase scaffolds the PPTB tool with the standard Vite template (owner decisi
   });
   ```
 
-- [ ] **Step 16: Run it and confirm it fails**
+- [x] **Step 16: Run it and confirm it fails**
 
   Run: `npx vitest run src/types/contracts.test.ts`
 
   Expect: FAIL with `Failed to resolve import "@/services/pptb/host.types"` (and the other contract paths): the contract files do not exist yet.
 
-- [ ] **Step 17: Commit the HTTP, recipe, code-analysis and host contracts verbatim**
+- [x] **Step 17: Commit the HTTP, recipe, code-analysis and host contracts verbatim**
 
   Create four files. The type bodies are plan-starter.md's Contracts text; only the `import type` lines are added.
 
@@ -809,7 +809,7 @@ This phase scaffolds the PPTB tool with the standard Vite template (owner decisi
   };
   ```
 
-- [ ] **Step 18: Commit the inspector, report and Starter-session contracts verbatim**
+- [x] **Step 18: Commit the inspector, report and Starter-session contracts verbatim**
 
   `src/types/inspector.ts` (imports `AccessType`, `Privilege` and `Connection`, which the contract uses without defining):
 
@@ -880,7 +880,7 @@ This phase scaffolds the PPTB tool with the standard Vite template (owner decisi
   export type StarterPackageInput = { state: StarterState; derived: StarterDerived; clientText: string };
   ```
 
-- [ ] **Step 19: Format, run the contract test and the type check, then commit**
+- [x] **Step 19: Format, run the contract test and the type check, then commit**
 
   ```bash
   npx prettier --write src/types src/lib src/services src/app
@@ -895,7 +895,7 @@ This phase scaffolds the PPTB tool with the standard Vite template (owner decisi
 
 ### E. Released pages and the shell skeleton
 
-- [ ] **Step 20: Write the failing `RELEASED_PAGES` test**
+- [x] **Step 20: Write the failing `RELEASED_PAGES` test**
 
   Create `src/app/releasedPages.test.ts`:
 
@@ -910,13 +910,13 @@ This phase scaffolds the PPTB tool with the standard Vite template (owner decisi
   });
   ```
 
-- [ ] **Step 21: Run it and confirm it fails**
+- [x] **Step 21: Run it and confirm it fails**
 
   Run: `npx vitest run src/app/releasedPages.test.ts`
 
   Expect: FAIL with `Failed to resolve import "@/app/releasedPages"`.
 
-- [ ] **Step 22: Implement `RELEASED_PAGES`**
+- [x] **Step 22: Implement `RELEASED_PAGES`**
 
   Create `src/app/releasedPages.ts`. How unreleased code is dropped: `vite.config.ts` replaces `__PAGE_STARTER__`, `__PAGE_OBJECTS__` and `__PAGE_INSPECTOR__` with the literals `true` or `false` at build time. Rolldown folds `false ? <Page /> : null` to `null`, so the page's import binding is unused, and because `package.json` marks our modules side-effect free (Step 12) Rolldown drops the page module and everything only it imports. Heavy page-only modules (PDF, code editor) are therefore excluded without any runtime check. If a page lazy-loads with `React.lazy`, the `import()` sits inside the same constant condition, and `codeSplitting: false` keeps the result in the single bundle. The tool never reads this list from settings or the URL.
 
@@ -931,13 +931,13 @@ This phase scaffolds the PPTB tool with the standard Vite template (owner decisi
   export const RELEASED_PAGES: readonly View[] = [...starter, ...objects, ...inspector];
   ```
 
-- [ ] **Step 23: Run it and confirm it passes**
+- [x] **Step 23: Run it and confirm it passes**
 
   Run: `npx vitest run src/app/releasedPages.test.ts`
 
   Expect: PASS. If it fails with `ReferenceError: __PAGE_STARTER__ is not defined`, this Vitest version did not apply `define` to the test run: add the same three entries under `test.define` in `vite.config.ts` (same `JSON.stringify` values) and re-run.
 
-- [ ] **Step 24: Write the failing App smoke test**
+- [x] **Step 24: Write the failing App smoke test**
 
   Create `src/app/App.test.tsx`. The fake host is deliberately absent: `window.toolboxAPI` is undefined in jsdom, and importing every stub must not throw.
 
@@ -965,13 +965,13 @@ This phase scaffolds the PPTB tool with the standard Vite template (owner decisi
   });
   ```
 
-- [ ] **Step 25: Run it and confirm it fails**
+- [x] **Step 25: Run it and confirm it fails**
 
   Run: `npx vitest run src/app/App.test.tsx`
 
   Expect: FAIL with `Failed to resolve import "@/app/App"`.
 
-- [ ] **Step 26: Write the shell skeleton (App, three page placeholders, `main.tsx`, `index.css`, `index.html`)**
+- [x] **Step 26: Write the shell skeleton (App, three page placeholders, `main.tsx`, `index.css`, `index.html`)**
 
   Phase 06 replaces `App.tsx`; Phases 18, 21, 22 and 23 replace the page files. The placeholder text is the marker that Step 41's build test searches for. Pages render a plain `<section>`: Phase 06's shell owns the `role="tabpanel"` wrapper around each page.
 
@@ -1131,13 +1131,13 @@ This phase scaffolds the PPTB tool with the standard Vite template (owner decisi
   </html>
   ```
 
-- [ ] **Step 27: Run both app tests and confirm they pass**
+- [x] **Step 27: Run both app tests and confirm they pass**
 
   Run: `npx vitest run src/app`
 
   Expect: PASS, `2 passed` (`releasedPages.test.ts`, `App.test.tsx`). The App renders with `window.toolboxAPI` undefined.
 
-- [ ] **Step 28: Format, check and commit the shell skeleton**
+- [x] **Step 28: Format, check and commit the shell skeleton**
 
   ```bash
   npx prettier --write src index.html
@@ -1151,7 +1151,7 @@ This phase scaffolds the PPTB tool with the standard Vite template (owner decisi
 
 ### F. Manifest (FR-12)
 
-- [ ] **Step 29: Write the failing manifest test**
+- [x] **Step 29: Write the failing manifest test**
 
   Create `tests/manifest.test.ts`. It encodes FR-12 line by line, and it also checks that every runtime dependency named in Step 4 is declared, which is how this phase proves that no later phase must edit `package.json`.
 
@@ -1253,13 +1253,13 @@ This phase scaffolds the PPTB tool with the standard Vite template (owner decisi
   });
   ```
 
-- [ ] **Step 30: Run it and confirm it fails**
+- [x] **Step 30: Run it and confirm it fails**
 
   Run: `npx vitest run tests/manifest.test.ts`
 
   Expect: FAIL: `features` is `undefined` (the template wrote none), `contributors`/`configurations` are missing, and `public/icons/server-logic-tools.svg` does not exist. The dependency test already passes.
 
-- [ ] **Step 31: Add the manifest fields**
+- [x] **Step 31: Add the manifest fields**
 
   The package name is the owner's choice (2026-10-17): `@ryanmakes/powerpages-serverlogic`. The template's `"private": true` is removed, because PPTB tools are published to npm (publishing itself still needs the owner's explicit confirmation).
 
@@ -1283,7 +1283,7 @@ This phase scaffolds the PPTB tool with the standard Vite template (owner decisi
 
   Expect: the last command prints the `features`, `configurations` and `icon` values exactly as set. There is no `cspExceptions` key and no `enabledForPowerPlatformAPI`.
 
-- [ ] **Step 32: Add the icon, then the README**
+- [x] **Step 32: Add the icon, then the README**
 
   Create `public/icons/server-logic-tools.svg` (a `{ }` mark that follows the host theme through `currentColor`; the design phase may refine the artwork, but the `currentColor` rule stays):
 
@@ -1322,13 +1322,13 @@ This phase scaffolds the PPTB tool with the standard Vite template (owner decisi
   Load it in PPTB with Settings, Show Debug Menu, then Debug, Load Local Tool, and pick the project root (not `dist/`). There is no hot reload: close and reopen the tool tab after each build.
   ````
 
-- [ ] **Step 33: Run the manifest test and confirm it passes**
+- [x] **Step 33: Run the manifest test and confirm it passes**
 
   Run: `npx vitest run tests/manifest.test.ts`
 
   Expect: PASS, `6 passed`.
 
-- [ ] **Step 34: Format and commit the manifest**
+- [x] **Step 34: Format and commit the manifest**
 
   ```bash
   npx prettier --write package.json tests public README.md
@@ -1342,7 +1342,7 @@ This phase scaffolds the PPTB tool with the standard Vite template (owner decisi
 
 ### G. Skeleton stubs (the pinned cross-phase functions)
 
-- [ ] **Step 35: Write the failing pinned-names test**
+- [x] **Step 35: Write the failing pinned-names test**
 
   Create `src/skeleton.test.ts`. It locks the name, location and signature of every pinned function. It deliberately does not assert that a stub throws, so it stays valid after each owner phase replaces its stub (and no two parallel phases ever edit this file).
 
@@ -1510,13 +1510,13 @@ This phase scaffolds the PPTB tool with the standard Vite template (owner decisi
   });
   ```
 
-- [ ] **Step 36: Run it and confirm it fails**
+- [x] **Step 36: Run it and confirm it fails**
 
   Run: `npx vitest run src/skeleton.test.ts`
 
   Expect: FAIL with `Failed to resolve import "@/app/HostContext"` (and the other stub paths).
 
-- [ ] **Step 37: Write the code-analysis, catalogue and slug stubs**
+- [x] **Step 37: Write the code-analysis, catalogue and slug stubs**
 
   Each stub keeps the contract signature and throws only when called. The number in the message is the owning phase.
 
@@ -1598,7 +1598,7 @@ This phase scaffolds the PPTB tool with the standard Vite template (owner decisi
   }
   ```
 
-- [ ] **Step 38: Write the generator, host, Inspector and report stubs**
+- [x] **Step 38: Write the generator, host, Inspector and report stubs**
 
   The handler registry is real code, not a stub: Phases 07, 08, 09 and 19 replace only their own `rN.ts`, never `index.ts`. `satisfies Record<RecipeId, ...>` makes a missing recipe a compile error.
 
@@ -1843,7 +1843,7 @@ This phase scaffolds the PPTB tool with the standard Vite template (owner decisi
   }
   ```
 
-- [ ] **Step 39: Write the app hook stubs and the Starter session stubs**
+- [x] **Step 39: Write the app hook stubs and the Starter session stubs**
 
   `src/app/HostContext.ts` (Phase 06):
 
@@ -1906,7 +1906,7 @@ This phase scaffolds the PPTB tool with the standard Vite template (owner decisi
   }
   ```
 
-- [ ] **Step 40: Run the pinned-names test, the type check and lint, then commit**
+- [x] **Step 40: Run the pinned-names test, the type check and lint, then commit**
 
   ```bash
   npx prettier --write src
@@ -1921,7 +1921,7 @@ This phase scaffolds the PPTB tool with the standard Vite template (owner decisi
 
 ### H. Fonts, library probe and build shape
 
-- [ ] **Step 41: Write the failing build-shape tests**
+- [x] **Step 41: Write the failing build-shape tests**
 
   Create `tests/buildShape.test.ts`. It builds the tool through Vite's JS API into `node_modules/.cache/build-shape/` (so it needs no prior `npm run build` and never touches `dist/`), then asserts the PPTB loading rules from CLAUDE.md. The font and probe checks are the red ones; the shape and released-pages checks characterise what Steps 11 and 22 already built.
 
@@ -2073,13 +2073,13 @@ This phase scaffolds the PPTB tool with the standard Vite template (owner decisi
   });
   ```
 
-- [ ] **Step 42: Run it and confirm the font and probe tests fail**
+- [x] **Step 42: Run it and confirm the font and probe tests fail**
 
   Run: `npx vitest run tests/buildShape.test.ts`
 
   Expect: FAIL. The font test fails with `expected 0 to be greater than or equal to 3` (no `@font-face` yet), and the probe test fails because `src/probe/libraryProbe.ts` does not exist (`Could not resolve entry module`). The shape, icon and released-pages tests pass: they characterise the config from Steps 11 and 22 and guard it against regression.
 
-- [ ] **Step 43: Copy the fonts and write `fonts.css`**
+- [x] **Step 43: Copy the fonts and write `fonts.css`**
 
   The files come from the packages installed in Step 5. UI font (woff2, Latin subset, weights 400, 500, 700): JetBrains Mono, OFL 1.1. Report fonts for jsPDF (static TTF, which jsPDF needs): DM Sans and Space Grotesk, OFL 1.1, from the `@expo-google-fonts` mirrors of Google Fonts' static instances. Segoe UI is not bundled (it is not redistributable, F52). The OFL texts are copied next to the fonts, as the licence requires.
 
@@ -2146,7 +2146,7 @@ This phase scaffolds the PPTB tool with the standard Vite template (owner decisi
   }
   ```
 
-- [ ] **Step 44: Write the failing library-probe test, then the probe module**
+- [x] **Step 44: Write the failing library-probe test, then the probe module**
 
   Create `src/probe/libraryProbe.test.ts`. It proves the libraries work together at runtime, not only that they bundle:
 
@@ -2258,7 +2258,7 @@ This phase scaffolds the PPTB tool with the standard Vite template (owner decisi
 
   Expect: PASS, `4 passed`. If the PDF test fails with an import error for `jspdf-autotable`, switch the import to the named export (`import { autoTable } from 'jspdf-autotable'`) and call `autoTable(doc, ...)` the same way. If `?inline` returns a path instead of a data URI under Vitest, read the base64 from the file with `readFileSync` in the test environment only and keep `?inline` for the bundle.
 
-- [ ] **Step 45: Add the bundle-size script and run the full build-shape suite**
+- [x] **Step 45: Add the bundle-size script and run the full build-shape suite**
 
   Create `scripts/bundle-size.mjs` (a measuring tool, not product code; it is excluded from ESLint in Step 10):
 
@@ -2280,7 +2280,7 @@ This phase scaffolds the PPTB tool with the standard Vite template (owner decisi
 
   Expect: PASS, `11 passed` (eight in the all-pages group, two in the released-pages group, one in the probe group, with the three builds taking a few seconds to a minute in total). If the probe test reports a `Could not resolve "html2canvas"` (or `canvg`, `dompurify`) error, the alias in `vite.config.ts` is not applying: check the three alias keys. If it reports `core-js`, add `'core-js': EMPTY_MODULE` to the same alias block and re-run. If the font test still counts fewer than three data URLs, `assetsInlineLimit` is not applied: confirm it is in `build` and that `src/index.css` imports `fonts.css`.
 
-- [ ] **Step 46: Format, check and commit**
+- [x] **Step 46: Format, check and commit**
 
   ```bash
   npx prettier --write src tests scripts
@@ -2294,7 +2294,7 @@ This phase scaffolds the PPTB tool with the standard Vite template (owner decisi
 
 ### I. Library probe size report
 
-- [ ] **Step 47: Measure the probe and the baseline bundle**
+- [x] **Step 47: Measure the probe and the baseline bundle**
 
   ```bash
   npm run probe:size
@@ -2312,7 +2312,7 @@ This phase scaffolds the PPTB tool with the standard Vite template (owner decisi
 
   There is no size budget in the spec. If the probe's gzip size is above 800 KiB, or the app bundle with stubs is above 400 KiB, report it to the owner before Wave W1: it would affect load time inside the PPTB webview, and the mitigations (loading jsPDF and CodeMirror only through `React.lazy`, still inlined) belong to Phases 20 and 21.
 
-- [ ] **Step 48: Commit the measurement**
+- [x] **Step 48: Commit the measurement**
 
   Edit the table in this plan file with the measured numbers, then:
 
