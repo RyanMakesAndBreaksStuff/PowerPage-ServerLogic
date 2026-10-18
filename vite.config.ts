@@ -98,6 +98,8 @@ export default defineConfig((configEnv) => {
     build: {
       outDir: isProbe ? 'dist-probe' : 'dist',
       assetsDir: 'assets',
+      // IIFE output makes Vite inject CSS into the JS; false emits one CSS file linked from index.html.
+      cssCodeSplit: false,
       // Fonts and small images become data: URIs; the PPTB default CSP allows data: fonts and images.
       assetsInlineLimit: 100_000,
       sourcemap: configEnv.mode === 'development',
