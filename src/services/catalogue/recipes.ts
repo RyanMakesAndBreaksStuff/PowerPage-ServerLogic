@@ -297,8 +297,20 @@ export const RECIPES: readonly RecipeMeta[] = [
     readsLiquidInput: false,
     upstreamCredentials: true,
     demoPage: false,
-    // The one deferred value: the body is "the fields Spike S3 sets". Phase 19 replaces it after S3.
-    examples: { post: NO_INPUT },
+    examples: {
+      post: {
+        query: null,
+        body: {
+          fullname: 'Alton Stott',
+          email: 'alton@contoso.com',
+          phone: '555-123-4567',
+          event: 197360000,
+          eventText: 'Tech Summit - General Admission',
+          date: '2026-11-05',
+        },
+        liquidInput: null,
+      },
+    },
   },
   {
     id: 'R8',

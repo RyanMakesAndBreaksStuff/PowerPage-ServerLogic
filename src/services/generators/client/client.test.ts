@@ -193,11 +193,20 @@ describe('generateClient guards and body rule', () => {
     expect(() => call('R1', 'missing', null, 'liquid')).toThrow(Error);
   });
 
-  it('R7 post, whose example body is null, emits a {} body', () => {
-    expect(getRecipe('R7').examples.post?.body).toBeNull();
+  it('R7 post emits the column-aware example body', () => {
+    expect(getRecipe('R7').examples.post?.body).toEqual({
+      fullname: 'Alton Stott',
+      email: 'alton@contoso.com',
+      phone: '555-123-4567',
+      event: 197360000,
+      eventText: 'Tech Summit - General Admission',
+      date: '2026-11-05',
+    });
     const text = call('R7', 'post', 'POST', 'fetch', 'graph-sharepoint');
     expect(text).toContain('JSON.stringify(');
-    expect(text).toContain('{}');
+    expect(text).toContain('"fullname": "Alton Stott"');
+    expect(text).toContain('"event": 197360000');
+    expect(text).toContain('"date": "2026-11-05"');
   });
 
   it('the $select text survives unchanged in the output', () => {

@@ -158,9 +158,9 @@ The owner approves the diff before Task 3 starts. Without approval, the golden w
 **Description:** Replace R7's `examples.post` (`NO_INPUT` and its deferral comment) in `recipes.ts` with `query: null`, the Decision 2 body and `liquidInput: null`. Rewrite the one deferred assertion in `recipes.test.ts`. Phase 10's client then emits the body with no edit.
 **Red first:** in `recipes.test.ts`, change "R7 post is the one value deferred to Spike S3" into "R7 post carries the column-aware example": `getRecipe('R7').examples.post` equals `{ query: null, body: { fullname: "Alton Stott", email: "alton@contoso.com", phone: "555-123-4567", event: 197360000, eventText: "Tech Summit - General Admission", date: "2026-11-05" }, liquidInput: null }`. Add "the R7 example passes the R7 contract row": `fullname` and `eventText` are non-empty and at most 200 characters, `email` and `phone` are at most 100, `email` has one `@` and a `.` after it, `event` is an integer and `date` matches `^\d{4}-\d{2}-\d{2}$`. Run it and watch both fail on `NO_INPUT`, then edit `recipes.ts`.
 **Acceptance criteria:**
-- [ ] R7's example body is the one in the spec's Example requests table (FR-3).
-- [ ] The example satisfies its own contract row (Decision 1).
-- [ ] No other recipe's example changed; the "no example keeps the literal `<guid>` placeholder" test still passes.
+- [x] R7's example body is the one in the spec's Example requests table (FR-3).
+- [x] The example satisfies its own contract row (Decision 1).
+- [x] No other recipe's example changed; the "no example keeps the literal `<guid>` placeholder" test still passes.
 **Verification:** `npx vitest run src/services/catalogue/recipes.test.ts` (red, then green); `npx vitest run src/services/generators/client` stays green with no golden edited.
 **Files:** `src/services/catalogue/recipes.ts`, `src/services/catalogue/recipes.test.ts`
 **Scope:** XS
@@ -263,6 +263,7 @@ Run in order, all with zero warnings: `npx tsc -b`, `npx eslint . --max-warnings
 8. **Date column handling is unverified.** `crd69_preferreddate` is a datetime column and the handler sends the `YYYY-MM-DD` string as is. Dataverse should read it as midnight UTC. The live run in Risk 2 confirms it; if not, the spec update, golden and example change together.
 9. **Phase 14 and 17 timing.** Tasks 4 and 5 edit files owned by those phases. Start them only after both merge, or two branches will edit the same lines.
 10. **Fixed messages are the plan's wording** (Decision 1 for validation; the stage messages are the spec's). If the owner wants other copy for validation, only the golden and the tests change.
+11. **Phase 10's client test pinned a null R7 body.** `client.test.ts` expected `examples.post.body` null and a `{}` fetch body. That assertion now expects the Decision 2 body. `client.ts` and the client goldens are unchanged.
 
 ## Done when
 - `generateHandler('R7')` returns real text and highlights, `R7_DIFFERENCES` is exported, and the golden, `r7.test.ts` and the generator exist.
