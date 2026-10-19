@@ -13,9 +13,6 @@ import type { RecipeId, RecipeMeta } from '@/types/recipe';
 import { buildPackageFiles } from './buildPackageFiles';
 import { buildZip } from './buildZip';
 
-/** Phase 19 removes this list and the R7 stub test together. */
-const PENDING_R7: readonly RecipeId[] = ['R7'];
-
 function fileCount(id: RecipeId): number {
   return id === 'R4' || id === 'R5' || id === 'R6' ? 5 : 4;
 }
@@ -95,11 +92,9 @@ function zipEntry(zip: Record<string, string>, path: string): string {
   return text;
 }
 
-const active = RECIPES.filter((recipe) => !PENDING_R7.includes(recipe.id));
-
 describe('starter package integration', () => {
   it('every recipe gives the right file count and names', () => {
-    for (const recipe of active) {
+    for (const recipe of RECIPES) {
       const probe = openSession(recipe.id, recipe.id === 'R8' ? 'liquid' : 'fetch');
       for (const language of languagesFor(recipe, probe.state.serverText)) {
         const built = build(recipe.id, language);
@@ -112,7 +107,7 @@ describe('starter package integration', () => {
   });
 
   it('zip client file equals generateClient output', () => {
-    for (const recipe of active) {
+    for (const recipe of RECIPES) {
       const probe = openSession(recipe.id, recipe.id === 'R8' ? 'liquid' : 'fetch');
       for (const language of languagesFor(recipe, probe.state.serverText)) {
         const built = build(recipe.id, language);
@@ -123,7 +118,7 @@ describe('starter package integration', () => {
   });
 
   it("zip server file equals the session's server text", () => {
-    for (const recipe of active) {
+    for (const recipe of RECIPES) {
       const built = build(recipe.id, recipe.id === 'R8' ? 'liquid' : 'fetch');
       const server = zipEntry(built.zip, `${built.derived.slug}.js`);
       const expected = built.state.serverText.endsWith('\n')
@@ -143,7 +138,7 @@ describe('starter package integration', () => {
   });
 
   it('each build finishes within 500 ms', () => {
-    for (const recipe of active) {
+    for (const recipe of RECIPES) {
       const { state, derived } = openSession(recipe.id, recipe.id === 'R8' ? 'liquid' : 'fetch');
       const clientText = generateClient({
         slug: derived.slug,
@@ -158,9 +153,32 @@ describe('starter package integration', () => {
     }
   });
 
-  it('R7 is still a stub until Phase 19 removes it and PENDING_R7 together', () => {
-    expect(PENDING_R7).toEqual(['R7']);
-    expect(() => generateHandler('R7')).toThrow('not implemented: phase 19');
+  it('R7 builds a starter package', () => {
+    const built = build('R7', 'fetch');
+    const slug = built.derived.slug;
+    expect(built.files.map((file) => file.path)).toEqual([
+      `${slug}.js`,
+      `${slug}.client.js`,
+      'README.md',
+      'permission-checklist.md',
+    ]);
+    expect(built.files.some((file) => file.path.endsWith('.page.html'))).toBe(false);
+  });
+
+  it('no recipe is pending', () => {
+    expect(RECIPES.map((recipe) => recipe.id)).toEqual([
+      'R1',
+      'R2',
+      'R3',
+      'R4',
+      'R5',
+      'R6',
+      'R7',
+      'R8',
+      'R9',
+      'R10',
+    ]);
+    for (const recipe of RECIPES) expect(() => generateHandler(recipe.id)).not.toThrow();
   });
 
   it('passes untitled and a digits-and-hyphens slug through unchanged', () => {

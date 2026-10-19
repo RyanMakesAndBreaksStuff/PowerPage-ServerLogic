@@ -14,6 +14,7 @@ import { LIQUID_SERVER_NOTE, requestPathSteps } from '@/services/generators/clie
 import { R4_DIFFERENCES } from '@/services/generators/handlers/r4';
 import { R5_DIFFERENCES } from '@/services/generators/handlers/r5';
 import { R6_DIFFERENCES } from '@/services/generators/handlers/r6';
+import { R7_DIFFERENCES } from '@/services/generators/handlers/r7';
 import type { ClientLanguage } from '@/types/http';
 import type { RecipeId } from '@/types/recipe';
 import { buildReadme, readinessBlock } from './readme';
@@ -27,6 +28,7 @@ const DIFFERENCES = {
   R4: R4_DIFFERENCES,
   R5: R5_DIFFERENCES,
   R6: R6_DIFFERENCES,
+  R7: R7_DIFFERENCES,
 } as const;
 
 const R1_HEADINGS = [
@@ -275,8 +277,8 @@ describe('buildReadme', () => {
     }
   });
 
-  it('upstream line for R3, R5, R6, R9 and not for R1, R2, R4, R8, R10', () => {
-    const present = new Set<RecipeId>(['R3', 'R5', 'R6', 'R9']);
+  it('upstream line for R3, R5, R6, R7, R9 and not for R1, R2, R4, R8, R10', () => {
+    const present = new Set<RecipeId>(['R3', 'R5', 'R6', 'R7', 'R9']);
     const absent = new Set<RecipeId>(['R1', 'R2', 'R4', 'R8', 'R10']);
     for (const id of present) {
       expect(getRecipe(id).upstreamCredentials).toBe(true);
@@ -313,7 +315,7 @@ describe('buildReadme', () => {
     for (const recipe of RECIPES) {
       const readme = buildReadme(inputFor(recipe.id));
       const diffs =
-        recipe.id === 'R4' || recipe.id === 'R5' || recipe.id === 'R6'
+        recipe.id === 'R4' || recipe.id === 'R5' || recipe.id === 'R6' || recipe.id === 'R7'
           ? DIFFERENCES[recipe.id]
           : undefined;
       if (diffs === undefined) {
@@ -338,6 +340,16 @@ describe('buildReadme', () => {
     expect(buildReadme(inputFor('R9'))).toContain(
       'The flow must validate its own inputs, because the handler passes the validated body through.',
     );
+    const r7 = buildReadme(inputFor('R7'));
+    expect(r7).toContain('Global access is expected');
+    expect(r7).toContain('Sites.Selected');
+    expect(r7).toContain('Key Vault');
+    expect(r7).toContain('ActivityId');
+    expect(r7).toContain('delete them manually');
+    expect(r7).toContain('invalid choice value');
+    expect(r7).toContain('email step');
+    expect(r7.toLowerCase()).not.toContain('cannot overwrite');
+    expect(r7.toLowerCase()).not.toContain("can't overwrite");
     const bare = inputFor('R2');
     expect(buildReadme(bare)).not.toContain('## Notes');
     const liquid = buildReadme({

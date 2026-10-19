@@ -213,9 +213,9 @@ The owner approves the diff before Task 3 starts. Without approval, the golden w
 - "R7 README carries the upstream-credentials line".
 - "no recipe is pending": the guard list is empty for all ten recipes.
 **Acceptance criteria:**
-- [ ] `PENDING_R7` and its guard no longer exist in Phase 14's code or tests (AC-5.6, AC-5.7).
-- [ ] The R7 README lists all twelve differences with reasons and carries the seven notes (AC-3.7, F05, F06, F10).
-- [ ] The README makes no overwrite claim until the probe passes (Spike S3, F05).
+- [x] `PENDING_R7` and its guard no longer exist in Phase 14's code or tests (AC-5.6, AC-5.7).
+- [x] The R7 README lists all twelve differences with reasons and carries the seven notes (AC-3.7, F05, F06, F10).
+- [x] The README makes no overwrite claim until the probe passes (Spike S3, F05).
 **Verification:** `npx vitest run src/services/generators/package`; then the full set in Checkpoint 2.
 **Files:** `src/services/generators/package/readmeNotes.ts`, `src/services/generators/package/readme.ts`, and the Phase 14 test files that held the R7 exclusion
 **Scope:** S
@@ -259,7 +259,7 @@ Run in order, all with zero warnings: `npx tsc -b`, `npx eslint . --max-warnings
 4. **The spec update must be approved before the golden.** If the owner changes the contract row in Task 1, the golden, the example and two test lists change with it. Nothing else does.
 5. **Trusted URL values are unencoded** (Decision 13). `HOSTNAME`, `SITE_PATH` and the Graph ids go into URLs as Learn does. A maker who sets `SITE_PATH` badly gets a Graph error and the "Couldn't connect" message, not an injection from a caller. The README should tell the maker to write `SITE_PATH` in the form Learn shows, with a leading colon and slash (for example `:/Events`).
 6. **`webUrl` may be absent.** The record is still created with `crd69_ticketurl: null` (Decision 7). A maker who needs the link must check the column. The alternative, failing, would orphan a ticket that exists.
-7. **The sample's columns are replaceable.** Makers with their own table must edit the field names, the entity set and the contract limits (Decision 1 follows the sample's column sizes). The checklist note and README say the table is replaceable. If the Phase 14 or 17 files name `PENDING_R7`, `README_NOTES`, `DIFFERENCES` or the behavior configuration list differently from this plan, Tasks 4 and 5 follow their names.
+7. **The sample's columns are replaceable.** Makers with their own table must edit the field names, the entity set and the contract limits (Decision 1 follows the sample's column sizes). The checklist note and README say the table is replaceable. If the Phase 14 or 17 files name `PENDING_R7`, `README_NOTES`, `DIFFERENCES` or the behavior configuration list differently from this plan, Tasks 4 and 5 follow their names. Task 4's red-first line says `<slug>.sl`; Phase 14's zip uses `<slug>.js`. The R7 package test follows `.js`.
 8. **Date column handling is unverified.** `crd69_preferreddate` is a datetime column and the handler sends the `YYYY-MM-DD` string as is. Dataverse should read it as midnight UTC. The live run in Risk 2 confirms it; if not, the spec update, golden and example change together.
 9. **Phase 14 and 17 timing.** Tasks 4 and 5 edit files owned by those phases. Start them only after both merge, or two branches will edit the same lines.
 10. **Fixed messages are the plan's wording** (Decision 1 for validation; the stage messages are the spec's). If the owner wants other copy for validation, only the golden and the tests change.

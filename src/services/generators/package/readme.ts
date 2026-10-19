@@ -8,6 +8,7 @@ import { LIQUID_SERVER_NOTE, requestPathSteps } from '@/services/generators/clie
 import { R4_DIFFERENCES } from '@/services/generators/handlers/r4';
 import { R5_DIFFERENCES } from '@/services/generators/handlers/r5';
 import { R6_DIFFERENCES } from '@/services/generators/handlers/r6';
+import { R7_DIFFERENCES } from '@/services/generators/handlers/r7';
 import type { ClientLanguage } from '@/types/http';
 import type { RecipeId, RecipeMeta } from '@/types/recipe';
 import { README_NOTES } from './readmeNotes';
@@ -35,6 +36,7 @@ const DIFFERENCES: Partial<Record<RecipeId, readonly { change: string; reason: s
   R4: R4_DIFFERENCES,
   R5: R5_DIFFERENCES,
   R6: R6_DIFFERENCES,
+  R7: R7_DIFFERENCES,
 };
 
 function mark(done: boolean, item: string): string {
