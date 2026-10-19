@@ -12,9 +12,9 @@
 
 ---
 
-**Baseline:** Phase 18's end state: `npx vitest run` 66 files and 960 tests passing, tsc and ESLint clean, `npx prettier --check . --end-of-line auto` clean (plain `--check .` reports CRLF files on this `core.autocrlf=true` checkout). `browserChecks.test.ts > performance` is load-sensitive and can fail once in a full parallel run; it passes when rerun.
+**Baseline:** Phase 18's end state: `npx vitest run` 72 files and 1,037 tests passing from `5953503` (Phases 14 and 19 merged; Phase 17 not yet, and its test files add to every total when it lands), tsc and ESLint clean, `npx prettier --check . --end-of-line auto` clean (plain `--check .` reports CRLF files on this `core.autocrlf=true` checkout). `browserChecks.test.ts > performance` is load-sensitive and can fail once in a full parallel run; it passes when rerun.
 
-**Verified while planning (2026-10-19):** every file in this plan was drafted at its path on top of Phase 18's drafted code and run against the repository: tsc, ESLint, Prettier and two consecutive full Vitest runs green at 72 files and 991 tests. Findings that shaped the plan:
+**Verified while planning (2026-10-19):** every file in this plan was drafted at its path on top of Phase 18's drafted code and run against the repository: first on `026f7d2`, then again on `5953503` after Phases 14 and 19 merged. On `5953503`, tsc, ESLint and Prettier were clean, and two consecutive full Vitest runs passed with 78 files and 1,068 tests. Findings that shaped the plan:
 
 1. jsdom has no `Range.getClientRects`, and CodeMirror's measure pass throws `TypeError: textRange(...).getClientRects is not a function` as an unhandled error. Task 2 polyfills it in `src/test/setup.ts`, guarded, because node-environment test files (handlers, build shape, probe) have no `Range` and 15 of them failed to load with an unguarded polyfill.
 2. `@codemirror/view` 6.43.14 already implements F48: Escape arms a 2-second "tab focus mode" in which Tab is not handled, so the browser moves focus. With `indentWithTab` bound, a Tab keydown is `preventDefault`ed before Esc and not after it, which `fireEvent.keyDown` (with `keyCode` set) observes directly.
@@ -1320,7 +1320,7 @@ Expected: exit 0; Prettier prints `All matched files use Prettier code style!`.
 
 Run: `npx vitest run`
 
-Expected: `Test Files  72 passed (72)` and `Tests  991 passed (991)` (Phase 18's 66 files and 960 tests, plus 6 files and 31 tests). If only `browserChecks.test.ts > performance` fails, rerun it alone: it is load-sensitive and was flaky before this phase.
+Expected: every file passes, with 6 more files and 31 more tests than Phase 18's end state: `Test Files  78 passed (78)` and `Tests  1068 passed (1068)` from `5953503`. If Phase 17 or another phase merged since, add its files and tests to both numbers. If only `browserChecks.test.ts > performance` fails, rerun it alone: it is load-sensitive and was flaky before this phase.
 
 Run: `npm run build`
 
@@ -1342,5 +1342,5 @@ No commit: this task adds no files. Record the gate results and the ◆ hand-off
 
 - **Contract use.** No pinned contract changes. New shared names: `minimalChange` (`src/lib/minimalChange.ts`) and `CodeEditor` (`src/features/starter/code/CodeEditor.tsx`). Phase 22's Insert relies on `state.cursor` now being kept current by the server pane.
 - **Highlights alternative (not taken).** Mapping highlight positions through edits would need either a `highlightLines` field on `StarterDerived` (a pinned-contract change owned by Phase 18a) or a CodeMirror state field reset on every outside change. Hiding highlights once the text is edited is the smallest correct behaviour; revisit only if makers ask for highlights on edited code.
-- **R7 until Phase 19.** As in Phase 18, selecting R7 with the real generators throws in the reducer until Phase 19 merges; `ServerPane`'s own `generateHandler('R7')` call would throw the same way. Tests here never select R7.
+- **R7 and Download.** Phase 19 has merged, so `ServerPane`'s `generateHandler(state.recipe)` works for every recipe, R7 included. Phase 14 has merged, and its test pins the zip's client file to `generateClient`, so Task 5's pane-equals-`generateClient` test closes Risk 2 end to end.
 - **Coverage map.** AC-4.10 and F48 → Task 2; AC-4.9 → Task 3; AC-4.2, 4.3, 4.7 note, 5.2, cursor tracking → Task 4; AC-2.4, 4.1, 4.4, 4.7 pill, 4.8, Phase 14 Risk 2 → Task 5; AC-4.1 timing → Task 6 ◆.

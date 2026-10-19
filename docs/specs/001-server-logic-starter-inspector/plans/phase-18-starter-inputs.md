@@ -6,15 +6,15 @@
 
 **Tech stack:** React 19.2 with the Compiler, TypeScript ~6.0 (strict, `exactOptionalPropertyTypes`), Phase 04 primitives (`Tile`, `PillGroup`, `Ring`, `StatusBadge`, `Button`, `Modal`, `Icon`, `useDisabledReason`), Phase 05 catalogue (`RECIPES`, `getRecipe`, `methodEnabled`, `checklistLines`), Vitest 5 + Testing Library + user-event 14, jsdom.
 
-**Scope:** `plan-starter.md` Part C, wave C1. Story 2 UI: AC-2.1, AC-2.2/2.3 (helper line), AC-2.4 (file name half; the pane header, endpoint and client URL are Phase 21's), AC-2.5, AC-2.6 (helper line), AC-2.9 (confirmation), AC-2.10 (pill reasons, R8 "Liquid only"), AC-2.11 (collision note). AC-3.1 (APG combobox), AC-3.4 (helper lists every function), AC-3.6 (note tile and in-tool checklist), AC-3.8 (method pills disabled for R8). AC-4.7 (the Liquid pill's disabled reason, as data for Phase 21). AC-5.1 (ring and three items), AC-5.3 (edited-validation tooltip), AC-5.4 (Mark checklist reviewed / Undo review and the checklist label), AC-5.5, AC-5.9 (Start over). FR-2, FR-5 (controls), NFR accessibility for these controls. Mounts Phase 14's `DownloadStarterButton`. **Depends on:** 04, 06, 10, 18a (all merged). Phase 14 is not required: until it merges, its stub renders nothing.
+**Scope:** `plan-starter.md` Part C, wave C1. Story 2 UI: AC-2.1, AC-2.2/2.3 (helper line), AC-2.4 (file name half; the pane header, endpoint and client URL are Phase 21's), AC-2.5, AC-2.6 (helper line), AC-2.9 (confirmation), AC-2.10 (pill reasons, R8 "Liquid only"), AC-2.11 (collision note). AC-3.1 (APG combobox), AC-3.4 (helper lists every function), AC-3.6 (note tile and in-tool checklist), AC-3.8 (method pills disabled for R8). AC-4.7 (the Liquid pill's disabled reason, as data for Phase 21). AC-5.1 (ring and three items), AC-5.3 (edited-validation tooltip), AC-5.4 (Mark checklist reviewed / Undo review and the checklist label), AC-5.5, AC-5.9 (Start over). FR-2, FR-5 (controls), NFR accessibility for these controls. Mounts Phase 14's `DownloadStarterButton`. **Depends on:** 04, 06, 10, 18a (all merged). Phases 14 and 19 have also merged, so the action column shows the working Download button and every recipe, R7 included, generates.
 
 **Out of scope:** Code panes, request path strip, Copy, line flags, highlights and the client-language pills (Phase 21). The Download button's behaviour (Phase 14). Server Objects "Permissions needed" tile from AC-3.6 (Phase 22). Any change to the session reducer, its types or `StarterDeps` (Phase 18a).
 
 ---
 
-**Baseline (2026-10-19, commit `026f7d2`):** `npx tsc -b` exit 0, `npx eslint . --max-warnings=0` exit 0, `npx vitest run` 63 files and 935 tests passing. A single parallel run once showed 1 timing failure in `src/lib/code-analysis/browserChecks.test.ts > performance` that passes when rerun or run alone, so treat that test as load-sensitive. `npx prettier --check .` reports 171 files only because this Windows checkout has `core.autocrlf=true` (CRLF working files). `npx prettier --check . --end-of-line auto` passes, so every Prettier command below uses that flag.
+**Baseline (2026-10-19, commit `5953503`, after Phases 14 and 19 merged):** `npx tsc -b` exit 0, `npx eslint . --max-warnings=0` exit 0, `npx vitest run` 69 files and 1,012 tests passing. Phase 17 (behavior harness) is not merged yet. It touches none of this phase's files, but it adds test files, so Task 5 states its expected totals relative to the baseline. A single parallel run once showed 1 timing failure in `src/lib/code-analysis/browserChecks.test.ts > performance` that passes when rerun or run alone, so treat that test as load-sensitive. `npx prettier --check .` reports 171 files only because this Windows checkout has `core.autocrlf=true` (CRLF working files). `npx prettier --check . --end-of-line auto` passes, so every Prettier command below uses that flag.
 
-**Verified while planning:** all code in this plan was drafted at these paths and run against the repository on 2026-10-19 (tsc, ESLint, Prettier and Vitest all green, 960 tests after this phase), then removed. Two findings shaped it: (1) a test helper that defines a local capture component fails `react-refresh/only-export-components`, so the harness captures the session through `StarterSessionContext.Consumer`; (2) `tests/buildShape.test.ts` greps the bundle for the placeholder text this phase deletes, so Task 3 retargets it.
+**Verified while planning:** all code in this plan was drafted at these paths and run against the repository on 2026-10-19, then removed. First run on `026f7d2`; rerun on `5953503` together with Phase 21's draft: tsc, ESLint and Prettier clean, and 78 files / 1,068 tests green in two consecutive runs. Two findings shaped it: (1) a test helper that defines a local capture component fails `react-refresh/only-export-components`, so the harness captures the session through `StarterSessionContext.Consumer`; (2) `tests/buildShape.test.ts` greps the bundle for the placeholder text this phase deletes, so Task 3 retargets it.
 
 ### Task 1: Pill options and spec strings exist as one pure module
 
@@ -1422,13 +1422,13 @@ Expected: exit 0; Prettier prints `All matched files use Prettier code style!`.
 
 Run: `npx vitest run`
 
-Expected: `Test Files  66 passed (66)` and `Tests  960 passed (960)` (63 files and 935 tests at baseline, plus 3 files and 25 tests). If only `browserChecks.test.ts > performance` fails, rerun it alone (`npx vitest run src/lib/code-analysis/browserChecks.test.ts`): it is load-sensitive and was flaky before this phase.
+Expected: every file passes, with 3 more files and 25 more tests than the baseline: `Test Files  72 passed (72)` and `Tests  1037 passed (1037)` from `5953503`. If Phase 17 or another phase merged first, add its files and tests to both numbers. If only `browserChecks.test.ts > performance` fails, rerun it alone (`npx vitest run src/lib/code-analysis/browserChecks.test.ts`): it is load-sensitive and was flaky before this phase.
 
 Run: `npm run build`
 
 Expected: `✓ built in` with no error. The existing "Some chunks are larger than 500 kB" warning is expected for the single-bundle shape.
 
-◆ Owner check (not an agent task): in PPTB (Debug → Load Local Tool, project root), confirm in both themes that the recipe list opens over the code row, the dark glass tiles stay legible, and the Validation info tooltip and method-pill tooltips appear on hover and focus.
+◆ Owner check (not an agent task): in PPTB (Debug → Load Local Tool, project root), confirm in both themes that the recipe list opens over the code row, the dark glass tiles stay legible, the Validation info tooltip and method-pill tooltips appear on hover and focus, and Download starter saves `<slug>.zip` from the action column.
 
 - [ ] **Step 5: Commit the coherent change**
 
@@ -1438,6 +1438,6 @@ No commit: this task adds no files. Record the gate results in the phase PR desc
 
 ## Notes after the plan
 
-- **R7 until Phase 19.** With the real generators, selecting "Microsoft Graph & SharePoint" throws `not implemented: phase 19` inside the session reducer, and the page's error boundary replaces the Starter page. This is pre-existing (Phase 18a's reducer calls `generateHandler`) and the Starter release gate already requires Phase 19. Tests here use `FAKE_STARTER_DEPS`, so they are unaffected.
+- **Download.** Phase 14 has merged, so the mount in Task 4 renders the working button. Its behaviour stays covered by Phase 14's own tests; this phase's tests don't click it.
 - **Contract use.** No pinned contract changes. `languageOptions` is new and is the only export Phase 21 needs from this phase; `plan-starter.md` § Contracts can list it next to the Phase 18 row when the plan is next edited.
 - **Coverage map.** AC-2.1, 2.2/2.3 helper, 2.5, 2.6 helper, 2.10 → Tasks 1, 3; AC-2.9 → Task 3; AC-2.11 → Tasks 1, 3; AC-3.1 → Task 2; AC-3.4 helper → Task 3; AC-3.6 note and checklist → Task 4; AC-3.8 pills → Tasks 1, 3; AC-4.7 pill reason → Task 1; AC-5.1, 5.3 → Task 3; AC-5.4, 5.5, 5.9 → Task 4.

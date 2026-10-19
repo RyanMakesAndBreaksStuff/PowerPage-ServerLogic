@@ -12,7 +12,7 @@
 - **Part A is built** (waves A0–A3 merged and green).
 - **Wave B1 is planned (2026-10-18):** phases 07–10 have task-level plan files (tasks, red-first tests and acceptance criteria; no code). Goldens are hand-written `__golden__/<id>.*.txt` files compared with `toBe`, ending in one LF.
 - **Wave B2 is planned (2026-10-19):** phases 14, 17 and 19 have task-level plan files. B2a (14 and 17) runs in parallel after B1. B2b (19) runs after 14 and 17 merge, because it removes their `PENDING_R7` exclusions. Spike S3's script half is done and recorded in Phase 19; its collision probe (◆) and the R7 spec update (owner approval) are still open.
-- **Part C is planned (2026-10-19):** phases 18 and 21 have implementation plans with full code, drafted and run green against the repository (960 tests after 18, 991 after 21), then removed. Phase 21 needs Phase 18 merged first.
+- **Part C is planned (2026-10-19):** phases 18 and 21 have implementation plans with full code, drafted and run green against the repository, then removed. On `5953503`: 1,037 tests after 18 and 1,068 after 21; Phase 17 adds its own tests on top when it lands. Phase 21 needs Phase 18 merged first.
 - **Open risk (Inspector, not Starter):** a file-column download through `queryData` is unverified until Spike S2 (`plan-inspector.md`). If it fails, reading handler code needs `execute`, which the read-only rule forbids, so that would need a spec and rules change.
 
 ## Scope
