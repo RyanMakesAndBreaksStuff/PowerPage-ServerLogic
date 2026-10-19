@@ -6,12 +6,13 @@
 **Created:** 2026-10-16. **Split from `plan.md`:** 2026-10-17.
 **Phase plans:** one file per phase in `plans/phase-NN-<slug>.md`. Phase numbers are the stable IDs from the original 25-phase layout, so cross-references in the phase files stay valid; `18a` is the session state moved out of old Phase 18.
 
-## Status (2026-10-18)
+## Status (2026-10-19)
 
 - **Part A is fully planned:** phases 00–06 and 18a have plan files.
 - **Part A is built** (waves A0–A3 merged and green).
 - **Wave B1 is planned (2026-10-18):** phases 07–10 have task-level plan files (tasks, red-first tests and acceptance criteria; no code). Goldens are hand-written `__golden__/<id>.*.txt` files compared with `toBe`, ending in one LF.
-- **The rest of Part B and Part C are outlined below;** their phase files (14, 17, 18, 19, 21) are not written yet. Write each before its wave starts.
+- **Wave B2 is planned (2026-10-19):** phases 14, 17 and 19 have task-level plan files. B2a (14 and 17) runs in parallel after B1. B2b (19) runs after 14 and 17 merge, because it removes their `PENDING_R7` exclusions. Spike S3's script half is done and recorded in Phase 19; its collision probe (◆) and the R7 spec update (owner approval) are still open.
+- **Part C is outlined below;** its phase files (18, 21) are not written yet. Write each before its wave starts.
 - **Open risk (Inspector, not Starter):** a file-column download through `queryData` is unverified until Spike S2 (`plan-inspector.md`). If it fails, reading handler code needs `execute`, which the read-only rule forbids, so that would need a spec and rules change.
 
 ## Scope
@@ -232,7 +233,7 @@ export type StarterPackageInput = { state: StarterState; derived: StarterDerived
 
 **Part A is done when** waves A0–A3 are merged and green, and `npm run build` still produces one IIFE bundle. From then on `plan-server-objects.md`, `plan-inspector.md` and Parts B and C of this plan can run in parallel.
 
-## Part B: Generators (B1 planned; B2 outline, phase files to write)
+## Part B: Generators (B1 and B2 planned)
 
 | Wave | Phase | Title | Depends on | Implements / Satisfies (summary) |
 |---|---|---|---|---|
@@ -240,9 +241,9 @@ export type StarterPackageInput = { state: StarterState; derived: StarterDerived
 | B1 | 08 | Handlers R4, R5, R6 + demo pages | 02, 05 | AC-3.3/3.4/3.7/3.9/3.10, corrections 17–18, ◆ R4 bound-create probe (owner, on the dev site; a pass becomes a spec update) |
 | B1 | 09 | Handlers R9, R10 | 02, 05 | FR-3 R9/R10 rows, F07 prerequisites |
 | B1 | 10 | Client generator + request path | 03, 05 | FR-2a, AC-2.7, AC-4.4–4.8, AC-4.11; `isLiquidAllowed` for `STARTER_DEPS` |
-| ◆→B2 | 19 | Spike S3 + Handler R7 | 05, 02, ◆S3 | S3 evidence (commit `7efe699`, collision probe); R7 Musts (F05/F06). Extends the 14 and 17 test tables with R7 |
-| B2 | 14 | Starter package + Download | 07, 08, 09, 10, 18a | AC-5.6, 5.7, 5.10, 5.11; FR-5 |
-| B2 | 17 | Behavior harness | 07, 08, 09, 10 | AC-4.12: 36 configurations, 6 shared client failure cases, demo-page cases, sentinel secret; also the R4 F08 option cases handed over by Phase 08 (Task 2) |
+| B2a | 14 | Starter package + Download | 07, 08, 09, 10, 18a | AC-5.6, 5.7, 5.10, 5.11; FR-5 |
+| B2a | 17 | Behavior harness | 07, 08, 09, 10 | AC-4.12: 36 configurations, 6 shared client failure cases, demo-page cases, sentinel secret; also the R4 F08 option cases handed over by Phase 08 (Task 2) |
+| ◆→B2b | 19 | Spike S3 + Handler R7 | 05, 02, 14, 17, ◆S3 probe, R7 spec update | S3 evidence (commit `7efe699`, script half done 2026-10-19; collision probe ◆); R7 Musts (F05/F06). Extends the 14 and 17 test tables with R7 |
 
 ## Part C: Starter UI (outline; phase files to write)
 
@@ -295,8 +296,8 @@ ACs, by story. Where a phase owns the state half and another the UI half, both a
 | 08 | B | `plans/phase-08-handlers-tutorials.md` |
 | 09 | B | `plans/phase-09-handlers-reference.md` |
 | 10 | B | `plans/phase-10-client-generator.md` |
-| 14 | B | `plans/phase-14-starter-package.md` (to write) |
-| 17 | B | `plans/phase-17-behavior-harness.md` (to write) |
-| 19 | B | `plans/phase-19-handler-r7.md` (to write) |
+| 14 | B | `plans/phase-14-starter-package.md` |
+| 17 | B | `plans/phase-17-behavior-harness.md` |
+| 19 | B | `plans/phase-19-handler-r7.md` |
 | 18 | C | `plans/phase-18-starter-inputs.md` (to write) |
 | 21 | C | `plans/phase-21-starter-code-panes.md` (to write) |
