@@ -12,7 +12,7 @@
 - **Part A is built** (waves A0–A3 merged and green).
 - **Wave B1 is planned (2026-10-18):** phases 07–10 have task-level plan files (tasks, red-first tests and acceptance criteria; no code). Goldens are hand-written `__golden__/<id>.*.txt` files compared with `toBe`, ending in one LF.
 - **Wave B2 is planned (2026-10-19):** phases 14, 17 and 19 have task-level plan files. B2a (14 and 17) runs in parallel after B1. B2b (19) runs after 14 and 17 merge, because it removes their `PENDING_R7` exclusions. Spike S3's script half is done and recorded in Phase 19; its collision probe (◆) and the R7 spec update (owner approval) are still open.
-- **Part C is outlined below;** its phase files (18, 21) are not written yet. Write each before its wave starts.
+- **Part C is planned (2026-10-19):** phases 18 and 21 have implementation plans with full code, drafted and run green against the repository (960 tests after 18, 991 after 21), then removed. Phase 21 needs Phase 18 merged first.
 - **Open risk (Inspector, not Starter):** a file-column download through `queryData` is unverified until Spike S2 (`plan-inspector.md`). If it fails, reading handler code needs `execute`, which the read-only rule forbids, so that would need a spec and rules change.
 
 ## Scope
@@ -245,7 +245,7 @@ export type StarterPackageInput = { state: StarterState; derived: StarterDerived
 | B2a | 17 | Behavior harness | 07, 08, 09, 10 | AC-4.12: 36 configurations, 6 shared client failure cases, demo-page cases, sentinel secret; also the R4 F08 option cases handed over by Phase 08 (Task 2) |
 | ◆→B2b | 19 | Spike S3 + Handler R7 | 05, 02, 14, 17, ◆S3 probe, R7 spec update | S3 evidence (commit `7efe699`, script half done 2026-10-19; collision probe ◆); R7 Musts (F05/F06). Extends the 14 and 17 test tables with R7 |
 
-## Part C: Starter UI (outline; phase files to write)
+## Part C: Starter UI (planned)
 
 | Wave | Phase | Title | Depends on | Implements / Satisfies (summary) |
 |---|---|---|---|---|
@@ -299,5 +299,5 @@ ACs, by story. Where a phase owns the state half and another the UI half, both a
 | 14 | B | `plans/phase-14-starter-package.md` |
 | 17 | B | `plans/phase-17-behavior-harness.md` |
 | 19 | B | `plans/phase-19-handler-r7.md` |
-| 18 | C | `plans/phase-18-starter-inputs.md` (to write) |
-| 21 | C | `plans/phase-21-starter-code-panes.md` (to write) |
+| 18 | C | `plans/phase-18-starter-inputs.md` |
+| 21 | C | `plans/phase-21-starter-code-panes.md` |
