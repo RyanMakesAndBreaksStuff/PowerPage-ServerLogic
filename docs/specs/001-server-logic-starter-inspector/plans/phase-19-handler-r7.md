@@ -129,9 +129,9 @@ Spec F59: each spike records its calls, versions and outcome in the plan of the 
 **Description:** This file is the record. The "Spike S3 evidence" section above holds the script half (source, commit, flow, columns, defects and the Learn checks). Hand the collision probe to the owner as a ◆ item: the owner runs it on a test SharePoint site and appends a "Probe result" heading to this file with the date, the tenant (redacted), the request and the response. Nothing else in the phase waits for it, except the README claim (Decision 12) and the release gate.
 **Red first:** none (documentation). The check is that the evidence section names the commit, the file path, the request body fields, the table columns, the flow and the defects, and that the probe's pass and fail outcomes are written down.
 **Acceptance criteria:**
-- [ ] The evidence section records the source commit (`7efe699`, full SHA), the sample file path, the request body, the columns, the script flow and the defects R7 fixes (F59, Spike S3).
-- [ ] The probe is listed as open, with the exact request, the pass outcome and the fail outcome (Spike S3, F05).
-- [ ] The probe is handed to the owner as a release-gate item, named in Risk 1.
+- [x] The evidence section records the source commit (`7efe699`, full SHA), the sample file path, the request body, the columns, the script flow and the defects R7 fixes (F59, Spike S3).
+- [x] The probe is listed as open, with the exact request, the pass outcome and the fail outcome (Spike S3, F05).
+- [x] The probe is handed to the owner as a release-gate item, named in Risk 1.
 **Verification:** Read the section against the spec's Spike S3 text; `npx prettier --check docs/specs/001-server-logic-starter-inspector/plans/phase-19-handler-r7.md`.
 **Files:** this file.
 **Scope:** XS
@@ -146,10 +146,10 @@ Spec F59: each spike records its calls, versions and outcome in the plan of the 
 The owner approves the diff before Task 3 starts. Without approval, the golden would pin text the spec does not yet say.
 **Red first:** none (document change). The owner's approval is the gate. The cross-check is Task 2's test, which reads the example from the spec's wording.
 **Acceptance criteria:**
-- [ ] The R7 contract row and example request in the spec match Decisions 1 and 2 word for word on limits, rules and values (FR-3).
-- [ ] Open Questions say S3's script half is done and the probe is open (F59).
-- [ ] The owner approved the diff in this conversation or the PR before Task 3's first commit.
-- [ ] No other spec text changed.
+- [x] The R7 contract row and example request in the spec match Decisions 1 and 2 word for word on limits, rules and values (FR-3).
+- [x] Open Questions say S3's script half is done and the probe is open (F59).
+- [x] The owner approved the diff in this conversation or the PR before Task 3's first commit.
+- [x] No other spec text changed.
 **Verification:** `git diff -- docs/specs/001-server-logic-starter-inspector/spec.md` shows only the three edits and the Change Log row; `npx prettier --check docs/specs/001-server-logic-starter-inspector/spec.md`.
 **Files:** `docs/specs/001-server-logic-starter-inspector/spec.md`
 **Scope:** S
