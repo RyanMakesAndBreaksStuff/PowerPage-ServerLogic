@@ -76,9 +76,9 @@ Phase 14 replaces three stubs with the package: a pure function that turns the S
 - "no restricted-pattern label contains a backtick" (Decision 7).
 - "is deterministic": two calls return deeply equal arrays.
 **Acceptance criteria:**
-- [ ] The checklist equals the three goldens byte for byte and carries the label and Readiness block (AC-5.4, AC-5.7, F13).
-- [ ] Exactly 4 files, or 5 for R4 to R6, in the fixed order (AC-5.6, FR-5).
-- [ ] The server file equals the pane text and is never altered beyond LF and the final newline (AC-4.10, F20).
+- [x] The checklist equals the three goldens byte for byte and carries the label and Readiness block (AC-5.4, AC-5.7, F13).
+- [x] Exactly 4 files, or 5 for R4 to R6, in the fixed order (AC-5.6, FR-5).
+- [x] The server file equals the pane text and is never altered beyond LF and the final newline (AC-4.10, F20).
 **Verification:** `npx vitest run src/services/generators/package/buildPackageFiles.test.ts` (red before the builder, green after); then `npx tsc -b && npx eslint . --max-warnings=0 && npx prettier --check .`
 **Files:** `__golden__/R1.permission-checklist.md.txt`, `__golden__/R4.permission-checklist.md.txt`, `__golden__/R10.permission-checklist.md.txt`, `buildPackageFiles.test.ts`, `buildPackageFiles.ts`, `readme.ts` (minimum `readinessBlock` and a placeholder `buildReadme`).
 **Scope:** S
@@ -103,10 +103,10 @@ Phase 14 replaces three stubs with the package: a pure function that turns the S
 - "notes": R3, R4 and R9 contain their `README_NOTES` bullets; Liquid adds `LIQUID_SERVER_NOTE` (also for a recipe with no notes).
 - "text is LF, ends with one newline, and is deterministic".
 **Acceptance criteria:**
-- [ ] The three READMEs equal their goldens, with sections in the Decision 4 order (AC-5.6).
-- [ ] Browser-check result, text-pattern statement, edited-validation line and Needs-attention marks are correct for every readiness combination (AC-5.1, AC-5.3, AC-5.7, F14).
-- [ ] No sentence claims that permissions exist in any environment (FR-5 Must not).
-- [ ] Upstream line, Key Vault paragraph, Differences and Notes appear exactly where their rules say (F10, FR-3, AC-3.7).
+- [x] The three READMEs equal their goldens, with sections in the Decision 4 order (AC-5.6).
+- [x] Browser-check result, text-pattern statement, edited-validation line and Needs-attention marks are correct for every readiness combination (AC-5.1, AC-5.3, AC-5.7, F14).
+- [x] No sentence claims that permissions exist in any environment (FR-5 Must not).
+- [x] Upstream line, Key Vault paragraph, Differences and Notes appear exactly where their rules say (F10, FR-3, AC-3.7).
 **Verification:** `npx vitest run src/services/generators/package/readme.test.ts`; then `npx tsc -b && npx eslint . --max-warnings=0 && npx prettier --check .`
 **Files:** `__golden__/R1.README.md.txt`, `__golden__/R4.README.md.txt`, `__golden__/R8.README.md.txt`, `readme.test.ts`, `readme.ts`, `readmeNotes.ts`
 **Scope:** M
@@ -123,8 +123,8 @@ Phase 14 replaces three stubs with the package: a pure function that turns the S
 - "throws on a duplicate path" and "throws on an empty path".
 - "returns a Uint8Array that starts with the zip signature `PK`".
 **Acceptance criteria:**
-- [ ] The zip holds each file under its flat path with UTF-8 content (AC-5.6).
-- [ ] A duplicate or empty path throws, so a bad file list never reaches the save dialog (AC-5.10).
+- [x] The zip holds each file under its flat path with UTF-8 content (AC-5.6).
+- [x] A duplicate or empty path throws, so a bad file list never reaches the save dialog (AC-5.10).
 **Verification:** `npx vitest run src/services/generators/package/buildZip.test.ts`
 **Files:** `buildZip.test.ts`, `buildZip.ts`
 **Scope:** XS
@@ -143,9 +143,9 @@ Phase 14 replaces three stubs with the package: a pure function that turns the S
 - "is busy while the save is pending": the host's `saveFile` is wrapped with a promise the test resolves later; while it is pending the button has `aria-busy="true"`; after it resolves, the attribute is gone and the toast appears.
 - "logs only the error name": `console.error` is spied; its arguments hold no message text.
 **Acceptance criteria:**
-- [ ] One click builds the zip in memory and makes one `saveFile` call with the full bytes (AC-5.10, AC-5.6).
-- [ ] Saved gives "<slug>.zip downloaded"; cancel is silent; any build or save failure gives "Couldn't save <slug>.zip" with the reason and leaves the session untouched (AC-5.10).
-- [ ] The button shows its busy state while pending, and uses the primary variant with the download icon (layout 10a, FR-11).
+- [x] One click builds the zip in memory and makes one `saveFile` call with the full bytes (AC-5.10, AC-5.6).
+- [x] Saved gives "<slug>.zip downloaded"; cancel is silent; any build or save failure gives "Couldn't save <slug>.zip" with the reason and leaves the session untouched (AC-5.10).
+- [x] The button shows its busy state while pending, and uses the primary variant with the download icon (layout 10a, FR-11).
 **Verification:** `npx vitest run src/features/starter/download/DownloadStarterButton.test.tsx`
 **Files:** `DownloadStarterButton.test.tsx`, `DownloadStarterButton.tsx`
 **Scope:** M
@@ -161,10 +161,10 @@ Phase 14 replaces three stubs with the package: a pure function that turns the S
 - "R7 is still a stub": `generateHandler('R7')` throws `not implemented: phase 19`; the test name says that Phase 19 removes it and the `PENDING_R7` exclusion together.
 - "no README or checklist line contains a character other than the slug, catalogue strings and labels": a smoke check that the slug `untitled` and a slug with digits and hyphens pass through unchanged.
 **Acceptance criteria:**
-- [ ] Every recipe except the pending R7 produces the right files for every enabled language (AC-5.6, FR-5).
-- [ ] The zip's client file equals `generateClient` for the same inputs (Decision 10).
-- [ ] Each build is within 500 ms; the 2 s live check remains a release-smoke item (AC-5.11).
-- [ ] The R7 exclusion is guarded, so it cannot be left behind (Decision 12).
+- [x] Every recipe except the pending R7 produces the right files for every enabled language (AC-5.6, FR-5).
+- [x] The zip's client file equals `generateClient` for the same inputs (Decision 10).
+- [x] Each build is within 500 ms; the 2 s live check remains a release-smoke item (AC-5.11).
+- [x] The R7 exclusion is guarded, so it cannot be left behind (Decision 12).
 **Verification:** `npx vitest run src/services/generators/package/package.integration.test.ts`; then the full set in Checkpoint 2.
 **Files:** `package.integration.test.ts`
 **Scope:** S
@@ -182,6 +182,9 @@ Phase 14 replaces three stubs with the package: a pure function that turns the S
 6. **The build-failure test relies on Phase 10's method and function guard.** Phase 10 Task 3 tests that `generateClient` throws on a mismatch. If that guard is ever relaxed, this test needs another throwing input. Phase 19 can add the R7 stub route back only while R7 is a stub.
 7. **The Troubleshooting `StatusCode` 0 bullet is keyed on the catalogue's `outboundDomains` and `HttpClient` use,** not on the edited text. A user who adds an outbound call by hand to R1 gets no such bullet. This is accepted: the README describes the generated recipe.
 8. **Fixed Learn URLs** (overview, Author server logic, governance page) are constants in `readme.ts`. Phase 05's catalogue does not hold them for every recipe, so the README owns them. If Learn moves a page, the URL check in a later release fixes one constant.
+9. **R1's catalogue `prerequisites` is non-empty** (the Account test-user line), so the README has a Prerequisites section. Task 2's sketch that R1 has no such heading does not match `recipes.ts`.
+10. **The StatusCode 0 bullet follows `outboundDomains` or a catalogue member whose name contains `HttpClient`.** R9 has neither, so it has no bullet, even though Decision 4's parenthetical lists R9. The troubleshooting assertion looks at that section only, because R4's differences text also says StatusCode.
+11. **`Icon` is `@/components/Icon`.** `@/components/icons` is the name map. `readinessBlock` takes `validation: boolean` so the eight-combination test can pass false; `StarterDerived` still type-checks because `true` is assignable to `boolean`.
 
 ## Done when
 - `buildPackageFiles`, `buildZip` and `DownloadStarterButton` no longer throw or render nothing; `readme.ts`, `readmeNotes.ts`, the six goldens and the five test files exist, and nothing else changed.
