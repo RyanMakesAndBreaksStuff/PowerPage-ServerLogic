@@ -1,0 +1,60 @@
+# customer-summary
+
+Read Dataverse records
+
+## Set up
+
+1. Set up a workspace.
+2. Open Server logic.
+3. Select + New server logic.
+4. Name it exactly `customer-summary`. That name is the API resource name.
+5. Select + Add roles and add `A web role the caller holds`.
+6. Select Edit code, then Open Visual Studio Code.
+7. Replace the file content with `customer-summary.js` and save.
+8. Configure the site settings, allowed domains and table permissions as listed in permission-checklist.md.
+9. Paste `customer-summary.client.js` into a page's custom JavaScript.
+
+## Endpoint
+
+`/_api/serverlogics/customer-summary`
+
+## Request path
+
+Page script fetch() → Token __RequestVerificationToken → Endpoint /_api/serverlogics/customer-summary → Handler function get() → Returns JSON string
+
+## Learn
+
+https://learn.microsoft.com/en-us/power-pages/configure/server-logic-overview
+https://learn.microsoft.com/en-us/power-pages/configure/author-server-logic
+
+## Browser checks
+
+No restricted patterns or browser APIs found.
+
+This is a text-pattern check, not a compile or a runtime test.
+
+## Validation
+
+Validation isn't authorization; table permissions are.
+
+## Readiness
+
+2/3 ready
+
+✓ Browser checks
+✓ Validation
+! Needs attention: Permissions: not marked reviewed in Logic Starter; not checked against any environment
+
+## Troubleshooting
+
+- The `x-ms-user-trace` response header holds base64 JSON, a list of `{ Level, MessageCode, Message }`, including `Server.Logger` output.
+- An `RTSL01` validation error means the whole file doesn't run and the caller gets HTTP 400.
+- HTTP 403 when the tenant's "Disable external service calls from Server Logic" governance control is on: https://learn.microsoft.com/en-us/power-pages/security/disable-external-service-calls
+
+## Secrets
+
+Hold secrets in Azure Key Vault, surface them through an environment variable, and reference them through a site setting. The generated code never holds a literal secret.
+
+## Prerequisites
+
+- Test users' contacts must have a parent account.
