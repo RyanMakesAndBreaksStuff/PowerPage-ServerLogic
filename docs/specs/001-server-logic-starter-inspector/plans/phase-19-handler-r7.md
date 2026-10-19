@@ -191,12 +191,12 @@ The owner approves the diff before Task 3 starts. Without approval, the golden w
 - "R7_DIFFERENCES lists the twelve differences": the array has twelve entries, each with a non-empty `change` and `reason`, and the changes match Decision 16.
 - "registry returns the same handler": `generateHandler('R7')` deep-equals `generateR7()`.
 **Acceptance criteria:**
-- [ ] The text equals the golden byte for byte and the three stages run in the spec's order with their own fixed operation names and messages (FR-3 R7 Must, F05, F06).
-- [ ] The token body is form-encoded with `encodeURIComponent` on each value, every call has `toResult` and an `IsSuccessStatusCode` check, and `CreateRecord` is not awaited (correction 17, corrections 11, 19).
-- [ ] Input is validated against the column-aware contract row before any call; the five settings are read through `Server.SiteSetting.Get` and fail closed before the first outbound call (Decision 1, AC-3.5, F57).
-- [ ] The ticket HTML is escaped, the file name is `ActivityId-slug.html`, and the upload URL carries `conflictBehavior=fail` (F05).
-- [ ] The logging rule holds, and the text has zero FR-4 hits, one highlight per connector call, no `Server.User` and no email step (AC-3.2, AC-4.2, F09).
-- [ ] `R7_DIFFERENCES` has the twelve entries of Decision 16 (AC-3.7).
+- [x] The text equals the golden byte for byte and the three stages run in the spec's order with their own fixed operation names and messages (FR-3 R7 Must, F05, F06).
+- [x] The token body is form-encoded with `encodeURIComponent` on each value, every call has `toResult` and an `IsSuccessStatusCode` check, and `CreateRecord` is not awaited (correction 17, corrections 11, 19).
+- [x] Input is validated against the column-aware contract row before any call; the five settings are read through `Server.SiteSetting.Get` and fail closed before the first outbound call (Decision 1, AC-3.5, F57).
+- [x] The ticket HTML is escaped, the file name is `ActivityId-slug.html`, and the upload URL carries `conflictBehavior=fail` (F05).
+- [x] The logging rule holds, and the text has zero FR-4 hits, one highlight per connector call, no `Server.User` and no email step (AC-3.2, AC-4.2, F09).
+- [x] `R7_DIFFERENCES` has the twelve entries of Decision 16 (AC-3.7).
 **Verification:** `npx vitest run src/services/generators/handlers/r7.test.ts` (red before `r7.ts`, green after); `npx eslint src/services/generators/handlers/r7.ts src/services/generators/handlers/r7.test.ts --max-warnings=0`; `npx prettier --check src/services/generators/handlers`; `npx tsc -b`.
 **Files:** `__golden__/R7.js.txt`, `r7.test.ts`, `r7.ts`
 **Scope:** M
