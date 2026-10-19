@@ -1,0 +1,210 @@
+// R7: Microsoft Graph & SharePoint
+// Learn: https://learn.microsoft.com/en-us/power-pages/configure/server-logic-graph-sharepoint
+// Sample package: https://github.com/microsoft/power-pages-samples/tree/main/samples/server-logic/sharepoint-integration
+
+const toResult = r => typeof r === "string" ? JSON.parse(r) : r;
+
+const TICKETS_FOLDER = "Tickets";
+const REGISTRATION_SET = "crd69_eventregistrations";
+
+const escapeHtml = (value) =>
+  value
+    .split("&")
+    .join("&amp;")
+    .split("<")
+    .join("&lt;")
+    .split(">")
+    .join("&gt;")
+    .split("\"")
+    .join("&quot;")
+    .split("'")
+    .join("&#39;");
+
+const nameSlug = (value) => {
+  const slug = value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 50)
+    .replace(/-+$/g, "");
+  return slug.length === 0 ? "registrant" : slug;
+};
+
+const parseJsonObject = () => {
+  try {
+    const value = JSON.parse(Server.Context.Body);
+    if (value !== null && !Array.isArray(value) && typeof value === "object") {
+      return value;
+    }
+  } catch {
+    return null;
+  }
+  return null;
+};
+
+const getAccessToken = async (tenantId, clientId, clientSecret) => {
+  const url = "https://login.microsoftonline.com/" + encodeURIComponent(tenantId) + "/oauth2/v2.0/token";
+  const form =
+    "client_id=" + encodeURIComponent(clientId) +
+    "&client_secret=" + encodeURIComponent(clientSecret) +
+    "&scope=" + encodeURIComponent("https://graph.microsoft.com/.default") +
+    "&grant_type=client_credentials";
+  return toResult(await Server.Connector.HttpClient.PostAsync(url, form, { "Content-Type": "application/x-www-form-urlencoded" }, "application/x-www-form-urlencoded"));
+};
+
+async function post() {
+  const parsed = parseJsonObject();
+  if (parsed === null) {
+    const errors = [{ field: "body", message: "Body must be a JSON object." }];
+    return JSON.stringify({ status: "error", message: "The request isn't valid.", errors: errors });
+  }
+  const fullname = typeof parsed.fullname === "string" ? parsed.fullname.trim() : parsed.fullname;
+  const email = typeof parsed.email === "string" ? parsed.email.trim() : parsed.email;
+  const phone = typeof parsed.phone === "string" ? parsed.phone.trim() : parsed.phone;
+  const eventText = typeof parsed.eventText === "string" ? parsed.eventText.trim() : parsed.eventText;
+  const event = parsed.event;
+  const date = parsed.date;
+  const errors = [];
+  if (typeof fullname !== "string" || fullname.length === 0 || fullname.length > 200) {
+    errors.push({ field: "fullname", message: "fullname is required and must be 200 characters or fewer." });
+  }
+  let emailOk = false;
+  if (typeof email === "string" && email.length > 0 && email.length <= 100) {
+    const parts = email.split("@");
+    emailOk = parts.length === 2 && parts[1].indexOf(".") !== -1;
+  }
+  if (!emailOk) {
+    errors.push({ field: "email", message: "email must be a valid address of 100 characters or fewer." });
+  }
+  if (typeof phone !== "string" || phone.length === 0 || phone.length > 100) {
+    errors.push({ field: "phone", message: "phone is required and must be 100 characters or fewer." });
+  }
+  if (!Number.isInteger(event)) {
+    errors.push({ field: "event", message: "event must be a whole number." });
+  }
+  if (typeof eventText !== "string" || eventText.length === 0 || eventText.length > 200) {
+    errors.push({ field: "eventText", message: "eventText is required and must be 200 characters or fewer." });
+  }
+  if (typeof date !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    errors.push({ field: "date", message: "date must look like 2026-11-05." });
+  }
+  if (errors.length > 0) {
+    return JSON.stringify({ status: "error", message: "The request isn't valid.", errors: errors });
+  }
+  const clientId = Server.SiteSetting.Get("CLIENT_ID");
+  if (!clientId) {
+    Server.Logger.Error("Missing site setting CLIENT_ID");
+    return JSON.stringify({ status: "error", message: "Server logic isn't configured: missing site setting CLIENT_ID" });
+  }
+  const clientSecret = Server.SiteSetting.Get("CLIENT_SECRET");
+  if (!clientSecret) {
+    Server.Logger.Error("Missing site setting CLIENT_SECRET");
+    return JSON.stringify({ status: "error", message: "Server logic isn't configured: missing site setting CLIENT_SECRET" });
+  }
+  const tenantId = Server.SiteSetting.Get("TENANT_ID");
+  if (!tenantId) {
+    Server.Logger.Error("Missing site setting TENANT_ID");
+    return JSON.stringify({ status: "error", message: "Server logic isn't configured: missing site setting TENANT_ID" });
+  }
+  const hostname = Server.SiteSetting.Get("HOSTNAME");
+  if (!hostname) {
+    Server.Logger.Error("Missing site setting HOSTNAME");
+    return JSON.stringify({ status: "error", message: "Server logic isn't configured: missing site setting HOSTNAME" });
+  }
+  const sitePath = Server.SiteSetting.Get("SITE_PATH");
+  if (!sitePath) {
+    Server.Logger.Error("Missing site setting SITE_PATH");
+    return JSON.stringify({ status: "error", message: "Server logic isn't configured: missing site setting SITE_PATH" });
+  }
+  let token = "";
+  let siteId = "";
+  let driveId = "";
+  try {
+    const auth = await getAccessToken(tenantId, clientId, clientSecret);
+    if (!auth.IsSuccessStatusCode) {
+      Server.Logger.Error("R7 connect" + " " + auth.StatusCode + " " + auth.ReasonPhrase);
+      return JSON.stringify({ status: "error", message: "Couldn't connect to SharePoint." });
+    }
+    const authBody = JSON.parse(auth.Body);
+    token = authBody.access_token;
+    if (typeof token !== "string" || token.length === 0) {
+      Server.Logger.Error("R7 connect" + " " + auth.StatusCode + " " + auth.ReasonPhrase);
+      return JSON.stringify({ status: "error", message: "Couldn't connect to SharePoint." });
+    }
+    const siteUrl = "https://graph.microsoft.com/v1.0/sites/" + hostname + ":" + sitePath;
+    const site = toResult(await Server.Connector.HttpClient.GetAsync(siteUrl, { Authorization: "Bearer " + token }));
+    if (!site.IsSuccessStatusCode) {
+      Server.Logger.Error("R7 connect" + " " + site.StatusCode + " " + site.ReasonPhrase);
+      return JSON.stringify({ status: "error", message: "Couldn't connect to SharePoint." });
+    }
+    const siteBody = JSON.parse(site.Body);
+    siteId = siteBody.id;
+    if (typeof siteId !== "string" || siteId.length === 0) {
+      Server.Logger.Error("R7 connect" + " " + site.StatusCode + " " + site.ReasonPhrase);
+      return JSON.stringify({ status: "error", message: "Couldn't connect to SharePoint." });
+    }
+    const driveUrl = "https://graph.microsoft.com/v1.0/sites/" + siteId + "/drive";
+    const drive = toResult(await Server.Connector.HttpClient.GetAsync(driveUrl, { Authorization: "Bearer " + token }));
+    if (!drive.IsSuccessStatusCode) {
+      Server.Logger.Error("R7 connect" + " " + drive.StatusCode + " " + drive.ReasonPhrase);
+      return JSON.stringify({ status: "error", message: "Couldn't connect to SharePoint." });
+    }
+    const driveBody = JSON.parse(drive.Body);
+    driveId = driveBody.id;
+    if (typeof driveId !== "string" || driveId.length === 0) {
+      Server.Logger.Error("R7 connect" + " " + drive.StatusCode + " " + drive.ReasonPhrase);
+      return JSON.stringify({ status: "error", message: "Couldn't connect to SharePoint." });
+    }
+  } catch (e) {
+    Server.Logger.Error("R7 connect" + " " + e.name);
+    return JSON.stringify({ status: "error", message: "Couldn't connect to SharePoint." });
+  }
+  let webUrl = null;
+  try {
+    const fileName = Server.Context.ActivityId + "-" + nameSlug(fullname) + ".html";
+    const ticketHtml =
+      "<html>" +
+      "<body style=\"font-family: Arial, sans-serif;\">" +
+      "<h2>Event Registration Confirmation</h2>" +
+      "<p><b>Name:</b> " + escapeHtml(fullname) + "</p>" +
+      "<p><b>Event:</b> " + escapeHtml(eventText) + "</p>" +
+      "<p><b>Date:</b> " + escapeHtml(date) + "</p>" +
+      "<p>Thank you for registering! Please save this confirmation.</p>" +
+      "</body>" +
+      "</html>";
+    const uploadUrl = "https://graph.microsoft.com/v1.0/drives/" + driveId + "/root:/" + TICKETS_FOLDER + "/" + fileName + ":/content?@microsoft.graph.conflictBehavior=fail";
+    const upload = toResult(await Server.Connector.HttpClient.PutAsync(uploadUrl, ticketHtml, { Authorization: "Bearer " + token, "Content-Type": "text/html" }, "text/html"));
+    if (!upload.IsSuccessStatusCode) {
+      Server.Logger.Error("R7 upload" + " " + upload.StatusCode + " " + upload.ReasonPhrase);
+      return JSON.stringify({ status: "error", message: "Couldn't upload the ticket." });
+    }
+    try {
+      const uploaded = JSON.parse(upload.Body);
+      const link = uploaded.webUrl;
+      if (typeof link === "string" && link.length > 0) {
+        webUrl = link;
+      }
+    } catch {
+      webUrl = null;
+    }
+  } catch (e) {
+    Server.Logger.Error("R7 upload" + " " + e.name);
+    return JSON.stringify({ status: "error", message: "Couldn't upload the ticket." });
+  }
+  try {
+    const r = toResult(Server.Connector.Dataverse.CreateRecord(REGISTRATION_SET, JSON.stringify({ crd69_name: fullname, crd69_email: email, crd69_phone: phone, crd69_event: event, crd69_preferreddate: date, crd69_ticketurl: webUrl })));
+    if (!r.IsSuccessStatusCode) {
+      Server.Logger.Error("R7 create after upload" + " " + r.StatusCode + " " + r.ReasonPhrase + " " + Server.Context.ActivityId);
+      return JSON.stringify({ status: "error", message: "Registration failed after the ticket was uploaded." });
+    }
+    const id = r.Headers && (r.Headers.entityid ?? r.Headers.entityId);
+    if (!id) {
+      Server.Logger.Error("R7 create after upload" + " " + r.StatusCode + " " + r.ReasonPhrase + " " + Server.Context.ActivityId);
+      return JSON.stringify({ status: "error", message: "Registration failed after the ticket was uploaded." });
+    }
+    return JSON.stringify({ status: "success", id });
+  } catch (e) {
+    Server.Logger.Error("R7 create after upload" + " " + e.name + " " + Server.Context.ActivityId);
+    return JSON.stringify({ status: "error", message: "Registration failed after the ticket was uploaded." });
+  }
+}

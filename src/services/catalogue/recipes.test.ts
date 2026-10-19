@@ -391,6 +391,16 @@ describe('prerequisites', () => {
   });
 });
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === 'object' && !Array.isArray(value);
+}
+
+function requireString(record: Record<string, unknown>, key: string): string {
+  const value = record[key];
+  if (typeof value !== 'string') throw new Error(`${key} is not a string`);
+  return value;
+}
+
 describe('example requests (F08)', () => {
   it('placeholder GUID', () => {
     expect(EXAMPLE_GUID).toBe('00000000-0000-0000-0000-000000000000');
@@ -480,12 +490,45 @@ describe('example requests (F08)', () => {
     });
   });
 
-  it('R7 post is the one value deferred to Spike S3 (phase 19 replaces this assertion)', () => {
+  it('R7 post carries the column-aware example', () => {
     expect(getRecipe('R7').examples.post).toEqual({
       query: null,
-      body: null,
+      body: {
+        fullname: 'Alton Stott',
+        email: 'alton@contoso.com',
+        phone: '555-123-4567',
+        event: 197360000,
+        eventText: 'Tech Summit - General Admission',
+        date: '2026-11-05',
+      },
       liquidInput: null,
     });
+  });
+
+  it('the R7 example passes the R7 contract row', () => {
+    const body = getRecipe('R7').examples.post?.body;
+    expect(isRecord(body)).toBe(true);
+    if (!isRecord(body)) throw new Error('R7 example body is not an object');
+    const fullname = requireString(body, 'fullname');
+    const eventText = requireString(body, 'eventText');
+    const email = requireString(body, 'email');
+    const phone = requireString(body, 'phone');
+    const date = requireString(body, 'date');
+    expect(fullname.length).toBeGreaterThan(0);
+    expect(fullname.length).toBeLessThanOrEqual(200);
+    expect(eventText.length).toBeGreaterThan(0);
+    expect(eventText.length).toBeLessThanOrEqual(200);
+    expect(email.length).toBeGreaterThan(0);
+    expect(email.length).toBeLessThanOrEqual(100);
+    expect(phone.length).toBeGreaterThan(0);
+    expect(phone.length).toBeLessThanOrEqual(100);
+    const parts = email.split('@');
+    expect(parts).toHaveLength(2);
+    const domain = parts[1];
+    if (domain === undefined) throw new Error('email has no domain');
+    expect(domain.indexOf('.')).toBeGreaterThanOrEqual(0);
+    expect(Number.isInteger(body.event)).toBe(true);
+    expect(date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
   });
 
   it('no example keeps the literal <guid> placeholder', () => {

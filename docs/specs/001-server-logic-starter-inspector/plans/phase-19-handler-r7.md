@@ -129,9 +129,9 @@ Spec F59: each spike records its calls, versions and outcome in the plan of the 
 **Description:** This file is the record. The "Spike S3 evidence" section above holds the script half (source, commit, flow, columns, defects and the Learn checks). Hand the collision probe to the owner as a ◆ item: the owner runs it on a test SharePoint site and appends a "Probe result" heading to this file with the date, the tenant (redacted), the request and the response. Nothing else in the phase waits for it, except the README claim (Decision 12) and the release gate.
 **Red first:** none (documentation). The check is that the evidence section names the commit, the file path, the request body fields, the table columns, the flow and the defects, and that the probe's pass and fail outcomes are written down.
 **Acceptance criteria:**
-- [ ] The evidence section records the source commit (`7efe699`, full SHA), the sample file path, the request body, the columns, the script flow and the defects R7 fixes (F59, Spike S3).
-- [ ] The probe is listed as open, with the exact request, the pass outcome and the fail outcome (Spike S3, F05).
-- [ ] The probe is handed to the owner as a release-gate item, named in Risk 1.
+- [x] The evidence section records the source commit (`7efe699`, full SHA), the sample file path, the request body, the columns, the script flow and the defects R7 fixes (F59, Spike S3).
+- [x] The probe is listed as open, with the exact request, the pass outcome and the fail outcome (Spike S3, F05).
+- [x] The probe is handed to the owner as a release-gate item, named in Risk 1.
 **Verification:** Read the section against the spec's Spike S3 text; `npx prettier --check docs/specs/001-server-logic-starter-inspector/plans/phase-19-handler-r7.md`.
 **Files:** this file.
 **Scope:** XS
@@ -146,10 +146,10 @@ Spec F59: each spike records its calls, versions and outcome in the plan of the 
 The owner approves the diff before Task 3 starts. Without approval, the golden would pin text the spec does not yet say.
 **Red first:** none (document change). The owner's approval is the gate. The cross-check is Task 2's test, which reads the example from the spec's wording.
 **Acceptance criteria:**
-- [ ] The R7 contract row and example request in the spec match Decisions 1 and 2 word for word on limits, rules and values (FR-3).
-- [ ] Open Questions say S3's script half is done and the probe is open (F59).
-- [ ] The owner approved the diff in this conversation or the PR before Task 3's first commit.
-- [ ] No other spec text changed.
+- [x] The R7 contract row and example request in the spec match Decisions 1 and 2 word for word on limits, rules and values (FR-3).
+- [x] Open Questions say S3's script half is done and the probe is open (F59).
+- [x] The owner approved the diff in this conversation or the PR before Task 3's first commit.
+- [x] No other spec text changed.
 **Verification:** `git diff -- docs/specs/001-server-logic-starter-inspector/spec.md` shows only the three edits and the Change Log row; `npx prettier --check docs/specs/001-server-logic-starter-inspector/spec.md`.
 **Files:** `docs/specs/001-server-logic-starter-inspector/spec.md`
 **Scope:** S
@@ -158,9 +158,9 @@ The owner approves the diff before Task 3 starts. Without approval, the golden w
 **Description:** Replace R7's `examples.post` (`NO_INPUT` and its deferral comment) in `recipes.ts` with `query: null`, the Decision 2 body and `liquidInput: null`. Rewrite the one deferred assertion in `recipes.test.ts`. Phase 10's client then emits the body with no edit.
 **Red first:** in `recipes.test.ts`, change "R7 post is the one value deferred to Spike S3" into "R7 post carries the column-aware example": `getRecipe('R7').examples.post` equals `{ query: null, body: { fullname: "Alton Stott", email: "alton@contoso.com", phone: "555-123-4567", event: 197360000, eventText: "Tech Summit - General Admission", date: "2026-11-05" }, liquidInput: null }`. Add "the R7 example passes the R7 contract row": `fullname` and `eventText` are non-empty and at most 200 characters, `email` and `phone` are at most 100, `email` has one `@` and a `.` after it, `event` is an integer and `date` matches `^\d{4}-\d{2}-\d{2}$`. Run it and watch both fail on `NO_INPUT`, then edit `recipes.ts`.
 **Acceptance criteria:**
-- [ ] R7's example body is the one in the spec's Example requests table (FR-3).
-- [ ] The example satisfies its own contract row (Decision 1).
-- [ ] No other recipe's example changed; the "no example keeps the literal `<guid>` placeholder" test still passes.
+- [x] R7's example body is the one in the spec's Example requests table (FR-3).
+- [x] The example satisfies its own contract row (Decision 1).
+- [x] No other recipe's example changed; the "no example keeps the literal `<guid>` placeholder" test still passes.
 **Verification:** `npx vitest run src/services/catalogue/recipes.test.ts` (red, then green); `npx vitest run src/services/generators/client` stays green with no golden edited.
 **Files:** `src/services/catalogue/recipes.ts`, `src/services/catalogue/recipes.test.ts`
 **Scope:** XS
@@ -191,12 +191,12 @@ The owner approves the diff before Task 3 starts. Without approval, the golden w
 - "R7_DIFFERENCES lists the twelve differences": the array has twelve entries, each with a non-empty `change` and `reason`, and the changes match Decision 16.
 - "registry returns the same handler": `generateHandler('R7')` deep-equals `generateR7()`.
 **Acceptance criteria:**
-- [ ] The text equals the golden byte for byte and the three stages run in the spec's order with their own fixed operation names and messages (FR-3 R7 Must, F05, F06).
-- [ ] The token body is form-encoded with `encodeURIComponent` on each value, every call has `toResult` and an `IsSuccessStatusCode` check, and `CreateRecord` is not awaited (correction 17, corrections 11, 19).
-- [ ] Input is validated against the column-aware contract row before any call; the five settings are read through `Server.SiteSetting.Get` and fail closed before the first outbound call (Decision 1, AC-3.5, F57).
-- [ ] The ticket HTML is escaped, the file name is `ActivityId-slug.html`, and the upload URL carries `conflictBehavior=fail` (F05).
-- [ ] The logging rule holds, and the text has zero FR-4 hits, one highlight per connector call, no `Server.User` and no email step (AC-3.2, AC-4.2, F09).
-- [ ] `R7_DIFFERENCES` has the twelve entries of Decision 16 (AC-3.7).
+- [x] The text equals the golden byte for byte and the three stages run in the spec's order with their own fixed operation names and messages (FR-3 R7 Must, F05, F06).
+- [x] The token body is form-encoded with `encodeURIComponent` on each value, every call has `toResult` and an `IsSuccessStatusCode` check, and `CreateRecord` is not awaited (correction 17, corrections 11, 19).
+- [x] Input is validated against the column-aware contract row before any call; the five settings are read through `Server.SiteSetting.Get` and fail closed before the first outbound call (Decision 1, AC-3.5, F57).
+- [x] The ticket HTML is escaped, the file name is `ActivityId-slug.html`, and the upload URL carries `conflictBehavior=fail` (F05).
+- [x] The logging rule holds, and the text has zero FR-4 hits, one highlight per connector call, no `Server.User` and no email step (AC-3.2, AC-4.2, F09).
+- [x] `R7_DIFFERENCES` has the twelve entries of Decision 16 (AC-3.7).
 **Verification:** `npx vitest run src/services/generators/handlers/r7.test.ts` (red before `r7.ts`, green after); `npx eslint src/services/generators/handlers/r7.ts src/services/generators/handlers/r7.test.ts --max-warnings=0`; `npx prettier --check src/services/generators/handlers`; `npx tsc -b`.
 **Files:** `__golden__/R7.js.txt`, `r7.test.ts`, `r7.ts`
 **Scope:** M
@@ -263,6 +263,7 @@ Run in order, all with zero warnings: `npx tsc -b`, `npx eslint . --max-warnings
 8. **Date column handling is unverified.** `crd69_preferreddate` is a datetime column and the handler sends the `YYYY-MM-DD` string as is. Dataverse should read it as midnight UTC. The live run in Risk 2 confirms it; if not, the spec update, golden and example change together.
 9. **Phase 14 and 17 timing.** Tasks 4 and 5 edit files owned by those phases. Start them only after both merge, or two branches will edit the same lines.
 10. **Fixed messages are the plan's wording** (Decision 1 for validation; the stage messages are the spec's). If the owner wants other copy for validation, only the golden and the tests change.
+11. **Phase 10's client test pinned a null R7 body.** `client.test.ts` expected `examples.post.body` null and a `{}` fetch body. That assertion now expects the Decision 2 body. `client.ts` and the client goldens are unchanged.
 
 ## Done when
 - `generateHandler('R7')` returns real text and highlights, `R7_DIFFERENCES` is exported, and the golden, `r7.test.ts` and the generator exist.
