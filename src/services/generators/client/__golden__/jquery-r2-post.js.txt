@@ -1,0 +1,40 @@
+// validate-request | POST | post
+const url = "/_api/serverlogics/validate-request";
+
+function showError(text) {
+  console.error(text);
+}
+
+function handleEnvelope(envelope) {
+  if (envelope.success === false) {
+    showError(String(envelope.error));
+    return;
+  }
+  let parsed;
+  try {
+    parsed = JSON.parse(envelope.data);
+  } catch {
+    showError("The response data could not be read.");
+    return;
+  }
+  if (parsed.status !== "success") {
+    showError(String(parsed.message));
+    return;
+  }
+  console.log(parsed.name, parsed.email);
+}
+
+shell.ajaxSafePost({
+  type: "POST",
+  url: url,
+  contentType: "application/json",
+  data: JSON.stringify(
+    {
+      "name": "Alton Stott",
+      "email": "alton@contoso.com"
+    }
+  ),
+  success: handleEnvelope,
+}).fail(function () {
+  showError("The request failed.");
+});

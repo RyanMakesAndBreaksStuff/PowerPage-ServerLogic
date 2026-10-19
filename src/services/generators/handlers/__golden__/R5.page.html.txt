@@ -1,0 +1,373 @@
+<div class="row sectionBlockLayout text-left" style="min-height: auto; padding: 8px;" data-slug="customer-summary">
+  <div class="container" style="display: flex; flex-wrap: wrap;">
+    <div class="col-md-12 columnBlockLayout" style="padding: 16px; margin: 60px 0px; min-height: 200px;">
+      <style>
+        #processingMsg {
+          padding: 6px 12px;
+          background: #eee;
+          border-radius: 4px;
+          position: fixed;
+          top: 10px;
+          left: 50%;
+          transform: translateX(-50%);
+          display: none;
+          z-index: 9999;
+          text-align: center;
+          font-weight: bold;
+        }
+        table {
+          border-collapse: collapse;
+          width: 100%;
+          margin-top: 10px;
+          font-family: Arial, sans-serif;
+        }
+        th, td {
+          border: 1px solid #ccc;
+          padding: 6px;
+          text-align: left;
+        }
+        button {
+          cursor: pointer;
+          border: 1px solid #aaa;
+          padding: 4px 8px;
+          border-radius: 4px;
+          background: #fff;
+          font-size: 14px;
+          margin-right: 2px;
+        }
+        button.add { color: green; }
+        button.save { color: green; }
+        button.cancel { color: orange; }
+        button.delete { color: red; }
+        input { width: 95%; box-sizing: border-box; }
+        td.actions { white-space: nowrap; }
+        td[data-attribute="UserName"] {
+          background: #f9f9f9;
+          cursor: default;
+        }
+      </style>
+      <div id="processingMsg">Processing...</div>
+      <div id="dataTable"></div>
+      <script id="demo-page-script">
+      const ENDPOINT = "/_api/serverlogics/customer-summary";
+
+      function escapeHtml(value) {
+        return String(value ?? "")
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#39;");
+      }
+
+      function errorText(payload) {
+        var text = payload && payload.message != null ? String(payload.message) : "";
+        if (payload && Array.isArray(payload.errors)) {
+          var extra = payload.errors
+            .map((item) => (item && item.message ? String(item.message) : ""))
+            .filter((item) => item !== "")
+            .join(" ");
+          if (extra) text = text ? text + " " + extra : extra;
+        }
+        return text;
+      }
+
+      function handleResponse(resp, onSuccess) {
+        if (resp && resp.success === false) {
+          alert(resp.error == null ? "Server logic not available" : String(resp.error));
+          return;
+        }
+        var payload;
+        try {
+          payload = JSON.parse(resp.data);
+        } catch (e) {
+          alert("The response could not be read.");
+          return;
+        }
+        if (payload.status === "success") {
+          onSuccess(payload);
+          return;
+        }
+        alert(errorText(payload));
+      }
+
+      function sessionFromContext(context) {
+        if (typeof context !== "string") return "";
+        var match = /\/(\([A-Za-z0-9()]{0,62}\))\/\$metadata/.exec(context);
+        if (!match || typeof match[1] !== "string") return "";
+        var segment = match[1];
+        return /^[A-Za-z0-9()]{0,64}$/.test(segment) ? segment : "";
+      }
+
+      function installSafeAjax(webapi, $) {
+        function safeAjax(ajaxOptions) {
+          var deferred = $.Deferred();
+          shell
+            .getTokenDeferred()
+            .done((token) => {
+              ajaxOptions.headers = ajaxOptions.headers || {};
+              ajaxOptions.headers["__RequestVerificationToken"] = token;
+              $.ajax(ajaxOptions)
+                .done((data, textStatus, jqXHR) => {
+                  validateLoginSession(data, textStatus, jqXHR, deferred.resolve);
+                })
+                .fail(deferred.reject);
+            })
+            .fail(function rejectToken() {
+              deferred.rejectWith(this, arguments);
+            });
+          return deferred.promise();
+        }
+        webapi.safeAjax = safeAjax;
+      }
+
+      jQuery(function initPage() {
+        installSafeAjax(window.webapi = window.webapi || {}, jQuery);
+        var notify = createNotify();
+        function createNotify() {
+          var message = $("#processingMsg");
+          var depth = 0;
+          var timer;
+          return {
+            show: (text) => {
+              message.text(text || "Processing...");
+              if (!depth) {
+                clearTimeout(timer);
+                message.show();
+              }
+              depth += 1;
+            },
+            hide: () => {
+              depth = Math.max(0, depth - 1);
+              if (!depth) {
+                clearTimeout(timer);
+                timer = setTimeout(() => {
+                  message.hide();
+                }, 200);
+              }
+            },
+          };
+        }
+        function ajaxCall(msg, opts, onSuccess) {
+          notify.show(msg);
+          var request = Object.assign({}, opts, {
+            success: (resp) => {
+              handleResponse(resp, onSuccess);
+            },
+          });
+          return webapi
+            .safeAjax(request)
+            .fail((r) => {
+              var message = r && r.responseJSON && r.responseJSON.error && r.responseJSON.error.message;
+              alert(message || "Server logic not available");
+            })
+            .always(notify.hide);
+        }
+        var cols = [
+          { name: "UserName", label: "User Name", editable: false },
+          { name: "FirstName", label: "First Name" },
+          { name: "LastName", label: "Last Name" },
+          { name: "MiddleName", label: "Middle Name" },
+          { name: "Age", label: "Age" },
+        ];
+        var data = [];
+        var serviceSession = "";
+        function render() {
+          var head = cols.map((col) => "<th>" + escapeHtml(col.label) + "</th>").join("");
+          var body = data
+            .map((row) => {
+              var username = row.UserName == null ? "" : String(row.UserName);
+              var cells = cols
+                .map((col) => {
+                  var raw = row[col.name] == null ? "" : String(row[col.name]);
+                  return (
+                    '<td data-attribute="' +
+                    escapeHtml(col.name) +
+                    '" data-value="' +
+                    escapeHtml(raw) +
+                    '">' +
+                    escapeHtml(raw) +
+                    "</td>"
+                  );
+                })
+                .join("");
+              return (
+                '<tr data-username="' +
+                escapeHtml(username) +
+                '">' +
+                cells +
+                '<td class="actions"><button class="delete">🗑️</button></td></tr>'
+              );
+            })
+            .join("");
+          $("#dataTable").html(
+            "<table><thead><tr>" +
+              head +
+              '<th>Actions <button class="add">➕</button></th></tr></thead><tbody>' +
+              body +
+              "</tbody></table>",
+          );
+        }
+        function beginEdit() {
+          var tr = $(this);
+          if (tr.hasClass("editing")) return;
+          tr.addClass("editing");
+          tr.data(
+            "original",
+            tr
+              .find("td[data-attribute]")
+              .map(function readCell() {
+                return $(this).text();
+              })
+              .get(),
+          );
+          tr.find("td[data-attribute]").each(function editCell() {
+            var td = $(this);
+            var attr = String(td.attr("data-attribute"));
+            var col = cols.find((item) => item.name === attr);
+            if (col && col.editable === false) return;
+            var oldVal = td.text();
+            td.html(
+              '<input type="text" value="' +
+                escapeHtml(oldVal) +
+                '" data-attr="' +
+                escapeHtml(attr) +
+                '" />',
+            );
+          });
+          tr.find("td.actions").append(
+            '<button class="save">✅</button><button class="cancel">❌</button>',
+          );
+        }
+        function cancelEdit() {
+          render();
+        }
+        function saveClick() {
+          var tr = $(this).closest("tr");
+          var username = String(tr.attr("data-username") || "");
+          var updates = {};
+          tr.find("input").each(function readInput() {
+            var input = $(this);
+            var attr = String(input.data("attr"));
+            var value = String(input.val() || "").trim();
+            if (attr === "Age") {
+              var age = Number(value);
+              updates[attr] = Number.isNaN(age) ? null : age;
+              return;
+            }
+            updates[attr] = value;
+          });
+          function applyUpdate(payload) {
+            if (payload.status === "success") {
+              var row = data.find((item) => item.UserName === username);
+              if (!row) return;
+              Object.assign(row, updates);
+              render();
+            }
+          }
+          ajaxCall(
+            "Updating...",
+            {
+              type: "PUT",
+              url: ENDPOINT,
+              contentType: "application/json",
+              data: JSON.stringify(
+                Object.assign({ UserName: username, serviceSession: serviceSession }, updates),
+              ),
+            },
+            applyUpdate,
+          );
+        }
+        function removeClick() {
+          var tr = $(this).closest("tr");
+          var username = String(tr.attr("data-username") || "");
+          if (!confirm("Delete " + username + "?")) return;
+          function applyDelete(payload) {
+            if (payload.status === "success") {
+              data = data.filter((item) => item.UserName !== username);
+              render();
+            }
+          }
+          ajaxCall(
+            "Deleting...",
+            {
+              type: "DELETE",
+              url:
+                ENDPOINT +
+                "?username=" +
+                encodeURIComponent(username) +
+                "&serviceSession=" +
+                encodeURIComponent(serviceSession),
+            },
+            applyDelete,
+          );
+        }
+        function addClick() {
+          var row = {
+            serviceSession: serviceSession,
+            UserName: "user" + Math.floor(Math.random() * 9000 + 1000),
+            FirstName: "New",
+            LastName: "Person",
+            MiddleName: "",
+            Age: 25,
+          };
+          function applyCreate(payload) {
+            if (payload.status === "success") {
+              data.unshift(row);
+              render();
+            }
+          }
+          ajaxCall(
+            "Adding...",
+            {
+              type: "POST",
+              url: ENDPOINT,
+              contentType: "application/json",
+              data: JSON.stringify(row),
+            },
+            applyCreate,
+          );
+        }
+        function applyPeople(payload) {
+          if (payload.status === "success") {
+            var body = payload.data;
+            if (typeof body === "string") {
+              try {
+                body = JSON.parse(body);
+              } catch (e) {
+                alert("The response could not be read.");
+                return;
+              }
+            }
+            var record = body && typeof body === "object" ? body : {};
+            serviceSession = sessionFromContext(record["@odata.context"]);
+            var rows = Array.isArray(record.value) ? record.value : [];
+            data = rows.map((row) => ({
+              UserName: row.UserName,
+              FirstName: row.FirstName,
+              LastName: row.LastName,
+              MiddleName: row.MiddleName,
+              Age: row.Age,
+            }));
+            render();
+          }
+        }
+        $("#dataTable").on("dblclick", "tr", beginEdit);
+        $("#dataTable").on("click", ".save", saveClick);
+        $("#dataTable").on("click", ".cancel", cancelEdit);
+        $("#dataTable").on("click", ".delete", removeClick);
+        $("#dataTable").on("click", ".add", addClick);
+        ajaxCall(
+          "Loading...",
+          {
+            type: "GET",
+            url: ENDPOINT,
+            contentType: "application/json",
+          },
+          applyPeople,
+        );
+      });
+      </script>
+    </div>
+  </div>
+</div>

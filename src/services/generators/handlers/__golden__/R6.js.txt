@@ -1,0 +1,29 @@
+// R6: Call an Azure Function
+// Learn: https://learn.microsoft.com/en-us/power-pages/configure/server-logic-azure-function
+
+const toResult = r => typeof r === "string" ? JSON.parse(r) : r;
+
+async function get() {
+  try {
+    const name = Server.Context.QueryParameters["name"];
+    if (typeof name !== "string" || name.length < 1 || name.length > 100) {
+      return JSON.stringify({ status: "error", message: "The request isn't valid.", errors: [{ field: "name", message: "Name is required and must be from 1 to 100 characters." }] });
+    }
+    const azureFunctionUrl = Server.SiteSetting.Get("AZURE_FUNCTION_URL");
+    if (!azureFunctionUrl) {
+      Server.Logger.Error("Missing site setting AZURE_FUNCTION_URL");
+      return JSON.stringify({ status: "error", message: "Server logic isn't configured: missing site setting AZURE_FUNCTION_URL" });
+    }
+    const separator = azureFunctionUrl.indexOf("?") === -1 ? "?" : "&";
+    const url = azureFunctionUrl + separator + "name=" + encodeURIComponent(name);
+    const r = toResult(await Server.Connector.HttpClient.GetAsync(url));
+    if (!r.IsSuccessStatusCode) {
+      Server.Logger.Error("R6 get" + " " + r.StatusCode + " " + r.ReasonPhrase);
+      return JSON.stringify({ status: "error", message: "The Azure Function call failed." });
+    }
+    return JSON.stringify({ status: "success", message: r.Body == null ? "" : r.Body });
+  } catch (e) {
+    Server.Logger.Error("R6 get" + " " + e.name);
+    return JSON.stringify({ status: "error", message: "The Azure Function call failed." });
+  }
+}

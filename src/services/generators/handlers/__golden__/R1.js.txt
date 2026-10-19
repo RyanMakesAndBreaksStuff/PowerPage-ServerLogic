@@ -1,0 +1,20 @@
+// R1: Read Dataverse records
+
+const toResult = r => typeof r === "string" ? JSON.parse(r) : r;
+
+function get() {
+  try {
+    const r = toResult(Server.Connector.Dataverse.RetrieveMultipleRecords("contacts", "$select=contactid,fullname,emailaddress1&$top=10"));
+    if (!r.IsSuccessStatusCode) {
+      Server.Logger.Error("R1 get" + " " + r.StatusCode + " " + r.ReasonPhrase);
+      return JSON.stringify({ status: "error", message: "Couldn't read contacts." });
+    }
+    const parsed = r.Body ? JSON.parse(r.Body) : null;
+    const value = parsed && Array.isArray(parsed.value) ? parsed.value : [];
+    const contacts = value.map(row => ({ id: row.contactid, fullname: row.fullname, email: row.emailaddress1 }));
+    return JSON.stringify({ status: "success", contacts });
+  } catch (e) {
+    Server.Logger.Error("R1 get" + " " + e.name);
+    return JSON.stringify({ status: "error", message: "Couldn't read contacts." });
+  }
+}

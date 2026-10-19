@@ -1,0 +1,132 @@
+// R5: External service CRUD
+// Learn: https://learn.microsoft.com/en-us/power-pages/configure/server-logic-external-services
+
+const toResult = r => typeof r === "string" ? JSON.parse(r) : r;
+const baseUrl = "https://services.odata.org/TripPinRESTierService";
+const isUserName = value => typeof value === "string" && /^[A-Za-z0-9._-]{1,64}$/.test(value);
+const isSession = value => typeof value === "string" && /^[A-Za-z0-9()]{0,64}$/.test(value);
+
+const readObject = () => {
+  let value = null;
+  try {
+    value = JSON.parse(Server.Context.Body);
+  } catch {
+    value = null;
+  }
+  if (value === null || Array.isArray(value) || typeof value !== "object") return null;
+  return value;
+};
+
+const personErrors = data => {
+  const errors = [];
+  if (!isSession(data.serviceSession)) {
+    errors.push({ field: "serviceSession", message: "serviceSession must be 0 to 64 letters, digits or parentheses." });
+  }
+  if (!isUserName(data.UserName)) {
+    errors.push({ field: "UserName", message: "UserName must be 1 to 64 letters, digits, dots, underscores or hyphens." });
+  }
+  return errors;
+};
+
+async function get() {
+  try {
+    Server.Logger.Log("R5 get" + " " + Server.Context.ActivityId);
+    const username = Server.Context.QueryParameters["username"];
+    const onePerson = username !== undefined && username !== null;
+    if (onePerson && !isUserName(username)) {
+      return JSON.stringify({ status: "error", message: "The request isn't valid.", errors: [{ field: "username", message: "username must be 1 to 64 letters, digits, dots, underscores or hyphens." }] });
+    }
+    const url = onePerson
+      ? baseUrl + "/People('" + encodeURIComponent(username) + "')" + "?$select=UserName,FirstName,LastName,MiddleName,Age"
+      : baseUrl + "/People" + "?$select=UserName,FirstName,LastName,MiddleName,Age";
+    const r = toResult(await Server.Connector.HttpClient.GetAsync(url, {}));
+    if (!r.IsSuccessStatusCode) {
+      Server.Logger.Error("R5 get" + " " + r.StatusCode + " " + r.ReasonPhrase);
+      return JSON.stringify({ status: "error", message: "Couldn't read people." });
+    }
+    const data = r.Body ? JSON.parse(r.Body) : null;
+    return JSON.stringify({ status: "success", data: data });
+  } catch (e) {
+    Server.Logger.Error("R5 get" + " " + e.name);
+    return JSON.stringify({ status: "error", message: "Couldn't read people." });
+  }
+}
+
+async function post() {
+  try {
+    Server.Logger.Log("R5 post" + " " + Server.Context.ActivityId);
+    const body = readObject();
+    if (body === null) {
+      return JSON.stringify({ status: "error", message: "The request isn't valid.", errors: [{ field: "body", message: "Body must be a JSON object." }] });
+    }
+    const errors = personErrors(body);
+    if (errors.length > 0) {
+      return JSON.stringify({ status: "error", message: "The request isn't valid.", errors: errors });
+    }
+    const { serviceSession, ...person } = body;
+    const url = baseUrl + (serviceSession !== "" ? "/" + serviceSession : "") + "/People";
+    const r = toResult(await Server.Connector.HttpClient.PostAsync(url, JSON.stringify(person), {}, "application/json"));
+    if (!r.IsSuccessStatusCode) {
+      Server.Logger.Error("R5 post" + " " + r.StatusCode + " " + r.ReasonPhrase);
+      return JSON.stringify({ status: "error", message: "Couldn't create the person." });
+    }
+    const data = r.Body ? JSON.parse(r.Body) : null;
+    return JSON.stringify({ status: "success", data: data });
+  } catch (e) {
+    Server.Logger.Error("R5 post" + " " + e.name);
+    return JSON.stringify({ status: "error", message: "Couldn't create the person." });
+  }
+}
+
+async function put() {
+  try {
+    Server.Logger.Log("R5 put" + " " + Server.Context.ActivityId);
+    const body = readObject();
+    if (body === null) {
+      return JSON.stringify({ status: "error", message: "The request isn't valid.", errors: [{ field: "body", message: "Body must be a JSON object." }] });
+    }
+    const errors = personErrors(body);
+    if (errors.length > 0) {
+      return JSON.stringify({ status: "error", message: "The request isn't valid.", errors: errors });
+    }
+    const { serviceSession, UserName, ...changes } = body;
+    const url = baseUrl + (serviceSession !== "" ? "/" + serviceSession : "") + "/People('" + encodeURIComponent(UserName) + "')";
+    const r = toResult(await Server.Connector.HttpClient.PatchAsync(url, JSON.stringify(changes), {}, "application/json"));
+    if (!r.IsSuccessStatusCode) {
+      Server.Logger.Error("R5 put" + " " + r.StatusCode + " " + r.ReasonPhrase);
+      return JSON.stringify({ status: "error", message: "Couldn't update the person." });
+    }
+    return JSON.stringify({ status: "success" });
+  } catch (e) {
+    Server.Logger.Error("R5 put" + " " + e.name);
+    return JSON.stringify({ status: "error", message: "Couldn't update the person." });
+  }
+}
+
+async function del() {
+  try {
+    Server.Logger.Log("R5 del" + " " + Server.Context.ActivityId);
+    const username = Server.Context.QueryParameters["username"];
+    const serviceSession = Server.Context.QueryParameters["serviceSession"];
+    const errors = [];
+    if (!isUserName(username)) {
+      errors.push({ field: "username", message: "username must be 1 to 64 letters, digits, dots, underscores or hyphens." });
+    }
+    if (!isSession(serviceSession)) {
+      errors.push({ field: "serviceSession", message: "serviceSession must be 0 to 64 letters, digits or parentheses." });
+    }
+    if (errors.length > 0) {
+      return JSON.stringify({ status: "error", message: "The request isn't valid.", errors: errors });
+    }
+    const url = baseUrl + (serviceSession !== "" ? "/" + serviceSession : "") + "/People('" + encodeURIComponent(username) + "')";
+    const r = toResult(await Server.Connector.HttpClient.DeleteAsync(url, {}));
+    if (!r.IsSuccessStatusCode) {
+      Server.Logger.Error("R5 del" + " " + r.StatusCode + " " + r.ReasonPhrase);
+      return JSON.stringify({ status: "error", message: "Couldn't remove the person." });
+    }
+    return JSON.stringify({ status: "success" });
+  } catch (e) {
+    Server.Logger.Error("R5 del" + " " + e.name);
+    return JSON.stringify({ status: "error", message: "Couldn't remove the person." });
+  }
+}

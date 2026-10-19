@@ -1,0 +1,88 @@
+// R10: Call a Dataverse custom API
+// Learn: https://learn.microsoft.com/en-us/power-pages/configure/server-objects
+
+// Replace new_CustomBoundFunction, new_Action and new_CustomBoundAction, and review what each API changes beyond the bound record.
+const new_CustomBoundFunction = "new_CustomBoundFunction";
+const new_Action = "new_Action";
+const new_CustomBoundAction = "new_CustomBoundAction";
+
+const toResult = r => typeof r === "string" ? JSON.parse(r) : r;
+const isGuid = s => typeof s === "string" && /^[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}$/.test(s);
+
+const parseJsonObject = () => {
+  try {
+    const value = JSON.parse(Server.Context.Body);
+    if (value !== null && typeof value === "object" && !Array.isArray(value)) return value;
+  } catch {
+    return null;
+  }
+  return null;
+};
+
+const respond = (operation, raw) => {
+  const r = toResult(raw);
+  if (!r.IsSuccessStatusCode) {
+    if (operation === "R10 get") {
+      Server.Logger.Error("R10 get" + " " + r.StatusCode + " " + r.ReasonPhrase);
+    } else if (operation === "R10 post") {
+      Server.Logger.Error("R10 post" + " " + r.StatusCode + " " + r.ReasonPhrase);
+    } else if (operation === "R10 patch") {
+      Server.Logger.Error("R10 patch" + " " + r.StatusCode + " " + r.ReasonPhrase);
+    }
+    return JSON.stringify({ status: "error", message: "Couldn't call the custom API." });
+  }
+  if (!r.Body) return JSON.stringify({ status: "success", data: null });
+  const data = JSON.parse(r.Body);
+  return JSON.stringify({ status: "success", data });
+};
+
+function get() {
+  const errors = [];
+  const id = Server.Context.QueryParameters["id"];
+  if (!id) errors.push({ field: "id", message: "id is required." });
+  else if (!isGuid(id)) errors.push({ field: "id", message: "id must be a GUID." });
+  if (errors.length > 0) {
+    return JSON.stringify({ status: "error", message: "The request isn't valid.", errors: errors });
+  }
+  try {
+    const url = "accounts(" + id + ")/Microsoft.Dynamics.CRM." + new_CustomBoundFunction;
+    return respond("R10 get", Server.Connector.Dataverse.InvokeCustomApi("get", url));
+  } catch (e) {
+    Server.Logger.Error("R10 get" + " " + e.name);
+    return JSON.stringify({ status: "error", message: "Couldn't call the custom API." });
+  }
+}
+
+function post() {
+  const errors = [];
+  const body = parseJsonObject();
+  if (body === null) errors.push({ field: "body", message: "Body must be a JSON object." });
+  if (errors.length > 0) {
+    return JSON.stringify({ status: "error", message: "The request isn't valid.", errors: errors });
+  }
+  try {
+    return respond("R10 post", Server.Connector.Dataverse.InvokeCustomApi("post", new_Action, JSON.stringify(body)));
+  } catch (e) {
+    Server.Logger.Error("R10 post" + " " + e.name);
+    return JSON.stringify({ status: "error", message: "Couldn't call the custom API." });
+  }
+}
+
+function patch() {
+  const errors = [];
+  const id = Server.Context.QueryParameters["id"];
+  if (!id) errors.push({ field: "id", message: "id is required." });
+  else if (!isGuid(id)) errors.push({ field: "id", message: "id must be a GUID." });
+  const body = parseJsonObject();
+  if (body === null) errors.push({ field: "body", message: "Body must be a JSON object." });
+  if (errors.length > 0) {
+    return JSON.stringify({ status: "error", message: "The request isn't valid.", errors: errors });
+  }
+  try {
+    const url = "accounts(" + id + ")/Microsoft.Dynamics.CRM." + new_CustomBoundAction;
+    return respond("R10 patch", Server.Connector.Dataverse.InvokeCustomApi("post", url, JSON.stringify(body)));
+  } catch (e) {
+    Server.Logger.Error("R10 patch" + " " + e.name);
+    return JSON.stringify({ status: "error", message: "Couldn't call the custom API." });
+  }
+}

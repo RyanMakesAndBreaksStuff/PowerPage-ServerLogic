@@ -1,0 +1,45 @@
+// R9: Trigger a cloud flow
+// Learn: https://learn.microsoft.com/en-us/power-pages/configure/server-objects
+
+const toResult = r => typeof r === "string" ? JSON.parse(r) : r;
+
+const parseJsonObject = () => {
+  try {
+    const value = JSON.parse(Server.Context.Body);
+    if (value === null || Array.isArray(value) || typeof value !== "object") return null;
+    return value;
+  } catch {
+    return null;
+  }
+};
+
+async function post() {
+  const payload = parseJsonObject();
+  if (!payload) {
+    return JSON.stringify({ status: "error", message: "The request isn't valid.", errors: [{ field: "body", message: "Body must be a JSON object." }] });
+  }
+  const cloudFlowId = Server.SiteSetting.Get("CLOUD_FLOW_ID");
+  if (!cloudFlowId) {
+    Server.Logger.Error("Missing site setting CLOUD_FLOW_ID");
+    return JSON.stringify({ status: "error", message: "Server logic isn't configured: missing site setting CLOUD_FLOW_ID" });
+  }
+  try {
+    const r = toResult(await Server.Connector.CloudFlow.TriggerAsync(cloudFlowId, JSON.stringify(payload)));
+    if (!r.IsSuccessStatusCode) {
+      Server.Logger.Error("R9 trigger" + " " + r.StatusCode + " " + r.ReasonPhrase);
+      return JSON.stringify({ status: "error", message: "Couldn't trigger the flow." });
+    }
+    let flowResponse = null;
+    if (r.Body) {
+      try {
+        flowResponse = JSON.parse(r.Body);
+      } catch {
+        flowResponse = r.Body;
+      }
+    }
+    return JSON.stringify({ status: "success", flowResponse });
+  } catch (e) {
+    Server.Logger.Error("R9 trigger" + " " + e.name);
+    return JSON.stringify({ status: "error", message: "Couldn't trigger the flow." });
+  }
+}
