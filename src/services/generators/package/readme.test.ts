@@ -55,6 +55,15 @@ function headings(text: string): string[] {
     .map((line) => line.slice(3));
 }
 
+function sectionBody(text: string, title: string): string {
+  const heading = `## ${title}\n`;
+  const start = text.indexOf(heading);
+  if (start < 0) throw new Error(`missing ${title}`);
+  const bodyStart = start + heading.length;
+  const next = text.indexOf('\n## ', bodyStart);
+  return next < 0 ? text.slice(bodyStart) : text.slice(bodyStart, next);
+}
+
 function readyOf(browser: boolean, validation: boolean, permissions: boolean): 0 | 1 | 2 | 3 {
   const n = Number(browser) + Number(validation) + Number(permissions);
   switch (n) {
@@ -256,12 +265,13 @@ describe('buildReadme', () => {
   it('troubleshooting has the four points', () => {
     for (const recipe of RECIPES) {
       const readme = buildReadme(inputFor(recipe.id));
-      expect(readme).toContain('x-ms-user-trace');
-      expect(readme).toContain('RTSL01');
-      expect(readme).toContain('403');
-      expect(readme).toContain(GOVERNANCE);
-      if (catalogueOutbound(recipe.id)) expect(readme).toContain('StatusCode');
-      else expect(readme).not.toContain('StatusCode');
+      const trouble = sectionBody(readme, 'Troubleshooting');
+      expect(trouble).toContain('x-ms-user-trace');
+      expect(trouble).toContain('RTSL01');
+      expect(trouble).toContain('403');
+      expect(trouble).toContain(GOVERNANCE);
+      if (catalogueOutbound(recipe.id)) expect(trouble).toContain('StatusCode');
+      else expect(trouble).not.toContain('StatusCode');
     }
   });
 
