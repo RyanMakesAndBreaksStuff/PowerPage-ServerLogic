@@ -657,23 +657,39 @@ git commit -m "feat(starter): add the CodeMirror code editor with line marks and
 
 **Files:**
 
-- Create: `src/features/starter/code/CopyButton.tsx` — the Copy action.
-- Signal: `src/features/starter/code/CopyButton.test.tsx` — success and failure toasts through the fake host.
+- Create: `src/app/CopyButton.tsx` — the Copy action. It lives in `src/app/` because Server Objects (Phase 22) uses it too and a feature can't import another feature's internals; `ExternalLink` is the precedent.
+- Signal: `src/app/CopyButton.test.tsx` — success and failure toasts through the fake host.
 
 - [ ] **Step 1: Establish the observable pre-change signal**
 
-Create `src/features/starter/code/CopyButton.test.tsx`:
+Create `src/app/CopyButton.test.tsx`:
 
 ```tsx
-import { screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
-import { renderStarter } from '../starterTestHarness';
-import { CopyButton } from './CopyButton';
+import { HostContext } from '@/app/HostContext';
+import { NotifyProvider } from '@/app/NotifyProvider';
+import { createFakeHost } from '@/services/pptb/fakeHost';
+import type { FakeHostInit } from '@/services/pptb/fakeHost';
+import { CopyButton } from '@/app/CopyButton';
 
-describe('CopyButton (AC-4.9, F49)', () => {
+function mount(init: FakeHostInit = {}) {
+  const host = createFakeHost(init);
+  render(
+    <HostContext value={host}>
+      <NotifyProvider>
+        <CopyButton text={'a\nb'} label="Copy sample" />
+      </NotifyProvider>
+    </HostContext>,
+  );
+  return { host, user: userEvent.setup() };
+}
+
+describe('CopyButton (AC-4.9, AC-6.7, F49)', () => {
   it('copies the text and says "Code copied"', async () => {
-    const { host, user } = renderStarter(<CopyButton text={'a\nb'} label="Copy server code" />);
-    await user.click(screen.getByRole('button', { name: 'Copy server code' }));
+    const { host, user } = mount();
+    await user.click(screen.getByRole('button', { name: 'Copy sample' }));
     await waitFor(() => {
       expect(host.callsOf('notify')).toEqual([
         { method: 'notify', notice: { title: 'Code copied', body: '', type: 'success' } },
@@ -684,10 +700,8 @@ describe('CopyButton (AC-4.9, F49)', () => {
 
   it('says "Couldn\'t copy" when the clipboard write fails, logging the error name only', async () => {
     const log = vi.spyOn(console, 'error').mockImplementation(() => undefined);
-    const { host, user } = renderStarter(<CopyButton text="x" label="Copy server code" />, {
-      host: { copy: 'reject' },
-    });
-    await user.click(screen.getByRole('button', { name: 'Copy server code' }));
+    const { host, user } = mount({ copy: 'reject' });
+    await user.click(screen.getByRole('button', { name: 'Copy sample' }));
     await waitFor(() => {
       expect(host.callsOf('notify')).toEqual([
         { method: 'notify', notice: { title: "Couldn't copy", body: '', type: 'error' } },
@@ -700,13 +714,13 @@ describe('CopyButton (AC-4.9, F49)', () => {
 
 - [ ] **Step 2: Capture the current signal**
 
-Run: `npx vitest run src/features/starter/code/CopyButton.test.tsx`
+Run: `npx vitest run src/app/CopyButton.test.tsx`
 
-Expected: `FAIL  src/features/starter/code/CopyButton.test.tsx`, with `Error: Failed to resolve import "./CopyButton" from "src/features/starter/code/CopyButton.test.tsx". Does the file exist?`
+Expected: `FAIL  src/app/CopyButton.test.tsx`, with `Error: Failed to resolve import "@/app/CopyButton" from "src/app/CopyButton.test.tsx". Does the file exist?`
 
 - [ ] **Step 3: Implement the minimum fix**
 
-Create `src/features/starter/code/CopyButton.tsx`:
+Create `src/app/CopyButton.tsx`:
 
 ```tsx
 import { useTransition } from 'react';
@@ -716,7 +730,7 @@ import { useNotify } from '@/app/useNotify';
 import { Button } from '@/components/Button';
 import { Icon } from '@/components/Icon';
 
-// AC-4.9, F49: copies the pane's plain text (never the line numbers) and is disabled while copying.
+// AC-4.9, AC-6.7, F49: copies plain text (never line numbers) and is disabled while copying.
 export function CopyButton({ text, label }: { text: string; label: string }): ReactElement {
   const host = useHost();
   const notify = useNotify();
@@ -745,18 +759,18 @@ export function CopyButton({ text, label }: { text: string; label: string }): Re
 
 - [ ] **Step 4: Confirm the signal changed, and nothing else did**
 
-Run: `npx vitest run src/features/starter/code/CopyButton.test.tsx`
+Run: `npx vitest run src/app/CopyButton.test.tsx`
 
 Expected: `Test Files  1 passed (1)` and `Tests  2 passed (2)`.
 
-Run: `npx tsc -b && npx eslint src/features/starter --max-warnings=0`
+Run: `npx tsc -b && npx eslint src/app/CopyButton.tsx src/app/CopyButton.test.tsx --max-warnings=0`
 
 Expected: both exit 0 with no output.
 
 - [ ] **Step 5: Commit the coherent change**
 
 ```bash
-git add src/features/starter/code/CopyButton.tsx src/features/starter/code/CopyButton.test.tsx
+git add src/app/CopyButton.tsx src/app/CopyButton.test.tsx
 git commit -m "feat(starter): add Copy with success and failure toasts"
 ```
 
@@ -921,7 +935,7 @@ import type { CheckSeverity } from '@/lib/code-analysis/codeAnalysis.types';
 import { LIQUID_SERVER_NOTE } from '@/services/generators/client/client';
 import { generateHandler } from '@/services/generators/handlers';
 import { CodeEditor } from './CodeEditor';
-import { CopyButton } from './CopyButton';
+import { CopyButton } from '@/app/CopyButton';
 import './codePanes.css';
 
 const SEVERITY = {
@@ -1164,7 +1178,7 @@ import { getRecipe } from '@/services/catalogue/recipes';
 import { generateClient } from '@/services/generators/client/client';
 import { languageOptions } from '../inputs/starterOptions';
 import { CodeEditor } from './CodeEditor';
-import { CopyButton } from './CopyButton';
+import { CopyButton } from '@/app/CopyButton';
 import './codePanes.css';
 
 /** The read-only client call (AC-2.4, AC-4.1, AC-4.4, AC-4.7 pill). */

@@ -1,9 +1,9 @@
 # Feature 001: Power Pages Server Logic — Logic Starter & Logic Inspector
 
 **Status:** Approved
-**Version:** 2.1.0
+**Version:** 2.2.0
 **Created:** 2026-10-06
-**Updated:** 2026-10-19
+**Updated:** 2026-10-20
 **Branch:** `001-server-logic-starter-inspector`
 **Design source:** layout 10a, `design_handoff_server_logic_tools/Logic Tooling Design Directions/design_handoff_server_logic_tools/` (README + references 01–06, light and dark), for the shell, Logic Starter, Server Objects, Logic Inspector and all UI tokens. Report styling still follows the original handoff's README §05 (`design_handoff_server_logic_tools/README.md`). High fidelity: colours, type, spacing and copy are final except where this spec overrides them (recipe list, A8, F38 labels).
 
@@ -24,6 +24,7 @@
 | 1.1.0 | 2026-10-14 | **MINOR.** Owner decisions on build phasing. **Added:** per-page releases (Starter, Server Objects, Inspector, in the order each completes), with unreleased pages' tabs shown disabled and their code left out of the build (AC-1.7, FR-1, FR-12); AC-1.1 and AC-6.8 note the exception. **Changed:** spike evidence goes in the plan of the phase that runs the spike, since each phase has its own plan file. **Resolved log:** PDF via jsPDF and jspdf-autotable in the web view (no .NET worker), the zip via fflate `zipSync`, the code editor via CodeMirror 6. |
 | 2.0.0 | 2026-10-16 | **MAJOR.** Results of Spike S1 (PG DEV, enhanced data model, 2026-10-14) and Spike S4 (live probe on PG DEV, 2026-10-15/16); evidence is in the phase-0 plan. **Rewritten:** FR-4 matching: the runtime matches Learn's restricted list as case-insensitive regexes over the raw text, so every hit is Blocked, including inside comments, strings and identifiers (correction 14, T6/T9–T11/T14, new T21–T22); the jQuery client calls `shell.ajaxSafePost`, because `shell.safeAjax` doesn't exist on a live site (correction 9, AC-4.6, FR-2a); FR-7's grant set follows a Parent-scope permission's chain to the roles of its top permission. **Changed:** corrections 8 and 11 confirmed live (failure envelopes have no `data`; connector results are JSON strings); AC-4.7 drops the `async` condition (Liquid calls async functions); FR-7 data sources record where S1 found each fact, read settings backed by environment variables, and flag `*.` entries in `AllowedDomains`, which match no host (FR-9). **Added:** corrections 20–23 (blocked HttpClient calls return `StatusCode` 0, `Server.User` is the whole contact record, top-level helpers are accepted, the `x-ms-user-trace` header) and a README troubleshooting note; S2 checks file-column download and environment-variable read access. **Unchanged:** R4 `post` keeps Global Create-only: S4 proved the caller's parent account is readable, not that a bound create works (F04). S4 item 6 and `CloudFlow.TriggerAsync` stay untested. |
 | 2.1.0 | 2026-10-19 | **MINOR.** R7 contract row is column-aware (owner decision 2026-10-19, evidence in phase-19-handler-r7.md). Example request is the S3 sample body. S3 script half is done; the collision probe stays open. |
+| 2.2.0 | 2026-10-20 | **MINOR.** Owner decision: Server Objects ships only with Logic Starter, because its used marks, "Used here" filter, Used in, Permissions needed and Insert all read the Starter session. **Added:** a build that releases `objects` without `starter` fails (FR-1 released pages). **Changed:** per-page releases keep their completion order, except that Server Objects is never released before Logic Starter (FR-1 release rule). **Removed:** the unreachable "unreleased Starter" cases in AC-1.7 and AC-6.8. |
 
 ---
 
@@ -128,7 +129,7 @@ Where the mocks and Learn disagree, Learn wins. The visual design still applies.
 - [ ] **AC-1.4** Given any tab When the user selects another Then the content area swaps immediately with no transition, and the previous tab's state is kept.
 - [ ] **AC-1.5** Given any pill When it has keyboard focus Then it shows a 2px outline in the theme's primary colour at a 2px offset, and the selected pill never uses the needs-review colour (FR-11).
 - [ ] **AC-1.6** Given the host theme When the tool opens Then it reads `toolboxAPI.utils.getCurrentTheme()` and renders its first frame in that theme, light (11c) or dark (12e). It re-reads the theme on `settings:updated`, on window focus and when the document becomes visible, because PPTB has no dedicated theme event. If the host can't answer, the tool keeps its current theme, or uses light at launch, as PPTB does. There is no in-tool toggle (FR-11).
-- [ ] **AC-1.7** Given a build in which a page isn't released yet (FR-1 released pages) When the shell renders Then that page's top tab still shows with its glyph and label, in the disabled style, with `aria-disabled="true"`. It stays in the tab list's arrow-key order but can't be activated, and it has no tooltip; this is an owner-approved exception to F47 for unreleased pages only. The first released tab, in AC-1.1 order, is active instead of Logic Starter. While Logic Inspector is unreleased, the site pill is disabled as in AC-1.3. While Logic Starter is unreleased, Server Objects doesn't show **Insert into handler**; Copy stays (AC-6.8). The page's content never renders.
+- [ ] **AC-1.7** Given a build in which a page isn't released yet (FR-1 released pages) When the shell renders Then that page's top tab still shows with its glyph and label, in the disabled style, with `aria-disabled="true"`. It stays in the tab list's arrow-key order but can't be activated, and it has no tooltip; this is an owner-approved exception to F47 for unreleased pages only. The first released tab, in AC-1.1 order, is active instead of Logic Starter. While Logic Inspector is unreleased, the site pill is disabled as in AC-1.3. Server Objects is never released without Logic Starter (FR-1), so it always has the Starter session and its Insert. The page's content never renders.
 
 ### Story 2: Configure a handler (Create Logic)
 
@@ -257,7 +258,6 @@ Where the mocks and Learn disagree, Learn wins. The visual design still applies.
     - "Move the cursor between statements inside a function, or use Copy" when the cursor isn't at a statement position;
     - "Inserting here would break the code; use Copy" when the trial parse fails (for example, a duplicate `let` or `const`).
   - **Fixture:** in `function get(){ /* cursor */ return "{}"; }`, with the cursor inside the comment, Insert is disabled with the statement-position tooltip.
-  - **Unreleased Starter.** In a build where Logic Starter isn't released, Insert isn't shown and Copy is the only action (AC-1.7).
   There is no snippet-form contract, variable-conflict analysis or reachability analysis beyond these rules.
 - [ ] **AC-6.9** Given the context column When it renders Then it shows:
   - "Used in <slug>": each used object with pills for the members called, plus a "← Back to Create Logic" link.
@@ -369,7 +369,7 @@ Where the mocks and Learn disagree, Learn wins. The visual design still applies.
 - Provide the three top tabs and the title-bar connection context and site picker, as in Story 1. The view state is `'starter' | 'objects' | 'inspector'`.
 - Keep each tab's state while switching.
 - Keep Starter and Server Objects fully usable without a connection.
-- **Released pages:** a build-time list names the released pages (`starter`, `objects`, `inspector`). An unreleased page's tab follows AC-1.7, and its code is left out of the bundle. The list isn't a runtime option or a tool setting, and users can't change it. Once all three pages are released, the list goes and AC-1.1 applies in full.
+- **Released pages:** a build-time list names the released pages (`starter`, `objects`, `inspector`). An unreleased page's tab follows AC-1.7, and its code is left out of the bundle. `objects` requires `starter`: Server Objects reads the Starter session, so a list that names `objects` without `starter` fails the build. The list isn't a runtime option or a tool setting, and users can't change it. Once all three pages are released, the list goes and AC-1.1 applies in full.
 - Follow the host theme (AC-1.6, FR-11).
 - Show every toast (success, info and error messages named in this spec) through `toolboxAPI.utils.showNotification({ title, body, type })`. Errors pass `duration: 0`, so they stay until dismissed. Success and info pass no `duration`, so they follow the user's PPTB notification duration setting. Toast text never includes stack traces.
 - **Fallback:** when `showNotification` is missing, throws or rejects, show the same message as an in-tool toast styled like a Bootstrap toast: a stack at the bottom right of the tool, each toast with a header (title and a close button) and a body, fading in and out (no animation under `prefers-reduced-motion`). Success and info toasts hide after 5 s; error toasts stay until closed. Success and info toasts use `role="status"`; error toasts use `role="alert"`. Log the host failure with `console.error`, by error name only. A failing fallback never calls the host again.
@@ -818,7 +818,7 @@ Sources: PPTB tool-development docs (manifest, `pptb-validate`, marketplace poli
 - Omit `cspExceptions`: every script, style, font and image is bundled, and all Dataverse traffic goes through the host. The default CSP allows only `'self'`, inline scripts and styles, and `data:` fonts and images.
 - Don't set `enabledForPowerPlatformAPI`; the tool reads only through `dataverseAPI`.
 - Pass `npx pptb-validate` with no errors before any release; `npm audit` is clean for a verified listing.
-- Release per page: Logic Starter, Server Objects and Logic Inspector are each published once complete, in whatever order they finish. Each release meets every AC of its released pages and of Story 1 (with AC-1.7 for unreleased pages), passes the validator, and is published only with the owner's explicit confirmation.
+- Release per page: Logic Starter, Server Objects and Logic Inspector are each published once complete, in whatever order they finish, except that Server Objects is released with or after Logic Starter. Each release meets every AC of its released pages and of Story 1 (with AC-1.7 for unreleased pages), passes the validator, and is published only with the owner's explicit confirmation.
 - Register `toolboxAPI.events.on` once at start-up and remove the handler on unload.
 
 **Must not:**
@@ -968,6 +968,7 @@ Spike checks are proposals until they run. Nothing in this spec counts as verifi
 - 2026-10-14 (owner): External links → `openInConnectionBrowser` on user selection (FR-1).
 - 2026-10-14 (owner): Host → PPTB Desktop App 1.2.7 or later; the VS Code extension isn't targeted (FR-12).
 - 2026-10-14 (owner): Releases → per page, in completion order; unreleased tabs are shown disabled with no tooltip, and their code isn't built (AC-1.7, FR-1, FR-12).
+- 2026-10-20 (owner): Server Objects → ships only with Logic Starter; a build naming `objects` without `starter` fails (FR-1, AC-1.7, AC-6.8).
 - 2026-10-14 (owner): Build planning → walking skeleton, then thin vertical slices; one plan file per phase, and spike evidence goes in the plan of the phase that runs it.
 - 2026-10-14 (owner): PDF → jsPDF and jspdf-autotable in the web view, drawn as vector text (never `html()` rasterising). Not a PPTB .NET worker: it needs a user-installed .NET 10 SDK, has a 1 MiB JSON-only message cap and runs unsandboxed (FR-10).
 - 2026-10-14 (owner): Zip → fflate `zipSync`, built in memory; the async API is unusable because the CSP blocks blob workers (AC-5.6, AC-5.10).
