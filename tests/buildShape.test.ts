@@ -124,6 +124,16 @@ describe('released pages (FR-1): unreleased page code is left out of the bundle'
     },
     BUILD_TIMEOUT,
   );
+
+  it(
+    'fails the build for Server Objects without Logic Starter',
+    async () => {
+      await expect(buildTool('objects-only', 'objects,inspector')).rejects.toThrow(
+        /Server Objects needs Logic Starter/,
+      );
+    },
+    BUILD_TIMEOUT,
+  );
 });
 
 describe('library probe build', () => {

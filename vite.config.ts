@@ -26,7 +26,14 @@ function parseReleasedPages(raw: string | undefined): ReadonlySet<Page> {
       `VITE_RELEASED_PAGES has unknown page(s): ${unknown.map((n) => JSON.stringify(n)).join(', ')}. Use any of: ${ALL_PAGES.join(', ')}.`,
     );
   }
-  return new Set(names.filter(isPage));
+  const released = new Set(names.filter(isPage));
+  // Server Objects reads the Starter session (used marks, Insert), so it never ships without Logic Starter.
+  if (released.has('objects') && !released.has('starter')) {
+    throw new Error(
+      'VITE_RELEASED_PAGES names "objects" without "starter": Server Objects needs Logic Starter.',
+    );
+  }
+  return released;
 }
 
 /**

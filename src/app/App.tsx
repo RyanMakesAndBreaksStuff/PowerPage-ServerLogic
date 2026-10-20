@@ -65,10 +65,6 @@ export function App({ host, starterDeps = STARTER_DEPS }: AppProps): ReactElemen
                       </Panel>
                     ) : null}
                   </StarterSessionProvider>
-                ) : __PAGE_OBJECTS__ ? (
-                  <Panel id="objects" label="Server Objects" view={view}>
-                    <ServerObjectsPage />
-                  </Panel>
                 ) : null}
                 {__PAGE_INSPECTOR__ ? (
                   <Panel id="inspector" label="Logic Inspector" view={view}>
