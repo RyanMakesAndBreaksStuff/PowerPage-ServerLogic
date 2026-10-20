@@ -1,0 +1,219 @@
+/* Create Logic, layout 10a §2. Colours come only from the theme tokens. */
+
+/* Fills the tool below the 42px title bar; below the 1024×700 minimum the window scrolls (NFR). */
+.starter-page {
+  box-sizing: border-box;
+  height: max(calc(100vh - 42px), 658px);
+  padding: 12px 16px 16px;
+  display: grid;
+  grid-template-columns: 220px repeat(3, minmax(0, 1fr));
+  grid-template-rows: 129px minmax(0, 1fr) auto;
+  gap: 12px;
+}
+
+.starter-page__note {
+  grid-row: 3;
+  grid-column: 1 / 4;
+}
+
+.starter-page__actions {
+  grid-row: 3;
+  grid-column: 4;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+}
+
+.starter-field {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid var(--control-border);
+  border-bottom: 2px solid var(--primary);
+  border-radius: 4px;
+  background: var(--code);
+  color: var(--text);
+  font-size: 12.5px;
+}
+
+.starter-help {
+  margin: 0;
+  color: var(--muted);
+  font-size: 11.5px;
+  overflow-wrap: anywhere;
+}
+
+.starter-help--clamp {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.starter-help--truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.starter-help code {
+  font-size: 11.5px;
+}
+
+.starter-export--active {
+  color: var(--text);
+  font-weight: 700;
+}
+
+.starter-object {
+  color: var(--server);
+}
+
+.starter-count {
+  color: var(--muted);
+  font-size: 11.5px;
+  white-space: nowrap;
+}
+
+/* The recipe list opens over the code row, so this tile must not clip it. */
+.starter-tile--recipe {
+  position: relative;
+  z-index: 2;
+  overflow: visible;
+}
+
+.starter-tile--readiness {
+  flex-direction: row;
+  align-items: center;
+  gap: 14px;
+}
+
+.starter-readiness {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 5px;
+}
+
+.starter-readiness__row {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.starter-combobox {
+  position: relative;
+}
+
+.starter-combobox__field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border: 1px solid var(--control-border);
+  border-bottom: 2px solid var(--primary);
+  border-radius: 4px;
+  background: var(--code);
+  color: var(--muted);
+}
+
+.starter-combobox__field:focus-within {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.starter-combobox__input {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 12.5px;
+  text-overflow: ellipsis;
+}
+
+/* The field draws the focus ring for the input inside it. */
+.starter-combobox__input:focus-visible {
+  outline: none;
+}
+
+.starter-combobox__list {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  max-height: 320px;
+  overflow-y: auto;
+  padding: 4px 0;
+  background: var(--tile);
+  border: 1px solid var(--control-border);
+  border-radius: 6px;
+  box-shadow: var(--tile-shadow);
+}
+
+.starter-combobox__group {
+  padding: 6px 10px 2px;
+  color: var(--muted);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.starter-combobox__option {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 5px 10px;
+  color: var(--text);
+  font-size: 12.5px;
+  cursor: pointer;
+}
+
+.starter-combobox__option[aria-selected='true'] {
+  background: var(--ok-tint);
+  box-shadow: inset 2px 0 0 var(--primary);
+}
+
+.starter-combobox__object {
+  color: var(--server);
+  font-size: 11px;
+}
+
+.starter-combobox__empty {
+  padding: 6px 10px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.starter-note__row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.starter-note__text {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  color: var(--text-2);
+  font-size: 12.5px;
+}
+
+.starter-note__checklist {
+  color: var(--text-2);
+  font-size: 12px;
+}
+
+.starter-note__checklist summary {
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.starter-note__checklist ul {
+  margin: 6px 0 0;
+  padding-left: 18px;
+}

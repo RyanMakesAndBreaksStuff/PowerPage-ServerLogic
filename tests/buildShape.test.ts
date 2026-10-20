@@ -92,11 +92,11 @@ describe('built tool: PPTB loading shape (all pages released)', () => {
     expect(existsSync(`${dist}/icons/server-logic-tools.svg`)).toBe(true);
   });
 
-  it('includes all three page placeholders', () => {
+  it('includes all three pages', () => {
     const [file] = filesIn(dist, '.js');
     if (file === undefined) throw new Error('no bundle emitted');
     const code = read(dist, file);
-    expect(code).toContain('Logic Starter page placeholder');
+    expect(code).toContain('Discard your edits?'); // text only the Starter page renders
     expect(code).toContain('Server Objects page placeholder');
     expect(code).toContain('Logic Inspector page placeholder');
   });
@@ -110,7 +110,7 @@ describe('released pages (FR-1): unreleased page code is left out of the bundle'
       const [file] = filesIn(dist, '.js');
       if (file === undefined) throw new Error('no bundle emitted');
       const code = read(dist, file);
-      expect(code).toContain('Logic Starter page placeholder');
+      expect(code).toContain('Discard your edits?'); // text only the Starter page renders
       expect(code).not.toContain('Server Objects page placeholder');
       expect(code).not.toContain('Logic Inspector page placeholder');
     },

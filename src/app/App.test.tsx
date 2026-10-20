@@ -47,14 +47,14 @@ describe('App shell', () => {
     fireEvent.click(screen.getByRole('tab', { name: 'Server Objects' }));
     expect(panel('objects')?.hidden).toBe(false);
     expect(panel('starter')?.hidden).toBe(true);
-    expect(screen.getByText('Logic Starter page placeholder')).toBeTruthy();
+    expect(screen.getByRole('region', { name: 'Logic name', hidden: true })).toBeTruthy();
   });
 
   it('reads "Not connected" and keeps the site pill disabled without a connection (AC-1.3)', async () => {
     await mount(null);
     expect(screen.getByText('Not connected')).toBeTruthy();
     expect(screen.getByText('No site selected').getAttribute('aria-disabled')).toBe('true');
-    expect(screen.getByText('Logic Starter page placeholder')).toBeTruthy();
+    expect(screen.getByRole('region', { name: 'Logic name' })).toBeTruthy();
   });
 
   it('shows the connection and its environment (AC-1.2), and follows connection changes', async () => {
