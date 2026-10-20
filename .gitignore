@@ -9,3 +9,6 @@ coverage/
 .env
 .env.*
 .scaffold/
+/.vs
+/AGENTS.md
+/LEAN-CTX.md
