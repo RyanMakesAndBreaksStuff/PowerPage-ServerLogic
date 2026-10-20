@@ -10,8 +10,10 @@ import type { StarterAction } from '@/app/starter-session/starterSession.types';
 import { StarterSessionProvider } from '@/app/starter-session/StarterSessionProvider';
 import { StarterSessionContext } from '@/app/starter-session/useStarterSession';
 import type { useStarterSession } from '@/app/starter-session/useStarterSession';
+import { ViewContext } from '@/app/useView';
 import { createFakeHost } from '@/services/pptb/fakeHost';
 import type { FakeHostInit } from '@/services/pptb/fakeHost';
+import type { View } from '@/types/http';
 
 type Session = ReturnType<typeof useStarterSession>;
 
@@ -22,19 +24,25 @@ export function renderStarter(
   const host = createFakeHost(options.host);
   const user = userEvent.setup();
   let latest: Session | null = null;
+  const views: View[] = [];
+  const setView = (v: View): void => {
+    views.push(v);
+  };
   render(
     <HostContext value={host}>
       <NotifyProvider>
-        <StarterSessionProvider deps={options.deps ?? FAKE_STARTER_DEPS}>
-          {ui}
-          {/* A render function, not a component, so the capture stays out of the app's lint rules. */}
-          <StarterSessionContext.Consumer>
-            {(session) => {
-              latest = session;
-              return null;
-            }}
-          </StarterSessionContext.Consumer>
-        </StarterSessionProvider>
+        <ViewContext value={['starter', setView]}>
+          <StarterSessionProvider deps={options.deps ?? FAKE_STARTER_DEPS}>
+            {ui}
+            {/* A render function, not a component, so the capture stays out of the app's lint rules. */}
+            <StarterSessionContext.Consumer>
+              {(session) => {
+                latest = session;
+                return null;
+              }}
+            </StarterSessionContext.Consumer>
+          </StarterSessionProvider>
+        </ViewContext>
       </NotifyProvider>
     </HostContext>,
   );
@@ -47,5 +55,5 @@ export function renderStarter(
       session().dispatch(action);
     });
   };
-  return { host, user, session, dispatch };
+  return { host, user, views, session, dispatch };
 }

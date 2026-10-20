@@ -113,6 +113,7 @@ describe('released pages (FR-1): unreleased page code is left out of the bundle'
       expect(code).toContain('Discard your edits?'); // text only the Starter page renders
       expect(code).not.toContain('Search objects and methods');
       expect(code).not.toContain('Logic Inspector page placeholder');
+      expect(code).not.toContain('Browse all in Server Objects');
     },
     BUILD_TIMEOUT,
   );

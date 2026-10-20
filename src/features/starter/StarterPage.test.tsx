@@ -199,4 +199,10 @@ describe('StarterPage note and actions (Phase 18)', () => {
     expect(ring('2 of 3 ready')).toBeInTheDocument();
     expect(h.session().state.language).toBe('fetch');
   });
+
+  it('opens Server Objects from "Browse all in Server Objects" (AC-6.10)', async () => {
+    const h = renderStarter(<StarterPage />);
+    await h.user.click(screen.getByRole('button', { name: 'Browse all in Server Objects' }));
+    expect(h.views).toEqual(['objects']);
+  });
 });
