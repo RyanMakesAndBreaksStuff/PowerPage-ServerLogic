@@ -97,7 +97,7 @@ describe('built tool: PPTB loading shape (all pages released)', () => {
     if (file === undefined) throw new Error('no bundle emitted');
     const code = read(dist, file);
     expect(code).toContain('Discard your edits?'); // text only the Starter page renders
-    expect(code).toContain('Server Objects page placeholder');
+    expect(code).toContain('Search objects and methods');
     expect(code).toContain('Logic Inspector page placeholder');
   });
 });
@@ -111,7 +111,7 @@ describe('released pages (FR-1): unreleased page code is left out of the bundle'
       if (file === undefined) throw new Error('no bundle emitted');
       const code = read(dist, file);
       expect(code).toContain('Discard your edits?'); // text only the Starter page renders
-      expect(code).not.toContain('Server Objects page placeholder');
+      expect(code).not.toContain('Search objects and methods');
       expect(code).not.toContain('Logic Inspector page placeholder');
     },
     BUILD_TIMEOUT,
