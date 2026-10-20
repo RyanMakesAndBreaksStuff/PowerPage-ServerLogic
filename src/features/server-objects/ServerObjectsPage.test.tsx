@@ -211,6 +211,35 @@ describe('Server Objects page (Story 6)', () => {
     expect(screen.queryByRole('region', { name: 'Another sample' })).toBeNull();
   });
 
+  it('keeps the still-listed object when Used here shrinks and All is chosen (AC-6.4a)', async () => {
+    const { dispatch, user } = renderObjects(<ServerObjectsPage />);
+    dispatch({
+      type: 'editServer',
+      text: 'function get() {\n  Server.Connector.HttpClient.GetAsync(url, headers);\n  return "{}";\n}\n',
+      cursor: null,
+    });
+    await user.click(screen.getByRole('radio', { name: 'Used here' }));
+    expect(within(detail()).getByRole('heading', { name: 'HttpClient' })).toBeTruthy();
+    dispatch({ type: 'editServer', text: HANDLER, cursor: null });
+    expect(within(detail()).getByRole('heading', { name: 'Logger' })).toBeTruthy();
+    await user.click(screen.getByRole('radio', { name: 'All' }));
+    expect(within(detail()).getByRole('heading', { name: 'Logger' })).toBeTruthy();
+  });
+
+  it('keeps the member match after a row click and a cleared search (AC-6.4a)', async () => {
+    const { user } = renderObjects(<ServerObjectsPage />);
+    const search = screen.getByRole('searchbox', { name: 'Search objects and methods' });
+    await user.type(search, 'Update');
+    expect(
+      within(detail()).getByRole('radio', { name: 'UpdateRecord' }).getAttribute('aria-checked'),
+    ).toBe('true');
+    await user.click(pick('Server.Connector.Dataverse'));
+    await user.clear(search);
+    expect(
+      within(detail()).getByRole('radio', { name: 'UpdateRecord' }).getAttribute('aria-checked'),
+    ).toBe('true');
+  });
+
   it('goes back to Create Logic (AC-6.10)', async () => {
     const { user, views } = renderObjects(<ServerObjectsPage />);
     await user.click(screen.getByRole('button', { name: 'Back to Create Logic' }));

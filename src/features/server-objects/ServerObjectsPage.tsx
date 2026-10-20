@@ -30,8 +30,17 @@ export function ServerObjectsPage(): ReactElement {
   const [selection, setSelection] = useState<Selection>(DEFAULT_SELECTION);
 
   const listed = listObjects(query, filter, derived.usedMembers);
-  // An edit in the server pane can change "Used here" while this page is hidden; reselect covers it at render.
-  const current = selected(listed, reselect(listed, selection, query));
+  // An edit can shrink "Used here" while this page is hidden, and a row click stores the first member.
+  // Store the reselect during render so the next filter or clear uses what is on screen (AC-6.4a).
+  const next = reselect(listed, selection, query);
+  if (
+    next.path !== selection.path ||
+    next.member !== selection.member ||
+    next.variant !== selection.variant
+  ) {
+    setSelection(next);
+  }
+  const current = selected(listed, next);
 
   const change = (nextQuery: string, nextFilter: ObjectFilter): void => {
     setQuery(nextQuery);
