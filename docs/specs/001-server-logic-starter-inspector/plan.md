@@ -1,6 +1,6 @@
 # Implementation Plan: Server Logic Tools (index)
 
-**Spec:** docs/specs/001-server-logic-starter-inspector/spec.md (v2.2.0, Approved)
+**Spec:** docs/specs/001-server-logic-starter-inspector/spec.md (v2.3.0, Approved)
 **Decisions:** no ADRs; library and phasing decisions are in the spec's Resolved log, and the 2026-10-17 owner decisions are in `plan-starter.md`.
 **Created:** 2026-10-16. **Split into three page plans:** 2026-10-17.
 
@@ -10,7 +10,7 @@ This file is now an index. The 25-phase layout was replaced by three plans, one 
 |---|---|---|---|
 | [`plan-starter.md`](plan-starter.md) | Logic Starter, **plus Part A, the shared foundation**, and the Contracts every plan consumes | — | Part A fully planned (phases 00–06, 18a). Parts B and C outlined |
 | [`plan-server-objects.md`](plan-server-objects.md) | Server Objects | Part A, Phase 21 | Planned (phases 13, 22); spec v2.2.0 |
-| [`plan-inspector.md`](plan-inspector.md) | Logic Inspector and reports | Part A only | Outlined (phases 11, 12, 15, 16, 20, 23, 24) |
+| [`plan-inspector.md`](plan-inspector.md) | Logic Inspector and reports | Part A only | Outlined (phases 11, 12, 15, 16, 20, 23, 24); spec v2.3.0 |
 
 Phase numbers are stable IDs carried over from the original layout, so cross-references in the phase files stay valid. `18a` is the session state moved out of old Phase 18 into Part A.
 

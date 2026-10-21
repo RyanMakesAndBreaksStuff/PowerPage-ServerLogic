@@ -1,10 +1,10 @@
 # Feature 001: Power Pages Server Logic — Logic Starter & Logic Inspector
 
 **Status:** Approved
-**Version:** 2.2.0
+**Version:** 2.3.0
 **Created:** 2026-10-06
 **Updated:** 2026-10-20
-**Branch:** `001-server-logic-starter-inspector`
+**Branch:** `001-logic-inspector`
 **Design source:** layout 10a, `design_handoff_server_logic_tools/Logic Tooling Design Directions/design_handoff_server_logic_tools/` (README + references 01–06, light and dark), for the shell, Logic Starter, Server Objects, Logic Inspector and all UI tokens. Report styling still follows the original handoff's README §05 (`design_handoff_server_logic_tools/README.md`). High fidelity: colours, type, spacing and copy are final except where this spec overrides them (recipe list, A8, F38 labels).
 
 ---
@@ -25,6 +25,7 @@
 | 2.0.0 | 2026-10-16 | **MAJOR.** Results of Spike S1 (PG DEV, enhanced data model, 2026-10-14) and Spike S4 (live probe on PG DEV, 2026-10-15/16); evidence is in the phase-0 plan. **Rewritten:** FR-4 matching: the runtime matches Learn's restricted list as case-insensitive regexes over the raw text, so every hit is Blocked, including inside comments, strings and identifiers (correction 14, T6/T9–T11/T14, new T21–T22); the jQuery client calls `shell.ajaxSafePost`, because `shell.safeAjax` doesn't exist on a live site (correction 9, AC-4.6, FR-2a); FR-7's grant set follows a Parent-scope permission's chain to the roles of its top permission. **Changed:** corrections 8 and 11 confirmed live (failure envelopes have no `data`; connector results are JSON strings); AC-4.7 drops the `async` condition (Liquid calls async functions); FR-7 data sources record where S1 found each fact, read settings backed by environment variables, and flag `*.` entries in `AllowedDomains`, which match no host (FR-9). **Added:** corrections 20–23 (blocked HttpClient calls return `StatusCode` 0, `Server.User` is the whole contact record, top-level helpers are accepted, the `x-ms-user-trace` header) and a README troubleshooting note; S2 checks file-column download and environment-variable read access. **Unchanged:** R4 `post` keeps Global Create-only: S4 proved the caller's parent account is readable, not that a bound create works (F04). S4 item 6 and `CloudFlow.TriggerAsync` stay untested. |
 | 2.1.0 | 2026-10-19 | **MINOR.** R7 contract row is column-aware (owner decision 2026-10-19, evidence in phase-19-handler-r7.md). Example request is the S3 sample body. S3 script half is done; the collision probe stays open. |
 | 2.2.0 | 2026-10-20 | **MINOR.** Owner decision: Server Objects ships only with Logic Starter, because its used marks, "Used here" filter, Used in, Permissions needed and Insert all read the Starter session. **Added:** a build that releases `objects` without `starter` fails (FR-1 released pages). **Changed:** per-page releases keep their completion order, except that Server Objects is never released before Logic Starter (FR-1 release rule). **Removed:** the unreachable "unreleased Starter" cases in AC-1.7 and AC-6.8. |
+| 2.3.0 | 2026-10-20 | **MINOR.** Fixes from the `plan-inspector.md` review, checked against Learn (Filter rows, file column download, web roles, server logic site settings, service protection limits), the PPTB events docs and Microsoft's Power Pages plugin. **Owner decisions:** results clear only when the active connection's id or URL changes, or no connection is active; other `connection:*` events keep them (AC-7.6); connection lost is a network or 401 read failure with the connection unchanged (AC-7.10); empty or unparseable code is the reviewable analysis limit "Couldn't analyse handler code", and only a failed download stays a read failure (AC-8.5, Error Scenarios); `TimeoutInSeconds` keeps Learn's 1–240 with a note for 121–240, because the plugin reports a 120 clamp (AC-7.12). **Added:** setting-name matching, inactive settings, `TimeoutInSeconds` and `AllowedDomains` parse rules, unknown table-permission scope, more than one default role (site banner), `$filter` literal escaping and at most 4 reads in flight (FR-7); export defaults, the snapshot point, cancel on cleared results and a build budget (AC-9.1, 9.8, 9.9); inline Markdown escaping, a vector `✓` and a JetBrains Mono TTF for the PDF (FR-10); the site pill's APG pattern (Accessibility). **Changed:** S2 adds connection-loss and event-payload checks and drops the up-front access test, which AC-7.7 covers per check. |
 
 ---
 
@@ -278,13 +279,13 @@ Where the mocks and Learn disagree, Learn wins. The visual design still applies.
 - [ ] **AC-7.3** Given a site is selected When the scan completes Then the files tile lists "Server logic (N)" with each record's file name and status ("Active" or "Inactive", from `statecode`). Inactive records are listed and checked like active ones, because they can be reactivated. If listing the records fails partway, the files tile shows "Inventory incomplete. Reconnect and rescan.", and the site result can't read as all Ready (F35).
 - [ ] **AC-7.4** Given the site has no server logic When the scan completes Then the empty state reads "No server logic found on this site" and Export report is disabled.
 - [ ] **AC-7.5** Given the PPTB connection is marked as Test, UAT or Production (its `environment` label, which the user sets in PPTB) When Inspector connects Then a persistent warning reads "This isn't a development environment. Inspector is read-only but is designed for dev sites." and scanning stays available.
-- [ ] **AC-7.6** Given the active connection changes, whichever tab is visible, Then Inspector's results and review marks are cleared and the site list reloads. Selecting a different site, or rescanning the same site, also clears results and review marks. Results from a superseded scan are discarded and never shown (FR-7 scan ID, F34).
+- [ ] **AC-7.6** Given the active connection changes, whichever tab is visible, Then Inspector's results and review marks are cleared and the site list reloads. The active connection has changed when its id or URL differs from the one the results were read with, or when no connection is active. PPTB fires `connection:created`, `connection:updated` and `connection:deleted` for any connection, so on each one the tool re-reads the active connection and compares; an event that leaves the id and URL unchanged (another connection added, edited or removed, or the active one renamed or relabelled) keeps results and review marks, and only the title bar and the AC-7.5 warning update. Selecting a different site, or rescanning the same site, also clears results and review marks. Results from a superseded scan are discarded and never shown (FR-7 scan ID, F34).
 - [ ] **AC-7.7** Given the connected identity can't read some configuration When the scan runs Then the affected checks show "Needs review – couldn't read configuration" and never "Configured". These checks have the status Needs review, count toward M, and export as "Needs review" with that reason.
 - [ ] **AC-7.8** Given the environment has no Power Pages sites When Inspector loads Then the empty state reads "No enhanced data model Power Pages sites found in this environment. Standard data model sites aren't supported.", no scan runs and Export report is disabled (F36). "Couldn't load sites" stays a separate error (Error Scenarios).
 - [ ] **AC-7.9** Given `ServerLogic/Enabled` is `false` for the selected site When the scan completes Then a banner above the files tile reads "Server logic is disabled on this site (`ServerLogic/Enabled` = false)". Files are still listed and checked, and the banner is repeated in every export.
-- [ ] **AC-7.10** Given the connection is lost mid-scan When the scan stops Then the results already read are kept and shown. Each file or check not yet read shows the state **Not scanned**, a "Connection lost. Reconnect and rescan." prompt appears, and a rescan replaces the results. Not scanned is a fourth display state, defined in FR-8.
+- [ ] **AC-7.10** Given the connection is lost mid-scan When the scan stops Then the results already read are kept and shown. Each file or check not yet read shows the state **Not scanned**, a "Connection lost. Reconnect and rescan." prompt appears, and a rescan replaces the results. Not scanned is a fourth display state, defined in FR-8. The connection is lost when a read fails with a network error or 401 while the active connection's id and URL are unchanged (Spike S2 records what the host returns for each). A 403 is AC-7.7, and a change of active connection is AC-7.6, which clears instead of keeping partial results.
 - [ ] **AC-7.11** Given the host doesn't report the environment type and Dataverse doesn't expose it When Inspector connects Then the environment classification shows "Unknown" and the AC-7.5 warning is shown.
-- [ ] **AC-7.12** Given `ServerLogic/TimeoutInSeconds` is set and isn't a positive integer up to 240 (Learn's maximum execution time) When the scan completes Then a site-level banner like AC-7.9 reads "`ServerLogic/TimeoutInSeconds` isn't a positive integer up to 240", and the banner is repeated in every export. It doesn't affect any check (F31).
+- [ ] **AC-7.12** Given `ServerLogic/TimeoutInSeconds` is set and isn't a positive integer up to 240 (Learn's maximum execution time) When the scan completes Then a site-level banner like AC-7.9 reads "`ServerLogic/TimeoutInSeconds` isn't a positive integer up to 240", and the banner is repeated in every export. It doesn't affect any check (F31). FR-7 defines how the value is read. For a value from 121 to 240 there's no banner, but the site detail notes "Microsoft's Power Pages plugin reports that values above 120 are clamped to 120. Learn allows up to 240." (owner decision 2026-10-20).
 
 ### Story 8: Review a file's readiness
 
@@ -303,7 +304,7 @@ Where the mocks and Learn disagree, Learn wins. The visual design still applies.
 - [ ] **AC-8.3** Given a file is selected When no finding has been chosen Then the first "Needs review" finding is selected, or the first finding if none need review.
 - [ ] **AC-8.4** Given the selected finding When the detail tile renders Then it shows the title, category, status, guidance text, a "Questions to consider" list and a configuration snapshot (web roles, tables with privileges, outbound).
 - [ ] **AC-8.5** Given a "Needs review" finding When the user selects **Mark as reviewed** Then its status becomes "Reviewed", the file ring, the file's list summary and the snapshot update, and the button becomes "Undo review". The button isn't shown for findings that are "Configured".
-  The button is also not shown when **any** of the finding's reasons is a read failure: "couldn't read configuration" (AC-7.7), "couldn't read handler code" (Error Scenarios) or a parent permission that couldn't be read. The remedy is a rescan with better access, so a file can't become Ready on evidence nobody saw. Analysis limits stay reviewable: "Couldn't determine which connectors the code uses" and a parent chain that loops or points at no record (F33).
+  The button is also not shown when **any** of the finding's reasons is a read failure: "couldn't read configuration" (AC-7.7), "couldn't read handler code" (Error Scenarios) or a parent permission that couldn't be read. The remedy is a rescan with better access, so a file can't become Ready on evidence nobody saw. Analysis limits stay reviewable: "Couldn't determine which connectors the code uses", "Couldn't analyse handler code" (the code downloaded but is empty or can't be parsed), "Couldn't interpret the scope of `<name>`" and a parent chain that loops or points at no record (F33). "Couldn't read handler code" means only that the download failed (owner decision 2026-10-20).
 - [ ] **AC-8.6** Given the files list When it renders Then each file shows its summary: "All configured" when C = 3; "Ready · V reviewed" when K = 3 and V > 0; otherwise "K/3 · M to review" (F38).
 - [ ] **AC-8.7** Given the files tile When it renders Then its footer always shows "Tenant outbound policy: not verified. This tool doesn't read tenant network policy."
 - [ ] **AC-8.8** Given the check rules (FR-9) When a file is evaluated Then:
@@ -315,6 +316,7 @@ Where the mocks and Learn disagree, Learn wins. The visual design still applies.
   - With no table permissions in the grant set, and Dataverse use detected in the handler code (FR-7 connector detection), Table permissions is "Needs review: Handler uses Dataverse but no table permissions are linked to its roles."
   - With no table permissions in the grant set, and no Dataverse use detected, Table permissions is "Configured: No Dataverse access in code, so no table permissions are needed." It counts toward K. **Exception:** if connector use couldn't be determined (FR-7), Table permissions is instead "Needs review: Couldn't determine which connectors the code uses." That result overrides this reassuring outcome (F24).
   - Only active table permissions count as linked. A permission that is inactive, or that is Parent scope with an inactive ancestor, is ignored. When a Parent-scope permission's chain can't be read or resolved, Table permissions is "Needs review: Couldn't evaluate parent permission `<name>`", whatever other permissions are linked (FR-7, F26).
+  - When a permission in the grant set has a missing or unknown `scope`, Table permissions is "Needs review: Couldn't interpret the scope of `<name>`" (FR-7).
   - If several Needs-review conditions apply to one check, the summary shows the first in the order listed here and the detail tile lists all of them.
   - `ServerLogic/TimeoutInSeconds` is a site-level banner (AC-7.12), not part of any check (F31).
   - Outbound networking follows the FR-9 decision table. The code-based cases come first. If connector use couldn't be determined and no HttpClient use is detected, Outbound is "Needs review: Couldn't determine which connectors the code uses." (row O0). Otherwise, with no HttpClient use detected (FR-7), Outbound is "Configured: No HttpClient calls in code." with the detail "Cloud flows (`CloudFlow.TriggerAsync`) aren't checked; their connections and network access are configured in the flow." (row O1, F32).
@@ -332,14 +334,14 @@ Where the mocks and Learn disagree, Learn wins. The visual design still applies.
 **Acceptance criteria:**
 
 - [ ] **AC-9.1** Given a scan that has finished or stopped, with at least one file discovered, When the user selects **Export report** Then a 520px modal opens on a scrim. Export report is disabled while a scan runs, and a report from a stopped scan carries the AC-7.10 notice (F40). The modal follows the APG modal dialog pattern: focus is trapped, Esc closes it, and focus returns to Export report (F48). It has:
-  - **Report:** *This file* or *Site summary*.
+  - **Report:** *This file* or *Site summary*. *This file* is the default when a file is selected and exports that file. With no file selected, *This file* is `aria-disabled` with the reason "Select a file first", and *Site summary* is selected.
   - **Format:** *Markdown* (default) or *PDF*.
   - **Include:** Questions to consider (on), Configuration snapshot (on) and Redact environment and site names (off).
   - A primary button that reads "Export Markdown" or "Export PDF".
 - [ ] **AC-9.2** Given This file + Markdown When the user exports Then `<file>-readiness.md` is saved, containing, in this order:
   - H2 "Server logic readiness: <file>".
   - **Environment**, **Scanned** and **Result** lines. Scanned reads "`<start>` – `<end>` (UTC±hh:mm)", followed by "Read as separate queries during this interval, not as one atomic snapshot." (F37)
-  - The AC-7.9 and AC-7.12 banners as blockquotes, only when they apply.
+  - The site banners (AC-7.9, AC-7.12 and the FR-7 default-role banner) as blockquotes, only when they apply.
   - A Check | Status | Finding table. A Reviewed check's Finding cell lists all its original reasons, whatever the Include toggles are set to (F41).
   - An H3 with guidance and a `- [ ]` question list per "Needs review" finding.
   - An H3 "Configuration snapshot" (web roles, tables with privileges, outbound), when that option is on.
@@ -350,15 +352,15 @@ Where the mocks and Learn disagree, Learn wins. The visual design still applies.
   - A header row (glyph, "Logic Inspector", "Site readiness report · <date>").
   - A hero: the site ring covering every check across all files (FR-11), "K/T checks addressed (C configured, V reviewed)" with the AC-8.1 variables summed over the site (F38, F39), the environment/site path, the scan interval and not-atomic statement from AC-9.2, the headline "<F> server logic files, <R> findings to review" (R counts Needs review checks), and Ready, Needs review, Incomplete (AC-8.10) and "Not verified: Tenant outbound policy" counts.
   - A files table with a mini ring per file, the three checks and a result pill.
-  - The AC-7.9 and AC-7.12 banners below the hero, only when they apply.
+  - The site banners (AC-7.9, AC-7.12 and the FR-7 default-role banner) below the hero, only when they apply.
   - A "Review first" section listing each open (Needs review) finding, ordered by check (Web role, Table permissions, Outbound networking) and then by file name A–Z. If any checks are Not scanned, a separate "Not scanned" list follows it in the same order.
   - The footer "Configuration review only. Confirm effective access with a real site user. Exported <date-time with UTC offset>."
 - [ ] **AC-9.4** Given This file + PDF, or Site summary + Markdown When the user exports Then the same content is produced in the other format: PDF uses the report page styling, and Markdown uses the H2 / table / H3 / checklist structure. File names follow `<file>-readiness.<ext>` and `<site>-site-readiness.<ext>`. In file names, the `<file>`/`<site>` stem is sanitised after redaction (AC-9.6): every run of characters outside `A-Za-z0-9._-` becomes `-`, leading and trailing `-` are trimmed, and an empty result becomes `site` (F43).
 - [ ] **AC-9.5** Given "Questions to consider" or "Configuration snapshot" is off When exporting Then that content is left out of the report.
 - [ ] **AC-9.6** Given "Redact environment and site names" is on When exporting Then the environment name, environment URL, site name and site domain or URL appear as `[environment]` and `[site]`, including in the file name of a Site summary export and the PDF's title metadata (F43). Server logic file names are not redacted.
 - [ ] **AC-9.7** Given findings marked "Reviewed" When exporting Then they appear as "Reviewed" (distinct from "Configured") in every format.
-- [ ] **AC-9.8** Given any export When it completes Then a toast confirms "<filename> exported". When the report's statuses and reasons are compared with the screen, they match. The report is built from the state at the moment the user selects Export; later changes don't affect it (F45).
-- [ ] **AC-9.9** Given any export When the save is confirmed Then it finishes within 5 s, measured from the user confirming the save dialog to the toast. If building or saving fails, an error toast reads "Couldn't save <filename>" with the reason, and no partial file is written. Cancelling the dialog writes nothing and shows no toast (mirrors AC-5.10 and AC-5.11, F46).
+- [ ] **AC-9.8** Given any export When it completes Then a toast confirms "<filename> exported". When the report's statuses and reasons are compared with the screen, they match. The report is built from the state at the moment the export dialog opens; later changes don't affect it (F45). If the results are cleared while the dialog is open (AC-7.6, a rescan or another site), the dialog closes, nothing is saved, and a status toast reads "Results changed, so the export was cancelled." Once the host's save dialog has opened, the snapshot already built is what gets saved.
+- [ ] **AC-9.9** Given any export When the save is confirmed Then it finishes within 5 s, measured from the user confirming the save dialog to the toast. `saveFile` takes the content up front, so the report is built before the save dialog opens; building takes at most 5 s, measured from the primary button to the save dialog appearing, and doesn't count toward the save budget. If building or saving fails, an error toast reads "Couldn't save <filename>" with the reason, and no partial file is written. Cancelling the dialog writes nothing and shows no toast (mirrors AC-5.10 and AC-5.11, F46).
 - [ ] **AC-9.10** Given configuration values containing Markdown or HTML syntax (a hostile-name fixture: a file, site and role named with `|`, `*`, `<script>`, `[x](y)` and a newline) When either format is exported Then the values render as literal text, the Markdown table keeps its columns, and nothing is fetched or executed (FR-10, F42).
 
 ## Functional Requirements
@@ -619,6 +621,8 @@ Learn-verified objects (9). Only members that Learn documents are listed. The ex
 - Give each scan an ID made of the connection, the site and a counter. Results carrying a stale ID are discarded, and starting a rescan supersedes the running one (F34).
 - Read every page of every query (F35). `dataverseAPI.queryData` documents only `value`, so Spike S2 checks whether it also returns `@odata.nextLink`. If it doesn't, list queries use `fetchXmlQuery` with its paging cookie.
 - Retry a read that fails with 429 or 5xx up to 3 times, waiting 1 s, 2 s and 4 s (PPTB's error object carries `status` but no `Retry-After`). After the last attempt the check is "Needs review – couldn't read configuration" (AC-7.7). PPTB's docs leave retries to the tool.
+- Keep at most 4 reads in flight, so per-record reads and their retry waits overlap and a 50-record scan fits the 30 s NFR. Dataverse's service protection limit is 52 concurrent requests per user (Learn), so 4 stays well inside it. The retry rule applies to each request.
+- In `$filter`, write every string value as an OData literal: double each `'` and URL-encode the result (Learn, "Filter rows using OData"). This covers values that come from configuration, such as environment-variable schema names, which may contain `'`.
 - List the Power Pages sites, and list the server logic records with their status for the selected site.
 - For each record, read its web roles, the grant set's table permissions (table, access type, privileges), its code (to derive exported function names and connector use), and the `ServerLogic/Enabled`, `ServerLogic/AllowedDomains`, `ServerLogic/AllowNetworkingToAllDomains` and `ServerLogic/TimeoutInSeconds` site settings.
 - Read each fact from the source in the data-source table below.
@@ -643,10 +647,14 @@ Learn-verified objects (9). Only members that Learn documents are listed. The ex
   - **Unknown:** an ancestor can't be read, the parent reference resolves to no readable record, or the chain loops. Table permissions is then Needs review, "Couldn't evaluate parent permission `<name>`", whatever other permissions are linked. An unresolved chain never leaves a clean Configured result.
   - The parent link is `content.parententitypermission`, the parent permission's `powerpagecomponentid` on the same site (Spike S1: 42 of 42 resolved).
   - The chain uses the type-18 components Inspector already reads, so it adds no query.
-- Parse `ServerLogic/AllowedDomains` as a comma-separated list of hosts, each trimmed (Spike S4: entries with a leading space matched). Learn doesn't document the format; if the value can't be parsed as that list, the Outbound check is "Needs review – couldn't interpret `ServerLogic/AllowedDomains`" (FR-9, O2). An entry that starts with `*.` is a **wildcard entry**: Spike S4 found `*.example.com` matched neither `www.example.com` nor `example.com`, so wildcard entries are reported (FR-9) and don't count toward the list.
+- Parse `ServerLogic/AllowedDomains` as a comma-separated list of hosts, each trimmed (Spike S4: entries with a leading space matched). Learn doesn't document the format, so the parse is strict: split on `,`, trim each entry and drop empty entries. An entry is a host when it matches `^(\*\.)?[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)*$`. Any other entry (a scheme such as `https://`, a path, a port, inner whitespace, or `*` anywhere but a leading `*.`) means the value can't be parsed, and the Outbound check is "Needs review – couldn't interpret `ServerLogic/AllowedDomains`", naming the entry (FR-9, O2). A value with no entries left is "no allow list". An entry that starts with `*.` is a **wildcard entry**: Spike S4 found `*.example.com` matched neither `www.example.com` nor `example.com`, so wildcard entries are reported (FR-9) and don't count toward the list.
 - Read a setting whose `content` has `source` 1 and an `envvar_schema` from its environment variable: the `environmentvariabledefinitions` row with that `schemaname`, its `environmentvariablevalue` `value`, or the definition's `defaultvalue` when there's no value (Spike S1). A Secret-type variable (`type` 100000005), a missing variable or a failed read is Needs review "Couldn't read `<setting>` from its environment variable" on the check that uses it. The finding's detail notes that the site uses a cached copy of environment-variable values until it restarts (Spike S4), so a recent change may not be live yet.
 - Treat `ServerLogic/AllowNetworkingToAllDomains` as `true` when the setting is absent (Learn default), and `ServerLogic/Enabled` as `true` when absent. Treat `ServerLogic/AllowedDomains` as "no allow list" when it is absent, empty or Learn's default text "All domains allowed". These defaults apply only after the settings query succeeded; a failed read is AC-7.7.
 - Normalise boolean settings (F28): trim, then match `true` or `false` case-insensitively. Any other value, empty included, is Needs review "Couldn't interpret `<setting>`" on the check that uses it (Outbound for `AllowNetworkingToAllDomains`; a site banner for `Enabled`). Two active settings with the same name on the same site are Needs review "Duplicate `<setting>`".
+- Match setting names after trimming, case-insensitively. Learn doesn't say whether the runtime's lookup is case-sensitive, so this finds every setting that might apply. Only active settings (`statecode` = 0) count: an inactive setting is ignored, as if absent, and the snapshot lists it as "(inactive, ignored)". Duplicates are two active settings whose names match this way.
+- Read `ServerLogic/TimeoutInSeconds` like the boolean settings, including from an environment variable: trim, then it's valid when it's only the digits `0`–`9` (leading zeros allowed) with a value from 1 to 240. Absent means Learn's default of 120 and no banner. Any other value, empty included, gets the AC-7.12 banner; a duplicate gets the banner "Duplicate `ServerLogic/TimeoutInSeconds`"; a failed read gets the banner "Couldn't read `ServerLogic/TimeoutInSeconds`". None of these affects a check.
+- Treat a table permission whose `scope` is missing or isn't one of the five values in the data-source table as unknown. Table permissions is then Needs review "Couldn't interpret the scope of `<name>`", an analysis limit that can be marked as reviewed (AC-8.5). Microsoft's Power Pages plugin also rejects such values in its table-permission validator.
+- If more than one web role on the site has `anonymoususersrole` = true, every one of them is treated as the anonymous role: each makes the Web role check flag an assignment, and each one's permissions join the grant set. The same applies to `authenticatedusersrole`. A site banner reads "More than one web role is marked as the Anonymous Users Role (`a`, `b`). Learn allows one per site." (or Authenticated Users Role) and is repeated in every export. It doesn't otherwise affect any check.
 - Scan every server logic record on the site, with no cap. The 30 s NFR applies up to 50 records. The scan always shows a progress count, "Scanned X of N" (F49).
 - Identify the default roles by the `anonymoususersrole` and `authenticatedusersrole` flags in each web role's `content`, never by name.
 - Warn, without blocking, on a non-Dev connection, or when the type is unknown (AC-7.5, AC-7.11).
@@ -687,11 +695,11 @@ S1 records the exact queries, one redacted sample record per component type, and
 - clipboard write (AC-4.9, AC-6.7);
 - whether `dataverseAPI.queryData` returns `@odata.nextLink` (FR-7);
 - a way to download a file column, for the server logic code in `filecontent` (Spike S1). Without one, every check that needs the code is "Needs review – couldn't read handler code";
-- read access to `environmentvariabledefinitions` and `environmentvariablevalues` for settings backed by environment variables (FR-7).
+- read access to `environmentvariabledefinitions` and `environmentvariablevalues` for settings backed by environment variables (FR-7);
+- what a read returns (error name and `status`) when the network drops and when the connection's sign-in expires, so AC-7.10 can tell connection loss from a 403 (AC-7.7);
+- whether `connection:*` events say which connection changed, or the tool must re-read the active connection on each one (AC-7.6).
 
-Theme, notifications and external links are settled by working PPTB tools (AC-1.6, FR-1). The host has no PDF API, so the tool bundles a PDF library (FR-10).
-
-Also confirm whether the signed-in identity's read access to `powerpagecomponent` and the environment-variable tables can be tested up front.
+Theme, notifications and external links are settled by working PPTB tools (AC-1.6, FR-1). The host has no PDF API, so the tool bundles a PDF library (FR-10). There's no up-front read-access test: a denied read is handled per check (AC-7.7).
 **Spike S4 (before the client generator ships; a dev site):** deploy one throwaway probe server logic, not a shipped recipe (F54), with:
 - `get`: Dataverse `RetrieveMultipleRecords`, an HttpClient GET of a JSON endpoint and of a text endpoint, and the raw `typeof` of each result;
 - `post`: `CreateRecord`, recording the exact `entityid` header casing (F55);
@@ -741,11 +749,13 @@ The probe also found that the runtime matches the restricted list case-insensiti
 
 **Must:**
 - **Web role:** Needs review when no role is assigned, or when the assigned roles include the anonymous role (`anonymoususersrole` = true in its `content`).
-- **Table permissions:** evaluated over the grant set (FR-7, F27). Needs review in four cases:
+- **Table permissions:** evaluated over the grant set (FR-7, F27). Needs review in six cases:
   - any Global access;
   - Create, Write, Delete, Append or Append To privileges for a handler that only exports `get()` (F25);
   - the code uses Dataverse (FR-7 connector detection) and the grant set has no active table permissions;
-  - a Parent-scope chain can't be resolved (FR-7).
+  - a Parent-scope chain can't be resolved (FR-7);
+  - a permission in the grant set has an unknown scope (FR-7);
+  - the code can't be read or analysed (Error Scenarios).
 
   Configured, with the "no table permissions needed" summary, when the grant set is empty and no Dataverse use is detected, unless connector use couldn't be determined (AC-8.8). Only active permissions count, and inactive ones and those with inactive ancestors are ignored. Non-Global access types aren't otherwise flagged in v1.
 - **Outbound networking:** evaluate the first row that matches. "All" means `AllowNetworkingToAllDomains` is `true` or absent. "List" means `AllowedDomains` parses to at least one host that isn't a wildcard entry (FR-7). If any entry is a wildcard entry, Outbound is Needs review and adds the reason "Wildcard entries aren't supported: `<entry>` matches no host." The row below is still chosen with those entries left out, and its message shows as well, so a list of only wildcard entries reads as O5.
@@ -767,9 +777,10 @@ The probe also found that the runtime matches the restricted list case-insensiti
 **Must:**
 - Export Markdown and PDF for both scopes, with the include and redact options, file names and content in Story 9.
 - Always include the configuration-only and tenant-policy-not-verified statements, the scan interval and the not-atomic statement (AC-9.2, F37).
-- Escape every configuration value (F42). In Markdown table cells, escape `\ | * _ ` [ ] < >` and replace newlines with spaces. In the PDF, HTML-escape every value when the PDF is rendered from HTML. Never fetch resources named by configuration values (AC-9.10).
+- Escape every configuration value (F42). In Markdown table cells, escape `\ | * _ ` [ ] < >` and replace newlines with spaces. Everywhere else a value appears in Markdown (the H2, the Environment, Scanned and Result lines, headings, blockquotes and list items), one inline-escape function escapes the same characters plus `#`, and replaces newlines with spaces. In the PDF, HTML-escape every value when the PDF is rendered from HTML. Never fetch resources named by configuration values (AC-9.10).
 - Paginate the PDF: table headers repeat on each page, rows aren't split, and no content is truncated (F44).
 - Bundle the report fonts locally after checking their licences (DM Sans, Space Grotesk and JetBrains Mono are OFL). The app UI uses the Windows system font stack `'Segoe UI Variable Text', 'Segoe UI', system-ui, sans-serif`; Segoe UI isn't redistributable, so it isn't bundled (F52).
+- In the PDF, use DM Sans for body text, Space Grotesk for headings and JetBrains Mono for paths (README §05), each as a static TTF, which jsPDF needs; the UI's JetBrains Mono woff2 can't be embedded. Draw the `✓` status glyph as a vector path, because neither DM Sans nor Space Grotesk has U+2713 (checked 2026-10-20); `!` comes from the font. A test checks every character the report writes in each font against that font's coverage.
 
 **Must not:**
 - Export JSON or CSV.
@@ -832,7 +843,7 @@ Sources: PPTB tool-development docs (manifest, `pptb-validate`, marketplace poli
 - Both panes update within 300 ms of any input change.
 - Server Objects search filters within 100 ms.
 - An Inspector scan of up to 50 server logic records completes within 30 s.
-- An export completes within 5 s of the save being confirmed (AC-9.9).
+- Building an export takes at most 5 s, and saving it completes within 5 s of the save being confirmed (AC-9.9).
 - A Starter zip download completes within 2 s (AC-5.11).
 
 ### Security
@@ -851,7 +862,7 @@ Sources: PPTB tool-development docs (manifest, `pptb-validate`, marketplace poli
 
 ### Accessibility
 
-- All controls are keyboard operable, with the visible focus ring from AC-1.5. Pill groups follow the APG radio group pattern (arrow keys), the top tabs follow APG tabs, the recipe picker follows the APG combobox, and the export modal follows the APG modal dialog (AC-9.1). In the code editor, Esc then Tab moves focus out of the editor (F48).
+- All controls are keyboard operable, with the visible focus ring from AC-1.5. Pill groups follow the APG radio group pattern (arrow keys), the top tabs follow APG tabs, the recipe picker follows the APG combobox, the site pill follows the APG select-only combobox (inactive sites are disabled options), and the export modal follows the APG modal dialog (AC-9.1). In the code editor, Esc then Tab moves focus out of the editor (F48).
 - Disabled choices that explain themselves use `aria-disabled="true"`, stay focusable, and show their reason on focus and hover through `aria-describedby` (AC-2.10, AC-4.7, AC-6.8, F47).
 - Status is never conveyed by colour alone: rings carry a text count, and statuses carry text and a `✓` or `!` glyph.
 - Meets WCAG 2.2 AA contrast in both themes. Layout 10a's tokens pass on their solid backgrounds (lowest 4.83:1 light, recomputed). **Glass gate:** at UI acceptance, text on dark glass tiles is measured against the brightest point of the aurora gradient behind it and must reach 4.5:1. The report tokens are adjusted per Assumption A8.
@@ -891,7 +902,12 @@ Sources: PPTB tool-development docs (manifest, `pptb-validate`, marketplace poli
 | Connection changes while another tab is visible | Inspector results and review marks are cleared; stale scan results are discarded (AC-7.6) |
 | Code can't be tokenized | Restricted patterns are still matched in full and reported as Blocked; the browser-API check falls back to substring matching and reports "May be rejected"; Browser checks notes "Couldn't parse this code" (FR-4) |
 | Site list can't be read | Error state "Couldn't load sites" with the reason and a Retry button; no scan runs |
-| A record's code is empty or can't be parsed | Function names are treated as unknown, so the Table permissions write-on-read rule can't apply. Table permissions and Outbound are "Needs review – couldn't read handler code"; Web role is evaluated normally |
+| A record's code can't be downloaded | Table permissions and Outbound are "Needs review – couldn't read handler code", a read failure with no Mark as reviewed (AC-8.5); Web role is evaluated normally |
+| A record's code is empty or can't be parsed | Function names are treated as unknown, so the Table permissions write-on-read rule can't apply. Table permissions and Outbound are "Needs review – Couldn't analyse handler code", which can be marked as reviewed (AC-8.5, owner decision 2026-10-20); Web role is evaluated normally |
+| A table permission's scope is missing or unknown | Table permissions: "Needs review – Couldn't interpret the scope of `<name>`" (FR-7) |
+| More than one web role is marked as the Anonymous or Authenticated Users Role | Every flagged role is treated as that default role; site banner, repeated in exports (FR-7) |
+| Results are cleared while the export dialog is open | The dialog closes, nothing is saved, and a status toast explains why (AC-9.8) |
+| A `connection:*` event leaves the active connection's id and URL unchanged | Results and review marks are kept; the title bar updates (AC-7.6) |
 | Server Objects search matches nothing | "No objects or members match '<query>'", with a Clear search link |
 | Liquid selected and the recipe changes to one without Liquid support | Language resets to fetch (AC-2.8) |
 | Required site setting missing at runtime (generated code) | The handler logs an error and returns `JSON.stringify({ status: "error", message: "Server logic isn't configured: missing site setting <name>" })` before any outbound call (FR-3, F57) |
