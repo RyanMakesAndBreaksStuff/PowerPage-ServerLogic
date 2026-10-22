@@ -6,11 +6,11 @@
 
 This file is now an index. The 25-phase layout was replaced by three plans, one per page, each ending at its own release gate:
 
-| Plan | Page | Depends on | Status |
-|---|---|---|---|
-| [`plan-starter.md`](plan-starter.md) | Logic Starter, **plus Part A, the shared foundation**, and the Contracts every plan consumes | — | Part A fully planned (phases 00–06, 18a). Parts B and C outlined |
-| [`plan-server-objects.md`](plan-server-objects.md) | Server Objects | Part A, Phase 21 | Planned (phases 13, 22); spec v2.2.0 |
-| [`plan-inspector.md`](plan-inspector.md) | Logic Inspector and reports | Part A only | Outlined (phases 11, 12, 15, 16, 20, 23, 24); spec v2.3.0 |
+| Plan                                               | Page                                                                                         | Depends on       | Status                                                           |
+| -------------------------------------------------- | -------------------------------------------------------------------------------------------- | ---------------- | ---------------------------------------------------------------- |
+| [`plan-starter.md`](plan-starter.md)               | Logic Starter, **plus Part A, the shared foundation**, and the Contracts every plan consumes | —                | Part A fully planned (phases 00–06, 18a). Parts B and C outlined |
+| [`plan-server-objects.md`](plan-server-objects.md) | Server Objects                                                                               | Part A, Phase 21 | Planned (phases 13, 22); spec v2.2.0                             |
+| [`plan-inspector.md`](plan-inspector.md)           | Logic Inspector and reports                                                                  | Part A only      | Planned (phases 11, 12, 15, 16, 20, 23, 24); spec v2.3.0         |
 
 Phase numbers are stable IDs carried over from the original layout, so cross-references in the phase files stay valid. `18a` is the session state moved out of old Phase 18 into Part A.
 
@@ -43,4 +43,5 @@ The "Steps to finish Part A" from the previous version of this file, and where e
 Changes made along the way, recorded in the phase files: Phase 01's `getTheme` now rejects on a host failure (for AC-1.6); Phase 00 scaffolds with create-vite 9.2.1 and Vite 8's `rolldownOptions`; the Starter session receives the Part B generators by injection (`StarterDeps`).
 
 ## Next step
+
 Start building Part A with Phase 00 (`plans/phase-00-skeleton.md`), then waves A1–A3 as listed in `plan-starter.md`. Write the Part B and Part C phase files (07–10, 14, 17–19, 21) before their waves; the first page to release is Logic Starter.
