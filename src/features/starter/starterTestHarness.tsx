@@ -1,5 +1,6 @@
 // Test helper, never imported by the app: mounts Starter UI inside the providers App gives it, on a fake host.
-import { act, render } from '@testing-library/react';
+import { EditorView } from '@codemirror/view';
+import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { ReactElement } from 'react';
 import { HostContext } from '@/app/HostContext';
@@ -56,4 +57,11 @@ export function renderStarter(
     });
   };
   return { host, user, views, session, dispatch };
+}
+
+/** The CodeMirror view behind a code pane, found by its textbox name. */
+export function editorView(name: string): EditorView {
+  const view = EditorView.findFromDOM(screen.getByRole('textbox', { name }));
+  if (view === null) throw new Error(`No editor named ${name}`);
+  return view;
 }

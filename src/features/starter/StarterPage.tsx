@@ -3,6 +3,7 @@ import { useStarterSession } from '@/app/starter-session/useStarterSession';
 import { useView } from '@/app/useView';
 import { Button } from '@/components/Button';
 import { Icon } from '@/components/Icon';
+import { ServerPane } from './code/ServerPane';
 import { DownloadStarterButton } from './download/DownloadStarterButton';
 import { PermissionNote } from './inputs/PermissionNote';
 import { StarterInputs } from './inputs/StarterInputs';
@@ -15,6 +16,11 @@ export function StarterPage(): ReactElement {
   return (
     <section aria-label="Logic Starter" className="starter-page">
       <StarterInputs />
+      <div className="starter-page__code">
+        <div className="starter-code__panes">
+          <ServerPane />
+        </div>
+      </div>
       <PermissionNote />
       <div className="starter-page__actions">
         <DownloadStarterButton />
