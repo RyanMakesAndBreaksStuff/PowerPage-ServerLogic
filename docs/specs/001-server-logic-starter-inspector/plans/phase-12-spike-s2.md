@@ -34,19 +34,19 @@
 - Create: `scripts/s2-probe.js` — DevTools read/probe script.
 - Signal: `node --check scripts/s2-probe.js` — parseable script.
 
-- [ ] **Step 1: Establish the observable pre-change signal**
+- [x] **Step 1: Establish the observable pre-change signal**
 
 ```powershell
 Test-Path scripts/s2-probe.js
 ```
 
-- [ ] **Step 2: Capture the current signal**
+- [x] **Step 2: Capture the current signal**
 
 Run: `Test-Path scripts/s2-probe.js`
 
 Expected: False: the probe file does not exist in the primary baseline.
 
-- [ ] **Step 3: Implement the minimum fix**
+- [x] **Step 3: Implement the minimum fix**
 
 ```js file=scripts/s2-probe.js
 // Paste this entire script into Tool DevTools in PPTB. It performs read calls only.
@@ -169,7 +169,7 @@ Expected: False: the probe file does not exist in the primary baseline.
 })();
 ```
 
-- [ ] **Step 4: Confirm the signal changed, and nothing else did**
+- [x] **Step 4: Confirm the signal changed, and nothing else did**
 
 Run: `Test-Path scripts/s2-probe.js`
 
@@ -179,7 +179,7 @@ Run: `node --check scripts/s2-probe.js`
 
 Expected: exit 0.
 
-- [ ] **Step 5: Commit the coherent change**
+- [x] **Step 5: Commit the coherent change**
 
 ```powershell
 git add -- scripts/s2-probe.js
@@ -245,7 +245,7 @@ All evidence rows populated; every contradiction has an approved spec change or 
 
 ## Done when
 
-- [ ] Source: script parses and contains every S2 probe with shape-only output.
+- [x] Source: script parses and contains every S2 probe with shape-only output.
 - [ ] Tests/build: captured shape fixtures and adapter checks pass.
 - [ ] Rendered browser: DevTools script/load confirmed.
 - [ ] Live PPTB: every evidence row filled; contradictions resolved before15; owner binary/clipboard/event/read outcomes recorded.
