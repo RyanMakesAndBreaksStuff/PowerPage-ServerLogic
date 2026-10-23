@@ -1,0 +1,92 @@
+import type { ReactElement } from 'react';
+import { useActiveConnection } from '@/app/useActiveConnection';
+import { useInspector } from '@/app/inspector-site/useInspector';
+import { Button } from '@/components/Button';
+import { Tile } from '@/components/Tile';
+import { InspectorContent } from './InspectorContent';
+import './inspector.css';
+
+export function InspectorPage(): ReactElement {
+  const connection = useActiveConnection();
+  const { state, result, rescan, retrySites, cancel } = useInspector();
+  const disabledReason = state.scanning
+    ? 'Wait for the scan to finish'
+    : result === null || result.files.length === 0
+      ? 'Scan a site with server logic first'
+      : null;
+  return (
+    <section aria-label="Logic Inspector">
+      <div className="inspector-toolbar">
+        <Button
+          onClick={rescan}
+          disabledReason={state.selected === null ? 'Select a site first' : null}
+        >
+          Rescan
+        </Button>
+        <Button variant="primary" disabledReason={disabledReason}>
+          Export report
+        </Button>
+      </div>
+      {connection === null ? (
+        <Tile>
+          <p>Select a connection in ToolBox to inspect a site.</p>
+        </Tile>
+      ) : (
+        <>
+          {connection.environment !== 'Dev' ? (
+            <p role="status">
+              This isn't a development environment. Inspector is read-only but is designed for dev
+              sites.
+            </p>
+          ) : null}
+          {state.sitesStatus === 'loading' ? <p role="status">Loading sites…</p> : null}
+          {state.sitesStatus === 'error' ? (
+            <Tile>
+              <h2>Couldn't load sites</h2>
+              <p>{state.error}</p>
+              <Button onClick={retrySites}>Retry</Button>
+            </Tile>
+          ) : null}
+          {state.sitesStatus === 'ready' && state.sites.length === 0 ? (
+            <p>
+              No enhanced data model Power Pages sites found in this environment. Standard data
+              model sites aren't supported.
+            </p>
+          ) : null}
+          {state.sitesStatus === 'ready' && state.sites.length > 0 && state.selected === null ? (
+            <p>Select a Power Pages site in the title bar.</p>
+          ) : null}
+          {state.scanning ? (
+            <Tile>
+              <p role="status">
+                Scanned {state.scanned} of {state.total}
+              </p>
+              <Button onClick={cancel}>Cancel scan</Button>
+            </Tile>
+          ) : null}
+          {state.error !== null && state.selected !== null ? (
+            <Tile>
+              <h2>Couldn't scan site</h2>
+              <p>{state.error}</p>
+              <Button onClick={rescan}>Retry</Button>
+            </Tile>
+          ) : null}
+          {result === null ? null : (
+            <>
+              {result.banners.map((banner) => (
+                <p role="status" key={banner}>
+                  {banner}
+                </p>
+              ))}
+              {result.files.length === 0 ? (
+                <p>No server logic found on this site</p>
+              ) : (
+                <InspectorContent key={result.facts.scanId} result={result} />
+              )}
+            </>
+          )}
+        </>
+      )}
+    </section>
+  );
+}
