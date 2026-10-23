@@ -65,7 +65,7 @@
 - Signal: `src/features/inspector/report/buildReportModel.test.ts`.
 - Create: `src/features/inspector/report/reportFixtures.ts` — reused test data only.
 
-- [ ] **Step 1: Establish the observable pre-change signal**
+- [x] **Step 1: Establish the observable pre-change signal**
 
 Create `src/features/inspector/report/reportFixtures.ts`:
 
@@ -347,13 +347,13 @@ describe('buildReportModel', () => {
 });
 ```
 
-- [ ] **Step 2: Capture the current signal**
+- [x] **Step 2: Capture the current signal**
 
 Run: `npx vitest run src/features/inspector/report/buildReportModel.test.ts`
 
 Expected: `Tests 11 failed (11)`; model-dependent cases throw `not implemented: phase 16` and the missing-file case gets that stub error instead of `Select a file first`.
 
-- [ ] **Step 3: Implement the minimum fix**
+- [x] **Step 3: Implement the minimum fix**
 
 Replace `src/features/inspector/report/reportModel.types.ts`:
 
@@ -662,7 +662,7 @@ export function reportFileNameBeforeBuild(result: SiteResult, options: ReportOpt
 }
 ```
 
-- [ ] **Step 4: Confirm the signal changed, and nothing else did**
+- [x] **Step 4: Confirm the signal changed, and nothing else did**
 
 Run: `npx vitest run src/features/inspector/report/buildReportModel.test.ts`
 
@@ -672,7 +672,7 @@ Run: `npx tsc -b`
 
 Expected: exit 0 with no diagnostics.
 
-- [ ] **Step 5: Commit the coherent change**
+- [x] **Step 5: Commit the coherent change**
 
 ```powershell
 git add src/features/inspector/report/reportModel.types.ts src/features/inspector/report/buildReportModel.ts src/features/inspector/report/reportFileName.ts src/features/inspector/report/reportFixtures.ts src/features/inspector/report/buildReportModel.test.ts
@@ -692,7 +692,7 @@ git commit -m "feat(inspector): build scoped redacted report model"
 - Signal: `src/features/inspector/report/markdownEscape.test.ts`, `src/features/inspector/report/renderMarkdown.test.ts`.
 - Create: `src/features/inspector/report/__golden__/file.md`, `src/features/inspector/report/__golden__/site.md`.
 
-- [ ] **Step 1: Establish the observable pre-change signal**
+- [x] **Step 1: Establish the observable pre-change signal**
 
 Create `src/features/inspector/report/markdownEscape.test.ts`:
 
@@ -929,13 +929,13 @@ tablePermissions detail.
 > Tenant outbound policy not verified.
 ```
 
-- [ ] **Step 2: Capture the current signal**
+- [x] **Step 2: Capture the current signal**
 
 Run: `npx vitest run src/features/inspector/report/markdownEscape.test.ts src/features/inspector/report/renderMarkdown.test.ts`
 
 Expected: both suites fail to resolve `./markdownEscape` while the helper is absent. After creating the helper in Step 3, keeping the original renderer stub makes all five renderer cases throw `not implemented: phase 16`; replacing that stub changes the signal to the seven passing tests below.
 
-- [ ] **Step 3: Implement the minimum fix**
+- [x] **Step 3: Implement the minimum fix**
 
 Create `src/features/inspector/report/markdownEscape.ts`:
 
@@ -1070,7 +1070,7 @@ export function renderMarkdown(model: ReportModel): string {
 }
 ```
 
-- [ ] **Step 4: Confirm the signal changed, and nothing else did**
+- [x] **Step 4: Confirm the signal changed, and nothing else did**
 
 Run: `npx vitest run src/features/inspector/report/markdownEscape.test.ts src/features/inspector/report/renderMarkdown.test.ts`
 
@@ -1092,7 +1092,7 @@ Run: `npx prettier --check src/features/inspector/report/*.ts`
 
 Expected: `All matched files use Prettier code style!`.
 
-- [ ] **Step 5: Commit the coherent change**
+- [x] **Step 5: Commit the coherent change**
 
 ```powershell
 git add src/features/inspector/report/markdownEscape.ts src/features/inspector/report/markdownEscape.test.ts src/features/inspector/report/renderMarkdown.ts src/features/inspector/report/renderMarkdown.test.ts src/features/inspector/report/__golden__/file.md src/features/inspector/report/__golden__/site.md
@@ -1131,8 +1131,8 @@ This is source and automated proof. No report has yet been saved by the real PPT
 
 ## Done when
 
-- [ ] **Source:** the two tasks are implemented with the exact exports and full model shape above; Phase 20 and Phase 24 consume this owner rather than redoing redaction/counts.
-- [ ] **Tests / build:** the 18 tests for this phase, TypeScript, scoped lint/format and the full regression suite pass. Both goldens remain exact output with one LF.
+- [x] **Source:** the two tasks are implemented with the exact exports and full model shape above; Phase 20 and Phase 24 consume this owner rather than redoing redaction/counts.
+- [x] **Tests / build:** the 18 tests for this phase, TypeScript, scoped lint/format and the full regression suite pass. Both goldens remain exact output with one LF. Verified 2026-10-23 at `11d1647`: 3 files / 18 report tests, 89 files / 1348 full-suite tests, `tsc -b` and `eslint . --max-warnings=0` pass; the scoped Prettier glob flags only the untouched Phase 20 `renderPdf.ts` stub. Goldens are pinned `eol=lf` in `.gitattributes`.
 - [ ] **Rendered browser:** after Phase 24, exported Markdown pasted into a PR/work item shows literal hostile names and complete sections; statuses/reasons equal the Inspector screen for the snapshot.
 - [ ] **Live PPTB / site (◆):** after Phase 24, both scopes save through the real host; redacted site export has the expected filename and no environment/site identity; a stopped scan's notices and not-scanned findings match the screen.
 
