@@ -8,7 +8,7 @@ export type TablePermissionFact = {
   id: string;
   name: string;
   table: string;
-  scope: AccessType;
+  scope: AccessType | null;
   privileges: readonly Privilege[];
   roleIds: readonly string[];
   active: boolean;
@@ -23,7 +23,8 @@ export type SettingValue =
   | { kind: 'absent' }
   | { kind: 'duplicate' }
   | { kind: 'value'; raw: string; fromEnvVar: boolean }
-  | { kind: 'envvar-unreadable' }; // secret type, missing variable or failed read
+  | { kind: 'envvar-unreadable' } // secret type, missing variable or failed read
+  | { kind: 'not-scanned' }; // environment-variable read not started before interruption
 export type ServerLogicFileFacts = {
   id: string;
   name: string;
@@ -41,6 +42,7 @@ export type SiteFacts = {
   roles: Readable<readonly WebRoleFact[]>;
   permissions: Readable<readonly TablePermissionFact[]>;
   settings: Readable<Readonly<Record<SettingName, SettingValue>>>;
+  inactiveSettings: readonly SettingName[];
   files: readonly ServerLogicFileFacts[];
   inventoryComplete: boolean;
   stopped: 'connection-lost' | null;
