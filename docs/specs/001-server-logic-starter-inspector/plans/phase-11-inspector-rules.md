@@ -45,7 +45,7 @@
 
 ---
 
-- [ ] **Step 0: Preflight**
+- [x] **Step 0: Preflight**
 
 Run from the repository root on `001-logic-inspector`:
 
@@ -67,7 +67,7 @@ Expected: unrelated work preserved; the Phase 11 stub remains; typecheck and con
 - Create: `src/features/inspector/model/settings.ts`, `settings.test.ts`, `grantSet.ts`, `grantSet.test.ts`.
 - Signal: the two tests.
 
-- [ ] **Step 1: Establish the observable pre-change signal**
+- [x] **Step 1: Establish the observable pre-change signal**
 
 ```ts file=src/features/inspector/model/settings.test.ts
 import { describe, expect, expectTypeOf, it } from 'vitest';
@@ -475,13 +475,13 @@ describe('FR-7 default-role banners', () => {
 });
 ```
 
-- [ ] **Step 2: Capture the current signal**
+- [x] **Step 2: Capture the current signal**
 
 Run: `npx vitest run src/features/inspector/model/settings.test.ts src/features/inspector/model/grantSet.test.ts`
 
 Expected: exit 1 because both implementation modules do not exist.
 
-- [ ] **Step 3: Implement the minimum fix**
+- [x] **Step 3: Implement the minimum fix**
 
 ```ts file=src/features/inspector/model/settings.ts
 import type { Reason, SettingName, SettingValue, SiteFacts } from '@/types/inspector';
@@ -792,7 +792,7 @@ export function defaultRoleBanners(facts: SiteFacts): readonly string[] {
 }
 ```
 
-- [ ] **Step 4: Confirm the signal changed, and nothing else did**
+- [x] **Step 4: Confirm the signal changed, and nothing else did**
 
 Run: `npx vitest run src/features/inspector/model/settings.test.ts src/features/inspector/model/grantSet.test.ts`
 
@@ -802,7 +802,7 @@ Run: `npx vitest run src/lib/code-analysis/structure.connector.test.ts`
 
 Expected: exit 0.
 
-- [ ] **Step 5: Commit the coherent change**
+- [x] **Step 5: Commit the coherent change**
 
 ```bash
 git add -- src/features/inspector/model/settings.ts src/features/inspector/model/settings.test.ts src/features/inspector/model/grantSet.ts src/features/inspector/model/grantSet.test.ts
@@ -819,7 +819,7 @@ git commit -m "feat(inspector): interpret settings and permission grants"
 - Replace: `src/features/inspector/model/rules.ts`.
 - Signal: `checks.test.ts` and `rules.test.ts`.
 
-- [ ] **Step 1: Establish the observable pre-change signal**
+- [x] **Step 1: Establish the observable pre-change signal**
 
 ```ts file=src/features/inspector/model/checks.test.ts
 import { describe, expect, it } from 'vitest';
@@ -1387,13 +1387,13 @@ describe('AC-7.9 / AC-7.12 and interrupted-site banners', () => {
 });
 ```
 
-- [ ] **Step 2: Capture the current signal**
+- [x] **Step 2: Capture the current signal**
 
 Run: `npx vitest run src/features/inspector/model/checks.test.ts src/features/inspector/model/rules.test.ts`
 
 Expected: exit 1 because the check module does not exist and `rules.ts` still throws `not implemented: phase 11`.
 
-- [ ] **Step 3: Implement the minimum fix**
+- [x] **Step 3: Implement the minimum fix**
 
 ```ts file=src/features/inspector/model/copy.ts
 import type { CheckId } from '@/types/inspector';
@@ -1873,7 +1873,7 @@ export const siteFacts = (patch: Partial<SiteFacts> = {}): SiteFacts => ({
 });
 ```
 
-- [ ] **Step 4: Confirm the signal changed, and nothing else did**
+- [x] **Step 4: Confirm the signal changed, and nothing else did**
 
 Run: `npx vitest run src/features/inspector/model/checks.test.ts src/features/inspector/model/rules.test.ts`
 
@@ -1883,7 +1883,7 @@ Run: `npx vitest run src/features/inspector/model src/lib/code-analysis`
 
 Expected: exit 0.
 
-- [ ] **Step 5: Commit the coherent change**
+- [x] **Step 5: Commit the coherent change**
 
 ```bash
 git add -- src/features/inspector/model/checks.ts src/features/inspector/model/checks.test.ts src/features/inspector/model/copy.ts src/features/inspector/model/rules.ts src/features/inspector/model/rules.test.ts src/features/inspector/model/fixtures.ts
@@ -1900,7 +1900,7 @@ Detached scratch base `42c2809`, 2026-10-22: the model tests passed in the assem
 
 ## Done when
 
-- [ ] Source: one owner interprets each setting, scope and parent chain; Phase 15 does not duplicate those rules.
-- [ ] Tests: settings, grants, all 64 states, O0–O6 and review eligibility pass.
-- [ ] Build: typecheck and scoped lint pass.
+- [x] Source: one owner interprets each setting, scope and parent chain; Phase 15 does not duplicate those rules.
+- [x] Tests: settings, grants, all 64 states, O0–O6 and review eligibility pass.
+- [x] Build: typecheck and scoped lint pass.
 - [ ] Live evidence remains explicitly unverified until the owner runs S2 and a dev-site scan.
