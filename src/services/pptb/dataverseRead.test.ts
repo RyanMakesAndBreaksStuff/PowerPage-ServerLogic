@@ -193,4 +193,20 @@ describe('downloadColumnContent', () => {
     expect(text).toBe('export function get() {}');
     expect(read).toHaveBeenCalledWith(`powerpagecomponents(${GUID})/filecontent/$value`, {});
   });
+
+  // Spike S2, 2026-10-22: PPTB's JSON-only queryData answers the binary $value body with an empty
+  // object. That is a per-file read failure, not a transport loss and not a retry.
+  it('rejects the empty-object shape once, with no status and no retry', async () => {
+    const read = vi.fn<RawRead>().mockResolvedValue({});
+    const sleep = vi.fn<Sleep>().mockResolvedValue(undefined);
+    await expect(
+      downloadColumnContent('powerpagecomponents', GUID, 'filecontent', { read, sleep }),
+    ).rejects.toMatchObject({
+      name: 'HostReadError',
+      status: null,
+      message: 'Unexpected file response from Dataverse.',
+    });
+    expect(read).toHaveBeenCalledTimes(1);
+    expect(sleep).not.toHaveBeenCalled();
+  });
 });
