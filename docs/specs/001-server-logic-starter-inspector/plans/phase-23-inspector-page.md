@@ -1,5 +1,7 @@
 # Logic Inspector Page Implementation Plan
 
+> **Spec v3.0.0 (Iris).** If this phase merges after Phase 25, write its CSS with the Iris names from Phase 25's rename table instead of the ones below: `--accent` for `--primary`, `--text3` for `--muted`, `--surface` for `--tile`, `--danger` for `--review`, and `var(--weight-strong)` for hard-coded bold weights. Use no glass, radius 12px on Inspector tiles, and needs-review tiles as `--surface` with a `--danger` border and a `--danger-soft` glyph chip. If it merges first, Phase 25 renames its CSS. The ◆ checks in both themes compare against the Iris handoff (`design_handoff_server_logic_tools/Logic Tooling Design Directions/design_handoff_iris_theme/`).
+
 **Goal:** Select an enhanced-model site and review its server logic findings with session-only marks and safe scan invalidation.
 
 **Architecture:** InspectorProvider owns site/scan/file selection and review state for the title bar and page. Phase 11 owns findings, copy, counts and banners; Phase 15 owns read operations; shared primitives own tokens, statuses, focus and modal behavior. A constant InspectorGate wraps the shell only in released Inspector builds.

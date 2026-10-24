@@ -1,6 +1,6 @@
 # Implementation Plan: Server Objects
 
-**Spec:** docs/specs/001-server-logic-starter-inspector/spec.md (v2.2.0, Approved; v2.2.0 records Decision 1)
+**Spec:** docs/specs/001-server-logic-starter-inspector/spec.md (v3.0.0, Approved; v2.2.0 records Decision 1; v3.0.0's Iris theme is Phase 25 in `plan-starter.md`)
 **Depends on:** Part A of `plan-starter.md` (phases 00–06 and 18a) and **Phase 21** (Part C). Part A's Contracts are consumed unchanged. This plan pins `SERVER_OBJECTS` and its types (Phase 13) and moves nothing else.
 **Index:** `plan.md`. **Split from `plan.md`:** 2026-10-17.
 **Phase plans:** `plans/phase-NN-<slug>.md`, with the stable phase numbers from the original layout.
@@ -50,7 +50,7 @@ Spec Story 6 (AC-6.1–6.10, AC-6.4a), FR-6, AC-3.2 for the samples, AC-3.6's "P
    - Insert lands in the server pane, with one undo.
    - Copy shows its toast.
    - "Browse all" and "Back to Create Logic" switch tabs.
-3. ◆ Glass contrast check (dark), and the Phase 22 rendered check at 1100×780 in both themes.
+3. ◆ Iris glow contrast check (both themes), and the Phase 22 rendered check at 1100×780 in both themes, after Phase 25.
 4. ◆ Publish with the owner's confirmation. Logic Starter is released with or before this page (Decision 1).
 
 ## Coverage (this plan)

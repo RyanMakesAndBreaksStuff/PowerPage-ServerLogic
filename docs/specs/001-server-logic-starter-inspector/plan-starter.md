@@ -1,6 +1,6 @@
 # Implementation Plan: Logic Starter (with Part A, the shared foundation)
 
-**Spec:** docs/specs/001-server-logic-starter-inspector/spec.md (v2.0.0, Approved)
+**Spec:** docs/specs/001-server-logic-starter-inspector/spec.md (v3.0.0, Approved; v3.0.0 adds Part D, the Iris theme)
 **Sibling plans:** `plan-server-objects.md` and `plan-inspector.md`. Both depend on Part A of this plan only, and consume its Contracts unchanged.
 **Index:** `plan.md` (the split, the phase DAG across all three plans, and the owner decisions).
 **Created:** 2026-10-16. **Split from `plan.md`:** 2026-10-17.
@@ -42,7 +42,7 @@ Ship Logic Starter as the first released page, on a Part A foundation that Serve
 ## Owner decisions taken for Part A (2026-10-17)
 
 1. **Paging rule amended.** `.claude/rules/pptb-host-and-output.md` now asks for `$select` plus `Prefer: odata.maxpagesize` and `$orderby`, never `$top` with paging (Phase 01, Decision 1).
-2. **Dark tiles: opaque `#15203a` plus the 7% glass layer**, not a see-through tile (Phase 04, Decision 1). The glass contrast gate stays at the Starter release.
+2. ~~**Dark tiles: opaque `#15203a` plus the 7% glass layer**, not a see-through tile (Phase 04, Decision 1). The glass contrast gate stays at the Starter release.~~ Superseded by spec v3.0.0: Iris tiles are solid `--surface` with no glass, and the gate is the Iris glow contrast check (Phase 25).
 3. **npm package name:** `@ryanmakes/powerpages-serverlogic` (Phase 00, Step 31).
 4. **Scaffold with the standard Vite template, not `yo pptb`,** keeping the template's versions except ESLint, which stays on 9 for `eslint-plugin-jsx-a11y` (Phase 00, Steps 1–6). `CLAUDE.md` and the rules were updated to match.
 
@@ -364,7 +364,7 @@ export type StarterPackageInput = {
 | A1   | 01    | PPTB host adapter + fake                                     | 00             | FR-7 paging/retry, FR-12 events, NFR Security; `createPptbHost`, `createFakeHost`                                                                                                         |
 | A1   | 02    | Restricted-pattern and browser-API checks                    | 00             | FR-4 (T1–T22), AC-5.2 logic, F23 fallback                                                                                                                                                 |
 | A1   | 03    | Code structure analysis                                      | 00             | FR-6 used detection, FR-7 exported fns and connector fixtures, AC-4.7 HTTP-only rule, AC-6.8 insertion and its fixture                                                                    |
-| A1   | 04    | Design tokens and shared UI primitives                       | 00             | FR-11 tokens (11c/12e, aurora, glass), rings (4° gaps, proportional above 30), APG radio PillGroup, aria-disabled tooltips (F47), Modal (APG), fallback Toast stack, Fluent icons; AC-1.5 |
+| A1   | 04    | Design tokens and shared UI primitives                       | 00             | FR-11 tokens (11c/12e, aurora, glass; replaced by Iris in Phase 25), rings (4° gaps, proportional above 30), APG radio PillGroup, aria-disabled tooltips (F47), Modal (APG), fallback Toast stack, Fluent icons; AC-1.5 |
 | A1   | 05    | Starter domain: recipe catalogue, slug, LF, handler snippets | 00             | FR-2, FR-3 metadata tables, AC-2.2/2.3/2.6/2.11, AC-3.5/3.6 data, AC-4.10 LF, Account-access lines, upstream-credentials line                                                             |
 | A2   | 06    | Shell                                                        | 01, 04         | Story 1 (AC-1.1–1.7), FR-1 (notify + fallback, external links), theme follow, events registered once                                                                                      |
 | A3   | 18a   | Shared Starter session state                                 | 02, 03, 05, 06 | Reducer, derived values and provider behind `StarterState`/`StarterAction`/`StarterDerived`; AC-2.8, 2.10, 3.8, 4.7, 4.10, 5.3, 5.4, 5.9 (state halves); the AC-6.8 insertion transaction |
@@ -390,11 +390,19 @@ export type StarterPackageInput = {
 | C1   | 18    | Starter input tiles | 04, 06, 10, 18a     | Story 2 UI: the four tiles, AC-3.1 combobox (APG), AC-2.1, 2.4, 2.5, 2.9 (discard confirmation), AC-5.1, 5.3, 5.4, 5.5, 5.9 controls; the AC-4.7 Liquid pill reason |
 | C2   | 21    | Starter code panes  | 04, 07, 10, 18, 18a | AC-4.1–4.3, 4.9, 4.10, AC-5.2 line flags, highlights, CodeMirror LF model, Esc-then-Tab (F48), cursor tracking for insert                                           |
 
-## Release gate: Logic Starter (after 14, 17, 18, 19, 21; a separate Integration Verification)
+## Part D: Iris theme (spec v3.0.0, planned 2026-10-23)
+
+| Wave | Phase | Title             | Depends on         | Implements / Satisfies (summary)                                                                                                                                         |
+| ---- | ----- | ----------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| D1   | 25    | Iris theme rework | 04, 06, 18, 21, 22 | FR-11 v3.0.0: Iris tokens under `iris.css` names, no aurora or glass, dark code wells, the new highlight rule, Segoe UI 550/650, JetBrains Mono kept; AC-1.5, 4.2, 5.1, 8.2 |
+
+Phase 25 supersedes the colour half of Phase 04 and the colour variables in the CSS of Phases 06, 18, 21 and 22. Their structure and behaviour stand. Design source: `design_handoff_server_logic_tools/Logic Tooling Design Directions/design_handoff_iris_theme/`. Every page's release gate waits for Phase 25.
+
+## Release gate: Logic Starter (after 14, 17, 18, 19, 21, 25; a separate Integration Verification)
 
 1. Run the full suite, `npm run build` and the IIFE build-shape test, then `npx pptb-validate --skip-url-checks`.
 2. ◆ PPTB smoke with Debug → Load Local Tool (the project root).
-3. ◆ Glass contrast check (dark).
+3. ◆ Iris glow contrast check, in both themes (spec Accessibility; replaces the glass contrast check).
 4. ◆ Timed walkthrough with 3 makers (median ≤ 5 min).
 5. ◆ Publish with the owner's confirmation. Release with `VITE_RELEASED_PAGES` set to `starter`, plus any pages already released.
 
@@ -406,7 +414,7 @@ export type StarterPackageInput = {
 - FR-3: 05, 07, 08, 09, 19
 - FR-4: 02
 - FR-5: 14, 18a, 18
-- FR-11: 04 (and every UI phase)
+- FR-11: 04, 25 (and every UI phase)
 - FR-12: 00, 01, 06
 
 ACs, by story. Where a phase owns the state half and another the UI half, both are named.

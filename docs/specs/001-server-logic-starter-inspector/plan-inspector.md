@@ -1,6 +1,6 @@
 # Implementation Plan: Logic Inspector and reports
 
-**Spec:** docs/specs/001-server-logic-starter-inspector/spec.md (v2.3.0, Approved)
+**Spec:** docs/specs/001-server-logic-starter-inspector/spec.md (v3.0.0, Approved; v3.0.0's Iris theme is Phase 25 in `plan-starter.md`, and reports are unchanged)
 **Branch:** `001-logic-inspector`
 **Depends on:** Part A of `plan-starter.md` only (phases 00–06 and 18a). Its Contracts include the Inspector amendments recorded on 2026-10-22.
 **Index:** `plan.md`. **Split from `plan.md`:** 2026-10-17.
@@ -60,7 +60,7 @@ Notes for writing these phases:
 2. ◆ PPTB smoke with Debug → Load Local Tool.
 3. ◆ A scan on the dev site, timed against the 30 s / 50 records NFR.
 4. ◆ Both export formats checked against the screen (AC-9.8).
-5. ◆ Glass contrast check (dark).
+5. ◆ Iris glow contrast check (both themes), after Phase 25.
 6. ◆ Publish with the owner's confirmation, with `VITE_RELEASED_PAGES` naming `inspector` plus any pages already released.
 
 ## Coverage (this plan)
@@ -92,3 +92,4 @@ Notes for writing these phases:
 | 2.3.0      | 11, 12, 15, 16, 20, 23, 24 | Notes for spec v2.3.0: AC-7.6 compares connection id and URL; S2 adds connection-loss and event-payload checks and a DevTools script; fixture rules for settings, scope, default roles and code analysis; 4 reads in flight; inline Markdown escaping; JetBrains Mono TTF and vector `✓`; Inspector code gated out of other builds; export snapshot, cancel and build budget. Coverage adds AC-1.2, AC-1.7, error scenarios and accessibility. |
 | 2026-10-22 | 11, 12, 15, 16, 20, 23, 24 | Seven executable phase files added. Scratch verification exposed necessary partialRows and per-setting Not scanned contracts, logical scan cancellation, instance-level jsPDF spies and PDF continuation rows. Formatting checks are scoped because the existing full-repository check fails on 176 files; rendered/live gates remain explicitly pending.                                                                                      |
 | 2026-10-23 | 12, 15, 23                 | First S2 run reviewed against Learn (file column data, page results, filter rows, server logic site settings). The `$value` empty object is the documented binary body seen through a JSON-only `queryData`; the plan now follows spec FR-7's "couldn't read handler code" fallback instead of blocking Phase 15. Phase 12 gains file-metadata probes and the Network checks still owed; Phase 15 and 23 gain the no-status rejection and non-GUID connection id notes. |
+| 3.0.0      | 23                         | Spec v3.0.0 (Iris theme). Phase 23 gains a note to use the Iris CSS names if it merges after Phase 25 (`plan-starter.md`, Part D). The gate's glass contrast check becomes the Iris glow contrast check in both themes. Reports (Phases 16, 20, 24) are unchanged. |

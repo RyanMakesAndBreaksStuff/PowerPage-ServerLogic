@@ -1,5 +1,7 @@
 # Phase 18: Starter Input Tiles Implementation Plan
 
+> **Superseded in part by Phase 25 (spec v3.0.0, Iris).** The CSS variable names, colours and hard-coded font weights in this file are replaced by `plans/phase-25-iris-theme.md`. The tiles' structure and behaviour stand.
+
 **Goal:** Replace the Logic Starter placeholder with layout 10a's input row (Logic name, HTTP method, Recipe combobox, Readiness), the permission note tile and the action column, all driving the Phase 18a session.
 
 **Architecture:** Every control reads and dispatches through `useStarterSession()` (Phase 18a); this phase adds no state of its own except the combobox's open/filter state and the pending recipe behind the AC-2.9 confirmation. Spec text and disabled reasons for pills live in one pure module, `src/features/starter/inputs/starterOptions.ts`, which Phase 21's client pane also consumes for the Liquid pill. Layout is CSS grid in `src/features/starter/starter.css`; Phase 21 fills grid row 2 without touching this phase's files except one mount edit in `StarterPage.tsx`.

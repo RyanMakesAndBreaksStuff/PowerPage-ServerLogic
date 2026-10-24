@@ -1,5 +1,7 @@
 # Phase 21: Starter Code Panes Implementation Plan
 
+> **Superseded in part by Phase 25 (spec v3.0.0, Iris).** The code colours in `codeTheme.ts` (`--keyword`, `--string`, `--comment`) and the CSS variable names in this file are replaced by `plans/phase-25-iris-theme.md`: code wells are dark in both themes, and the highlight is a 12% white fill with a `--code-accent` bar (AC-4.2). The editor model, highlights, line flags and Copy behaviour stand.
+
 **Goal:** Fill Create Logic's code row with the request path strip, an editable CodeMirror server pane and a read-only client pane, each with Copy, so edits, highlights, line flags and the client call follow the Phase 18a session.
 
 **Architecture:** One `CodeEditor` component wraps CodeMirror 6 for both panes; the session text stays the source of truth: the editor reports edits and cursor moves, and takes outside changes (recipe switch, Start over, Server Objects insert) as one minimal, undoable change computed by `src/lib/minimalChange.ts`. Line highlights and FR-4 flags are CodeMirror line decorations rebuilt from props through a compartment. The panes are thin session readers: `ServerPane` shows `state.serverText`, `ClientPane` shows `generateClient(...)` with the call shape Phase 14's download uses, and `RequestPathStrip` shows Phase 10's `requestPathSteps`.

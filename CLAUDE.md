@@ -12,9 +12,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Where things are
 
-- `docs/specs/001-server-logic-starter-inspector/spec.md` is the source of truth (v2.3.0). Its FRs, ACs, recipe table (R1–R10), numbered Learn corrections and spikes S1–S4 govern behaviour. `review.md` sits next to it.
+- `docs/specs/001-server-logic-starter-inspector/spec.md` is the source of truth (v3.0.0). Its FRs, ACs, recipe table (R1–R10), numbered Learn corrections and spikes S1–S4 govern behaviour. `review.md` sits next to it.
 - The implementation plan sits next to it: `plan.md` is the index, `plan-starter.md` holds Part A (the shared foundation), the Contracts every phase consumes and the Starter phases, and `plan-server-objects.md` and `plan-inspector.md` cover the other two pages. Phase files are in `plans/`.
-- **Layout 10a** in `design_handoff_server_logic_tools/Logic Tooling Design Directions/design_handoff_server_logic_tools/` is the high-fidelity design for the shell, Logic Starter, Server Objects, Logic Inspector and all UI tokens (README plus `reference/01–06`, light and dark). Its recipe list is **not** adopted: the spec's R1–R10 stand.
+- **Layout 10a** in `design_handoff_server_logic_tools/Logic Tooling Design Directions/design_handoff_server_logic_tools/` is the high-fidelity design for the layout, copy and behaviour of the shell, Logic Starter, Server Objects and Logic Inspector (README plus `reference/01–06`, light and dark). Its colours and §4 tokens are superseded by Iris (below). Its recipe list is **not** adopted: the spec's R1–R10 stand.
+- **Iris** in `design_handoff_server_logic_tools/Logic Tooling Design Directions/design_handoff_iris_theme/` is the UI theme (spec v3.0.0, FR-11; Phase 25 builds it). Use `tokens/iris.css` for values and variable names, the README for the role mapping, and `Logic Starter Iris.dc.html` (with `support.js`) as the visual reference. Don't use `iris-workbenchTokens.ts` (Fluent v9), its theme switcher, Cascadia Mono, its 600/700 weights or anything in `explorations/`. The UI uses Segoe UI at 550 base and 650 emphasis, with JetBrains Mono for code.
 - The original `design_handoff_server_logic_tools/` README §05 still governs **report** styling. Its other references are superseded by 10a. `06-interactive-prototype.dc.html` is an **older layout**, so use it for behaviour only (state, toggles, export dialog), not visuals. It needs `support.js` in the same folder.
 - `mocks/` contains visual explorations. They are reference only, not production code.
 - The root review files (`sol-review.md`, `Opus-review-of-Sol-review.md`, `Opus_*debate*.md`) are the review debate behind spec v0.6.0 and v0.7.0. The spec appendix records how each of the 59 findings (F01–F59) was resolved.
@@ -24,7 +25,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - Always show all five HTTP methods: `GET`, `POST`, `PUT`, `PATCH`, `DELETE`.
 - Reports export to **Markdown and PDF only**, for two scopes: **This file** and **Site summary**. There is no JSON export.
-- Two themes follow the host theme, with no in-tool toggle. Readiness colours: in dark, blue `#5aa9ff` means configured or OK and orange `#ffa24a` means needs review; reports use README §05's blue and orange with the spec's A8 adjustments; in light, ink `#111111` means OK and red `#c0261d` means needs review. Every status also carries a `✓`/`!` glyph and a word. The segmented progress ring is the main readiness visual everywhere.
+- Two themes follow the host theme, with no in-tool toggle. Readiness colours (Iris): `--accent` means configured or OK (light `#3640c8`, dark `#8e9cff`) and `--danger` means needs review (light `#a8281f`, dark `#ff8f86`), and needs-review colour is for status only. Reports keep README §05's blue and orange with the spec's A8 adjustments. Code wells are dark in both themes. Every status also carries a `✓`/`!` glyph and a word. The segmented progress ring is the main readiness visual everywhere.
 - The Inspector reviews configuration only. Every report says so and states that the tenant outbound policy is **not verified**.
 - The tool is read-only toward the environment. Starter only produces downloads, and Inspector only reads.
 

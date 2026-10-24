@@ -1,5 +1,7 @@
 # Phase 22: Server Objects page
 
+> **Superseded in part by Phase 25 (spec v3.0.0, Iris).** The CSS variable names, `color-mix` tints of `--primary`, and hard-coded font weights in this file are replaced by `plans/phase-25-iris-theme.md` (selected rows use `--accent-soft`). The page's structure and behaviour stand.
+
 **Part:** `plan-server-objects.md`, wave S2.
 **Implements:** Story 6, FR-6 (the page), the Starter half of AC-6.10, and the "Permissions needed" tile from AC-3.6 | **Satisfies:**
 - AC-6.1: three columns.

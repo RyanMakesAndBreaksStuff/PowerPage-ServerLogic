@@ -1,0 +1,91 @@
+/* Iris theme. Light is default; dark applies under [data-theme="dark"]. */
+:root, [data-theme="light"] {
+  --bg: #f5f5fd;
+  --bg2: #fbfbff;
+  --surface: #ffffff;
+  --surface2: #ececf9;
+  --surface3: #dcdcf0;
+  --border: #cacae6;
+  --border-strong: #9898c8;
+  --interactive-stroke: #5c5c94;
+  --text: #0d0d24;
+  --text2: #34345a;
+  --text3: #55557f;
+  --accent: #3640c8;
+  --accent-strong: #2630a8;
+  --accent-ink: #ffffff;
+  --accent2: #0a6a60;
+  --danger: #a8281f;
+  --warn: #7a4d00;
+  --good: #17663f;
+  --info: #1f5fa8;
+  --code: #0c0c18;
+  --glow1: rgba(54,64,200,.14);
+  --glow2: rgba(10,106,96,.12);
+  --accent-soft: rgba(54,64,200,0.12);
+  --danger-soft: rgba(168,40,31,0.12);
+  --warn-soft: rgba(122,77,0,0.12);
+  --good-soft: rgba(23,102,63,0.12);
+  --info-soft: rgba(31,95,168,0.12);
+  --accent2-soft: rgba(10,106,96,0.12);
+  --code-text: #f3f3ff;
+  --code-text2: #cecff0;
+  --code-text3: #9d9ec9;
+  --code-accent: #8e9cff;
+  --code-good: #62d69b;
+  --code-warn: #f0c45c;
+  --code-danger: #ff8f86;
+  --code-info: #7ac0ff;
+  --code-a2: #5fd8c4;
+}
+[data-theme="dark"] {
+  --bg: #000000;
+  --bg2: #050509;
+  --surface: #0c0c18;
+  --surface2: #151527;
+  --surface3: #212138;
+  --border: #303050;
+  --border-strong: #4c4c7a;
+  --interactive-stroke: #9a9ad0;
+  --text: #f3f3ff;
+  --text2: #cecff0;
+  --text3: #9d9ec9;
+  --accent: #8e9cff;
+  --accent-strong: #7482f5;
+  --accent-ink: #0a0c2a;
+  --accent2: #5fd8c4;
+  --danger: #ff8f86;
+  --warn: #f0c45c;
+  --good: #62d69b;
+  --info: #7ac0ff;
+  --code: #000000;
+  --glow1: rgba(142,156,255,.2);
+  --glow2: rgba(95,216,196,.16);
+  --accent-soft: rgba(142,156,255,0.16);
+  --danger-soft: rgba(255,143,134,0.16);
+  --warn-soft: rgba(240,196,92,0.16);
+  --good-soft: rgba(98,214,155,0.16);
+  --info-soft: rgba(122,192,255,0.16);
+  --accent2-soft: rgba(95,216,196,0.16);
+  --code-text: #f3f3ff;
+  --code-text2: #cecff0;
+  --code-text3: #9d9ec9;
+  --code-accent: #8e9cff;
+  --code-good: #62d69b;
+  --code-warn: #f0c45c;
+  --code-danger: #ff8f86;
+  --code-info: #7ac0ff;
+  --code-a2: #5fd8c4;
+}
+
+/* Typography: heavier Segoe UI. No web font is loaded; Segoe UI ships with Windows. */
+:root, [data-theme="light"], [data-theme="dark"] {
+  --font-ui: "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "Cascadia Mono", Consolas, ui-monospace, monospace;
+  --weight-base: 600;
+  --weight-caption: 700;
+  --weight-strong: 700;
+}
+/* Muted text is darkened: --text3 takes the --text2 value. */
+:root, [data-theme="light"] { --text3: #34345a; }
+[data-theme="dark"] { --text3: #cecff0; }

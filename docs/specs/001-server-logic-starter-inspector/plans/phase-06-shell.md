@@ -1,5 +1,7 @@
 # Phase 06: Shell
 
+> **Superseded in part by Phase 25 (spec v3.0.0, Iris).** The CSS variable names and colours in this file (`--primary`, `--review`, `--muted`, `--server`, `--surface` as the content area) and the dark-theme note about the aurora showing through the selected tab are replaced by `plans/phase-25-iris-theme.md`. Theme following, tabs, notifications and events stand.
+
 **Part:** A (foundation), `plan-starter.md`. Server Objects and Inspector consume it unchanged.
 **Implements:** FR-1 (three top tabs, title-bar connection context and site pill, per-tab state kept, Starter and Server Objects usable without a connection, released pages at run time, host notifications with the in-tool fallback, external links on click only), FR-11 (host theme followed, no toggle), FR-12 (events registered once at start-up and removed on unload) | **Satisfies:** AC-1.1, AC-1.2 (the site pill as a disabled placeholder: the picker itself is AC-7.2 in `plan-inspector.md`), AC-1.3, AC-1.4, AC-1.5 (tabs; pills are Phase 04), AC-1.6, AC-1.7 (the run-time half: the tab state; the build-time half is Phase 00), and the Error Scenario "`showNotification` missing, throws or rejects"
 **Depends on:** 00, 01, 04

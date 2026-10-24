@@ -1,11 +1,11 @@
 # Feature 001: Power Pages Server Logic — Logic Starter & Logic Inspector
 
 **Status:** Approved
-**Version:** 2.3.0
+**Version:** 3.0.0
 **Created:** 2026-10-06
-**Updated:** 2026-10-20
+**Updated:** 2026-10-23
 **Branch:** `001-logic-inspector`
-**Design source:** layout 10a, `design_handoff_server_logic_tools/Logic Tooling Design Directions/design_handoff_server_logic_tools/` (README + references 01–06, light and dark), for the shell, Logic Starter, Server Objects, Logic Inspector and all UI tokens. Report styling still follows the original handoff's README §05 (`design_handoff_server_logic_tools/README.md`). High fidelity: colours, type, spacing and copy are final except where this spec overrides them (recipe list, A8, F38 labels).
+**Design source:** layout 10a, `design_handoff_server_logic_tools/Logic Tooling Design Directions/design_handoff_server_logic_tools/` (README + references 01–06, light and dark), for the shell, Logic Starter, Server Objects and Logic Inspector layout, copy and behaviour. The **Iris** theme handoff (`design_handoff_server_logic_tools/Logic Tooling Design Directions/design_handoff_iris_theme/`: README, `tokens/iris.css`, and `Logic Starter Iris.dc.html` as the visual reference) supplies all UI colours and the role mapping, and supersedes 10a §4 and the colours in references 01–06. Report styling still follows the original handoff's README §05 (`design_handoff_server_logic_tools/README.md`). High fidelity: colours, type, spacing and copy are final except where this spec overrides them (recipe list, A8, F38 labels, and the Iris items FR-11 doesn't adopt).
 
 ---
 
@@ -26,6 +26,7 @@
 | 2.1.0 | 2026-10-19 | **MINOR.** R7 contract row is column-aware (owner decision 2026-10-19, evidence in phase-19-handler-r7.md). Example request is the S3 sample body. S3 script half is done; the collision probe stays open. |
 | 2.2.0 | 2026-10-20 | **MINOR.** Owner decision: Server Objects ships only with Logic Starter, because its used marks, "Used here" filter, Used in, Permissions needed and Insert all read the Starter session. **Added:** a build that releases `objects` without `starter` fails (FR-1 released pages). **Changed:** per-page releases keep their completion order, except that Server Objects is never released before Logic Starter (FR-1 release rule). **Removed:** the unreachable "unreleased Starter" cases in AC-1.7 and AC-6.8. |
 | 2.3.0 | 2026-10-20 | **MINOR.** Fixes from the `plan-inspector.md` review, checked against Learn (Filter rows, file column download, web roles, server logic site settings, service protection limits), the PPTB events docs and Microsoft's Power Pages plugin. **Owner decisions:** results clear only when the active connection's id or URL changes, or no connection is active; other `connection:*` events keep them (AC-7.6); connection lost is a network or 401 read failure with the connection unchanged (AC-7.10); empty or unparseable code is the reviewable analysis limit "Couldn't analyse handler code", and only a failed download stays a read failure (AC-8.5, Error Scenarios); `TimeoutInSeconds` keeps Learn's 1–240 with a note for 121–240, because the plugin reports a 120 clamp (AC-7.12). **Added:** setting-name matching, inactive settings, `TimeoutInSeconds` and `AllowedDomains` parse rules, unknown table-permission scope, more than one default role (site banner), `$filter` literal escaping and at most 4 reads in flight (FR-7); export defaults, the snapshot point, cancel on cleared results and a build budget (AC-9.1, 9.8, 9.9); inline Markdown escaping, a vector `✓` and a JetBrains Mono TTF for the PDF (FR-10); the site pill's APG pattern (Accessibility). **Changed:** S2 adds connection-loss and event-payload checks and drops the up-front access test, which AC-7.7 covers per check. |
+| 3.0.0 | 2026-10-23 | **MAJOR.** Owner decision: the Iris theme replaces 11c Paper & Signal (light) and 12e Glass Bento (dark), on this repo's terms. **Rewritten:** FR-11's token table now uses Iris values and `iris.css` variable names; code wells are dark in both themes; the code highlight is a 12% white fill with a 2px `--code-accent` bar (AC-4.2); "primary" becomes `--accent` (AC-1.5, AC-5.1, AC-8.2); A1 (flat near-black with two corner glows, no aurora, no glass, no `backdrop-filter`) and A2 (Iris light and dark, host-driven); the glass contrast gate becomes a glow gate (Accessibility). **Owner decisions:** Segoe UI weights 550 for base text and 650 for emphasis; code stays in bundled JetBrains Mono. **Not adopted from the Iris handoff:** its persisted Light/Dark switcher (AC-1.6 and A2 stand), the Fluent UI v9 `workbenchTokens.ts` (the app uses CSS variables), Cascadia Mono / Consolas, its 600/700 weights, and text glyphs in place of Fluent System Icons. **Unchanged:** layout 10a, reports (README §05 palette, A8, FR-10 fonts). |
 
 ---
 
@@ -128,8 +129,8 @@ Where the mocks and Learn disagree, Learn wins. The visual design still applies.
 - [ ] **AC-1.2** Given any tab is active When the title bar renders Then, on the right of the title bar, it shows the connection name with its environment classification (for example "Contoso · Development") and the site pill. The site pill is Inspector's site picker (AC-7.2). It reads "No site selected" until a site is chosen, and Logic Starter and Server Objects ignore it.
 - [ ] **AC-1.3** Given no connection is active When the shell renders Then the context area reads "Not connected", the site pill is disabled, and Starter and Server Objects remain fully usable.
 - [ ] **AC-1.4** Given any tab When the user selects another Then the content area swaps immediately with no transition, and the previous tab's state is kept.
-- [ ] **AC-1.5** Given any pill When it has keyboard focus Then it shows a 2px outline in the theme's primary colour at a 2px offset, and the selected pill never uses the needs-review colour (FR-11).
-- [ ] **AC-1.6** Given the host theme When the tool opens Then it reads `toolboxAPI.utils.getCurrentTheme()` and renders its first frame in that theme, light (11c) or dark (12e). It re-reads the theme on `settings:updated`, on window focus and when the document becomes visible, because PPTB has no dedicated theme event. If the host can't answer, the tool keeps its current theme, or uses light at launch, as PPTB does. There is no in-tool toggle (FR-11).
+- [ ] **AC-1.5** Given any pill When it has keyboard focus Then it shows a 2px outline in the theme's accent colour at a 2px offset, and the selected pill never uses the needs-review colour (FR-11).
+- [ ] **AC-1.6** Given the host theme When the tool opens Then it reads `toolboxAPI.utils.getCurrentTheme()` and renders its first frame in that theme, Iris light or Iris dark. It re-reads the theme on `settings:updated`, on window focus and when the document becomes visible, because PPTB has no dedicated theme event. If the host can't answer, the tool keeps its current theme, or uses light at launch, as PPTB does. There is no in-tool toggle (FR-11).
 - [ ] **AC-1.7** Given a build in which a page isn't released yet (FR-1 released pages) When the shell renders Then that page's top tab still shows with its glyph and label, in the disabled style, with `aria-disabled="true"`. It stays in the tab list's arrow-key order but can't be activated, and it has no tooltip; this is an owner-approved exception to F47 for unreleased pages only. The first released tab, in AC-1.1 order, is active instead of Logic Starter. While Logic Inspector is unreleased, the site pill is disabled as in AC-1.3. Server Objects is never released without Logic Starter (FR-1), so it always has the Starter session and its Insert. The page's content never renders.
 
 ### Story 2: Configure a handler (Create Logic)
@@ -183,7 +184,7 @@ Where the mocks and Learn disagree, Learn wins. The visual design still applies.
 **Acceptance criteria:**
 
 - [ ] **AC-4.1** Given valid inputs When the user changes the name, method, recipe or client language Then, within 300 ms, the client pane and the server pane's header and highlights update. The server text depends only on the recipe: it changes only when the recipe changes (AC-2.9) or on Start over (F12).
-- [ ] **AC-4.2** Given the server pane When it renders Then its header shows `<slug>.js` and a `Server` pill in the server-object colour. The lines that do the recipe's data access are highlighted with 10% of the primary colour over the code surface and a 2px inset primary bar (layout 10a §4). The footer reads "Runs on Power Pages with the caller's permissions".
+- [ ] **AC-4.2** Given the server pane When it renders Then its header shows `<slug>.js` and a `Server` pill in the server-object colour. The lines that do the recipe's data access are highlighted with a `rgba(255,255,255,.12)` fill over the code well and a 2px inset bar in `--code-accent` (FR-11). The footer reads "Runs on Power Pages with the caller's permissions".
 - [ ] **AC-4.3** Given the server pane When the user types in it Then the code is editable, the Browser checks readiness item re-runs on the edited code, and edits persist until the recipe changes (AC-2.9) or the user selects Start over.
 - [ ] **AC-4.4** Given the client call pane When it renders Then it offers single-select `fetch` (default), `jQuery` and `Liquid` pills. The footer reads "Paste into a page's custom JavaScript" for fetch and jQuery, or "Paste into a page or web template" for Liquid.
 - [ ] **AC-4.5** Given `fetch` is selected When the pane renders Then it calls `/_api/serverlogics/<slug>` with the selected method inside `shell.getTokenDeferred().done(...)`, sends the `__RequestVerificationToken` header, checks `success` (showing `error` when it's false), reads `data` from the response envelope (Learn correction 8), parses it with `JSON.parse` inside a try/catch, and branches on the handler's `status` (FR-3 contract table). The token is sent for every method, including GET. Spike S4 found a GET passes without it and a POST without it fails with HTTP 401, so sending it on GET is harmless.
@@ -215,7 +216,7 @@ Where the mocks and Learn disagree, Learn wins. The visual design still applies.
 
 **Acceptance criteria:**
 
-- [ ] **AC-5.1** Given the Readiness tile When it renders Then it shows a 3-segment ring labelled "K/3 ready" beside three pills: **Browser checks**, **Validation** and **Permissions**. Each pill shows ✓ in the theme's primary colour when complete and ! in the needs-review colour when it needs attention (FR-11). Browser checks is a text-pattern check (FR-4), not a compile or runtime test, and `README.md` says so (F14).
+- [ ] **AC-5.1** Given the Readiness tile When it renders Then it shows a 3-segment ring labelled "K/3 ready" beside three pills: **Browser checks**, **Validation** and **Permissions**. Each pill shows ✓ in the theme's accent colour when complete and ! in the needs-review colour when it needs attention (FR-11). Browser checks is a text-pattern check (FR-4), not a compile or runtime test, and `README.md` says so (F14).
 - [ ] **AC-5.2** Given the server pane code When it contains any restricted pattern or browser API (FR-4) Then Browser checks is "needs attention" and the offending lines are flagged in the pane.
 - [ ] **AC-5.3** Given an unedited recipe When the view renders Then Validation is complete. It stays complete after manual edits, because the tool doesn't re-verify edited validation (see Non-Goals). After any edit, the Validation pill's tooltip and the `README.md` line read "Generated validation; edits aren't rechecked." (F14)
 - [ ] **AC-5.4** Given Permissions needs attention When the user selects "Mark checklist reviewed" Then the Permissions segment turns blue and K increases by one; Browser checks and Validation keep their own state (F15). "Undo review" reverts it.
@@ -300,7 +301,7 @@ Where the mocks and Learn disagree, Learn wins. The visual design still applies.
   - A 3-segment ring, "K/3 addressed", with the legend "C configured · V reviewed · M review". **C = Configured, V = Reviewed, M = Needs review, U = Not scanned, T = total checks (3 per file), K = C + V** (F38, F39). The "· V reviewed" part appears only when V > 0. Not scanned segments are grey, count in neither K nor M, and add "· U not scanned" to the legend, pluralised as needed. A table-driven test covers all 4³ = 64 combinations of check states for one file.
   - Three finding tiles: Web role assigned, Table permissions and Outbound networking.
   - A detail tile.
-- [ ] **AC-8.2** Given each finding When it renders Then it shows an icon (✓ or !), the title, a one-line summary and a status: "Configured" or "Reviewed" in the theme's primary colour, or "Needs review" in the needs-review colour (FR-11).
+- [ ] **AC-8.2** Given each finding When it renders Then it shows an icon (✓ or !), the title, a one-line summary and a status: "Configured" or "Reviewed" in the theme's accent colour, or "Needs review" in the needs-review colour (FR-11).
 - [ ] **AC-8.3** Given a file is selected When no finding has been chosen Then the first "Needs review" finding is selected, or the first finding if none need review.
 - [ ] **AC-8.4** Given the selected finding When the detail tile renders Then it shows the title, category, status, guidance text, a "Questions to consider" list and a configuration snapshot (web roles, tables with privileges, outbound).
 - [ ] **AC-8.5** Given a "Needs review" finding When the user selects **Mark as reviewed** Then its status becomes "Reviewed", the file ring, the file's list summary and the snapshot update, and the button becomes "Undo review". The button isn't shown for findings that are "Configured".
@@ -788,27 +789,27 @@ The probe also found that the runtime matches the restricted list case-insensiti
 ### FR-11: Visual design
 
 **Must:**
-- Ship two themes from layout 10a §4 and follow the host theme as AC-1.6 describes. There is no in-tool theme toggle (Assumption A2):
+- Ship the two Iris themes and follow the host theme as AC-1.6 describes. There is no in-tool theme toggle (Assumption A2). Tokens are plain CSS custom properties named as in `tokens/iris.css`, light on `:root` and `[data-theme='light']`, dark on `[data-theme='dark']`:
 
-  | Token | Light (11c Paper & Signal) | Dark (12e Glass Bento) |
+  | Token | Light | Dark |
   |---|---|---|
-  | window | `#e8e8e4` | `#081022` + blue/orange aurora gradients |
-  | surface | `#f2f2ef` | transparent over window |
-  | tile | `#ffffff` | `#15203a` (glass `rgba(255,255,255,.07)`, `backdrop-filter: blur(14px)`) |
-  | code | `#f7f7f5` | `#0b1328` |
-  | border | `#dcdcd6` | `rgba(255,255,255,.18)` |
-  | control border | `#dcdcd6` | `#3a4766` |
-  | text / text-2 / muted | `#111111` / `#33332f` / `#5f5f59` | `#eef4ff` / `#d3def2` / `#a9bbdc` |
-  | primary (OK, selected, done) | `#111111` | `#5aa9ff`, text `#8fc6ff` |
-  | needs review | `#c0261d` | `#ffa24a` |
-  | server objects, strings | `#4d6a1f` | `#c4a7ff`, strings `#a9d3ff` |
-  | keywords | `#b0231b` | `#ffb874` |
-  | comments, line numbers | `#5f5f59` | `#9fb0cd` |
+  | `--bg` (window, title bar) | `#f5f5fd` | `#000000` |
+  | `--bg2` (content area) | `#fbfbff` | `#050509` |
+  | `--glow1` (top right) / `--glow2` (bottom left) | `rgba(54,64,200,.14)` / `rgba(10,106,96,.12)` | `rgba(142,156,255,.2)` / `rgba(95,216,196,.16)` |
+  | `--surface` / `--surface2` / `--surface3` | `#ffffff` / `#ececf9` / `#dcdcf0` | `#0c0c18` / `#151527` / `#212138` |
+  | `--border` / `--border-strong` / `--interactive-stroke` | `#cacae6` / `#9898c8` / `#5c5c94` | `#303050` / `#4c4c7a` / `#9a9ad0` |
+  | `--text` / `--text2` / `--text3` | `#0d0d24` / `#34345a` / `#34345a` | `#f3f3ff` / `#cecff0` / `#cecff0` |
+  | `--accent` (OK, selected, done) / `--accent-strong` / `--accent-ink` | `#3640c8` / `#2630a8` / `#ffffff` | `#8e9cff` / `#7482f5` / `#0a0c2a` |
+  | `--accent2` (server objects, `◇`, "Uses …") | `#0a6a60` | `#5fd8c4` |
+  | `--danger` (needs review) | `#a8281f` | `#ff8f86` |
+  | `--code` (code well) | `#0c0c18` | `#000000` |
 
-- Use **primary** only for selected pills, the active recipe underline, the Download button and done ring segments, and **needs review** only for status: the `! Permissions` pill, unfinished ring segments, the `⇄` client-call icon and the Inspector tab icon.
-- In dark, apply the aurora background and glass to every tile (Assumption A1).
-- Type: the system stack `'Segoe UI Variable Text', 'Segoe UI', system-ui, sans-serif` for UI text, and JetBrains Mono, bundled locally, for code.
-- Reports keep the original handoff's README §05 palette in both themes, with the A8 adjustments.
+  `--text3` takes the `--text2` value (the handoff's darkened muted text). Each soft tint (`--accent-soft`, `--accent2-soft`, `--danger-soft`) is its colour at alpha .12 in light and .16 in dark. `iris.css`'s `--warn`, `--good` and `--info` families may ship but nothing in this spec uses them.
+- Code wells are dark in both themes: `--code` fill with a 1px `--border-strong` outline. Plain text `--code-text` `#f3f3ff`, comments and line numbers `--code-text3` `#9d9ec9`, keywords `--code-info` `#7ac0ff`, `Server.*` objects `--code-a2` `#5fd8c4`, strings `--code-good` `#62d69b`. Highlighted lines use `rgba(255,255,255,.12)` plus a 2px inset bar in `--code-accent` `#8e9cff`. Accent buttons on a code well use `--code-accent` fill and `--code` text.
+- Use `--accent` fill with `--accent-ink` text only for selected pills, the active recipe underline, the Download button and done ring segments; selected rows and chips use `--accent-soft` with `--text` and a 1px `--accent` border. Use `--danger` only for status: the `! Permissions` pill, unfinished ring segments, the `⇄` client-call icon and the Inspector tab icon, with `--danger-soft` behind needs-review tiles and chips. Interactive pill outlines use `--interactive-stroke`, and inputs carry a 2px `--accent` bottom border. Ring track and gaps use `--border`, except the Starter ring's gaps, which use `--surface`.
+- The content area is `--bg2` with `--glow1` in the top-right corner and `--glow2` in the bottom-left. Tiles and cards are `--surface` with a 1px `--border`, radius 10px (Inspector 12px). There is no aurora, no glass and no `backdrop-filter` (Assumption A1).
+- Type: the system stack `'Segoe UI Variable Text', 'Segoe UI', system-ui, sans-serif` for UI text, at weight **550** for base text and **650** for emphasis (captions, selected states, page and Inspector titles). Nothing loads a font for the UI stack; where it falls back to a static Segoe UI or to `system-ui` (macOS), the browser picks the nearest available weight. Code uses JetBrains Mono, bundled locally, at its existing weights; Cascadia Mono and Consolas aren't used.
+- Reports keep the original handoff's README §05 palette in both themes, with the A8 adjustments. The Iris theme doesn't apply to Markdown or PDF exports.
 - Lay out Create Logic per layout 10a §2: grid rows `129px / minmax(0,1fr) / auto`, columns `220px repeat(3, minmax(0,1fr))`.
 - Draw rings as SVG arcs with 4° gaps. A ring has one segment per check up to 30 checks. Above 30, the site ring draws three arcs whose sizes are proportional to Configured + Reviewed, Needs review and Not scanned. Empty arcs are omitted, and the 4° gaps fall only between the arcs drawn.
 - Apply the AA report-token adjustments in Assumption A8. Every other token is as listed above.
@@ -865,7 +866,7 @@ Sources: PPTB tool-development docs (manifest, `pptb-validate`, marketplace poli
 - All controls are keyboard operable, with the visible focus ring from AC-1.5. Pill groups follow the APG radio group pattern (arrow keys), the top tabs follow APG tabs, the recipe picker follows the APG combobox, the site pill follows the APG select-only combobox (inactive sites are disabled options), and the export modal follows the APG modal dialog (AC-9.1). In the code editor, Esc then Tab moves focus out of the editor (F48).
 - Disabled choices that explain themselves use `aria-disabled="true"`, stay focusable, and show their reason on focus and hover through `aria-describedby` (AC-2.10, AC-4.7, AC-6.8, F47).
 - Status is never conveyed by colour alone: rings carry a text count, and statuses carry text and a `✓` or `!` glyph.
-- Meets WCAG 2.2 AA contrast in both themes. Layout 10a's tokens pass on their solid backgrounds (lowest 4.83:1 light, recomputed). **Glass gate:** at UI acceptance, text on dark glass tiles is measured against the brightest point of the aurora gradient behind it and must reach 4.5:1. The report tokens are adjusted per Assumption A8.
+- Meets WCAG 2.2 AA contrast in both themes. The Iris text tokens pass on `--bg2`, `--surface`, `--surface2` and their own soft tints (lowest 5.01:1, `--accent2` over the light `--glow1` peak, computed 2026-10-23); code-well colours pass on the well and on a highlighted line (lowest 5.58:1). `--interactive-stroke` and the 2px `--accent` focus outline pass 3:1. `--border` and `--border-strong` don't reach 3:1, so they outline only decorative tiles, cards and code wells, never a control's only boundary. Done (`--accent`) and needs-review (`--danger`) ring segments differ in hue only (about 1.1:1), so the ring's text count and the `✓`/`!` glyphs carry status. **Glow gate:** at UI acceptance, text placed directly on the content area is measured at the strongest point of each glow and must reach 4.5:1. The report tokens are adjusted per Assumption A8.
 - The minimum supported viewport is **1024×700**, measured as the tool's viewport, not a container. Below it the window scrolls rather than reflowing. Truncated values expose their full text in a tooltip and the accessible name. Code panes and data tables may scroll, as WCAG exempts two-dimensional content from reflow. PDF text stays selectable (F50).
 - The code panes and the export modal are reachable and operable with a screen reader.
 
@@ -915,7 +916,7 @@ Sources: PPTB tool-development docs (manifest, `pptb-validate`, marketplace poli
 
 ## Open Questions
 
-No blocking product decisions remain. All 59 review findings are adopted (appendix), and the owner approved the design decisions on 2026-10-08. One gate remains at UI acceptance, not planning: the dark glass contrast measurement (Accessibility). Four plan-time spikes are required, all in FR-7:
+No blocking product decisions remain. All 59 review findings are adopted (appendix), and the owner approved the design decisions on 2026-10-08. One gate remains at UI acceptance, not planning: the Iris glow contrast measurement (Accessibility). Four plan-time spikes are required, all in FR-7:
 - **S1:** the `powerpagecomponent` code column, role and parent links, JSON keys, setting values, name format and R10's Account relationship. Needed before Inspector work starts.
 - **S2:** the host's connection, connection-change event, binary save, clipboard and `queryData` paging. Needed before Inspector and download work.
 - **S3:** the script half is done on 2026-10-19 (source `power-pages-samples` commit `7efe699`, outcome in `plans/phase-19-handler-r7.md`). The collision probe stays open.
@@ -932,7 +933,7 @@ Spike checks are proposals until they run. Nothing in this spec counts as verifi
 - the behavior harness, shared client failure fixtures and demo-page cases (AC-4.12).
 
 **Implementation work added in v0.7.0:**
-- two themes following the host theme, aurora and glass, and the glass contrast measurement (FR-11);
+- two themes following the host theme, aurora and glass, and the glass contrast measurement (FR-11; aurora, glass and the glass gate superseded by Iris in v3.0.0);
 - the top-level Server Objects tab, the title-bar site picker and the recipe combobox (Story 1, AC-3.1);
 - the grant set with the Authenticated and Anonymous Users roles, and settings normalisation (FR-7);
 - the scan ID, paging and the inventory-incomplete state (FR-7, AC-7.3);
@@ -942,8 +943,8 @@ Spike checks are proposals until they run. Nothing in this spec counts as verifi
 
 **Assumptions** (A1–A9 proposed on 2026-10-07; A1, A2, A4 and A8 decided by the owner on 2026-10-08):
 
-- **A1: Dark background.** Decided 2026-10-08 (layout 10a): dark uses the aurora gradient on `#081022`, with glass on every tile. Reverses the v0.6.0 default.
-- **A2: Theme.** Decided 2026-10-08: light (11c) and dark (12e) both ship and follow the host theme, with no in-tool toggle. Reverses the v0.6.0 dark-only default.
+- **A1: Dark background.** Decided 2026-10-23 (Iris): dark is flat near-black (`--bg` `#000000`, content `#050509`) with two corner glows, and tiles are solid `--surface`. No aurora, glass or `backdrop-filter`. Reverses the 2026-10-08 aurora-and-glass decision.
+- **A2: Theme.** Decided 2026-10-08, restated 2026-10-23: Iris light and Iris dark both ship and follow the host theme, with no in-tool toggle. The Iris handoff's persisted Light/Dark switcher isn't adopted.
 - **A3: Reference 04.** The two-pane Markdown view is an illustration of the export output, not an in-app screen. The export dialog and downloaded files are the only deliverables.
 - **A4: Recipe tile layout.** Decided 2026-10-08: the searchable combobox from layout 10a §3, with group headers (AC-3.1). The design's own recipe list isn't adopted; the spec's R1–R10 stand.
 - **A7: Recipe scope.** One-line reference snippets from the server objects page (`SiteSetting.Get`, `EnvironmentVariable.get`, `Website`, `User`, `Logger`, each Dataverse method, each HttpClient verb, Context request info) are insertable samples in Server Objects (FR-6), not recipes. Scenario samples are recipes R8–R10.
@@ -956,7 +957,7 @@ Spike checks are proposals until they run. Nothing in this spec counts as verifi
   | Report orange text, on white and on tint `#fdf0e3` | `#d9680a` (3.54 / 3.16) | `#b05408` | 5.10 / 4.55 |
   | Report blue chip on tint `#eaf2fd` | `#1f6fd1` (4.38) | `#1e6dcd` | 4.51 |
 
-  The v0.6.0 code-comment and line-number rows are obsolete: layout 10a's code tokens pass (FR-11). The 10a report screenshots still show the old orange.
+  The v0.6.0 code-comment and line-number rows are obsolete: the Iris code-well tokens pass (FR-11). The 10a report screenshots still show the old orange.
 - **A9: Outbound settings precedence.** As in FR-9 O3–O6, based on Microsoft's `add-server-logic` guidance. Spike S4 confirmed it on 2026-10-16.
 
 **Resolved:**
