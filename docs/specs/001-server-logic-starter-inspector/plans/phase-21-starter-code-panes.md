@@ -30,7 +30,7 @@
 - Create: `src/lib/minimalChange.ts` — the prefix/suffix diff, pure.
 - Signal: `src/lib/minimalChange.test.ts` — exact changes and round-trip rebuilds.
 
-- [ ] **Step 1: Establish the observable pre-change signal**
+- [x] **Step 1: Establish the observable pre-change signal**
 
 Create `src/lib/minimalChange.test.ts`:
 
@@ -76,13 +76,13 @@ describe('minimalChange', () => {
 });
 ```
 
-- [ ] **Step 2: Capture the current signal**
+- [x] **Step 2: Capture the current signal**
 
 Run: `npx vitest run src/lib/minimalChange.test.ts`
 
 Expected: `FAIL  src/lib/minimalChange.test.ts`, with `Error: Failed to resolve import "./minimalChange" from "src/lib/minimalChange.test.ts". Does the file exist?`
 
-- [ ] **Step 3: Implement the minimum fix**
+- [x] **Step 3: Implement the minimum fix**
 
 Create `src/lib/minimalChange.ts`:
 
@@ -108,7 +108,7 @@ export function minimalChange(before: string, after: string): TextChange | null 
 }
 ```
 
-- [ ] **Step 4: Confirm the signal changed, and nothing else did**
+- [x] **Step 4: Confirm the signal changed, and nothing else did**
 
 Run: `npx vitest run src/lib/minimalChange.test.ts`
 
@@ -118,12 +118,14 @@ Run: `npx tsc -b && npx eslint src/lib --max-warnings=0`
 
 Expected: both exit 0 with no output.
 
-- [ ] **Step 5: Commit the coherent change**
+- [x] **Step 5: Commit the coherent change**
 
 ```bash
 git add src/lib/minimalChange.ts src/lib/minimalChange.test.ts
 git commit -m "feat(lib): add minimalChange for one-step editor syncs"
 ```
+
+**Execution evidence (2026-10-23):** The test-first run failed resolving `./minimalChange` (exit 1). After implementation, focused Vitest passed 1 file / 7 tests; `npx tsc -b`, `npx eslint src/lib --max-warnings=0` and focused Prettier exited 0. Coordinator reviewed both files and committed only those paths as `7349ecf`.
 
 ### Task 2: A CodeMirror editor follows the session text and keyboard rules
 
@@ -138,7 +140,7 @@ git commit -m "feat(lib): add minimalChange for one-step editor syncs"
 - Modify: `src/test/setup.ts` — give jsdom's `Range` client rects.
 - Signal: `src/features/starter/code/lineDecorations.test.ts`, `src/features/starter/code/CodeEditor.test.tsx`.
 
-- [ ] **Step 1: Establish the observable pre-change signal**
+- [x] **Step 1: Establish the observable pre-change signal**
 
 Create `src/features/starter/code/lineDecorations.test.ts`:
 
@@ -300,13 +302,13 @@ describe('CodeEditor', () => {
 });
 ```
 
-- [ ] **Step 2: Capture the current signal**
+- [x] **Step 2: Capture the current signal**
 
 Run: `npx vitest run src/features/starter/code`
 
 Expected: `Test Files  2 failed (2)`, with `Error: Failed to resolve import "./lineDecorations" from "src/features/starter/code/lineDecorations.test.ts". Does the file exist?` and `Error: Failed to resolve import "./CodeEditor" from "src/features/starter/code/CodeEditor.test.tsx". Does the file exist?`
 
-- [ ] **Step 3: Implement the minimum fix**
+- [x] **Step 3: Implement the minimum fix**
 
 Create `src/features/starter/code/lineDecorations.ts`:
 
@@ -630,7 +632,7 @@ if (typeof Range !== 'undefined') {
 }
 ```
 
-- [ ] **Step 4: Confirm the signal changed, and nothing else did**
+- [x] **Step 4: Confirm the signal changed, and nothing else did**
 
 Run: `npx vitest run src/features/starter/code`
 
@@ -644,12 +646,14 @@ Run: `npx tsc -b && npx eslint src --max-warnings=0`
 
 Expected: both exit 0 with no output.
 
-- [ ] **Step 5: Commit the coherent change**
+- [x] **Step 5: Commit the coherent change**
 
 ```bash
 git add src/features/starter/code/lineDecorations.ts src/features/starter/code/lineDecorations.test.ts src/features/starter/code/codeTheme.ts src/features/starter/code/CodeEditor.tsx src/features/starter/code/CodeEditor.test.tsx src/features/starter/code/codePanes.css src/test/setup.ts
 git commit -m "feat(starter): add the CodeMirror code editor with line marks and Esc-Tab exit"
 ```
+
+**Execution evidence (2026-10-23):** The test-first run failed with both expected missing imports (exit 1). After implementation, editor/decorations tests passed 2 files / 10 tests without unhandled errors; handler/build/probe regression passed 20 files / 248 tests. TypeScript, source ESLint, owned-file Prettier and scoped diff checks exited 0. Coordinator reviewed all seven files and committed only those paths as `b784e2b`.
 
 ### Task 3: Copy puts a pane's text on the clipboard with a toast
 
@@ -660,7 +664,7 @@ git commit -m "feat(starter): add the CodeMirror code editor with line marks and
 - Create: `src/app/CopyButton.tsx` — the Copy action. It lives in `src/app/` because Server Objects (Phase 22) uses it too and a feature can't import another feature's internals; `ExternalLink` is the precedent.
 - Signal: `src/app/CopyButton.test.tsx` — success and failure toasts through the fake host.
 
-- [ ] **Step 1: Establish the observable pre-change signal**
+- [x] **Step 1: Establish the observable pre-change signal**
 
 Create `src/app/CopyButton.test.tsx`:
 
@@ -712,13 +716,13 @@ describe('CopyButton (AC-4.9, AC-6.7, F49)', () => {
 });
 ```
 
-- [ ] **Step 2: Capture the current signal**
+- [x] **Step 2: Capture the current signal**
 
 Run: `npx vitest run src/app/CopyButton.test.tsx`
 
 Expected: `FAIL  src/app/CopyButton.test.tsx`, with `Error: Failed to resolve import "@/app/CopyButton" from "src/app/CopyButton.test.tsx". Does the file exist?`
 
-- [ ] **Step 3: Implement the minimum fix**
+- [x] **Step 3: Implement the minimum fix**
 
 Create `src/app/CopyButton.tsx`:
 
@@ -757,7 +761,7 @@ export function CopyButton({ text, label }: { text: string; label: string }): Re
 }
 ```
 
-- [ ] **Step 4: Confirm the signal changed, and nothing else did**
+- [x] **Step 4: Confirm the signal changed, and nothing else did**
 
 Run: `npx vitest run src/app/CopyButton.test.tsx`
 
@@ -767,12 +771,14 @@ Run: `npx tsc -b && npx eslint src/app/CopyButton.tsx src/app/CopyButton.test.ts
 
 Expected: both exit 0 with no output.
 
-- [ ] **Step 5: Commit the coherent change**
+- [x] **Step 5: Commit the coherent change**
 
 ```bash
 git add src/app/CopyButton.tsx src/app/CopyButton.test.tsx
 git commit -m "feat(starter): add Copy with success and failure toasts"
 ```
+
+**Execution evidence (2026-10-23):** Both files already existed from commit `b53e382`, unchanged from that commit and matching the planned code. Reused them without recreating a failing import or making a duplicate commit. Focused Vitest passed 1 file / 2 tests; focused ESLint and the checkout's baseline `npx tsc -b` exited 0. Busy state is confirmed by `pending` flowing to `Button`'s native `disabled={busy}`; the planned tests cover copy success/failure. Starter pane labels are verified by Tasks 4–5.
 
 ### Task 4: The server pane edits the session handler
 
@@ -785,7 +791,7 @@ git commit -m "feat(starter): add Copy with success and failure toasts"
 - Modify: `src/features/starter/StarterPage.tsx` — mount the code row with the server pane.
 - Signal: `src/features/starter/code/ServerPane.test.tsx` — pane through the real session.
 
-- [ ] **Step 1: Establish the observable pre-change signal**
+- [x] **Step 1: Establish the observable pre-change signal**
 
 In `src/features/starter/starterTestHarness.tsx`, replace the first import line:
 
@@ -915,13 +921,13 @@ describe('ServerPane (Phase 21)', () => {
 });
 ```
 
-- [ ] **Step 2: Capture the current signal**
+- [x] **Step 2: Capture the current signal**
 
 Run: `npx vitest run src/features/starter/code/ServerPane.test.tsx`
 
 Expected: `FAIL  src/features/starter/code/ServerPane.test.tsx`, with `Error: Failed to resolve import "./ServerPane" from "src/features/starter/code/ServerPane.test.tsx". Does the file exist?`
 
-- [ ] **Step 3: Implement the minimum fix**
+- [x] **Step 3: Implement the minimum fix**
 
 Create `src/features/starter/code/ServerPane.tsx`:
 
@@ -1018,7 +1024,7 @@ and mount the code row between the input row and the note tile:
       <PermissionNote />
 ```
 
-- [ ] **Step 4: Confirm the signal changed, and nothing else did**
+- [x] **Step 4: Confirm the signal changed, and nothing else did**
 
 Run: `npx vitest run src/features/starter/code/ServerPane.test.tsx`
 
@@ -1032,12 +1038,14 @@ Run: `npx tsc -b && npx eslint . --max-warnings=0`
 
 Expected: both exit 0 with no output.
 
-- [ ] **Step 5: Commit the coherent change**
+- [x] **Step 5: Commit the coherent change**
 
 ```bash
 git add src/features/starter/code/ServerPane.tsx src/features/starter/code/ServerPane.test.tsx src/features/starter/starterTestHarness.tsx src/features/starter/StarterPage.tsx
 git commit -m "feat(starter): add the editable server pane with highlights and browser-check flags"
 ```
+
+**Execution evidence (2026-10-23):** The test-first run failed resolving `./ServerPane` (exit 1). After implementation, focused Vitest passed 1 file / 7 tests and Starter/app regression passed 22 files / 193 tests (existing StarterPage now has 13 tests, App 6). TypeScript, repository ESLint and owned-file Prettier exited 0. Coordinator reviewed all four files and committed only those paths as `5c11900`.
 
 ### Task 5: The client pane and request path strip show how to call the handler
 
@@ -1050,7 +1058,7 @@ git commit -m "feat(starter): add the editable server pane with highlights and b
 - Modify: `src/features/starter/StarterPage.tsx` — mount the strip and the client pane.
 - Signal: `src/features/starter/code/ClientPane.test.tsx` — client text, strip, pills, footers and same-render updates.
 
-- [ ] **Step 1: Establish the observable pre-change signal**
+- [x] **Step 1: Establish the observable pre-change signal**
 
 Create `src/features/starter/code/ClientPane.test.tsx`:
 
@@ -1158,13 +1166,13 @@ describe('ClientPane and RequestPathStrip (Phase 21)', () => {
 });
 ```
 
-- [ ] **Step 2: Capture the current signal**
+- [x] **Step 2: Capture the current signal**
 
 Run: `npx vitest run src/features/starter/code/ClientPane.test.tsx`
 
 Expected: `FAIL  src/features/starter/code/ClientPane.test.tsx`, with `Error: Failed to resolve import "./ClientPane" from "src/features/starter/code/ClientPane.test.tsx". Does the file exist?`
 
-- [ ] **Step 3: Implement the minimum fix**
+- [x] **Step 3: Implement the minimum fix**
 
 Create `src/features/starter/code/ClientPane.tsx`:
 
@@ -1283,7 +1291,7 @@ and the code row becomes:
       </div>
 ```
 
-- [ ] **Step 4: Confirm the signal changed, and nothing else did**
+- [x] **Step 4: Confirm the signal changed, and nothing else did**
 
 Run: `npx vitest run src/features/starter/code/ClientPane.test.tsx`
 
@@ -1297,12 +1305,14 @@ Run: `npx tsc -b && npx eslint . --max-warnings=0`
 
 Expected: both exit 0 with no output.
 
-- [ ] **Step 5: Commit the coherent change**
+- [x] **Step 5: Commit the coherent change**
 
 ```bash
 git add src/features/starter/code/ClientPane.tsx src/features/starter/code/RequestPathStrip.tsx src/features/starter/code/ClientPane.test.tsx src/features/starter/StarterPage.tsx
 git commit -m "feat(starter): add the client call pane and request path strip"
 ```
+
+**Execution evidence (2026-10-23):** The test-first run failed resolving `./ClientPane` (exit 1). After implementation, focused Vitest passed 1 file / 5 tests and Starter/app regression passed 23 files / 198 tests. TypeScript, repository ESLint, owned-file Prettier and scoped diff checks exited 0. Coordinator reviewed all four files and committed only those paths as `7d4b9e1`.
 
 ### Task 6: The phase passes every repository gate and builds one IIFE bundle
 
@@ -1312,17 +1322,17 @@ git commit -m "feat(starter): add the client call pane and request path strip"
 
 - Signal: the four repository gates and `npm run build`.
 
-- [ ] **Step 1: Establish the observable pre-change signal**
+- [x] **Step 1: Establish the observable pre-change signal**
 
 The signal is the gate list from `plan-starter.md` § Global Constraints, run on the finished phase. No new code.
 
-- [ ] **Step 2: Capture the current signal**
+- [x] **Step 2: Capture the current signal**
 
 Run: `git status --short src tests`
 
 Expected: no output (Tasks 1–5 committed).
 
-- [ ] **Step 3: Implement the minimum fix**
+- [x] **Step 3: Implement the minimum fix**
 
 No change. If a gate fails, fix it in the task that owns the failing file with a new commit.
 
@@ -1349,6 +1359,10 @@ Expected: `✓ built in` with no error; `tests/buildShape.test.ts` (part of the 
 - [ ] **Step 5: Commit the coherent change**
 
 No commit: this task adds no files. Record the gate results and the ◆ hand-off in the phase PR description.
+
+**Execution evidence (2026-10-23):** `git status --short src tests` returned no output after Task 5's commit. The exact static-gate chain passed TypeScript and repository ESLint, then failed global Prettier (exit 1) solely on `.scratch/write-root-plans.mjs`. That tracked file has no working-tree changes and is outside Phase 21 ownership; it was preserved. A diagnostic `npx prettier --check src tests --end-of-line auto` passed, but does not replace the required global gate. `npx vitest run` passed 86 files / 1,329 tests, including all 12 `tests/buildShape.test.ts` tests, without unhandled errors. `npm run build` exited 0 and emitted one JavaScript bundle; Vite reported its standard size warning. No application repair was needed. Step 4 remains unchecked until the unrelated formatting issue is resolved and the exact global gate passes. Step 5 remains unchecked because no phase PR was created; the gate evidence and ◆ hand-off are recorded here for its description.
+
+**Release hand-off:** In PPTB, load the project root with Debug → Load Local Tool and check both themes: input-to-pane updates within 300 ms, Esc then Tab moving focus out while Tab alone indents, screen-reader access to both panes and findings, clipboard text and “Code copied” feedback, and highlight/flag colours and bars. These owner checks were not performed by this execution.
 
 ---
 
