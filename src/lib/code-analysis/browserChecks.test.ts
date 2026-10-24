@@ -219,14 +219,16 @@ describe('performance (NFR: 300 ms for a 2 000-line file)', () => {
   );
   const code = `function get() {\n${lines.join('\n')}\n}`;
 
-  // Best of 5 runs: the full suite runs files in parallel, so a single run measures CPU contention, not the checker.
+  // CPU time, not wall time: the full suite runs files in parallel worker processes (Vitest's default forks pool),
+  // and under that load wall time measures waiting for a core (over 300 ms seen; ~40 ms alone). Best of 5 drops GC pauses.
   const fastestRun = (input: string): number => {
     runBrowserChecks(input); // warm-up: regex compilation and JIT
     let best = Infinity;
     for (let i = 0; i < 5; i++) {
-      const started = performance.now();
+      const started = process.cpuUsage();
       runBrowserChecks(input);
-      best = Math.min(best, performance.now() - started);
+      const { user, system } = process.cpuUsage(started);
+      best = Math.min(best, (user + system) / 1000);
     }
     return best;
   };
