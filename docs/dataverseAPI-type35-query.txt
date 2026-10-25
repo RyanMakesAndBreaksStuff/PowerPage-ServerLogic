@@ -1,0 +1,8 @@
+const result = await dataverseAPI.queryData(
+ 'powerpagecomponents?$select=powerpagecomponenttype,content,name,powerpagecomponentid,statecode&$filter=powerpagecomponenttype eq 35&$top=50',
+)
+console.log(`Found ${result.value.length} records`)
+console.log(result.value)
+result.value.forEach((record) => {
+  console.log(`${record.name} - ${record.powerpagecomponenttype} -${record.powerpagecomponentid} - ${record.content}`  )
+})
