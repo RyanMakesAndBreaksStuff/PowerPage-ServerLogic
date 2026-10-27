@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "build:beta": "tsc -b && vite build --mode beta",
     "lint": "eslint . --max-warnings=0",
     "preview": "vite preview",
     "watch": "vite build --watch",
@@ -79,7 +80,7 @@
     "node": ">=20.19.0"
   },
   "displayName": "Server Logic Tools",
-  "description": "Generate Power Pages server logic handlers and review a site's existing server logic for web role, table permission and outbound networking gaps.",
+  "description": "Generate Power Pages server logic handlers, client calls and permission checklists, and browse the Server.* object reference.",
   "main": "index.html",
   "icon": "icons/server-logic-tools.svg",
   "license": "MIT",

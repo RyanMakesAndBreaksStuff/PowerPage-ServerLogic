@@ -52,7 +52,7 @@ export const R7_DIFFERENCES: readonly { change: string; reason: string }[] = [
   {
     change: "Input is validated against the table's columns before any call.",
     reason:
-      'The column-aware contract row is checked before any outbound call, so a bad value cannot orphan a ticket (FR-3).',
+      'Input that fails the local checks stops before any outbound call. A later Dataverse rejection can still leave an uploaded ticket (FR-3).',
   },
   {
     change: 'The optional email step and toBase64 are not generated.',

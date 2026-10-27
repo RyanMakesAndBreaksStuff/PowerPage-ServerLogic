@@ -8,13 +8,15 @@ import { defineConfig } from 'vitest/config';
 const ALL_PAGES = ['starter', 'objects', 'inspector'] as const;
 type Page = (typeof ALL_PAGES)[number];
 
+const BETA_PAGES = 'starter,objects';
+
 function isPage(value: string): value is Page {
   return ALL_PAGES.some((page) => page === value);
 }
 
 /**
  * FR-1 released pages. VITE_RELEASED_PAGES is a comma list such as "starter,objects".
- * Unset means all three. Anything unknown (including an empty value) fails the build,
+ * Unset means all three, except in `--mode beta`, which defaults to BETA_PAGES. Anything unknown (including an empty value) fails the build,
  * so a typo can never silently ship a build with no pages.
  */
 function parseReleasedPages(raw: string | undefined): ReadonlySet<Page> {
@@ -81,7 +83,10 @@ const EMPTY_MODULE = fromRoot('./src/lib/emptyModule.ts');
 // https://vitejs.dev/config/
 export default defineConfig((configEnv) => {
   const env = loadEnv(configEnv.mode, process.cwd(), 'VITE_');
-  const released = parseReleasedPages(env.VITE_RELEASED_PAGES);
+  // `--mode beta` is the early-beta release: Logic Starter and Server Objects only.
+  const released = parseReleasedPages(
+    env.VITE_RELEASED_PAGES ?? (configEnv.mode === 'beta' ? BETA_PAGES : undefined),
+  );
   const isProbe = configEnv.mode === 'probe';
 
   return {

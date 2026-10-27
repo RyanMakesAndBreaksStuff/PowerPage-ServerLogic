@@ -10,7 +10,7 @@ export const README_NOTES: Partial<Record<RecipeId, readonly string[]>> = {
     'Hold `CLIENT_SECRET` in Azure Key Vault behind an environment variable.',
     'A retry is a new request with a new ActivityId and uploads another ticket. Find orphans by the ActivityId prefix of the file name and delete them manually.',
     'Whether a name collision fails the upload is unverified until the collision probe passes.',
-    'An invalid choice value fails after the upload, so the ticket is orphaned.',
+    'An invalid choice value that Dataverse rejects fails after the upload, so the ticket is orphaned.',
     "The optional email step from Learn's sample is not generated.",
   ],
   R9: [

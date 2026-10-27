@@ -119,6 +119,20 @@ describe('released pages (FR-1): unreleased page code is left out of the bundle'
   );
 
   it(
+    'ships Starter and Server Objects but not the Inspector placeholder in --mode beta',
+    async () => {
+      const dist = await buildTool('beta-mode', undefined, 'beta');
+      const [file] = filesIn(dist, '.js');
+      if (file === undefined) throw new Error('no bundle emitted');
+      const code = read(dist, file);
+      expect(code).toContain('Discard your edits?');
+      expect(code).toContain('Search objects and methods');
+      expect(code).not.toContain('Logic Inspector page placeholder');
+    },
+    BUILD_TIMEOUT,
+  );
+
+  it(
     'fails the build for an unknown page name',
     async () => {
       await expect(buildTool('invalid', 'starter,bogus')).rejects.toThrow(/unknown page/i);

@@ -4,9 +4,15 @@ A Power Platform ToolBox (PPTB) tool for Power Pages server logic.
 
 - **Logic Starter** generates a handler, a client call and a permission checklist.
 - **Server Objects** is a reference for the `Server.*` objects.
-- **Logic Inspector** reviews a development site's server logic for web role, table permission and outbound networking gaps, and exports Markdown and PDF reports.
+- **Logic Inspector** (reviews existing server logic and exports reports) is coming in a later release.
 
-The tool is read-only toward your environment. Inspector reviews configuration only; it does not verify the tenant's outbound policy.
+The tool is read-only toward your environment.
+
+## Using it
+
+1. Open **Logic Starter**, pick a pattern, and fill in the inputs. The handler, the client call and the permission checklist update as you type.
+2. Choose **Download starter** to save the generated files, then add them to your Power Pages site.
+3. Open **Server Objects** to look up a `Server.*` object or method. Use **Insert** to add a call to your handler.
 
 ## Requirements
 
@@ -16,7 +22,8 @@ PPTB Desktop App 1.2.7 or later. The PPTB VS Code extension is not tested.
 
 ```bash
 npm install
-npm run build          # single IIFE bundle in dist/
+npm run build          # single IIFE bundle in dist/ (all pages)
+npm run build:beta     # early-beta bundle: Logic Starter and Server Objects only
 npm run dev-watch      # development build with sourcemaps
 npm test
 ```
