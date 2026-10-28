@@ -12,7 +12,7 @@ PascalCase component files (`EntityList.tsx`); camelCase hooks/utilities (`useEn
 Vite `react-compiler-ts` scaffold plus the PPTB build shape (Phase 00) as the base; feature-first `src/` (`app/`, `features/<feature>/`, `components/`, `lib/`, `services/`, `types/`). Specs in `docs/specs/NNN-slug/`. Design references in `design_handoff_server_logic_tools/` and `mocks/` (reference only, not production code).
 
 ## Code Style
-Strict TypeScript, ESLint flat config (typescript-eslint strictTypeChecked) + Prettier. See `.claude/rules/typescript.md`, `react.md`, `tooling.md`.
+Strict TypeScript, ESLint flat config (typescript-eslint strictTypeChecked); no formatter (Prettier dropped 2026-10-27). See `.claude/rules/typescript.md`, `react.md`, `tooling.md`.
 
 ## Architectural Patterns
 - Single `services/pptb/` adapter over host globals; read-only Dataverse access (`.claude/rules/pptb-host-and-output.md`).
