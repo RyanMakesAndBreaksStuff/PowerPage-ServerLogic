@@ -337,6 +337,9 @@ describe('buildReadme', () => {
     expect(buildReadme(inputFor('R4'))).toContain(
       'The Global Create grant is expected, and Logic Inspector flags it.',
     );
+    expect(buildReadme(inputFor('R4'))).toContain(
+      "The new contact isn't readable through the Account-scoped permission until it's linked to the caller's account.",
+    );
     expect(buildReadme(inputFor('R9'))).toContain(
       'The flow must validate its own inputs, because the handler passes the validated body through.',
     );
@@ -347,6 +350,7 @@ describe('buildReadme', () => {
     expect(r7).toContain('ActivityId');
     expect(r7).toContain('delete them manually');
     expect(r7).toContain('invalid choice value');
+    expect(r7).toContain('the registration is still created with an empty ticket URL');
     expect(r7).toContain('email step');
     expect(r7.toLowerCase()).not.toContain('cannot overwrite');
     expect(r7.toLowerCase()).not.toContain("can't overwrite");

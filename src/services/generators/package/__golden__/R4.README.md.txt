@@ -78,3 +78,4 @@ Hold secrets in Azure Key Vault, surface them through an environment variable, a
 ## Notes
 
 - The Global Create grant is expected, and Logic Inspector flags it.
+- The new contact isn't readable through the Account-scoped permission until it's linked to the caller's account.
