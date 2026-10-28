@@ -219,6 +219,9 @@ describe('performance (NFR: 300 ms for a 2 000-line file)', () => {
   );
   const code = `function get() {\n${lines.join('\n')}\n}`;
 
+  // Wall time is not the budget (see fastestRun); the Vitest timeout only has to survive a loaded machine.
+  const TIMING_TIMEOUT = 20_000;
+
   // CPU time, not wall time: the full suite runs files in parallel worker processes (Vitest's default forks pool),
   // and under that load wall time measures waiting for a core (over 300 ms seen; ~40 ms alone). Best of 5 drops GC pauses.
   const fastestRun = (input: string): number => {
@@ -236,10 +239,10 @@ describe('performance (NFR: 300 ms for a 2 000-line file)', () => {
   it('checks a 2 000-line file well inside the budget', () => {
     expect(runBrowserChecks(code).hits.filter((h) => h.severity === 'blocked')).toHaveLength(20);
     expect(fastestRun(code)).toBeLessThan(300);
-  });
+  }, TIMING_TIMEOUT);
 
   it('stays inside the budget when "import" is repeated on every line without a closing "from"', () => {
     const worst = Array.from({ length: 2000 }, (_, i) => `// import note ${String(i)}`).join('\n');
     expect(fastestRun(worst)).toBeLessThan(300);
-  });
+  }, TIMING_TIMEOUT);
 });
