@@ -18,6 +18,7 @@ const signatures = (): string[] =>
     .map((li) => li.textContent);
 
 const HANDLER = 'function get() {\n  Server.Logger.Log("hi");\n  return "{}";\n}\n';
+const LEARN = 'https://learn.microsoft.com/power-pages/configure/server-objects';
 
 describe('Server Objects page (Story 6)', () => {
   it('shows the list, the detail and the context column (AC-6.1)', () => {
@@ -32,6 +33,21 @@ describe('Server Objects page (Story 6)', () => {
     const { user } = renderObjects(<ServerObjectsPage />);
     await user.click(pick('Server.User'));
     expect(detail().textContent).toContain('Returns: Not documented on Learn');
+  });
+
+  it('exposes the code sample as a named group (a11y)', () => {
+    renderObjects(<ServerObjectsPage />);
+    expect(within(detail()).getAllByRole('group', { name: /sample$/ })).toHaveLength(1);
+  });
+
+  it('links the Learn reference through the host, never a new window (FR-1)', async () => {
+    const { host, user } = renderObjects(<ServerObjectsPage />);
+    const link = within(detail()).getByRole('link', { name: 'Server objects on Microsoft Learn' });
+    expect(link.getAttribute('href')).toBe(LEARN);
+    expect(link.getAttribute('target')).toBeNull();
+    await user.click(link);
+    expect(host.callsOf('openExternal')).toHaveLength(1);
+    expect(host.callsOf('openExternal')[0]?.url).toBe(LEARN);
   });
 
   it('lists the nine objects with description and count, and marks used ones (AC-6.2)', () => {

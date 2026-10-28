@@ -1,10 +1,15 @@
 import type { ReactElement } from 'react';
 import { CopyButton } from '@/app/CopyButton';
+import { ExternalLink } from '@/app/ExternalLink';
 import { Pill } from '@/components/Pill';
 import { PillGroup } from '@/components/PillGroup';
 import { Tile } from '@/components/Tile';
 import { classNames } from '@/lib/classNames';
-import { NOT_DOCUMENTED, isConnector } from '@/services/catalogue/serverObjects';
+import {
+  NOT_DOCUMENTED,
+  SERVER_OBJECTS_LEARN_URL,
+  isConnector,
+} from '@/services/catalogue/serverObjects';
 import type { ContextScope, ObjectMember, ServerObject } from '@/services/catalogue/serverObjects';
 import { InsertButton } from './InsertButton';
 
@@ -25,7 +30,7 @@ type DetailProps = {
 /** A sample's code with CSS line numbers; the copied text is the catalogue string itself (AC-4.9). */
 export function SampleCode({ code, label }: { code: string; label: string }): ReactElement {
   return (
-    <pre className="objects-code" aria-label={label}>
+    <pre className="objects-code" role="group" aria-label={label}>
       <code>
         {code.split('\n').map((line, index) => (
           // Lines never reorder: the index is the line number.
@@ -60,6 +65,7 @@ export function ObjectDetail({
           <Pill tone="server">{isConnector(object) ? 'Connector' : 'Object'}</Pill>
         </nav>
         <p className="objects-detail__description">{object.description}</p>
+        <ExternalLink href={SERVER_OBJECTS_LEARN_URL}>Server objects on Microsoft Learn</ExternalLink>
         <PillGroup
           label="Members"
           options={object.members.map((m) => ({ value: m.name, label: m.name }))}
