@@ -50,6 +50,20 @@ describe('Server Objects page (Story 6)', () => {
     expect(host.callsOf('openExternal')[0]?.url).toBe(LEARN);
   });
 
+  it('announces how many objects the list shows (a11y)', async () => {
+    const { user } = renderObjects(<ServerObjectsPage />);
+    const count = (): string => within(list()).getByRole('status').textContent;
+    expect(count()).toBe('9 objects listed');
+    await user.type(screen.getByRole('searchbox', { name: 'Search objects and methods' }), 'zzz');
+    expect(count()).toBe('0 objects listed');
+  });
+
+  it('says what the used mark means (a11y)', () => {
+    const { dispatch } = renderObjects(<ServerObjectsPage />);
+    dispatch({ type: 'editServer', text: HANDLER, cursor: null });
+    expect(pick('Server.Logger').textContent).toContain('used by the current handler');
+  });
+
   it('lists the nine objects with description and count, and marks used ones (AC-6.2)', () => {
     const { dispatch } = renderObjects(<ServerObjectsPage />);
     expect(listed()).toHaveLength(9);

@@ -74,6 +74,9 @@ export function ServerObjectsPage(): ReactElement {
           }}
           compact
         />
+        <p role="status" className="objects-visually-hidden">
+          {`${String(listed.length)} ${listed.length === 1 ? 'object' : 'objects'} listed`}
+        </p>
         <ul className="objects-list__items">
           {listed.map(({ object }) => {
             const isSelected = current?.object === object;
@@ -92,6 +95,7 @@ export function ServerObjectsPage(): ReactElement {
                     {derived.usedMembers.has(object.path) ? (
                       <Pill tone="server" compact>
                         used
+                        <span className="objects-visually-hidden"> by the current handler</span>
                       </Pill>
                     ) : null}
                   </span>
