@@ -76,6 +76,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  window.dispatchEvent(new Event('pagehide'));
   Reflect.deleteProperty(window, 'toolboxAPI');
   Reflect.deleteProperty(window, 'dataverseAPI');
   vi.restoreAllMocks();
@@ -325,6 +326,17 @@ describe('onEvent', () => {
     unsubscribeSecond();
     expect(stubs.off).toHaveBeenCalledTimes(1);
     expect(stubs.off).toHaveBeenCalledWith(hub());
+  });
+
+  it('removes the host handler once when the page is hidden (FR-12)', () => {
+    host.onEvent(() => undefined);
+    const callback = hub();
+    window.dispatchEvent(new Event('pagehide'));
+    const removed = (): number =>
+      stubs.off.mock.calls.filter(([registered]) => registered === callback).length;
+    expect(removed()).toBe(1);
+    window.dispatchEvent(new Event('pagehide'));
+    expect(removed()).toBe(1);
   });
 
   it('registers again after every handler has unsubscribed', () => {

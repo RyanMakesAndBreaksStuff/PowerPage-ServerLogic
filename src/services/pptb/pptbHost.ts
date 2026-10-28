@@ -64,7 +64,7 @@ function unexpected(label: string): HostCallError {
 
 /**
  * `toolboxAPI.events.on` is registered once per host, on the first handler, and routes on `payload.event`.
- * The last unsubscribe calls `events.off` (declared in @pptb/types, not shown in the docs: Spike S2).
+ * The last unsubscribe, or the page's pagehide, calls events.off (declared in @pptb/types, not shown in the docs: Spike S2).
  */
 function createEventHub(): PptbHost['onEvent'] {
   const handlers = new Set<(e: HostEvent) => void>();
@@ -80,26 +80,31 @@ function createEventHub(): PptbHost['onEvent'] {
       }
     }
   };
+  // FR-12: the host handler also goes when the tool unloads. A later subscribe registers it again.
+  const detach = (): void => {
+    if (!registered) return;
+    registered = false;
+    window.removeEventListener('pagehide', detach);
+    try {
+      window.toolboxAPI.events.off(hub);
+    } catch (error) {
+      logHostFailure('events.off', error);
+    }
+  };
   return (handler) => {
     handlers.add(handler);
     if (!registered) {
       try {
         window.toolboxAPI.events.on(hub);
         registered = true;
+        window.addEventListener('pagehide', detach);
       } catch (error) {
         logHostFailure('events.on', error);
       }
     }
     return () => {
       handlers.delete(handler);
-      if (handlers.size === 0 && registered) {
-        registered = false;
-        try {
-          window.toolboxAPI.events.off(hub);
-        } catch (error) {
-          logHostFailure('events.off', error);
-        }
-      }
+      if (handlers.size === 0) detach();
     };
   };
 }

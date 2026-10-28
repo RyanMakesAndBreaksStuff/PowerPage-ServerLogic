@@ -79,7 +79,7 @@ describe('App shell', () => {
     expect(screen.getByText('Not connected')).toBeTruthy();
   });
 
-  it('registers one host event listener for the whole app and removes it on unload (FR-12)', async () => {
+  it('registers one host event listener for the whole app and removes it on unmount', async () => {
     const host = createFakeHost();
     const { unmount } = render(<App host={host} starterDeps={FAKE_STARTER_DEPS} />);
     await act(async () => {
