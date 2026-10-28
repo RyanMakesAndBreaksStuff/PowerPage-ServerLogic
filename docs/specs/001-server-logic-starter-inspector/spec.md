@@ -1,9 +1,9 @@
 # Feature 001: Power Pages Server Logic — Logic Starter & Logic Inspector
 
 **Status:** Approved
-**Version:** 3.0.0
+**Version:** 3.0.1
 **Created:** 2026-10-06
-**Updated:** 2026-10-23
+**Updated:** 2026-10-27
 **Branch:** `001-logic-inspector`
 **Design source:** layout 10a, `design_handoff_server_logic_tools/Logic Tooling Design Directions/design_handoff_server_logic_tools/` (README + references 01–06, light and dark), for the shell, Logic Starter, Server Objects and Logic Inspector layout, copy and behaviour. The **Iris** theme handoff (`design_handoff_server_logic_tools/Logic Tooling Design Directions/design_handoff_iris_theme/`: README, `tokens/iris.css`, and `Logic Starter Iris.dc.html` as the visual reference) supplies all UI colours and the role mapping, and supersedes 10a §4 and the colours in references 01–06. Report styling still follows the original handoff's README §05 (`design_handoff_server_logic_tools/README.md`). High fidelity: colours, type, spacing and copy are final except where this spec overrides them (recipe list, A8, F38 labels, and the Iris items FR-11 doesn't adopt).
 
@@ -27,6 +27,7 @@
 | 2.2.0 | 2026-10-20 | **MINOR.** Owner decision: Server Objects ships only with Logic Starter, because its used marks, "Used here" filter, Used in, Permissions needed and Insert all read the Starter session. **Added:** a build that releases `objects` without `starter` fails (FR-1 released pages). **Changed:** per-page releases keep their completion order, except that Server Objects is never released before Logic Starter (FR-1 release rule). **Removed:** the unreachable "unreleased Starter" cases in AC-1.7 and AC-6.8. |
 | 2.3.0 | 2026-10-20 | **MINOR.** Fixes from the `plan-inspector.md` review, checked against Learn (Filter rows, file column download, web roles, server logic site settings, service protection limits), the PPTB events docs and Microsoft's Power Pages plugin. **Owner decisions:** results clear only when the active connection's id or URL changes, or no connection is active; other `connection:*` events keep them (AC-7.6); connection lost is a network or 401 read failure with the connection unchanged (AC-7.10); empty or unparseable code is the reviewable analysis limit "Couldn't analyse handler code", and only a failed download stays a read failure (AC-8.5, Error Scenarios); `TimeoutInSeconds` keeps Learn's 1–240 with a note for 121–240, because the plugin reports a 120 clamp (AC-7.12). **Added:** setting-name matching, inactive settings, `TimeoutInSeconds` and `AllowedDomains` parse rules, unknown table-permission scope, more than one default role (site banner), `$filter` literal escaping and at most 4 reads in flight (FR-7); export defaults, the snapshot point, cancel on cleared results and a build budget (AC-9.1, 9.8, 9.9); inline Markdown escaping, a vector `✓` and a JetBrains Mono TTF for the PDF (FR-10); the site pill's APG pattern (Accessibility). **Changed:** S2 adds connection-loss and event-payload checks and drops the up-front access test, which AC-7.7 covers per check. |
 | 3.0.0 | 2026-10-23 | **MAJOR.** Owner decision: the Iris theme replaces 11c Paper & Signal (light) and 12e Glass Bento (dark), on this repo's terms. **Rewritten:** FR-11's token table now uses Iris values and `iris.css` variable names; code wells are dark in both themes; the code highlight is a 12% white fill with a 2px `--code-accent` bar (AC-4.2); "primary" becomes `--accent` (AC-1.5, AC-5.1, AC-8.2); A1 (flat near-black with two corner glows, no aurora, no glass, no `backdrop-filter`) and A2 (Iris light and dark, host-driven); the glass contrast gate becomes a glow gate (Accessibility). **Owner decisions:** Segoe UI weights 550 for base text and 650 for emphasis; code stays in bundled JetBrains Mono. **Not adopted from the Iris handoff:** its persisted Light/Dark switcher (AC-1.6 and A2 stand), the Fluent UI v9 `workbenchTokens.ts` (the app uses CSS variables), Cascadia Mono / Consolas, its 600/700 weights, and text glyphs in place of Fluent System Icons. **Unchanged:** layout 10a, reports (README §05 palette, A8, FR-10 fonts). |
+| 3.0.1 | 2026-10-27 | **PATCH.** Owner decisions for the early beta (Logic Starter and Server Objects), from `docs/beta-readiness-review.md`. **Added:** an early-beta exception in FR-12: the current palette and targeted behavior tests ship first, and the Iris theme and the full AC-4.12 matrix follow. **Changed:** AC-1.7 hides the site pill while Logic Inspector is unreleased; the FR-3 logging rule and the security NFR cover handlers, and the generated browser client may log to the console; "Back to Create Logic" and "Clear search" are buttons, not links. |
 
 ---
 
@@ -131,7 +132,7 @@ Where the mocks and Learn disagree, Learn wins. The visual design still applies.
 - [ ] **AC-1.4** Given any tab When the user selects another Then the content area swaps immediately with no transition, and the previous tab's state is kept.
 - [ ] **AC-1.5** Given any pill When it has keyboard focus Then it shows a 2px outline in the theme's accent colour at a 2px offset, and the selected pill never uses the needs-review colour (FR-11).
 - [ ] **AC-1.6** Given the host theme When the tool opens Then it reads `toolboxAPI.utils.getCurrentTheme()` and renders its first frame in that theme, Iris light or Iris dark. It re-reads the theme on `settings:updated`, on window focus and when the document becomes visible, because PPTB has no dedicated theme event. If the host can't answer, the tool keeps its current theme, or uses light at launch, as PPTB does. There is no in-tool toggle (FR-11).
-- [ ] **AC-1.7** Given a build in which a page isn't released yet (FR-1 released pages) When the shell renders Then that page's top tab still shows with its glyph and label, in the disabled style, with `aria-disabled="true"`. It stays in the tab list's arrow-key order but can't be activated, and it has no tooltip; this is an owner-approved exception to F47 for unreleased pages only. The first released tab, in AC-1.1 order, is active instead of Logic Starter. While Logic Inspector is unreleased, the site pill is disabled as in AC-1.3. Server Objects is never released without Logic Starter (FR-1), so it always has the Starter session and its Insert. The page's content never renders.
+- [ ] **AC-1.7** Given a build in which a page isn't released yet (FR-1 released pages) When the shell renders Then that page's top tab still shows with its glyph and label, in the disabled style, with `aria-disabled="true"`. It stays in the tab list's arrow-key order but can't be activated, and it has no tooltip; this is an owner-approved exception to F47 for unreleased pages only. The first released tab, in AC-1.1 order, is active instead of Logic Starter. While Logic Inspector is unreleased, the title bar doesn't render the site pill. Server Objects is never released without Logic Starter (FR-1), so it always has the Starter session and its Insert. The page's content never renders.
 
 ### Story 2: Configure a handler (Create Logic)
 
@@ -262,7 +263,7 @@ Where the mocks and Learn disagree, Learn wins. The visual design still applies.
   - **Fixture:** in `function get(){ /* cursor */ return "{}"; }`, with the cursor inside the comment, Insert is disabled with the statement-position tooltip.
   There is no snippet-form contract, variable-conflict analysis or reachability analysis beyond these rules.
 - [ ] **AC-6.9** Given the context column When it renders Then it shows:
-  - "Used in <slug>": each used object with pills for the members called, plus a "← Back to Create Logic" link.
+  - "Used in <slug>": each used object with pills for the members called, plus a "← Back to Create Logic" button.
   - "Permissions needed": tables with privileges and roles, with the warn state when the checklist isn't reviewed.
   - "Another sample": the sample for the next member of the selected object in Learn's order, wrapping round. It is hidden for objects with one member.
 - [ ] **AC-6.10** Given Logic Starter When the user selects "Browse all in Server Objects" Then the Server Objects top-level tab opens. Given Server Objects, selecting "← Back to Create Logic" switches to the Logic Starter tab.
@@ -435,7 +436,7 @@ Each recipe defines:
   - Failure returns `JSON.stringify({ status: "error", message })`.
   - `message` is a fixed, human-readable string. Exception text and connector bodies are never returned.
   - A validation failure adds `errors: [{ field, message }]` to the failure object.
-- **Logging rule** (F09). Generated code may log only the following:
+- **Logging rule** (F09). Generated handler code may log only the following:
   - a fixed operation name;
   - for connector failures, `StatusCode` and `ReasonPhrase`;
   - for caught exceptions, `e.name`;
@@ -831,6 +832,7 @@ Sources: PPTB tool-development docs (manifest, `pptb-validate`, marketplace poli
 - Don't set `enabledForPowerPlatformAPI`; the tool reads only through `dataverseAPI`.
 - Pass `npx pptb-validate` with no errors before any release; `npm audit` is clean for a verified listing.
 - Release per page: Logic Starter, Server Objects and Logic Inspector are each published once complete, in whatever order they finish, except that Server Objects is released with or after Logic Starter. Each release meets every AC of its released pages and of Story 1 (with AC-1.7 for unreleased pages), passes the validator, and is published only with the owner's explicit confirmation.
+- **Early beta exception (spec 3.0.1).** The first release, built with `npm run build:beta` (Logic Starter and Server Objects), needn't meet the previous bullet in two respects. It ships on its current palette instead of the Iris theme (FR-11, and the colour clauses of AC-1.5, AC-1.6, AC-2.5, AC-4.2, AC-5.1, AC-5.4 and AC-6.2). It replaces the AC-4.12 36-configuration matrix with targeted `node:vm` tests for the client envelope (AC-4.5, AC-4.6) and for R7. Both gaps close in a later release.
 - Register `toolboxAPI.events.on` once at start-up and remove the handler on unload.
 
 **Must not:**
@@ -854,7 +856,7 @@ Sources: PPTB tool-development docs (manifest, `pptb-validate`, marketplace poli
 - No configuration, findings or code are sent to third parties.
 - Files and reports the tool generates contain no tokens or secrets the tool obtained. Code the user edits is downloaded exactly as written; the tool doesn't scan or redact it (F20).
 - Generated code never contains literal secrets.
-- Generated code never logs bodies, exception messages, URLs, headers, tokens or site-setting values (the FR-3 logging rule).
+- Generated handler code never logs bodies, exception messages, URLs, headers, tokens or site-setting values (the FR-3 logging rule). The generated browser client may write response values to the console.
 
 ### Reliability
 
@@ -909,7 +911,7 @@ Sources: PPTB tool-development docs (manifest, `pptb-validate`, marketplace poli
 | More than one web role is marked as the Anonymous or Authenticated Users Role | Every flagged role is treated as that default role; site banner, repeated in exports (FR-7) |
 | Results are cleared while the export dialog is open | The dialog closes, nothing is saved, and a status toast explains why (AC-9.8) |
 | A `connection:*` event leaves the active connection's id and URL unchanged | Results and review marks are kept; the title bar updates (AC-7.6) |
-| Server Objects search matches nothing | "No objects or members match '<query>'", with a Clear search link |
+| Server Objects search matches nothing | "No objects or members match '<query>'", with a Clear search button |
 | Liquid selected and the recipe changes to one without Liquid support | Language resets to fetch (AC-2.8) |
 | Required site setting missing at runtime (generated code) | The handler logs an error and returns `JSON.stringify({ status: "error", message: "Server logic isn't configured: missing site setting <name>" })` before any outbound call (FR-3, F57) |
 | More than 50 server logic records | All are scanned; the "Scanned X of N" progress count shows for every scan (FR-7) |
