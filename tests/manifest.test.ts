@@ -51,6 +51,12 @@ describe('PPTB manifest (FR-12)', () => {
     ]);
   });
 
+  it('is BSD-3-Clause and ships the licence text', () => {
+    expect(manifest.license).toBe('BSD-3-Clause');
+    expect(existsSync(`${ROOT}LICENSE`)).toBe(true);
+    expect(readFileSync(`${ROOT}LICENSE`, 'utf8')).toContain('BSD 3-Clause License');
+  });
+
   it('links the repository and a raw GitHub README', () => {
     expect(manifest.configurations).toEqual({
       repository: 'https://github.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic',

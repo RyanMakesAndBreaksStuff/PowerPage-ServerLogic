@@ -79,7 +79,7 @@
   "description": "Generate Power Pages server logic handlers, client calls and permission checklists, and browse the Server.* object reference.",
   "main": "index.html",
   "icon": "icons/server-logic-tools.svg",
-  "license": "MIT",
+  "license": "BSD-3-Clause",
   "author": "Ryan Christopher",
   "contributors": [
     {
