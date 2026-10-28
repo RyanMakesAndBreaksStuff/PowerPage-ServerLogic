@@ -61,13 +61,15 @@ export function createStarterReducer(
       case 'selectRecipe': {
         const recipe = getRecipe(action.recipe);
         const text = generated(deps, action.recipe);
+        // AC-4.7: losing Liquid because the new recipe can't use it gets the same toast as a text edit.
+        // Leaving or entering R8 is exempt (Decision 6): R8 fixes the language.
+        const liquidLost =
+          state.language === 'liquid' &&
+          state.recipe !== 'R8' &&
+          action.recipe !== 'R8' &&
+          !deps.isLiquidAllowed(recipe, text);
         const language =
-          action.recipe === 'R8'
-            ? 'liquid'
-            : state.recipe === 'R8' ||
-                (state.language === 'liquid' && !deps.isLiquidAllowed(recipe, text))
-              ? 'fetch'
-              : state.language;
+          action.recipe === 'R8' ? 'liquid' : state.recipe === 'R8' || liquidLost ? 'fetch' : state.language;
         return {
           ...state,
           recipe: action.recipe,
@@ -77,6 +79,7 @@ export function createStarterReducer(
           generatedText: text,
           cursor: null,
           reviewedText: null,
+          pendingNotice: liquidLost ? LIQUID_RESET_NOTICE : state.pendingNotice,
         };
       }
       case 'setLanguage': {

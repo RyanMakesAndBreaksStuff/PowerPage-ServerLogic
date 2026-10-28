@@ -46,12 +46,21 @@ describe('selectRecipe (AC-2.8, AC-3.8)', () => {
     expect(state.reviewedText).toBeNull();
   });
 
-  it('resets Liquid to fetch when the new recipe has no Liquid support', () => {
+  it('resets Liquid to fetch with the toast when the new recipe has no Liquid support (AC-4.7)', () => {
     const state = run(
       { type: 'setLanguage', language: 'liquid' },
       { type: 'selectRecipe', recipe: 'R2' },
     );
     expect(state.language).toBe('fetch');
+    expect(state.pendingNotice).toEqual(LIQUID_RESET_NOTICE);
+  });
+
+  it('keeps Liquid, with no toast, when the new recipe supports it', () => {
+    const state = run(
+      { type: 'setLanguage', language: 'liquid' },
+      { type: 'selectRecipe', recipe: 'R1' },
+    );
+    expect(state.language).toBe('liquid');
     expect(state.pendingNotice).toBeNull();
   });
 
