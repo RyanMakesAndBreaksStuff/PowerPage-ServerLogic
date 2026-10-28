@@ -11,6 +11,30 @@ import type { ObjectMember, ServerObject } from '@/services/catalogue/serverObje
 import { nextMember } from './objectList';
 import { SampleCode } from './ObjectDetail';
 
+function NeededList({
+  label,
+  items,
+}: {
+  label: string;
+  items: readonly string[];
+}): ReactElement | null {
+  if (items.length === 0) return null;
+  return (
+    <>
+      <p className="objects-muted">{label}</p>
+      <ul className="objects-grants">
+        {items.map((item) => (
+          <li key={item}>
+            <Pill compact mono>
+              {item}
+            </Pill>
+          </li>
+        ))}
+      </ul>
+    </>
+  );
+}
+
 /** AC-6.9: what the handler uses, the permissions it needs and another sample of the selected object. */
 export function ContextColumn({
   shown,
@@ -71,6 +95,8 @@ export function ContextColumn({
           </ul>
         )}
         <Pill>{recipe.webRole}</Pill>
+        <NeededList label="Outbound domains" items={recipe.outboundDomains} />
+        <NeededList label="Site settings" items={recipe.siteSettings} />
         <p className="objects-muted">
           {reviewed
             ? 'Checklist reviewed in Logic Starter.'

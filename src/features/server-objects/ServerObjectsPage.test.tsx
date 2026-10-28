@@ -247,6 +247,15 @@ describe('Server Objects page (Story 6)', () => {
     expect(screen.queryByRole('region', { name: 'Another sample' })).toBeNull();
   });
 
+  it('lists outbound domains and site settings for the selected recipe (AC-3.6)', () => {
+    const { dispatch } = renderObjects(<ServerObjectsPage />);
+    const permissions = screen.getByRole('region', { name: 'Permissions needed' });
+    expect(within(permissions).queryByText('Outbound domains')).toBeNull();
+    dispatch({ type: 'selectRecipe', recipe: 'R7' });
+    expect(within(permissions).getByText('graph.microsoft.com')).toBeTruthy();
+    expect(within(permissions).getByText('CLIENT_SECRET')).toBeTruthy();
+  });
+
   it('keeps the still-listed object when Used here shrinks and All is chosen (AC-6.4a)', async () => {
     const { dispatch, user } = renderObjects(<ServerObjectsPage />);
     dispatch({
