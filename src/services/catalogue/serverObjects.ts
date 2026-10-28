@@ -192,7 +192,7 @@ export const SERVER_OBJECTS: readonly ServerObject[] = [
         name: 'fullname',
         kind: 'property',
         signatures: ['fullname'],
-        returns: 'null when the caller is anonymous',
+        returns: null,
         timing: null,
         context: null,
         description: "Full name of the signed-in user's contact.",

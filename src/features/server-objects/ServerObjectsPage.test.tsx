@@ -28,6 +28,12 @@ describe('Server Objects page (Story 6)', () => {
     expect(screen.getByRole('region', { name: 'Permissions needed' })).toBeTruthy();
   });
 
+  it('shows "Not documented on Learn" for Server.User.fullname, not an invented return type (AC-6.5)', async () => {
+    const { user } = renderObjects(<ServerObjectsPage />);
+    await user.click(pick('Server.User'));
+    expect(detail().textContent).toContain('Returns: Not documented on Learn');
+  });
+
   it('lists the nine objects with description and count, and marks used ones (AC-6.2)', () => {
     const { dispatch } = renderObjects(<ServerObjectsPage />);
     expect(listed()).toHaveLength(9);

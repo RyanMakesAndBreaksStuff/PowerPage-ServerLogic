@@ -108,8 +108,6 @@ describe('SERVER_OBJECTS (FR-6)', () => {
         if (isConnector(o)) {
           expect(m.returns).toContain('IsSuccessStatusCode');
           expect(m.returns?.includes('Headers')).toBe(o.path !== 'Server.Connector.CloudFlow');
-        } else if (o.path === 'Server.User') {
-          expect(m.returns).toBe('null when the caller is anonymous');
         } else {
           expect(m.returns).toBeNull();
         }
