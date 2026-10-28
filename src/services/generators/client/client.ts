@@ -179,6 +179,9 @@ function urlLines(slug: string, query: string | null): readonly string[] {
   ];
 }
 
+const ENVELOPE_INVALID = 'The response was not a valid envelope.';
+const DATA_UNREADABLE = 'The response data could not be read.';
+
 function showErrorLines(): readonly string[] {
   return ['function showError(text) {', '  console.error(text);', '}'];
 }
@@ -188,17 +191,31 @@ function envelopeLines(keys: readonly string[]): readonly string[] {
     keys.length === 0
       ? '  console.log("done");'
       : `  console.log(${keys.map((key) => `parsed.${key}`).join(', ')});`;
+  const invalid = `    showError(${JSON.stringify(ENVELOPE_INVALID)});`;
+  const unreadable = `    showError(${JSON.stringify(DATA_UNREADABLE)});`;
   return [
     'function handleEnvelope(envelope) {',
+    '  if (typeof envelope !== "object" || envelope === null) {',
+    invalid,
+    '    return;',
+    '  }',
     '  if (envelope.success === false) {',
     '    showError(String(envelope.error));',
+    '    return;',
+    '  }',
+    '  if (envelope.success !== true) {',
+    invalid,
     '    return;',
     '  }',
     '  let parsed;',
     '  try {',
     '    parsed = JSON.parse(envelope.data);',
     '  } catch {',
-    '    showError("The response data could not be read.");',
+    unreadable,
+    '    return;',
+    '  }',
+    '  if (typeof parsed !== "object" || parsed === null) {',
+    unreadable,
     '    return;',
     '  }',
     '  if (parsed.status !== "success") {',
