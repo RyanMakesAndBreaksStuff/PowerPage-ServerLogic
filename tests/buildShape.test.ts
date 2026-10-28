@@ -99,6 +99,7 @@ describe('built tool: PPTB loading shape (all pages released)', () => {
     expect(code).toContain('Discard your edits?'); // text only the Starter page renders
     expect(code).toContain('Search objects and methods');
     expect(code).toContain('Logic Inspector page placeholder');
+    expect(code).toContain('No site selected');
   });
 });
 
@@ -128,6 +129,7 @@ describe('released pages (FR-1): unreleased page code is left out of the bundle'
       expect(code).toContain('Discard your edits?');
       expect(code).toContain('Search objects and methods');
       expect(code).not.toContain('Logic Inspector page placeholder');
+      expect(code).not.toContain('No site selected');
     },
     BUILD_TIMEOUT,
   );

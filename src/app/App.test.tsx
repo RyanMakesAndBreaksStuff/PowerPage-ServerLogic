@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { App } from '@/app/App';
 import { FAKE_STARTER_DEPS } from '@/app/starter-session/fakeStarterDeps';
 import { createFakeHost } from '@/services/pptb/fakeHost';
@@ -55,6 +55,17 @@ describe('App shell', () => {
     expect(screen.getByText('Not connected')).toBeTruthy();
     expect(screen.getByText('No site selected').getAttribute('aria-disabled')).toBe('true');
     expect(screen.getByRole('region', { name: 'Logic name' })).toBeTruthy();
+  });
+
+  it('does not render the site pill while Logic Inspector is unreleased (AC-1.7)', async () => {
+    vi.stubGlobal('__PAGE_INSPECTOR__', false);
+    try {
+      await mount(null);
+      expect(screen.getByText('Not connected')).toBeTruthy();
+      expect(screen.queryByText('No site selected')).toBeNull();
+    } finally {
+      vi.unstubAllGlobals();
+    }
   });
 
   it('shows the connection and its environment (AC-1.2), and follows connection changes', async () => {

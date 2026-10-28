@@ -17,7 +17,7 @@ export function TitleBar(): ReactElement {
       <TopTabs view={view} released={RELEASED_PAGES} onSelect={setView} />
       <span className="shell__context">
         <span>{connectionLabel(connection)}</span>
-        <SitePill />
+        {__PAGE_INSPECTOR__ ? <SitePill /> : null}
       </span>
     </header>
   );
