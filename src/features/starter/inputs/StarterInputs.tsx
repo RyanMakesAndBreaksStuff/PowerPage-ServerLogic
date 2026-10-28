@@ -156,8 +156,9 @@ function ReadinessTile(): ReactElement {
       <div className="starter-readiness">
         <StatusBadge kind={browser ? 'ok' : 'review'} label="Browser checks" />
         <span className="starter-readiness__row">
-          <StatusBadge kind="ok" label="Validation" />
-          {derived.edited ? <EditedValidationInfo /> : null}
+          <StatusBadge kind="ok" label="Validation">
+            {derived.edited ? <EditedValidationInfo /> : null}
+          </StatusBadge>
         </span>
         <StatusBadge kind={permissions ? 'ok' : 'review'} label="Permissions" />
       </div>

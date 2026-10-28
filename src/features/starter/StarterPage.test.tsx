@@ -142,13 +142,14 @@ describe('StarterPage input tiles (Phase 18)', () => {
     expect(badge('Browser checks')).toBe('review');
   });
 
-  it('explains that edited validation is not rechecked (AC-5.3)', () => {
+  it('explains on the Validation pill that edited validation is not rechecked (AC-5.3)', () => {
     const h = renderStarter(<StarterPage />);
-    expect(screen.queryByRole('button', { name: 'About validation' })).toBeNull();
+    const pill = (): HTMLElement => within(readiness()).getByText('Validation');
+    expect(within(pill()).queryByRole('button', { name: 'About validation' })).toBeNull();
     h.dispatch({ type: 'editServer', text: 'changed', cursor: null });
-    expect(screen.getByRole('button', { name: 'About validation' })).toHaveAccessibleDescription(
-      "Generated validation; edits aren't rechecked.",
-    );
+    expect(
+      within(pill()).getByRole('button', { name: 'About validation' }),
+    ).toHaveAccessibleDescription("Generated validation; edits aren't rechecked.");
   });
 });
 
