@@ -1,9 +1,9 @@
 # Feature 001: Power Pages Server Logic — Logic Starter & Logic Inspector
 
 **Status:** Approved
-**Version:** 3.0.1
+**Version:** 3.0.2
 **Created:** 2026-10-06
-**Updated:** 2026-10-27
+**Updated:** 2026-10-30
 **Branch:** `001-logic-inspector`
 **Design source:** layout 10a, `design_handoff_server_logic_tools/Logic Tooling Design Directions/design_handoff_server_logic_tools/` (README + references 01–06, light and dark), for the shell, Logic Starter, Server Objects and Logic Inspector layout, copy and behaviour. The **Iris** theme handoff (`design_handoff_server_logic_tools/Logic Tooling Design Directions/design_handoff_iris_theme/`: README, `tokens/iris.css`, and `Logic Starter Iris.dc.html` as the visual reference) supplies all UI colours and the role mapping, and supersedes 10a §4 and the colours in references 01–06. Report styling still follows the original handoff's README §05 (`design_handoff_server_logic_tools/README.md`). High fidelity: colours, type, spacing and copy are final except where this spec overrides them (recipe list, A8, F38 labels, and the Iris items FR-11 doesn't adopt).
 
@@ -28,6 +28,7 @@
 | 2.3.0 | 2026-10-20 | **MINOR.** Fixes from the `plan-inspector.md` review, checked against Learn (Filter rows, file column download, web roles, server logic site settings, service protection limits), the PPTB events docs and Microsoft's Power Pages plugin. **Owner decisions:** results clear only when the active connection's id or URL changes, or no connection is active; other `connection:*` events keep them (AC-7.6); connection lost is a network or 401 read failure with the connection unchanged (AC-7.10); empty or unparseable code is the reviewable analysis limit "Couldn't analyse handler code", and only a failed download stays a read failure (AC-8.5, Error Scenarios); `TimeoutInSeconds` keeps Learn's 1–240 with a note for 121–240, because the plugin reports a 120 clamp (AC-7.12). **Added:** setting-name matching, inactive settings, `TimeoutInSeconds` and `AllowedDomains` parse rules, unknown table-permission scope, more than one default role (site banner), `$filter` literal escaping and at most 4 reads in flight (FR-7); export defaults, the snapshot point, cancel on cleared results and a build budget (AC-9.1, 9.8, 9.9); inline Markdown escaping, a vector `✓` and a JetBrains Mono TTF for the PDF (FR-10); the site pill's APG pattern (Accessibility). **Changed:** S2 adds connection-loss and event-payload checks and drops the up-front access test, which AC-7.7 covers per check. |
 | 3.0.0 | 2026-10-23 | **MAJOR.** Owner decision: the Iris theme replaces 11c Paper & Signal (light) and 12e Glass Bento (dark), on this repo's terms. **Rewritten:** FR-11's token table now uses Iris values and `iris.css` variable names; code wells are dark in both themes; the code highlight is a 12% white fill with a 2px `--code-accent` bar (AC-4.2); "primary" becomes `--accent` (AC-1.5, AC-5.1, AC-8.2); A1 (flat near-black with two corner glows, no aurora, no glass, no `backdrop-filter`) and A2 (Iris light and dark, host-driven); the glass contrast gate becomes a glow gate (Accessibility). **Owner decisions:** Segoe UI weights 550 for base text and 650 for emphasis; code stays in bundled JetBrains Mono. **Not adopted from the Iris handoff:** its persisted Light/Dark switcher (AC-1.6 and A2 stand), the Fluent UI v9 `workbenchTokens.ts` (the app uses CSS variables), Cascadia Mono / Consolas, its 600/700 weights, and text glyphs in place of Fluent System Icons. **Unchanged:** layout 10a, reports (README §05 palette, A8, FR-10 fonts). |
 | 3.0.1 | 2026-10-27 | **PATCH.** Owner decisions for the early beta (Logic Starter and Server Objects), from `docs/beta-readiness-review.md`. **Added:** an early-beta exception in FR-12: the current palette and targeted behavior tests ship first, and the Iris theme and the full AC-4.12 matrix follow. **Changed:** AC-1.7 hides the site pill while Logic Inspector is unreleased; the FR-3 logging rule and the security NFR cover handlers, and the generated browser client may log to the console; "Back to Create Logic" and "Clear search" are buttons, not links. |
+| 3.0.2 | 2026-10-30 | **PATCH.** Brings the spec in line with the code on branch `starter-objexts-prep`. **Added:** the Implementation Status section, which lists where the code does not yet meet a requirement. **Clarified:** FR-12 names the licence (BSD-3-Clause, with a `LICENSE` file at the root). **Unchanged:** every requirement, including the Iris theme (FR-11) and the AC-4.12 matrix. |
 
 ---
 
@@ -825,7 +826,7 @@ Sources: PPTB tool-development docs (manifest, `pptb-validate`, marketplace poli
 - Declare in `package.json`:
   - `features.connections: { "min": 0, "max": 1 }`, so the tool opens without a connection (AC-1.3). PPTB's default is one required connection;
   - `features.minAPI: "1.2.7"`, the first version with optional connections;
-  - `name`, `version` (1.0.0 or later for release), `displayName` "Server Logic Tools", `description`, a `license` from PPTB's approved list, and `contributors`;
+  - `name`, `version` (1.0.0 or later for release), `displayName` "Server Logic Tools", `description`, a `license` from PPTB's approved list (BSD-3-Clause, with a `LICENSE` file at the root), and `contributors`;
   - `configurations.repository` (a GitHub URL) and `configurations.readmeUrl` (a `raw.githubusercontent.com` URL);
   - `icon`: an SVG under `dist/` that uses `currentColor`.
 - Omit `cspExceptions`: every script, style, font and image is bundled, and all Dataverse traffic goes through the host. The default CSP allows only `'self'`, inline scripts and styles, and `data:` fonts and images.
@@ -1016,6 +1017,27 @@ Spike checks are proposals until they run. Nothing in this spec counts as verifi
 - A general OData option validation engine. R4 checks only option names, duplicates and `$top`, and Dataverse rejects malformed values.
 - Detecting configuration changes during a scan. Reports state the scan interval instead (AC-9.2).
 - Effective-user authorization testing (see Non-Goals).
+
+---
+
+## Implementation Status
+
+Checked against the source on branch `starter-objexts-prep` on 2026-10-30. This section records where the code does not yet meet a requirement. It changes no requirement. Items not listed are met as far as this check went.
+
+**Closed since the 2026-10-26 audit:** generated clients reject null and malformed response envelopes (AC-4.5, AC-4.6); the FR-12 host handler is removed on unload; the validation note sits on the Validation pill (AC-5.3); Permissions needed lists outbound domains and site settings (AC-3.6); `Server.User.fullname` shows "Not documented on Learn" (AC-6.5); the site pill is hidden while Logic Inspector is unreleased (AC-1.7); and the R4 README states the Account-scope limit (FR-3).
+
+| Requirement | State | Note |
+|---|---|---|
+| FR-11 Iris theme (AC-1.5, AC-1.6, AC-2.5, AC-4.2, AC-5.1, AC-5.4, AC-6.2 colours) | Not started | The source still uses the superseded palette, with no `--code-accent`. Planned in `plans/phase-25-iris-theme.md`. The early-beta exception (FR-12) lets the beta ship before it. |
+| AC-4.12 behaviour matrix | Partial | The R7 handler runs under `node:vm` (`r7.behavior.test.ts`), and client envelopes are tested (`client.envelope.test.ts`). The shared behaviour harness (Phase 17) and the other recipes are not built. |
+| AC-1.2 site pill | Partial | A placeholder with no site picker. Hidden in the beta build (AC-1.7). |
+| AC-3.2 (T1) | Partial | Zero hits are asserted per recipe, not as the literal recipe × method × language sweep. |
+| AC-5.11 download timing | Not measured | No test checks the 2-second target. Carried from the 2026-10-26 audit. |
+| NFR: search within 100 ms | Not measured | Search is synchronous with no debounce, and no test measures it. Carried from the 2026-10-26 audit. |
+| Stories 7–8, Logic Inspector (FR-7 to FR-9) | Partial | The model, scan, readiness and report modules exist in `src/features/inspector/`. Page-level behaviour and live S2 evidence are not verified in this check. Unreleased in the beta. |
+| Story 9, export dialog (FR-10, Story 9 ACs) | Not started | No export component exists in `src/`. Planned in `plans/phase-24-export-dialog.md`. |
+
+---
 
 ## Appendix: Review finding dispositions (v0.7.0)
 
