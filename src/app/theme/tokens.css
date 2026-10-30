@@ -1,5 +1,5 @@
 /*
- * Design tokens from layout 10a section 4 (spec FR-11). Phase 06 imports this file once from the
+ * 1a Graphite palette using the layout 10a token roles (spec FR-11). Phase 06 imports this file once from the
  * entry point and sets data-theme="light" or "dark" on the html element. Without the attribute the
  * light theme applies, which is also the launch default when the host cannot answer (AC-1.6).
  */
@@ -10,75 +10,72 @@
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 }
 
-/* Light: 11c Paper & Signal. */
+/* Light: 1a Graphite. */
 :root,
 [data-theme='light'] {
   color-scheme: light;
-  --window: #e8e8e4;
+  --window: #f6f6f6;
   --window-bg: var(--window);
-  --surface: #f2f2ef;
+  --surface: #fbfbfb;
   --tile: #ffffff;
   --tile-glass: transparent;
   --tile-blur: none;
   --tile-shadow: none;
-  --code: #f7f7f5;
-  --border: #dcdcd6;
-  --control-border: #dcdcd6;
-  --text: #111111;
-  --text-2: #33332f;
-  --muted: #5f5f59;
+  --code: #ececec;
+  --border: #cfcfcf;
+  --control-border: #666666;
+  --text: #0a0a0a;
+  --text-2: #333333;
+  --muted: #555555;
   --primary: #111111;
   --primary-text: #111111;
   --on-primary: #ffffff;
-  --ok-tint: #d9d9d9;
-  --review: #c0261d;
-  --review-tint: #f6dedd;
-  --server: #4d6a1f;
-  --server-tint: #e6eae0;
-  --string: #4d6a1f;
-  --keyword: #b0231b;
-  --comment: #5f5f59;
-  --ghost: #f2f2ef;
+  --ok-tint: #e2e2e2;
+  --review: #a8281f;
+  --review-tint: #f5e5e4;
+  --server: #0a5aa8;
+  --server-tint: #e2ebf5;
+  --string: #17663f;
+  --keyword: #2a4bb0;
+  --comment: #555555;
+  --ghost: #eeeeee;
   --tooltip-bg: #111111;
   --tooltip-text: #ffffff;
-  --scrim: rgba(17, 17, 17, 0.45);
+  --scrim: rgba(0, 0, 0, 0.45);
   --code-highlight: color-mix(in srgb, var(--primary) 10%, var(--code));
 }
 
-/* Dark: 12e Glass Bento. Must stay after the light block: both match the html element. */
+/* Dark: 1a Graphite. Must stay after the light block: both match the html element. */
 [data-theme='dark'] {
   color-scheme: dark;
-  --window: #081022;
-  --window-bg:
-    radial-gradient(45% 40% at 8% 5%, rgba(90, 169, 255, 0.45), transparent 70%),
-    radial-gradient(40% 45% at 95% 95%, rgba(255, 162, 74, 0.38), transparent 70%),
-    radial-gradient(40% 40% at 70% 10%, rgba(60, 90, 200, 0.4), transparent 70%), var(--window);
-  --surface: transparent;
-  --tile: #15203a;
-  --tile-glass: rgba(255, 255, 255, 0.07);
-  --tile-blur: blur(14px);
-  --tile-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 10px 30px rgba(0, 0, 0, 0.25);
-  --code: #0b1328;
-  --border: rgba(255, 255, 255, 0.18);
-  --control-border: #3a4766;
-  --text: #eef4ff;
-  --text-2: #d3def2;
-  --muted: #a9bbdc;
-  --primary: #5aa9ff;
-  --primary-text: #8fc6ff;
-  --on-primary: #06122b;
-  --ok-tint: #20365a;
-  --review: #ffa24a;
-  --review-tint: #38343c;
-  --server: #c4a7ff;
-  --server-tint: #2e3356;
-  --string: #a9d3ff;
-  --keyword: #ffb874;
-  --comment: #9fb0cd;
-  --ghost: #1d2a4a;
-  --tooltip-bg: #eef4ff;
-  --tooltip-text: #081022;
-  --scrim: rgba(3, 8, 20, 0.62);
+  --window: #000000;
+  --window-bg: var(--window);
+  --surface: #060606;
+  --tile: #0f0f0f;
+  --tile-glass: transparent;
+  --tile-blur: none;
+  --tile-shadow: none;
+  --code: #000000;
+  --border: #3a3a3a;
+  --control-border: #a0a0a0;
+  --text: #fafafa;
+  --text-2: #d4d4d4;
+  --muted: #a5a5a5;
+  --primary: #f2f2f2;
+  --primary-text: #f2f2f2;
+  --on-primary: #0a0a0a;
+  --ok-tint: #333333;
+  --review: #ff8f86;
+  --review-tint: #352422;
+  --server: #8ec5ff;
+  --server-tint: #232c35;
+  --string: #62d69b;
+  --keyword: #92b2ff;
+  --comment: #a5a5a5;
+  --ghost: #191919;
+  --tooltip-bg: #f2f2f2;
+  --tooltip-text: #0a0a0a;
+  --scrim: rgba(0, 0, 0, 0.62);
   --code-highlight: color-mix(in srgb, var(--primary) 10%, var(--code));
 }
 
@@ -89,6 +86,7 @@ body {
   background: var(--window-bg);
   color: var(--text);
   font-family: var(--font-ui);
+  font-weight: 600;
 }
 
 [data-theme='dark'] body {

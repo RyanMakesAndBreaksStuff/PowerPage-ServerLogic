@@ -20,10 +20,6 @@ export type ServerObject = {
 
 export const NOT_DOCUMENTED = 'Not documented on Learn';
 
-/** The Learn reference these objects come from (FR-1 external link). */
-export const SERVER_OBJECTS_LEARN_URL =
-  'https://learn.microsoft.com/power-pages/configure/server-objects';
-
 // Correction 11: the connector result. CloudFlow's has no Headers.
 const RESULT =
   'Connector result { StatusCode, Body, IsSuccessStatusCode, ReasonPhrase, ServerError, ServerErrorMessage, Headers }; Body is a JSON string';

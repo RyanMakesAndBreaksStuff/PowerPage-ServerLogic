@@ -12,7 +12,7 @@ export const CODE_HIGHLIGHT = HighlightStyle.define([
 export const CODE_THEME = EditorView.theme({
   '&': { height: '100%', backgroundColor: 'var(--code)', color: 'var(--text)', fontSize: '12px' },
   '&.cm-focused': { outline: '2px solid var(--primary)', outlineOffset: '-2px' },
-  '.cm-scroller': { fontFamily: 'var(--font-mono)', lineHeight: '1.6' },
+  '.cm-scroller': { fontFamily: 'var(--font-mono)', fontWeight: '400', lineHeight: '1.6' },
   '.cm-content': { caretColor: 'var(--text)' },
   '.cm-gutters': { backgroundColor: 'var(--code)', color: 'var(--comment)', border: 'none' },
 });

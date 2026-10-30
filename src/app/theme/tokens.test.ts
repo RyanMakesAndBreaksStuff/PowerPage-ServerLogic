@@ -29,35 +29,39 @@ function rule(css: string, selector: string): string {
 const light = themeTokens('light');
 const dark = themeTokens('dark');
 
-// FR-11 token table, exactly. [name, light, dark]
+// 1a Graphite palette in the FR-11 token roles. [name, light, dark]
 const SPEC_TOKENS: [string, string, string][] = [
-  ['window', '#e8e8e4', '#081022'],
-  ['surface', '#f2f2ef', 'transparent'],
-  ['tile', '#ffffff', '#15203a'],
-  ['code', '#f7f7f5', '#0b1328'],
-  ['border', '#dcdcd6', 'rgba(255, 255, 255, 0.18)'],
-  ['control-border', '#dcdcd6', '#3a4766'],
-  ['text', '#111111', '#eef4ff'],
-  ['text-2', '#33332f', '#d3def2'],
-  ['muted', '#5f5f59', '#a9bbdc'],
-  ['primary', '#111111', '#5aa9ff'],
-  ['primary-text', '#111111', '#8fc6ff'],
-  ['review', '#c0261d', '#ffa24a'],
-  ['server', '#4d6a1f', '#c4a7ff'],
-  ['string', '#4d6a1f', '#a9d3ff'],
-  ['keyword', '#b0231b', '#ffb874'],
-  ['comment', '#5f5f59', '#9fb0cd'],
-  ['tile-glass', 'transparent', 'rgba(255, 255, 255, 0.07)'],
-  ['tile-blur', 'none', 'blur(14px)'],
+  ['window', '#f6f6f6', '#000000'],
+  ['surface', '#fbfbfb', '#060606'],
+  ['tile', '#ffffff', '#0f0f0f'],
+  ['code', '#ececec', '#000000'],
+  ['border', '#cfcfcf', '#3a3a3a'],
+  ['control-border', '#666666', '#a0a0a0'],
+  ['text', '#0a0a0a', '#fafafa'],
+  ['text-2', '#333333', '#d4d4d4'],
+  ['muted', '#555555', '#a5a5a5'],
+  ['primary', '#111111', '#f2f2f2'],
+  ['primary-text', '#111111', '#f2f2f2'],
+  ['review', '#a8281f', '#ff8f86'],
+  ['server', '#0a5aa8', '#8ec5ff'],
+  ['string', '#17663f', '#62d69b'],
+  ['keyword', '#2a4bb0', '#92b2ff'],
+  ['comment', '#555555', '#a5a5a5'],
+  ['tile-glass', 'transparent', 'transparent'],
+  ['tile-blur', 'none', 'none'],
 ];
 
 // Design reference values for the pill, button, tooltip and scrim surfaces.
 const DESIGN_TOKENS: [string, string, string][] = [
-  ['on-primary', '#ffffff', '#06122b'],
-  ['ok-tint', '#d9d9d9', '#20365a'],
-  ['review-tint', '#f6dedd', '#38343c'],
-  ['server-tint', '#e6eae0', '#2e3356'],
-  ['ghost', '#f2f2ef', '#1d2a4a'],
+  ['on-primary', '#ffffff', '#0a0a0a'],
+  ['ok-tint', '#e2e2e2', '#333333'],
+  ['review-tint', '#f5e5e4', '#352422'],
+  ['server-tint', '#e2ebf5', '#232c35'],
+  ['ghost', '#eeeeee', '#191919'],
+  ['tile-shadow', 'none', 'none'],
+  ['tooltip-bg', '#111111', '#f2f2f2'],
+  ['tooltip-text', '#ffffff', '#0a0a0a'],
+  ['scrim', 'rgba(0, 0, 0, 0.45)', 'rgba(0, 0, 0, 0.62)'],
 ];
 
 describe('theme tokens (FR-11)', () => {
@@ -85,11 +89,8 @@ describe('theme tokens (FR-11)', () => {
     }
   });
 
-  it('paints the dark window with the blue and orange aurora over #081022', () => {
-    const bg = dark.get('window-bg') ?? '';
-    expect(bg).toContain('radial-gradient(45% 40% at 8% 5%, rgba(90, 169, 255, 0.45)');
-    expect(bg).toContain('radial-gradient(40% 45% at 95% 95%, rgba(255, 162, 74, 0.38)');
-    expect(bg).toContain('var(--window)');
+  it('paints both windows with a flat background', () => {
+    expect(dark.get('window-bg')).toBe('var(--window)');
     expect(light.get('window-bg')).toBe('var(--window)');
   });
 
@@ -122,16 +123,17 @@ describe('focus ring and selection (AC-1.5)', () => {
   });
 });
 
-describe('glass, window and assets', () => {
-  it('blurs the dark tile backdrop by 14px through the token', () => {
+describe('flat tiles, window and assets', () => {
+  it('disables backdrop blur through the shared tile token', () => {
     expect(rule(primitives, '.ui-tile')).toContain('backdrop-filter: var(--tile-blur)');
-    expect(dark.get('tile-blur')).toBe('blur(14px)');
+    expect(dark.get('tile-blur')).toBe('none');
   });
 
   it('keeps the 1024x700 floor on the body', () => {
     const body = rule(tokens, 'body');
     expect(body).toContain('min-width: 1024px');
     expect(body).toContain('min-height: 700px');
+    expect(body).toContain('font-weight: 600');
   });
 
   it('loads nothing from another origin', () => {
