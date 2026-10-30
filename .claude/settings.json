@@ -53,7 +53,6 @@
       "WebFetch(domain:docs.powerplatformtoolbox.com)",
       "WebFetch(domain:code.claude.com)"
     ],
-    "ask": [],
     "deny": [
       "Bash(rm -rf *)",
       "Bash(rm -fr *)",
@@ -119,7 +118,8 @@
       "Read(~/.azure/**)",
       "Read(~/.ssh/**)",
       "Read(~/.git-credentials)"
-    ]
+    ],
+    "ask": []
   },
   "hooks": {
     "PostToolUse": [
@@ -128,8 +128,8 @@
         "hooks": [
           {
             "type": "command",
-            "timeout": 60,
-            "command": "node -e \"require(require('path').join(process.env.CLAUDE_PROJECT_DIR||process.cwd(),'.claude','hooks','format-lint.cjs'))\""
+            "command": "node -e \"require(require('path').join(process.env.CLAUDE_PROJECT_DIR||process.cwd(),'.claude','hooks','format-lint.cjs'))\"",
+            "timeout": 60
           }
         ]
       }
@@ -139,11 +139,15 @@
         "hooks": [
           {
             "type": "command",
-            "timeout": 300,
-            "command": "node -e \"require(require('path').join(process.env.CLAUDE_PROJECT_DIR||process.cwd(),'.claude','hooks','verify-on-stop.cjs'))\""
+            "command": "node -e \"require(require('path').join(process.env.CLAUDE_PROJECT_DIR||process.cwd(),'.claude','hooks','verify-on-stop.cjs'))\"",
+            "timeout": 300
           }
         ]
       }
     ]
+  },
+  "enabledPlugins": {
+    "power-pages@power-platform-skills": true,
+    "context-mode@context-mode": true
   }
 }

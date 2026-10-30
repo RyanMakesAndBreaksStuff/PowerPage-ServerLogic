@@ -1,0 +1,4 @@
+approval_policy = "on-request"
+sandbox_mode = "danger-full-access"
+model_verbosity = "low"
+model_reasoning_summary = "concise"

@@ -52,3 +52,56 @@ Scope: Fulfil `C:/Users/RyanDev/.claude/plans/humble-questing-noodle.md` using `
 ### Review
 
 In progress. Baseline `42c2809` on `001-logic-inspector`: build, lint and full Vitest passed. Repository-wide Prettier fails on 176 pre-existing files; planned source and documents receive focused checks without unrelated formatting changes. S2, rendered-browser fidelity and live PPTB/site evidence remain separate owner-run gates.
+
+## Starter UI investigation — 2026-10-23
+
+Scope: Continue investigating the missing central content shown in `docs/pptb.png`. Identify the cause and validate it against the current checkout and a browser render.
+
+- [x] Recover the screenshot and trace the current Starter component and layout.
+- [x] Verify whether the code panes exist in this checkout and compare with Phase 21.
+- [x] Verify the build and focused page tests; check browser availability for visual reproduction.
+- [x] Record the cause, verification evidence and required next implementation step.
+
+### Review
+
+Investigation completed on `32186b2`. `src/features/starter/StarterPage.tsx:16` mounts only input tiles, permission note and actions. `src/features/starter/starter.css:10` reserves three grid rows and explicitly places the note/actions in row 3, leaving row 2 empty. No files exist under `src/features/starter/code/`. This explains the empty central area in the saved PPTB screenshot without requiring a runtime rendering failure.
+
+The required implementation is `docs/specs/001-server-logic-starter-inspector/plans/phase-21-starter-code-panes.md`: its goal adds the request path, editable server pane and read-only client pane; Task 4 explicitly mounts the missing code row. The plan's steps remain unchecked. The Inspector page separately remains a Phase 23 placeholder.
+
+Verification: `npm run build` passed (TypeScript and single-IIFE production build); `npx vitest run src/features/starter/StarterPage.test.tsx src/app/App.test.tsx` passed, 2 files / 19 tests. Those existing page tests cover Phase 18 inputs/actions and shell behavior, so their success does not establish Phase 21 completion. Browser inventory returned no enabled browsers or apps; no fresh browser or live PPTB render was performed. A delegated read-only trace failed with a service 503; the coordinator completed the source trace directly. Application source and unrelated dirty work were preserved; only this task record was edited, and no commit was made.
+
+## Phase 21 execution — 2026-10-23
+
+Scope: Execute the approved `docs/specs/001-server-logic-starter-inspector/plans/phase-21-starter-code-panes.md` using `ryan-makes-execute`. Preserve all unrelated changes and stage only task-owned paths.
+
+- [x] Read the approved plan, repository instructions, lessons and worktree state; confirm dependency ordering and file ownership.
+- [x] Task 1: Add and verify the minimal outside-text replacement helper.
+- [x] Task 2: Add and verify CodeMirror editors, line marks, styles and the guarded jsdom polyfill.
+- [x] Task 3: Verify the existing shared Copy button and reuse its implementation.
+- [x] Task 4: Add and verify the editable server pane and session/cursor integration.
+- [x] Task 5: Add and verify the client pane, language pills and request path strip.
+- [ ] Task 6: Run repository gates and the IIFE build; record results and release smoke handoff.
+
+### Review
+
+Tasks 1–5 are implemented and committed through `7d4b9e1`; the existing CopyButton was reused. Task 5 captured the expected missing-import failure, then passed focused Vitest (1 file / 5 tests), Starter/app regression (23 files / 198 tests), TypeScript, repository ESLint, owned-file Prettier and scoped diff checks.
+
+Final verification: TypeScript and repository ESLint passed; full Vitest passed 86 files / 1,329 tests, including all 12 IIFE build-shape tests; `npm run build` exited 0 and emitted one JavaScript bundle. Global Prettier failed solely on the unchanged tracked `.scratch/write-root-plans.mjs`, outside Phase 21 ownership. Formatting under `src` and `tests` passed. Task 6 remains unchecked because the exact global formatting gate has not passed; no phase PR was created. The plan records the results and PR-description hand-off. Unrelated skill/design deletions, Inspector plans, scratch work and findings were preserved.
+
+PPTB timing, clipboard, keyboard focus, screen reader and both-theme smoke checks remain owner-run release gates as specified by the plan; they were not performed by this execution.
+
+## Remaining-work planning — 2026-10-24
+
+Scope: Read `docs/specs/001-server-logic-starter-inspector/status-2026-10-23.md` first, investigate every remaining open item against the current repository and current Microsoft Learn documentation, and record an executable continuation plan using `ryan-makes-plan`. Planning only; no application implementation or environment changes.
+
+- [x] Read the status brief, planning skill/template, project lessons and initial working-tree state.
+- [x] Recover the prior investigation and save a clearly marked local draft/checkpoint on 2026-10-25; continue directly after delegate service failures.
+- [ ] Verify the current spec, phase contracts, source ownership and actual completion evidence.
+- [ ] Refresh material platform contracts and code samples with Microsoft Learn MCP.
+- [ ] Run the existing baseline checks and record exact results and proof limits.
+- [ ] Save the continuation plan at `docs/plans/10-24-2026-server-logic-remaining-work.md`.
+- [ ] Audit coverage, dependencies, executable steps, file ownership and preserved unrelated changes.
+
+### Review
+
+In progress. The initial branch is `001-logic-inspector`, 14 commits ahead of its tracking branch. Existing skill/design deletions, task notes, scratch work and untracked inputs are outside this planning task and preserved.
