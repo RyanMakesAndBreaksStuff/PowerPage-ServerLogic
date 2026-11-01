@@ -64,11 +64,12 @@ function unexpected(label: string): HostCallError {
 
 /**
  * `toolboxAPI.events.on` is registered once per host, on the first handler, and routes on `payload.event`.
- * The last unsubscribe, or the page's pagehide, calls events.off (declared in @pptb/types, not shown in the docs: Spike S2).
+ * The last unsubscribe, or the page's pagehide, disposes the host subscription with events.off as a fallback.
  */
 function createEventHub(): PptbHost['onEvent'] {
   const handlers = new Set<(e: HostEvent) => void>();
   let registered = false;
+  let disposeHost: (() => void) | null = null;
   const hub = (_event: unknown, payload: unknown): void => {
     const event = toHostEvent(payload);
     if (event === null) return;
@@ -85,17 +86,27 @@ function createEventHub(): PptbHost['onEvent'] {
     if (!registered) return;
     registered = false;
     window.removeEventListener('pagehide', detach);
+    handlers.clear();
+    const dispose = disposeHost;
+    disposeHost = null;
     try {
-      window.toolboxAPI.events.off(hub);
+      if (dispose !== null) dispose();
+      else window.toolboxAPI.events.off(hub);
     } catch (error) {
-      logHostFailure('events.off', error);
+      logHostFailure(dispose !== null ? 'events.on disposer' : 'events.off', error);
     }
   };
   return (handler) => {
     handlers.add(handler);
     if (!registered) {
       try {
-        window.toolboxAPI.events.on(hub);
+        const result: unknown = window.toolboxAPI.events.on(hub);
+        disposeHost =
+          typeof result === 'function'
+            ? () => {
+                (result as () => void)();
+              }
+            : null;
         registered = true;
         window.addEventListener('pagehide', detach);
       } catch (error) {

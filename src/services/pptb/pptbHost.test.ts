@@ -23,8 +23,21 @@ function makeStubs() {
     .fn<(name: string, content: unknown, filters?: unknown) => Promise<unknown>>()
     .mockResolvedValue('C:\\out\\file.zip');
   const getActiveConnection = vi.fn<() => Promise<unknown>>().mockResolvedValue(null);
-  const on = vi.fn<(callback: EventCallback) => void>();
-  const off = vi.fn<(callback: EventCallback) => void>();
+  const registrations = new Set<EventCallback>();
+  const off = vi.fn<(callback: EventCallback) => void>((callback) => {
+    registrations.delete(callback);
+  });
+  const on = vi.fn<(callback: EventCallback) => unknown>();
+  on.mockImplementation((callback) => {
+    const wrapped: EventCallback = (event, payload) => callback(event, payload);
+    registrations.add(wrapped);
+    return () => {
+      registrations.delete(wrapped);
+    };
+  });
+  const emit = (payload: unknown): void => {
+    for (const callback of [...registrations]) callback(undefined, payload);
+  };
   const queryData = vi
     .fn<(query: string, target?: unknown, headers?: unknown) => Promise<unknown>>()
     .mockResolvedValue({ value: [] });
@@ -37,6 +50,8 @@ function makeStubs() {
     getActiveConnection,
     on,
     off,
+    registrations,
+    emit,
     queryData,
     toolbox: {
       utils: { getCurrentTheme, showNotification, copyToClipboard, openInConnectionBrowser },
@@ -313,30 +328,53 @@ describe('onEvent', () => {
     expect(stubs.on).toHaveBeenCalledTimes(1);
   });
 
-  it('stops delivering after unsubscribe and calls events.off with the same callback after the last one', () => {
+  it('disposes the wrapper on last unsubscribe and delivers once after resubscribe', () => {
     const first = vi.fn();
     const second = vi.fn();
-    const unsubscribeFirst = host.onEvent(first);
-    const unsubscribeSecond = host.onEvent(second);
-    unsubscribeFirst();
-    hub()(undefined, payload('settings:updated'));
+    host.onEvent(first)();
+    expect(stubs.registrations.size).toBe(0);
+    const unsubscribe = host.onEvent(second);
+    expect(stubs.registrations.size).toBe(1);
+    stubs.emit(payload('settings:updated'));
     expect(first).not.toHaveBeenCalled();
     expect(second).toHaveBeenCalledTimes(1);
+    unsubscribe();
+    expect(stubs.registrations.size).toBe(0);
+    expect(stubs.on).toHaveBeenCalledTimes(2);
     expect(stubs.off).not.toHaveBeenCalled();
-    unsubscribeSecond();
-    expect(stubs.off).toHaveBeenCalledTimes(1);
-    expect(stubs.off).toHaveBeenCalledWith(hub());
   });
 
-  it('removes the host handler once when the page is hidden (FR-12)', () => {
-    host.onEvent(() => undefined);
-    const callback = hub();
+  it('disposes the wrapper on pagehide and remains idempotent', () => {
+    const handler = vi.fn();
+    host.onEvent(handler);
     window.dispatchEvent(new Event('pagehide'));
-    const removed = (): number =>
-      stubs.off.mock.calls.filter(([registered]) => registered === callback).length;
-    expect(removed()).toBe(1);
     window.dispatchEvent(new Event('pagehide'));
-    expect(removed()).toBe(1);
+    stubs.emit(payload('settings:updated'));
+    expect(stubs.registrations.size).toBe(0);
+    expect(handler).not.toHaveBeenCalled();
+    expect(stubs.off).not.toHaveBeenCalled();
+  });
+
+  it('uses events.off(hub) only when on returns no disposer', () => {
+    stubs.on.mockImplementation((callback) => {
+      stubs.registrations.add(callback);
+      return undefined;
+    });
+    host.onEvent(() => undefined)();
+    expect(stubs.off).toHaveBeenCalledWith(stubs.on.mock.calls[0]?.[0]);
+    expect(stubs.registrations.size).toBe(0);
+  });
+
+  it('does not revive old subscribers after pagehide', () => {
+    const oldHandler = vi.fn();
+    const currentHandler = vi.fn();
+    host.onEvent(oldHandler);
+    window.dispatchEvent(new Event('pagehide'));
+    host.onEvent(currentHandler);
+    stubs.emit(payload('settings:updated'));
+    expect(oldHandler).not.toHaveBeenCalled();
+    expect(currentHandler).toHaveBeenCalledTimes(1);
+    expect(stubs.registrations.size).toBe(1);
   });
 
   it('registers again after every handler has unsubscribed', () => {
@@ -648,7 +686,9 @@ describe('read-only guarantee', () => {
     await host.downloadFileColumn('powerpagecomponents', GUID, 'filecontent');
 
     expect(violations).toEqual([]);
-    expect(new Set(touched.filter((name) => ALLOWED.includes(name)))).toEqual(new Set(ALLOWED));
+    expect(new Set(touched.filter((name) => ALLOWED.includes(name)))).toEqual(
+      new Set(ALLOWED.filter((name) => name !== 'toolboxAPI.events.off')),
+    );
   });
 
   it('refuses to reach a write member, as the guard proves', () => {
