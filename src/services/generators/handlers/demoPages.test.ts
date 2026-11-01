@@ -1,5 +1,6 @@
 // @vitest-environment node
 import { readFileSync } from 'node:fs';
+import { runInNewContext } from 'node:vm';
 import { parse } from 'acorn';
 import { describe, expect, it, vi } from 'vitest';
 import type { RecipeId } from '@/types/recipe';
@@ -57,25 +58,15 @@ function extractFunction(source: string, name: string): string {
 }
 
 type ResponseHandler = (resp: unknown, onSuccess: (payload: unknown) => void) => void;
-type ResponseHandlerFactory = (
-  alertFn: (message: string) => void,
-  errorTextFn: (payload: unknown) => string,
-) => ResponseHandler;
 type ShowEnvelope = (resp: unknown) => void;
-type ShowEnvelopeFactory = (
-  showResult: (text: string, isError: boolean) => void,
-  errorTextFn: (payload: unknown) => string,
-) => ShowEnvelope;
 
 it.each(['R4', 'R5'] as const)('%s rejects invalid envelopes before application success', (id) => {
   const handlerSource = extractFunction(requirePage(id), 'handleResponse');
-  const build = new Function(
-    'alert',
-    'errorText',
-    `return (${handlerSource});`,
-  ) as unknown as ResponseHandlerFactory;
   const alertSpy = vi.fn<(message: string) => void>();
-  const handleResponse = build(alertSpy, () => 'Application response failed.');
+  const handleResponse = runInNewContext(`(${handlerSource})`, {
+    alert: alertSpy,
+    errorText: () => 'Application response failed.',
+  }) as unknown as ResponseHandler;
   const success = vi.fn<(payload: unknown) => void>();
   const invalidResponses: unknown[] = [
     null,
@@ -90,7 +81,9 @@ it.each(['R4', 'R5'] as const)('%s rejects invalid envelopes before application 
   ];
 
   for (const response of invalidResponses) {
-    expect(() => handleResponse(response, success)).not.toThrow();
+    expect(() => {
+      handleResponse(response, success);
+    }).not.toThrow();
     expect(success).not.toHaveBeenCalled();
   }
   expect(alertSpy).toHaveBeenCalledWith('The response could not be read.');
@@ -107,13 +100,11 @@ it.each(['R4', 'R5'] as const)('%s rejects invalid envelopes before application 
 
 it('R6 rejects invalid envelopes and only displays a valid application success as success', () => {
   const handlerSource = extractFunction(requirePage('R6'), 'showEnvelope');
-  const build = new Function(
-    'showResult',
-    'errorText',
-    `return (${handlerSource});`,
-  ) as unknown as ShowEnvelopeFactory;
   const showResult = vi.fn<(text: string, isError: boolean) => void>();
-  const showEnvelope = build(showResult, () => 'Application response failed.');
+  const showEnvelope = runInNewContext(`(${handlerSource})`, {
+    showResult,
+    errorText: () => 'Application response failed.',
+  }) as unknown as ShowEnvelope;
   const invalidResponses: readonly [unknown, string][] = [
     [null, 'The response could not be read.'],
     [{}, 'The response could not be read.'],
@@ -130,7 +121,9 @@ it('R6 rejects invalid envelopes and only displays a valid application success a
   ];
 
   for (const [response, message] of invalidResponses) {
-    expect(() => showEnvelope(response)).not.toThrow();
+    expect(() => {
+      showEnvelope(response);
+    }).not.toThrow();
     expect(showResult).toHaveBeenLastCalledWith(message, true);
   }
   showEnvelope({ success: false, error: 'denied', data: '{"status":"success"}' });

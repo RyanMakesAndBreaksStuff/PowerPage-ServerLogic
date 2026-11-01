@@ -285,7 +285,7 @@ describe('Server Objects page (Story 6)', () => {
     const permissions = (): HTMLElement => screen.getByRole('region', { name: 'Permissions needed' });
     const contactRows = (): string[] =>
       within(permissions()).getAllByRole('listitem')
-        .map((row) => row.textContent ?? '')
+        .map((row) => row.textContent)
         .filter((text) => text.includes('contact ·'));
 
     dispatch({ type: 'selectRecipe', recipe: 'R4' });

@@ -100,7 +100,8 @@ function createEventHub(): PptbHost['onEvent'] {
     handlers.add(handler);
     if (!registered) {
       try {
-        const result: unknown = window.toolboxAPI.events.on(hub);
+        const events: { on: (callback: typeof hub) => unknown } = window.toolboxAPI.events;
+        const result: unknown = events.on(hub);
         disposeHost =
           typeof result === 'function'
             ? () => {

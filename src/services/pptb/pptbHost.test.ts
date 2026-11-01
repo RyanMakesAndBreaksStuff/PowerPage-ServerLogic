@@ -29,7 +29,9 @@ function makeStubs() {
   });
   const on = vi.fn<(callback: EventCallback) => unknown>();
   on.mockImplementation((callback) => {
-    const wrapped: EventCallback = (event, payload) => callback(event, payload);
+    const wrapped: EventCallback = (event, payload) => {
+      callback(event, payload);
+    };
     registrations.add(wrapped);
     return () => {
       registrations.delete(wrapped);
