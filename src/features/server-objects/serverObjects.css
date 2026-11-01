@@ -303,6 +303,11 @@
   flex-direction: column;
   gap: 12px;
   min-height: 0;
+  overflow-y: auto;
+}
+
+.objects-context > .ui-tile {
+  flex-shrink: 0;
 }
 
 .objects-context .ui-tile {
@@ -312,7 +317,7 @@
 }
 
 .objects-context__another {
-  flex: 1;
+  flex: none;
 }
 
 .objects-context__another .objects-code {
