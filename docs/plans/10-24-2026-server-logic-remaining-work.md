@@ -4,7 +4,7 @@
 
 **Status:** Initial design and phased plan, replacing the recovery checkpoint. Detailed implementation steps and acceptance remain open. The user requested this initial document without the formal planning-skill workflow.
 
-**Goal:** Finish Starter behavior coverage, adopt Iris, and deliver the Inspector scan, review page, and Markdown/PDF export flow.
+**Goal:** Finish Starter behavior coverage and deliver the Inspector scan, review page, and Markdown/PDF export flow.
 
 ## Starting point
 
@@ -44,7 +44,7 @@ flowchart TD
 | Inspector presentation | `InspectorPage.tsx` and supporting components | Display results, detail, and review actions. |
 | Export lifecycle | Phase 24 dialog and page integration | Own snapshot, options, cancellation, rendering, and save state. |
 | Report content | Existing report model | Feed equivalent presentation data to Markdown and PDF. |
-| UI appearance | `src/app/theme/tokens.css` and existing UI styles | Use Iris; report appearance retains its separate contract. |
+| UI appearance | `src/app/theme/tokens.css` and existing UI styles | Keep the 1a Graphite tokens (spec v4.0.0, FR-11); report appearance retains its separate contract. |
 
 ### Connection and scan lifecycle
 
@@ -70,22 +70,19 @@ Markdown and PDF must convey the same findings, reviewed reasons, notices, redac
 
 ### Visual design
 
-Apply Iris before the Inspector page so new styles use Iris names directly. Layout and behavior continue to follow layout 10a. Use dark code wells in both themes, Segoe UI at 550/650, and JetBrains Mono with an explicit 400 weight for code. Replace aurora/glass with the approved corner glows; theme remains host-driven.
-
-Rename the current content-area `--surface` to `--bg2` before mapping tile color to Iris `--surface`. Keep CSS component class names. Preserve report colors/fonts under their existing contract and keep generated demo-page CSS separate from the application theme migration.
+The 1a Graphite theme in `src/app/theme/tokens.css` is in place (spec v4.0.0, FR-11). New styles, including the Inspector page, use its variable names. Layout and behavior follow layout 10a; the theme remains host-driven. Preserve report colors/fonts under their existing contract and keep generated demo-page CSS separate from the application theme.
 
 ## Delivery sequence
 
 1. Restore the formatting gate.
 2. Build the Starter behavior harness, then complete R7 behavior coverage.
-3. Apply Iris.
-4. Implement the Inspector scan reader.
-5. Complete PDF rendering.
-6. Build the Inspector page, after Iris and the scan reader.
-7. Add export dialog integration, after the page and PDF.
-8. Reconcile documentation and complete integration and owner acceptance.
+3. Implement the Inspector scan reader.
+4. Complete PDF rendering.
+5. Build the Inspector page, after the scan reader.
+6. Add export dialog integration, after the page and PDF.
+7. Reconcile documentation and complete integration and owner acceptance.
 
-Starter coverage, Iris, the scan reader, and PDF have largely separate ownership. This sequence works without parallel agents. If work is later split, keep shared adapter/connection edits coordinated and finish Iris before page styling.
+Starter coverage, the scan reader, and PDF have largely separate ownership. This sequence works without parallel agents. If work is later split, keep shared adapter/connection edits coordinated.
 
 ## Work packages
 
@@ -109,15 +106,7 @@ Resume [Phase 19](../specs/001-server-logic-starter-inspector/plans/phase-19-han
 
 **Done when:** all 36 configurations and required handler/demo failure paths are covered without R7 exclusions. The owner-run S3 collision probe remains a separate gate.
 
-### 3. Apply Iris across the UI
-
-**Owns:** theme tokens/tests, primitive/shell styles, Starter/code styles, Server Objects styles, and Tile description.
-
-Follow [Phase 25](../specs/001-server-logic-starter-inspector/plans/phase-25-iris-theme.md) with the visual boundaries above. Migrate tokens and consumers coherently. Preserve layout, interactions, accessibility, report formatting, and generated output.
-
-**Done when:** token/contrast and component checks pass; both themes have approved code wells, highlights, and typography; obsolete glass/aurora styles are removed. Rendered comparison and PPTB glow contrast still require acceptance evidence.
-
-### 4. Implement the scan reader
+### 3. Implement the scan reader
 
 **Owns:** `src/features/inspector/scan/`, scan fixtures, and necessary PPTB error/download adapter changes; F03–F05.
 
@@ -125,7 +114,7 @@ Complete [Phase 15](../specs/001-server-logic-starter-inspector/plans/phase-15-i
 
 **Done when:** fixtures prove full/partial scans, the four-read limit, stale-result rejection, 401/explicit-transport stopping, 403/non-transport failures, and unreadable code that cannot produce a Ready file. Live paging and scan timing remain separate.
 
-### 5. Complete PDF rendering
+### 4. Complete PDF rendering
 
 **Owns:** `src/features/inspector/report/renderPdf.ts`, PDF-specific helpers/tests, and bundled font asset; F03/F09.
 
@@ -133,17 +122,17 @@ Complete [Phase 20](../specs/001-server-logic-starter-inspector/plans/phase-20-r
 
 **Done when:** both report scopes handle long/hostile text, reviewed reasons, partial results, banners, pagination, and font coverage. Existing Markdown/report-model checks pass; native save is verified separately.
 
-### 6. Build the page and connection lifecycle
+### 5. Build the page and connection lifecycle
 
 **Owns:** `ConnectionProvider.tsx` and tests; planned `src/app/inspector-site/`; site pill; Inspector components/styles; build-shape integration; F06–F07.
 
 Complete [Phase 23](../specs/001-server-logic-starter-inspector/plans/phase-23-inspector-page.md) with existing findings/counts. Include the shared title-bar picker, no automatic site selection, inactive-site handling, warnings, progress, results, detail, review/undo, and error/empty states. Apply connection retention, focus/visibility refresh, and cleanup here.
 
-Use Iris names. Limit export integration to eligibility until work package 7. Update the build-shape marker before the page's checks; keep Inspector provider/picker code behind the existing page-release boundary.
+Use the 1a Graphite variable names. Limit export integration to eligibility until work package 6. Update the build-shape marker before the page's checks; keep Inspector provider/picker code behind the existing page-release boundary.
 
 **Done when:** the page compiles independently; transient refresh failure preserves findings/review marks; real context changes clear them; superseded scans cannot repaint; builds excluding Inspector exclude its implementation. Check keyboard/focus and rendered states alongside automated behavior.
 
-### 7. Integrate the export dialog
+### 6. Integrate the export dialog
 
 **Owns:** Phase 24 dialog/lifecycle modules, page integration, and tests; F08.
 

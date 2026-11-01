@@ -1,6 +1,6 @@
 # Logic Inspector Page Implementation Plan
 
-> **Spec v3.0.0 (Iris).** If this phase merges after Phase 25, write its CSS with the Iris names from Phase 25's rename table instead of the ones below: `--accent` for `--primary`, `--text3` for `--muted`, `--surface` for `--tile`, `--danger` for `--review`, and `var(--weight-strong)` for hard-coded bold weights. Use no glass, radius 12px on Inspector tiles, and needs-review tiles as `--surface` with a `--danger` border and a `--danger-soft` glyph chip. If it merges first, Phase 25 renames its CSS. The ◆ checks in both themes compare against the Iris handoff (`design_handoff_server_logic_tools/Logic Tooling Design Directions/design_handoff_iris_theme/`).
+> **Spec v4.0.0 (1a Graphite).** Write this phase's CSS with the variable names below; they are the 1a Graphite tokens in `src/app/theme/tokens.css` (spec FR-11). Use no glass, radius 12px on Inspector tiles, and `--review` on `--review-tint` for needs-review chips. The ◆ checks in both themes compare against the 1a Graphite pages already built (Logic Starter, Server Objects).
 
 **Goal:** Select an enhanced-model site and review its server logic findings with session-only marks and safe scan invalidation.
 

@@ -1,6 +1,6 @@
 # Phase 18: Starter Input Tiles Implementation Plan
 
-> **Superseded in part by Phase 25 (spec v3.0.0, Iris).** The CSS variable names, colours and hard-coded font weights in this file are replaced by `plans/phase-25-iris-theme.md`. The tiles' structure and behaviour stand.
+> **Superseded in part by spec v4.0.0 (1a Graphite).** The colours in this file are now the 1a Graphite values in `src/app/theme/tokens.css` (spec FR-11), under the same variable names; base text is weight 600 and emphasis 700. The tiles' structure and behaviour stand.
 
 **Goal:** Replace the Logic Starter placeholder with layout 10a's input row (Logic name, HTTP method, Recipe combobox, Readiness), the permission note tile and the action column, all driving the Phase 18a session.
 

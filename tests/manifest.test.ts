@@ -65,13 +65,11 @@ describe('PPTB manifest (FR-12)', () => {
     });
   });
 
-  it('uses a theme-aware SVG icon that is copied into dist', () => {
-    expect(manifest.icon).toBe('icons/server-logic-tools.svg');
-    const path = 'public/icons/server-logic-tools.svg';
+  it('uses the branded SVG logo as the icon, copied into dist', () => {
+    expect(manifest.icon).toBe('icons/logo.svg');
+    const path = 'public/icons/logo.svg';
     expect(existsSync(`${ROOT}${path}`)).toBe(true);
-    const svg = readFileSync(`${ROOT}${path}`, 'utf8');
-    expect(svg).toContain('currentColor');
-    expect(svg).not.toMatch(/(?:fill|stroke)="#/);
+    expect(readFileSync(`${ROOT}${path}`, 'utf8')).toMatch(/^<svg\b/);
   });
 
   it('declares every runtime dependency the whole project needs (no later package.json edits)', () => {

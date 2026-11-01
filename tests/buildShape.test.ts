@@ -89,7 +89,7 @@ describe('built tool: PPTB loading shape (all pages released)', () => {
   });
 
   it('copies the manifest icon into dist', () => {
-    expect(existsSync(`${dist}/icons/server-logic-tools.svg`)).toBe(true);
+    expect(existsSync(`${dist}/icons/logo.svg`)).toBe(true);
   });
 
   it('includes all three pages', () => {

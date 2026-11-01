@@ -26,7 +26,7 @@
 | FR-12 unload handler | 14 |
 | Flaky timing test | 15 |
 
-**Out of scope:** B1 (owner validates manually), B2 and B4 and B7 (already in `676459e`), B6 (merge to `main` is the owner's last step), the Iris theme (D1b) and the full AC-4.12 harness (D2b, see `docs/plans/10-24-2026-generator-behavior-harness.md`), the `hostErrors.ts` status logging, section 5 "defer" items, the demo pages' own envelope check (`demoPages.ts:61`), R7's impossible-date regex, `.claude/hooks/format-lint.cjs` and the Prettier entries in `.claude/settings.json` (both skip Prettier when it is absent), and `PPTB-Mock` (`fakeHost.ts` and `makeStubs` in `pptbHost.test.ts` already cover host fakes, and Mock pins `@pptb/types@1.2.6`).
+**Out of scope:** B1 (owner validates manually), B2 and B4 and B7 (already in `676459e`), B6 (merge to `main` is the owner's last step), the theme (D1b) and the full AC-4.12 harness (D2b, see `docs/plans/10-24-2026-generator-behavior-harness.md`), the `hostErrors.ts` status logging, section 5 "defer" items, the demo pages' own envelope check (`demoPages.ts:61`), R7's impossible-date regex, `.claude/hooks/format-lint.cjs` and the Prettier entries in `.claude/settings.json` (both skip Prettier when it is absent), and `PPTB-Mock` (`fakeHost.ts` and `makeStubs` in `pptbHost.test.ts` already cover host fakes, and Mock pins `@pptb/types@1.2.6`).
 
 ---
 
@@ -105,7 +105,7 @@ Apply these edits to `spec.md`. Each old string is unique in the file.
 2. Insert this row on a new line directly after the row that starts `| 3.0.0 | 2026-10-23 |`:
 
 ```markdown
-| 3.0.1 | 2026-10-27 | **PATCH.** Owner decisions for the early beta (Logic Starter and Server Objects), from `docs/beta-readiness-review.md`. **Added:** an early-beta exception in FR-12: the current palette and targeted behavior tests ship first, and the Iris theme and the full AC-4.12 matrix follow. **Changed:** AC-1.7 hides the site pill while Logic Inspector is unreleased; the FR-3 logging rule and the security NFR cover handlers, and the generated browser client may log to the console; "Back to Create Logic" and "Clear search" are buttons, not links. |
+| 3.0.1 | 2026-10-27 | **PATCH.** Owner decisions for the early beta (Logic Starter and Server Objects), from `docs/beta-readiness-review.md`. **Added:** an early-beta exception in FR-12: the current palette and targeted behavior tests ship first, and the full AC-4.12 matrix follows. **Changed:** AC-1.7 hides the site pill while Logic Inspector is unreleased; the FR-3 logging rule and the security NFR cover handlers, and the generated browser client may log to the console; "Back to Create Logic" and "Clear search" are buttons, not links. |
 ```
 
 3. In AC-1.7, replace `While Logic Inspector is unreleased, the site pill is disabled as in AC-1.3.` with `While Logic Inspector is unreleased, the title bar doesn't render the site pill.`
@@ -116,7 +116,7 @@ Apply these edits to `spec.md`. Each old string is unique in the file.
 8. In FR-12, add this bullet on a new line directly after the bullet that starts `- Release per page:`:
 
 ```markdown
-- **Early beta exception (spec 3.0.1).** The first release, built with `npm run build:beta` (Logic Starter and Server Objects), needn't meet the previous bullet in two respects. It ships on its current palette instead of the Iris theme (FR-11, and the colour clauses of AC-1.5, AC-1.6, AC-2.5, AC-4.2, AC-5.1, AC-5.4 and AC-6.2). It replaces the AC-4.12 36-configuration matrix with targeted `node:vm` tests for the client envelope (AC-4.5, AC-4.6) and for R7. Both gaps close in a later release.
+- **Early beta exception (spec 3.0.1).** The first release, built with `npm run build:beta` (Logic Starter and Server Objects), needn't meet the previous bullet in two respects. It ships on its current palette (FR-11). It replaces the AC-4.12 36-configuration matrix with targeted `node:vm` tests for the client envelope (AC-4.5, AC-4.6) and for R7. Both gaps close in a later release.
 ```
 
 - [ ] **Step 4: Confirm the signal changed, and nothing else did**

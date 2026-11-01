@@ -1,6 +1,6 @@
 # Phase 21: Starter Code Panes Implementation Plan
 
-> **Superseded in part by Phase 25 (spec v3.0.0, Iris).** The code colours in `codeTheme.ts` (`--keyword`, `--string`, `--comment`) and the CSS variable names in this file are replaced by `plans/phase-25-iris-theme.md`: code wells are dark in both themes, and the highlight is a 12% white fill with a `--code-accent` bar (AC-4.2). The editor model, highlights, line flags and Copy behaviour stand.
+> **Superseded in part by spec v4.0.0 (1a Graphite).** The code colours in `codeTheme.ts` (`--keyword`, `--string`, `--comment`) keep their names and take the 1a Graphite values in `src/app/theme/tokens.css`. Code wells follow the theme (`--code`), and the highlight stays 10% `--primary` over `--code` with a 2px inset `--primary` bar (AC-4.2). The editor model, highlights, line flags and Copy behaviour stand.
 
 **Goal:** Fill Create Logic's code row with the request path strip, an editable CodeMirror server pane and a read-only client pane, each with Copy, so edits, highlights, line flags and the client call follow the Phase 18a session.
 

@@ -1,0 +1,8 @@
+{
+  "name": "minimatch-compat",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Lets eslint-plugin-jsx-a11y (calls minimatch as a function) run on minimatch 11. Remove once jsx-a11y supports minimatch >=11.",
+  "main": "index.js",
+  "dependencies": { "minimatch": "^11.0.3" }
+}

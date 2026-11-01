@@ -16,5 +16,6 @@ coverage/
 /Opus_Sol_debate_round1_sol_response.md
 /Opus_Sol_Debate_Round2_Sol_reponse.md
 .agents/*
+.rm-frontend-review/
 
 

@@ -1,6 +1,6 @@
 # Implementation Plan: Server Logic Tools (index)
 
-**Spec:** docs/specs/001-server-logic-starter-inspector/spec.md (v3.0.0, Approved)
+**Spec:** docs/specs/001-server-logic-starter-inspector/spec.md (v4.0.0, Approved)
 **Decisions:** no ADRs; library and phasing decisions are in the spec's Resolved log, and the 2026-10-17 owner decisions are in `plan-starter.md`.
 **Created:** 2026-10-16. **Split into three page plans:** 2026-10-17.
 
@@ -8,7 +8,7 @@ This file is now an index. The 25-phase layout was replaced by three plans, one 
 
 | Plan                                               | Page                                                                                         | Depends on       | Status                                                           |
 | -------------------------------------------------- | -------------------------------------------------------------------------------------------- | ---------------- | ---------------------------------------------------------------- |
-| [`plan-starter.md`](plan-starter.md)               | Logic Starter, **plus Part A, the shared foundation**, and the Contracts every plan consumes | —                | Part A fully planned (phases 00–06, 18a). Parts B and C outlined. Part D (Phase 25, Iris theme) planned for spec v3.0.0 |
+| [`plan-starter.md`](plan-starter.md)               | Logic Starter, **plus Part A, the shared foundation**, and the Contracts every plan consumes | —                | Part A fully planned (phases 00–06, 18a). Parts B and C outlined.                               |
 | [`plan-server-objects.md`](plan-server-objects.md) | Server Objects                                                                               | Part A, Phase 21 | Planned (phases 13, 22); spec v2.2.0                             |
 | [`plan-inspector.md`](plan-inspector.md)           | Logic Inspector and reports                                                                  | Part A only      | Planned (phases 11, 12, 15, 16, 20, 23, 24); spec v2.3.0         |
 
@@ -25,7 +25,6 @@ Part A (plan-starter.md): 00 → {01, 02, 03, 04, 05} → 06 → 18a
   07 08 09 10 → 14 17, ◆19       13 → 22                         11 → ◆12 → 15, 16 → 20, 23 → 24
   18 → 21 → Starter gate         → Server Objects gate           → Inspector gate
 
-Part D (plan-starter.md, spec v3.0.0): 25 Iris theme, after 04, 06, 18, 21 and 22; all three gates wait for it.
 ```
 
 Once Part A is merged, the three plans run in parallel. Shared names are pinned only in `plan-starter.md` § Contracts; the other plans consume them unchanged. Pages release in whatever order their gates pass, each build naming its released pages in `VITE_RELEASED_PAGES` (FR-1, FR-12).
@@ -44,15 +43,14 @@ The "Steps to finish Part A" from the previous version of this file, and where e
 
 Changes made along the way, recorded in the phase files: Phase 01's `getTheme` now rejects on a host failure (for AC-1.6); Phase 00 scaffolds with create-vite 9.2.1 and Vite 8's `rolldownOptions`; the Starter session receives the Part B generators by injection (`StarterDeps`).
 
-## Spec v3.0.0: Iris theme (2026-10-23)
+## Spec v4.0.0: 1a Graphite theme (2026-10-31)
 
-The Iris theme replaces 11c and 12e (spec FR-11, A1, A2). Its handoff is at `design_handoff_server_logic_tools/Logic Tooling Design Directions/design_handoff_iris_theme/`.
+The 1a Graphite palette in `src/app/theme/tokens.css` is the UI theme (spec FR-11, A1, A2). It keeps the variable names of Phases 04, 06, 18, 21 and 22, so no rename phase is needed.
 
-- **New:** `plans/phase-25-iris-theme.md` (Part D of `plan-starter.md`). It replaces the tokens, renames the CSS variables to the `iris.css` names, removes aurora and glass, makes code wells dark in both themes, and sets Segoe UI to weights 550 and 650. JetBrains Mono stays for code.
-- **Superseded in part:** Phase 04's token values, glass and highlight rule, and the colour variables in the CSS of Phases 06, 18, 21 and 22. Each of those files says so at the top. Their behaviour, structure and tests of behaviour stand.
-- **To build against Iris:** Phase 23 (not built yet). It uses the Iris names directly if it merges after Phase 25.
+- **Superseded in part:** Phase 04's token values and glass, and the colour values in the CSS of Phases 06, 18, 21 and 22. Each of those files says so at the top. Their behaviour, structure and tests of behaviour stand.
+- **To build against Graphite:** Phase 23 (not built yet), with the variable names it already uses.
 - **Unchanged:** reports (Phases 16, 20, 24), layout 10a, the host-driven theme with no toggle.
-- **Gates:** each page's "glass contrast check" becomes the Iris glow contrast check, in both themes.
+- **Gates:** the glass contrast check is removed; `tokens.test.ts` asserts every text pair.
 
 ## Next step
 

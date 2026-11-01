@@ -3,7 +3,7 @@
 **Implements:** FR-12 (PPTB manifest, single IIFE bundle, no CDN, no `cspExceptions`), FR-1 (released pages as a build-time constant; unreleased page code left out of the bundle), FR-10 and FR-11 (report fonts, JetBrains Mono and Fluent System Icons bundled locally), FR-7 (S1 and S4 evidence recorded under F59) | **Satisfies:** AC-1.7, build-time half only (an unreleased page's code is absent from the bundle; the disabled-tab behaviour is Phase 06). No other AC is owned here: this phase is the enabling skeleton that every later phase builds on.
 **Depends on:** none (Wave W0)
 **Files:**
-- Create or replace at the repo root: `package.json` (from the template), `package-lock.json`, `index.html`, `tsconfig.json`, `tsconfig.app.json`, `tsconfig.node.json`, `vite.config.ts`, `eslint.config.ts`, `.prettierrc.json`, `.prettierignore`, `.gitignore` (append), `.npmignore`, `README.md`, `public/icons/server-logic-tools.svg`, `scripts/bundle-size.mjs`.
+- Create or replace at the repo root: `package.json` (from the template), `package-lock.json`, `index.html`, `tsconfig.json`, `tsconfig.app.json`, `tsconfig.node.json`, `vite.config.ts`, `eslint.config.ts`, `.prettierrc.json`, `.prettierignore`, `.gitignore` (append), `.npmignore`, `README.md`, `public/icons/logo.svg`, `scripts/bundle-size.mjs`.
 - Delete (the template's demo and its JS ESLint config): `src/App.tsx`, `eslint.config.js`. The template's `App.css`, `src/assets/`, `public/` and README are never copied in (Step 3).
 - Create under `src/`: `main.tsx`, `index.css`, `vite-env.d.ts`, `skeleton.test.ts`.
   - `test/`: `setup.ts`, `toolchain.test.tsx`.
@@ -1217,13 +1217,11 @@ This phase scaffolds the PPTB tool with the standard Vite template (owner decisi
       });
     });
 
-    it('uses a theme-aware SVG icon that is copied into dist', () => {
-      expect(manifest.icon).toBe('icons/server-logic-tools.svg');
-      const path = 'public/icons/server-logic-tools.svg';
+    it('uses the branded SVG logo as the icon, copied into dist', () => {
+      expect(manifest.icon).toBe('icons/logo.svg');
+      const path = 'public/icons/logo.svg';
       expect(existsSync(`${ROOT}${path}`)).toBe(true);
-      const svg = readFileSync(`${ROOT}${path}`, 'utf8');
-      expect(svg).toContain('currentColor');
-      expect(svg).not.toMatch(/(?:fill|stroke)="#/);
+      expect(readFileSync(`${ROOT}${path}`, 'utf8')).toMatch(/^<svg\b/);
     });
 
     it('declares every runtime dependency the whole project needs (no later package.json edits)', () => {
@@ -1257,7 +1255,7 @@ This phase scaffolds the PPTB tool with the standard Vite template (owner decisi
 
   Run: `npx vitest run tests/manifest.test.ts`
 
-  Expect: FAIL: `features` is `undefined` (the template wrote none), `contributors`/`configurations` are missing, and `public/icons/server-logic-tools.svg` does not exist. The dependency test already passes.
+  Expect: FAIL: `features` is `undefined` (the template wrote none), `contributors`/`configurations` are missing, and `public/icons/logo.svg` does not exist. The dependency test already passes.
 
 - [x] **Step 31: Add the manifest fields**
 
@@ -1270,7 +1268,7 @@ This phase scaffolds the PPTB tool with the standard Vite template (owner decisi
   npm pkg set displayName="Server Logic Tools"
   npm pkg set description="Generate Power Pages server logic handlers and review a site's existing server logic for web role, table permission and outbound networking gaps."
   npm pkg set main="index.html"
-  npm pkg set icon="icons/server-logic-tools.svg"
+  npm pkg set icon="icons/logo.svg"
   npm pkg set license="MIT"
   npm pkg set author="Ryan Christopher"
   npm pkg set contributors='[{"name":"Ryan Christopher","url":"https://github.com/RyanMakesAndBreaksStuff"}]' --json
@@ -1285,13 +1283,7 @@ This phase scaffolds the PPTB tool with the standard Vite template (owner decisi
 
 - [x] **Step 32: Add the icon, then the README**
 
-  Create `public/icons/server-logic-tools.svg` (a `{ }` mark that follows the host theme through `currentColor`; the design phase may refine the artwork, but the `currentColor` rule stays):
-
-  ```svg
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="img" aria-label="Server Logic Tools">
-    <path fill="currentColor" d="M8 3C6.3 3 5 4.3 5 6v3c0 .8-.7 1.5-1.5 1.5H3v3h.5c.8 0 1.5.7 1.5 1.5v3c0 1.7 1.3 3 3 3h1v-2H8c-.6 0-1-.4-1-1v-3c0-1.2-.6-2.3-1.6-3C6.4 11.3 7 10.2 7 9V6c0-.6.4-1 1-1h1V3H8zm8 0c1.7 0 3 1.3 3 3v3c0 .8.7 1.5 1.5 1.5H21v3h-.5c-.8 0-1.5.7-1.5 1.5v3c0 1.7-1.3 3-3 3h-1v-2h1c.6 0 1-.4 1-1v-3c0-1.2.6-2.3 1.6-3-1-.7-1.6-1.8-1.6-3V6c0-.6-.4-1-1-1h-1V3h1z"/>
-  </svg>
-  ```
+  Add `public/icons/logo.svg`, the owner-supplied branded logo. It keeps its own colours and does not use `currentColor` (spec 4.0.1 rewrote the FR-12 icon rule; the original `{ }` `currentColor` mark was replaced).
 
   Create `README.md` (the manifest's `readmeUrl` points at it; the template's README was not copied in Step 3). The outer fence below uses four backticks because the README contains a fenced block:
 
@@ -2018,7 +2010,7 @@ This phase scaffolds the PPTB tool with the standard Vite template (owner decisi
     });
 
     it('copies the manifest icon into dist', () => {
-      expect(existsSync(`${dist}/icons/server-logic-tools.svg`)).toBe(true);
+      expect(existsSync(`${dist}/icons/logo.svg`)).toBe(true);
     });
 
     it('includes all three page placeholders', () => {
@@ -2302,7 +2294,7 @@ This phase scaffolds the PPTB tool with the standard Vite template (owner decisi
   npm run size
   ```
 
-  Expect: `probe:size` ends with a line such as `probe.js  raw <N> KiB  gzip <M> KiB`; `npm run build` ends with Vite's `built in <T>s` and `dist/index.html`, `dist/assets/index-<hash>.js`, `dist/assets/index-<hash>.css`, `dist/icons/server-logic-tools.svg`; `npm run size` prints the app bundle line. Copy the numbers into the table below in this plan file (and into the commit message of Step 48). The estimates are planning figures from typical minified sizes, not measurements:
+  Expect: `probe:size` ends with a line such as `probe.js  raw <N> KiB  gzip <M> KiB`; `npm run build` ends with Vite's `built in <T>s` and `dist/index.html`, `dist/assets/index-<hash>.js`, `dist/assets/index-<hash>.css`, `dist/icons/logo.svg`; `npm run size` prints the app bundle line. Copy the numbers into the table below in this plan file (and into the commit message of Step 48). The estimates are planning figures from typical minified sizes, not measurements:
 
   | Measurement | Command | Planning estimate (unverified) | Measured raw KiB | Measured gzip KiB |
   |---|---|---|---|---|
@@ -2410,7 +2402,7 @@ git ls-files docs/specs/001-server-logic-starter-inspector/spikes
 Expected:
 - `tsc -b` and `eslint` print nothing; `prettier --check` prints `All matched files use Prettier code style!`.
 - `vitest run` reports all test files passed: `src/test/toolchain.test.tsx` (1), `src/types/contracts.test.ts` (13), `src/app/releasedPages.test.ts` (1), `src/app/App.test.tsx` (1), `src/skeleton.test.ts` (5), `src/probe/libraryProbe.test.ts` (4), `tests/manifest.test.ts` (6), `tests/buildShape.test.ts` (11).
-- `npm run build` ends with `built in`, and `dist/` holds `index.html`, one `assets/index-<hash>.js`, one `assets/index-<hash>.css` and `icons/server-logic-tools.svg`.
+- `npm run build` ends with `built in`, and `dist/` holds `index.html`, one `assets/index-<hash>.js`, one `assets/index-<hash>.css` and `icons/logo.svg`.
 - `pptb-validate --skip-url-checks` reports no errors. URL checks are skipped because the repository and the raw README URL may not be public yet. If it reports a missing field, fix the manifest field it names in `package.json` and add the matching assertion to `tests/manifest.test.ts` first. The package name `@ryanmakes/powerpages-serverlogic` is the owner's choice; publishing needs an npm account that owns the `@ryanmakes` scope.
 - `git status --short` prints nothing (everything committed), and `git ls-files` lists the 10 committed spike files (`s1/t11.json`, `t18.json`, `t35.json`, `t9-sl.json`, `t9.json`, `s4/envvar.json`, `page.json`, `s4-liquid-page.html`, `s4-probe.js`, `scan-restricted.js`).
 - Phase-specific: `npm run probe:size` prints a `probe.js` size line, and the table in Step 47 has no `_fill_` cells left.

@@ -4,7 +4,7 @@ Date: 2026-10-24. Planning only. The requested `status-2026-10-23.md` was read f
 
 ## Repository and verification
 
-- Current HEAD: `820c313` (`docs(spec): adopt the Iris theme as spec v3.0.0`), branch `001-logic-inspector`, 14 commits ahead of its tracking branch.
+- Current HEAD: `820c313` (spec v3.0.0 theme commit, superseded by spec v4.0.0), branch `001-logic-inspector`, 14 commits ahead of its tracking branch.
 - `spec.md` is Approved, version 3.0.0, updated 2026-10-23. Its requirements take precedence over old phase assumptions.
 - `npm run typecheck` and `npm run lint` completed successfully.
 - Fresh full `npm test`: 89 files, 1,348 tests passed; duration 25.57 seconds. The full summary was recovered from the lean-ctx command log, rather than inferred from compressed output.

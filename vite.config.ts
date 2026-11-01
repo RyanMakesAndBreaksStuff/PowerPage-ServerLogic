@@ -114,6 +114,7 @@ export default defineConfig((configEnv) => {
       cssCodeSplit: false,
       // Fonts and small images become data: URIs; the PPTB default CSP allows data: fonts and images.
       assetsInlineLimit: 100_000,
+      publicDir: 'public',
       sourcemap: configEnv.mode === 'development',
       lib: isProbe
         ? {
@@ -135,6 +136,8 @@ export default defineConfig((configEnv) => {
     },
     test: {
       environment: 'jsdom',
+      // First jsdom render in a file exceeds 5s while the suite builds in parallel.
+      testTimeout: 15_000,
       setupFiles: ['./src/test/setup.ts'],
       include: ['src/**/*.test.{ts,tsx}', 'tests/**/*.test.ts'],
     },
