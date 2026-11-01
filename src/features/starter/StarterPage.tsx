@@ -4,7 +4,6 @@ import { useView } from '@/app/useView';
 import { Button } from '@/components/Button';
 import { Icon } from '@/components/Icon';
 import { ClientPane } from './code/ClientPane';
-import { RequestPathStrip } from './code/RequestPathStrip';
 import { ServerPane } from './code/ServerPane';
 import { DownloadStarterButton } from './download/DownloadStarterButton';
 import { PermissionNote } from './inputs/PermissionNote';
@@ -19,7 +18,6 @@ export function StarterPage(): ReactElement {
     <section aria-label="Logic Starter" className="starter-page">
       <StarterInputs />
       <div className="starter-page__code">
-        <RequestPathStrip />
         <div className="starter-code__panes">
           <ServerPane />
           <ClientPane />

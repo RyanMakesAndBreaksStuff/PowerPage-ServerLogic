@@ -1,4 +1,4 @@
-/* The code row of Create Logic (layout 10a §2, §4): request path strip, then the two panes. */
+/* The code row of Create Logic (layout 10a §2, §4) contains the two code panes. */
 
 .starter-page__code {
   grid-row: 2;
@@ -8,49 +8,6 @@
   gap: 12px;
   min-width: 0;
   min-height: 0;
-}
-
-.starter-strip {
-  flex: none;
-  padding: 15.5px 16px;
-}
-
-.starter-strip__steps {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.starter-strip__step {
-  display: flex;
-  flex: 1;
-  align-items: center;
-  gap: 8px;
-  min-width: 0;
-  color: var(--muted);
-}
-
-.starter-strip__item {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  min-width: 0;
-}
-
-.starter-strip__label {
-  color: var(--muted);
-  font-size: 10.5px;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-}
-
-.starter-strip__value {
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .starter-code__panes {

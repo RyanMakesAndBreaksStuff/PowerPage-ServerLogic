@@ -1,25 +1,19 @@
-import { act, fireEvent, screen, within } from '@testing-library/react';
+import { act, fireEvent, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { STARTER_DEPS } from '@/app/starter-session/starterDeps';
 import { generateClient } from '@/services/generators/client/client';
 import { StarterPage } from '../StarterPage';
 import { editorView, renderStarter } from '../starterTestHarness';
 import { ClientPane } from './ClientPane';
-import { RequestPathStrip } from './RequestPathStrip';
 
 const clientText = (): string => editorView('Client call code').state.doc.toString();
 const radio = (name: string): HTMLElement => screen.getByRole('radio', { name });
 
 function Panes() {
-  return (
-    <>
-      <RequestPathStrip />
-      <ClientPane />
-    </>
-  );
+  return <ClientPane />;
 }
 
-describe('ClientPane and RequestPathStrip (Phase 21)', () => {
+describe('ClientPane (Phase 21)', () => {
   it('shows the generated client call, read-only, matching the download (AC-4.4, Phase 14 Risk 2)', () => {
     const h = renderStarter(<Panes />, { deps: STARTER_DEPS });
     const { state, derived } = h.session();
@@ -45,34 +39,6 @@ describe('ClientPane and RequestPathStrip (Phase 21)', () => {
     const h = renderStarter(<Panes />, { deps: STARTER_DEPS });
     h.dispatch({ type: 'setName', name: 'Orders' });
     expect(clientText()).toContain('/_api/serverlogics/orders');
-    expect(screen.getByRole('region', { name: 'Request path' })).toHaveTextContent(
-      'Endpoint /_api/serverlogics/orders',
-    );
-  });
-
-  it('shows the five HTTP steps, or the four Liquid steps (AC-4.8)', () => {
-    const h = renderStarter(<Panes />, { deps: STARTER_DEPS });
-    const steps = (): string[] =>
-      within(screen.getByRole('region', { name: 'Request path' }))
-        .getAllByRole('listitem')
-        .map((li) => li.textContent);
-    expect(steps()).toEqual([
-      'Page script fetch()',
-      'Token __RequestVerificationToken',
-      'Endpoint /_api/serverlogics/customer-summary',
-      'Handler function get()',
-      'Returns JSON string',
-    ]);
-    h.dispatch({ type: 'setLanguage', language: 'liquid' });
-    expect(steps()).toEqual([
-      'Page render Liquid page',
-      'Tag serverlogic',
-      'Handler function get()',
-      'Returns result object',
-    ]);
-    expect(screen.getByRole('region', { name: 'Client call' })).toHaveTextContent(
-      'Paste into a page or web template',
-    );
   });
 
   it('switches language with the pills and explains a disabled Liquid pill (AC-4.4, AC-4.7)', () => {

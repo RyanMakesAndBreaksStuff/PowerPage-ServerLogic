@@ -2,7 +2,7 @@ import { act, screen, within } from '@testing-library/react';
 import type { UserEvent } from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 import { StarterPage } from './StarterPage';
-import { renderStarter } from './starterTestHarness';
+import { editorView, renderStarter } from './starterTestHarness';
 
 // Scoped to their tiles, so the code panes' own pills and text (Phase 21) never match.
 const methodTile = (): HTMLElement => screen.getByRole('region', { name: 'HTTP method' });
@@ -24,6 +24,39 @@ describe('StarterPage input tiles (Phase 18)', () => {
     }
     expect(screen.getByRole('region', { name: 'Recipe' })).toHaveTextContent('10 recipes');
   });
+
+  it('keeps both R7 editors focusable and every checklist item mounted when expanded', async () => {
+    const h = renderStarter(<StarterPage />);
+    await pickRecipe(h.user, /Microsoft Graph & SharePoint/);
+    await h.user.click(screen.getByText('View checklist', { exact: true }));
+
+    const note = screen.getByRole('region', { name: 'Permissions note' });
+    const list = within(note).getByRole('list');
+    expect(within(list).getAllByRole('listitem')).toHaveLength(10);
+    expect(within(list).getByText(/Hold the client secret/)).toBeInTheDocument();
+
+    const server = editorView('Server code');
+    server.focus();
+    expect(server.hasFocus).toBe(true);
+    const client = editorView('Client call code');
+    client.focus();
+    expect(client.hasFocus).toBe(true);
+  });
+
+  it.each(['R1', 'R8'] as const)(
+    'omits the request-path strip for %s and retains both code panes',
+    async (recipe) => {
+      const h = renderStarter(<StarterPage />);
+      if (recipe === 'R8') await pickRecipe(h.user, /Invoke from Liquid/);
+
+      expect(screen.queryByRole('region', { name: 'Request path' })).not.toBeInTheDocument();
+      for (const label of ['Page script', 'Token', 'Endpoint', 'Handler', 'Returns']) {
+        expect(screen.queryByText(label, { exact: true })).not.toBeInTheDocument();
+      }
+      expect(screen.getByRole('textbox', { name: 'Server code' })).toBeInTheDocument();
+      expect(screen.getByRole('textbox', { name: 'Client call code' })).toBeInTheDocument();
+    },
+  );
 
   it('slugifies the name into the file line and warns about shared slugs (AC-2.2, AC-2.3, AC-2.11)', async () => {
     const { user } = renderStarter(<StarterPage />);

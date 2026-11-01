@@ -7,7 +7,7 @@
   padding: 12px 16px 16px;
   display: grid;
   grid-template-columns: 220px repeat(3, minmax(0, 1fr));
-  grid-template-rows: 129px minmax(0, 1fr) auto;
+  grid-template-rows: 129px minmax(200px, 1fr) min-content;
   gap: 12px;
 }
 
@@ -224,4 +224,9 @@
 .starter-note__checklist ul {
   margin: 6px 0 0;
   padding-left: 18px;
+}
+
+.starter-note__checklist[open] ul {
+  max-height: 7rem;
+  overflow-y: auto;
 }
