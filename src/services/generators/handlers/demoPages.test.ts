@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { readFileSync } from 'node:fs';
 import { parse } from 'acorn';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import type { RecipeId } from '@/types/recipe';
 import { generateDemoPage } from './demoPages';
 
@@ -55,6 +55,89 @@ function extractFunction(source: string, name: string): string {
   }
   throw new Error(`unclosed function ${name}`);
 }
+
+type ResponseHandler = (resp: unknown, onSuccess: (payload: unknown) => void) => void;
+type ResponseHandlerFactory = (
+  alertFn: (message: string) => void,
+  errorTextFn: (payload: unknown) => string,
+) => ResponseHandler;
+type ShowEnvelope = (resp: unknown) => void;
+type ShowEnvelopeFactory = (
+  showResult: (text: string, isError: boolean) => void,
+  errorTextFn: (payload: unknown) => string,
+) => ShowEnvelope;
+
+it.each(['R4', 'R5'] as const)('%s rejects invalid envelopes before application success', (id) => {
+  const handlerSource = extractFunction(requirePage(id), 'handleResponse');
+  const build = new Function(
+    'alert',
+    'errorText',
+    `return (${handlerSource});`,
+  ) as unknown as ResponseHandlerFactory;
+  const alertSpy = vi.fn<(message: string) => void>();
+  const handleResponse = build(alertSpy, () => 'Application response failed.');
+  const success = vi.fn<(payload: unknown) => void>();
+  const invalidResponses: unknown[] = [
+    null,
+    {},
+    { data: '{"status":"success"}' },
+    { success: 'true', data: '{"status":"success"}' },
+    { success: true, data: '{' },
+    { success: true, data: 'null' },
+    { success: true, data: '[]' },
+    { success: true, data: '{}' },
+    { success: true, data: '{"status":"error","message":"denied"}' },
+  ];
+
+  for (const response of invalidResponses) {
+    expect(() => handleResponse(response, success)).not.toThrow();
+    expect(success).not.toHaveBeenCalled();
+  }
+  expect(alertSpy).toHaveBeenCalledWith('The response could not be read.');
+  expect(alertSpy).toHaveBeenCalledWith('Application response failed.');
+
+  alertSpy.mockClear();
+  handleResponse({ success: false, error: 'denied', data: '{"status":"success"}' }, success);
+  expect(alertSpy).toHaveBeenCalledWith('denied');
+  expect(success).not.toHaveBeenCalled();
+
+  handleResponse({ success: true, data: '{"status":"success","data":[]}' }, success);
+  expect(success).toHaveBeenCalledTimes(1);
+});
+
+it('R6 rejects invalid envelopes and only displays a valid application success as success', () => {
+  const handlerSource = extractFunction(requirePage('R6'), 'showEnvelope');
+  const build = new Function(
+    'showResult',
+    'errorText',
+    `return (${handlerSource});`,
+  ) as unknown as ShowEnvelopeFactory;
+  const showResult = vi.fn<(text: string, isError: boolean) => void>();
+  const showEnvelope = build(showResult, () => 'Application response failed.');
+  const invalidResponses: readonly [unknown, string][] = [
+    [null, 'The response could not be read.'],
+    [{}, 'The response could not be read.'],
+    [{ data: '{"status":"success"}' }, 'The response could not be read.'],
+    [{ success: 'true', data: '{"status":"success"}' }, 'The response could not be read.'],
+    [{ success: true, data: '{' }, 'The response could not be read.'],
+    [{ success: true, data: 'null' }, 'The response could not be read.'],
+    [{ success: true, data: '[]' }, 'The response could not be read.'],
+    [{ success: true, data: '{}' }, 'Application response failed.'],
+    [
+      { success: true, data: '{"status":"error","message":"denied"}' },
+      'Application response failed.',
+    ],
+  ];
+
+  for (const [response, message] of invalidResponses) {
+    expect(() => showEnvelope(response)).not.toThrow();
+    expect(showResult).toHaveBeenLastCalledWith(message, true);
+  }
+  showEnvelope({ success: false, error: 'denied', data: '{"status":"success"}' });
+  expect(showResult).toHaveBeenLastCalledWith('denied', true);
+  showEnvelope({ success: true, data: '{"status":"success","message":"Hello"}' });
+  expect(showResult).toHaveBeenLastCalledWith('Hello', false);
+});
 
 /** The ENDPOINT literal is parsed as a script, never evaluated. */
 function readEndpoint(page: string): string {

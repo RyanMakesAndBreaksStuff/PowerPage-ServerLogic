@@ -73,8 +73,16 @@
       }
 
       function handleResponse(resp, onSuccess) {
-        if (resp && resp.success === false) {
-          alert(resp.error == null ? "Server logic not available" : String(resp.error));
+        if (!resp || typeof resp !== "object" || Array.isArray(resp)) {
+          alert("The response could not be read.");
+          return;
+        }
+        if (resp.success === false) {
+          alert(resp.error == null || resp.error === "" ? "Server logic not available" : String(resp.error));
+          return;
+        }
+        if (resp.success !== true || typeof resp.data !== "string") {
+          alert("The response could not be read.");
           return;
         }
         var payload;
@@ -84,11 +92,15 @@
           alert("The response could not be read.");
           return;
         }
+        if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
+          alert("The response could not be read.");
+          return;
+        }
         if (payload.status === "success") {
           onSuccess(payload);
           return;
         }
-        alert(errorText(payload));
+        alert(errorText(payload) || "Application response failed.");
       }
 
       function sessionFromContext(context) {

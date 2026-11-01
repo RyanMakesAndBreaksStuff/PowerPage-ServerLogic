@@ -74,8 +74,19 @@ function showResult(text, isError) {
 }
 
 function showEnvelope(resp) {
-  if (resp && resp.success === false) {
-    showResult(resp.error == null ? "" : String(resp.error), true);
+  if (!resp || typeof resp !== "object" || Array.isArray(resp)) {
+    showResult("The response could not be read.", true);
+    return;
+  }
+  if (resp.success === false) {
+    showResult(
+      resp.error == null || resp.error === "" ? "Server logic not available" : String(resp.error),
+      true,
+    );
+    return;
+  }
+  if (resp.success !== true || typeof resp.data !== "string") {
+    showResult("The response could not be read.", true);
     return;
   }
   var payload;
@@ -85,11 +96,15 @@ function showEnvelope(resp) {
     showResult("The response could not be read.", true);
     return;
   }
+  if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
+    showResult("The response could not be read.", true);
+    return;
+  }
   if (payload.status === "success") {
     showResult(payload.message == null ? "" : String(payload.message), false);
     return;
   }
-  showResult(errorText(payload), true);
+  showResult(errorText(payload) || "Application response failed.", true);
 }
 
 function callServer() {
