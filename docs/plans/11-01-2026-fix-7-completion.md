@@ -68,7 +68,7 @@ The isolated sequence used `toolboxAPI.utils.showNotification` to emit one real 
 
 `FIX7_DONE` printed with no new error. These deltas prove one application delivery per host event while subscribed, no delivery after pagehide, no revival of previous subscribers, one delivery to only the new subscriber after resubscription, and no delivery after final unsubscribe. The raw observer was disposed. The tool was reloaded to remove diagnostic globals and restore its normal subscriptions after the simulated pagehide. Native console screenshot was captured inline in the execution chat.
 
-Cleanup limitation: Insider closed during an interruption and was reopened for cleanup. Its original Dark theme has not been restored: the reopened host remains Light, and computer-use focus/click actions repeatedly failed to activate Settings. Restore Dark in host Settings when convenient. This does not affect the verified lifecycle result or repository implementation.
+Cleanup complete: the user confirmed that Insider is back to its original Dark theme. No theme-restoration work remains.
 
 ## Supplemental static audit
 
