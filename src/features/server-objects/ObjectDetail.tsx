@@ -102,7 +102,7 @@ export function ObjectDetail({
               />
             ) : null}
             <span className="objects-sample__actions">
-              <CopyButton text={sample.code} label="Copy sample" />
+              <CopyButton text={sample.code} label="Copy sample" iconSize={14} />
               <InsertButton sample={sample.code} />
             </span>
           </div>

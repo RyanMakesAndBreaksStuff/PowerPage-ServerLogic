@@ -210,6 +210,14 @@
   margin-left: auto;
 }
 
+.objects-sample__actions .ui-button {
+  box-sizing: border-box;
+  min-height: 24px;
+  gap: 6px;
+  padding: 2px 10px;
+  font-size: 12px;
+}
+
 .objects-code {
   margin: 0;
   padding: 12px 14px;

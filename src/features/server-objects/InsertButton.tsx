@@ -28,7 +28,7 @@ export function InsertButton({ sample }: { sample: string }): ReactElement {
       disabledReason={plan.ok ? null : INSERT_REASONS[plan.reason]}
       onClick={insert}
     >
-      <Icon name="add" />
+      <Icon name="add" size={14} />
       Insert into handler
     </Button>
   );

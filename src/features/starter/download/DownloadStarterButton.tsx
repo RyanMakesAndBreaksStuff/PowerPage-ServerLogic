@@ -43,7 +43,7 @@ export function DownloadStarterButton(): ReactNode {
 
   return (
     <Button variant="primary" fullWidth busy={pending} onClick={onClick}>
-      <Icon name="arrow-download" />
+      <Icon name="arrow-download" size={14} />
       Download starter
     </Button>
   );
