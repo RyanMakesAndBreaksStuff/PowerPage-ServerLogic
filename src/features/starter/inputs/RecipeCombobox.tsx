@@ -1,11 +1,18 @@
-import { useId, useState } from 'react';
+import { useCallback, useEffect, useId, useRef, useState } from 'react';
 import type { KeyboardEvent, ReactElement } from 'react';
 import { Icon } from '@/components/Icon';
 import { classNames } from '@/lib/classNames';
 import { getRecipe, RECIPES } from '@/services/catalogue/recipes';
+import type { HttpMethod } from '@/types/http';
 import type { RecipeGroup, RecipeId, RecipeMeta } from '@/types/recipe';
+import { recipeSupportsMethod } from './starterOptions';
 
-export type RecipeComboboxProps = { value: RecipeId; onSelect: (id: RecipeId) => void };
+export type RecipeComboboxProps = {
+  value: RecipeId;
+  onSelect: (id: RecipeId) => void;
+  methodFilter: HttpMethod | null;
+  onVisibleCountChange: (count: number) => void;
+};
 
 const GROUPS = [
   { group: 'core', label: 'Core' },
@@ -22,24 +29,60 @@ function matches(recipe: RecipeMeta, query: string): boolean {
 
 // APG editable combobox with list autocomplete (AC-3.1, F48): focus stays in the input and
 // aria-activedescendant names the active option.
-export function RecipeCombobox({ value, onSelect }: RecipeComboboxProps): ReactElement {
+export function RecipeCombobox({
+  value,
+  onSelect,
+  methodFilter,
+  onVisibleCountChange,
+}: RecipeComboboxProps): ReactElement {
   const id = useId();
   const listId = `${id}-list`;
+  const rootRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState<string | null>(null); // null shows the selected name, unfiltered
   const [active, setActive] = useState<RecipeId | null>(null);
 
-  const visible = RECIPES.filter((r) => matches(r, query ?? ''));
+  const visible = RECIPES.filter(
+    (recipe) =>
+      matches(recipe, query ?? '') &&
+      (methodFilter === null || recipeSupportsMethod(recipe, methodFilter)),
+  );
   const activeId = open ? (visible.find((r) => r.id === active) ?? visible[0])?.id : undefined;
+
+  const close = useCallback(() => {
+    setOpen(false);
+    setQuery(null);
+    setActive(null);
+  }, []);
+
+  useEffect(() => {
+    onVisibleCountChange(visible.length);
+  }, [onVisibleCountChange, visible.length]);
+
+  useEffect(() => {
+    if (!open || activeId === undefined) return;
+    const activeOption = document.getElementById(`${id}-${activeId}`) as unknown as {
+      scrollIntoView?: (options: ScrollIntoViewOptions) => void;
+    } | null;
+    if (typeof activeOption?.scrollIntoView === 'function') {
+      activeOption.scrollIntoView({ block: 'nearest' });
+    }
+  }, [activeId, id, open]);
+
+  useEffect(() => {
+    const dismissOutside = (event: PointerEvent): void => {
+      if (event.target instanceof Node && !rootRef.current?.contains(event.target)) close();
+    };
+    document.addEventListener('pointerdown', dismissOutside);
+    return () => {
+      document.removeEventListener('pointerdown', dismissOutside);
+    };
+  }, [close]);
 
   const openList = (): void => {
     setOpen(true);
     setActive(value);
-  };
-  const close = (): void => {
-    setOpen(false);
-    setQuery(null);
-    setActive(null);
   };
   const choose = (recipe: RecipeId): void => {
     close();
@@ -69,10 +112,19 @@ export function RecipeCombobox({ value, onSelect }: RecipeComboboxProps): ReactE
   };
 
   return (
-    <div className="starter-combobox">
+    <div
+      className="starter-combobox"
+      ref={rootRef}
+      onBlur={(event) => {
+        if (!(event.relatedTarget instanceof Node) || !event.currentTarget.contains(event.relatedTarget)) {
+          close();
+        }
+      }}
+    >
       <div className="starter-combobox__field">
         <Icon name="search" />
         <input
+          ref={inputRef}
           role="combobox"
           aria-label="Recipe"
           aria-expanded={open}
@@ -93,9 +145,30 @@ export function RecipeCombobox({ value, onSelect }: RecipeComboboxProps): ReactE
             if (!open) openList();
           }}
           onKeyDown={onKeyDown}
-          onBlur={close}
         />
-        <Icon name="chevron-down" />
+        <button
+          type="button"
+          className="ui-button ui-button--ghost starter-combobox__toggle"
+          aria-label="Toggle recipes"
+          aria-expanded={open}
+          aria-controls={listId}
+          onMouseDown={(event) => {
+            event.preventDefault();
+          }}
+          onKeyDown={(event) => {
+            if (event.key === 'Escape') close();
+          }}
+          onClick={() => {
+            if (open) close();
+            else {
+              inputRef.current?.focus();
+              setActive(value);
+              setOpen(true);
+            }
+          }}
+        >
+          <Icon name="chevron-down" />
+        </button>
       </div>
       <div
         id={listId}

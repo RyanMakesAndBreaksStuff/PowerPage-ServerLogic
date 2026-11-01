@@ -1,6 +1,6 @@
 import type { PillOption } from '@/components/PillGroup';
 import { methodEnabled } from '@/services/catalogue/recipes';
-import { HTTP_METHODS, METHOD_FUNCTION } from '@/types/http';
+import { HTTP_METHODS } from '@/types/http';
 import type { ClientLanguage, HttpMethod } from '@/types/http';
 import type { RecipeMeta } from '@/types/recipe';
 
@@ -14,18 +14,14 @@ export function collisionNote(slug: string): string {
   return `Different names can produce the same slug, and so the same endpoint. Check that ${slug} isn't already used on your site.`;
 }
 
-/** AC-2.5, AC-2.10, AC-3.8: all five methods; one the recipe doesn't export is disabled with its reason. */
-export function methodOptions(recipe: RecipeMeta): readonly PillOption<HttpMethod>[] {
-  return HTTP_METHODS.map((method) => ({
-    value: method,
-    label: method,
-    disabledReason:
-      recipe.id === 'R8'
-        ? LIQUID_ONLY_REASON
-        : methodEnabled(recipe, method)
-          ? null
-          : `${recipe.name} doesn't export ${METHOD_FUNCTION[method]}()`,
-  }));
+/** All five HTTP methods remain selectable as recipe filters. */
+export function methodFilterOptions(): readonly PillOption<HttpMethod>[] {
+  return HTTP_METHODS.map((method) => ({ value: method, label: method, disabledReason: null }));
+}
+
+/** Whether a recipe exports the function associated with a method filter. */
+export function recipeSupportsMethod(recipe: RecipeMeta, method: HttpMethod): boolean {
+  return methodEnabled(recipe, method);
 }
 
 /** AC-4.4, AC-4.7, AC-3.8: fetch, jQuery and Liquid. R8 is fixed to Liquid. */

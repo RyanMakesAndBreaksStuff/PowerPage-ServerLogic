@@ -1,4 +1,4 @@
-import { Fragment, useId, useState } from 'react';
+import { Fragment, useCallback, useId, useState } from 'react';
 import type { ReactElement } from 'react';
 import { useStarterSession } from '@/app/starter-session/useStarterSession';
 import { Button } from '@/components/Button';
@@ -10,10 +10,11 @@ import { StatusBadge } from '@/components/StatusBadge';
 import { Tile } from '@/components/Tile';
 import { useDisabledReason } from '@/components/useDisabledReason';
 import { classNames } from '@/lib/classNames';
+import type { HttpMethod } from '@/types/http';
 import { getRecipe, RECIPES } from '@/services/catalogue/recipes';
 import type { RecipeId } from '@/types/recipe';
 import { RecipeCombobox } from './RecipeCombobox';
-import { collisionNote, EDITED_VALIDATION_NOTE, methodOptions } from './starterOptions';
+import { collisionNote, EDITED_VALIDATION_NOTE, methodFilterOptions } from './starterOptions';
 
 function LogicNameTile(): ReactElement {
   const { state, dispatch, derived } = useStarterSession();
@@ -41,19 +42,31 @@ function LogicNameTile(): ReactElement {
   );
 }
 
-function MethodTile(): ReactElement {
-  const { state, dispatch, derived } = useStarterSession();
+type MethodFilterProps = {
+  methodFilter: HttpMethod | null;
+  onMethodFilterChange: (method: HttpMethod) => void;
+};
+
+type PendingRecipeSelection = { recipe: RecipeId; preferredMethod: HttpMethod | null };
+
+type RecipeFilterProps = {
+  methodFilter: HttpMethod | null;
+  visibleCount: number;
+  onVisibleCountChange: (count: number) => void;
+  onClearMethodFilter: () => void;
+};
+
+function MethodTile({ methodFilter, onMethodFilterChange }: MethodFilterProps): ReactElement {
+  const { state, derived } = useStarterSession();
   const recipe = getRecipe(state.recipe);
   const several = recipe.functions.length > 1;
   return (
     <Tile heading="HTTP method">
       <PillGroup
         label="HTTP method"
-        options={methodOptions(recipe)}
-        value={state.method}
-        onChange={(method) => {
-          dispatch({ type: 'setMethod', method });
-        }}
+        options={methodFilterOptions()}
+        value={methodFilter}
+        onChange={onMethodFilterChange}
       />
       <p className="starter-help">
         {recipe.id === 'R8' ? 'Liquid only · ' : null}
@@ -75,32 +88,69 @@ function MethodTile(): ReactElement {
   );
 }
 
-function RecipeTile(): ReactElement {
+function RecipeTile({
+  methodFilter,
+  visibleCount,
+  onVisibleCountChange,
+  onClearMethodFilter,
+}: RecipeFilterProps): ReactElement {
   const { state, dispatch, derived } = useStarterSession();
-  const [pending, setPending] = useState<RecipeId | null>(null);
+  const [pending, setPending] = useState<PendingRecipeSelection | null>(null);
   const recipe = getRecipe(state.recipe);
+
+  const commit = (selection: PendingRecipeSelection): void => {
+    if (selection.preferredMethod === null) {
+      dispatch({ type: 'selectRecipe', recipe: selection.recipe });
+    } else {
+      dispatch({
+        type: 'selectRecipe',
+        recipe: selection.recipe,
+        preferredMethod: selection.preferredMethod,
+      });
+    }
+  };
 
   // AC-2.9: a change that would discard edits waits for confirmation; Cancel keeps both.
   const select = (id: RecipeId): void => {
-    if (id === state.recipe) return;
-    if (derived.edited) setPending(id);
-    else dispatch({ type: 'selectRecipe', recipe: id });
+    if (id === state.recipe) {
+      if (methodFilter !== null) dispatch({ type: 'setMethod', method: methodFilter });
+      return;
+    }
+    const selection = { recipe: id, preferredMethod: methodFilter };
+    if (derived.edited) setPending(selection);
+    else commit(selection);
   };
   const cancel = (): void => {
     setPending(null);
   };
   const discard = (): void => {
-    if (pending !== null) dispatch({ type: 'selectRecipe', recipe: pending });
+    if (pending !== null) commit(pending);
     setPending(null);
   };
 
   return (
     <Tile
       heading="Recipe"
-      aside={<span className="starter-count">{RECIPES.length} recipes</span>}
+      aside={
+        <div className="starter-recipe__aside">
+          <span className="starter-count">{visibleCount} recipes</span>
+          <Button
+            aria-label="Clear method filter"
+            className="starter-recipe__clear"
+            onClick={onClearMethodFilter}
+          >
+            Clear filter
+          </Button>
+        </div>
+      }
       className="starter-tile--recipe"
     >
-      <RecipeCombobox value={state.recipe} onSelect={select} />
+      <RecipeCombobox
+        value={state.recipe}
+        methodFilter={methodFilter}
+        onVisibleCountChange={onVisibleCountChange}
+        onSelect={select}
+      />
       <p className="starter-help starter-help--truncate" title={recipe.mainObject}>
         Uses <span className="ui-mono starter-object">{recipe.mainObject}</span>
       </p>
@@ -118,7 +168,8 @@ function RecipeTile(): ReactElement {
         }
       >
         <p>
-          Switching to {pending === null ? '' : getRecipe(pending).name} regenerates the handler and
+          Switching to {pending === null ? '' : getRecipe(pending.recipe).name} regenerates the
+          handler and
           discards your edits to {derived.slug}.js.
         </p>
       </Modal>
@@ -168,11 +219,28 @@ function ReadinessTile(): ReactElement {
 
 /** The four input tiles of layout 10a's top row (AC-2.1). */
 export function StarterInputs(): ReactElement {
+  const { state, dispatch } = useStarterSession();
+  const [visibleCount, setVisibleCount] = useState(RECIPES.length);
+  const reportVisibleCount = useCallback((count: number) => {
+    setVisibleCount(count);
+  }, []);
   return (
     <>
       <LogicNameTile />
-      <MethodTile />
-      <RecipeTile />
+      <MethodTile
+        methodFilter={state.recipeMethodFilter}
+        onMethodFilterChange={(method) => {
+          dispatch({ type: 'setRecipeMethodFilter', method });
+        }}
+      />
+      <RecipeTile
+        methodFilter={state.recipeMethodFilter}
+        visibleCount={visibleCount}
+        onVisibleCountChange={reportVisibleCount}
+        onClearMethodFilter={() => {
+          dispatch({ type: 'setRecipeMethodFilter', method: null });
+        }}
+      />
       <ReadinessTile />
     </>
   );

@@ -1,4 +1,4 @@
-import { act, screen, within } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
 import type { UserEvent } from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 import { StarterPage } from './StarterPage';
@@ -71,62 +71,48 @@ describe('StarterPage input tiles (Phase 18)', () => {
     expect(nameInput()).toHaveAccessibleDescription(/^File untitled\.js /);
   });
 
-  it('shows five method pills and explains the disabled ones (AC-2.5, AC-2.6, AC-2.10)', () => {
-    renderStarter(<StarterPage />);
-    const group = screen.getByRole('radiogroup', { name: 'HTTP method' });
-    expect(
-      within(group)
-        .getAllByRole('radio')
-        .map((r) => r.textContent),
-    ).toEqual(['GET', 'POST', 'PUT', 'PATCH', 'DELETE']);
-    expect(radio('GET')).toHaveAttribute('aria-checked', 'true');
-    expect(radio('POST')).toHaveAttribute('aria-disabled', 'true');
-    expect(radio('POST')).toHaveAccessibleDescription(
-      "Read Dataverse records doesn't export post()",
-    );
-    act(() => {
-      radio('POST').focus();
-    });
-    expect(
-      screen.getByRole('tooltip', { name: "Read Dataverse records doesn't export post()" }),
-    ).toHaveAttribute('data-visible', 'true');
+  it('offers five enabled method filters, initially with no filter selected', async () => {
+    const h = renderStarter(<StarterPage />);
+    expect(within(methodTile()).getAllByRole('radio').map((pill) => pill.textContent)).toEqual([
+      'GET',
+      'POST',
+      'PUT',
+      'PATCH',
+      'DELETE',
+    ]);
+    for (const pill of within(methodTile()).getAllByRole('radio')) {
+      expect(pill).not.toHaveAttribute('aria-disabled', 'true');
+      expect(pill).toHaveAttribute('aria-checked', 'false');
+    }
+    await h.user.click(radio('POST'));
+    expect(radio('POST')).toHaveAttribute('aria-checked', 'true');
+    expect(h.session().state.method).toBe('GET');
     expect(screen.getByRole('region', { name: 'HTTP method' })).toHaveTextContent(
       'Exports function get()',
     );
   });
 
-  it('lists every function of a multi-function recipe and marks the targeted one (AC-2.6, AC-3.4)', async () => {
-    const { user } = renderStarter(<StarterPage />);
-    await pickRecipe(user, /^Dataverse CRUD/);
-    expect(radio('GET')).toHaveAttribute('aria-checked', 'true');
-    expect(radio('PATCH')).toHaveAttribute('aria-disabled', 'true');
-    expect(screen.getByRole('region', { name: 'HTTP method' })).toHaveTextContent(
-      'Exports function get() function post() function put() function del()',
-    );
-    expect(within(methodTile()).getByText('function get()')).toHaveAttribute(
-      'aria-current',
-      'true',
-    );
-    await user.click(radio('PUT'));
-    expect(within(methodTile()).getByText('function put()')).toHaveAttribute(
-      'aria-current',
-      'true',
-    );
-    expect(within(methodTile()).getByText('function get()')).not.toHaveAttribute('aria-current');
+  it('keeps the R4 handler method and export target when the PUT filter changes', async () => {
+    const h = renderStarter(<StarterPage />);
+    await pickRecipe(h.user, /^Dataverse CRUD/);
+    expect(h.session().state.method).toBe('GET');
+    await h.user.click(radio('PUT'));
+    expect(radio('PUT')).toHaveAttribute('aria-checked', 'true');
+    expect(h.session().state.method).toBe('GET');
+    expect(within(methodTile()).getByText('function get()')).toHaveAttribute('aria-current', 'true');
+    expect(within(methodTile()).getByText('function put()')).not.toHaveAttribute('aria-current');
   });
 
-  it('disables every method for R8 and says Liquid only (AC-2.10, AC-3.8)', async () => {
-    const { user } = renderStarter(<StarterPage />);
-    await pickRecipe(user, /^Invoke from Liquid/);
-    for (const r of within(methodTile()).getAllByRole('radio')) {
-      expect(r).toHaveAttribute('aria-disabled', 'true');
-      expect(r).toHaveAttribute('aria-checked', 'false');
+  it('keeps every HTTP filter enabled for R8', async () => {
+    const h = renderStarter(<StarterPage />);
+    await pickRecipe(h.user, /^Invoke from Liquid/);
+    for (const pill of within(methodTile()).getAllByRole('radio')) {
+      expect(pill).not.toHaveAttribute('aria-disabled', 'true');
+      expect(pill).toHaveAttribute('aria-checked', 'false');
     }
-    expect(radio('GET')).toHaveAccessibleDescription('Liquid only: not callable over HTTP');
     expect(screen.getByRole('region', { name: 'HTTP method' })).toHaveTextContent(
       'Liquid only · Exports function getSummary()',
     );
-    expect(screen.getByRole('region', { name: 'Recipe' })).toHaveTextContent('Uses Server.Context');
   });
 
   it('asks before a recipe change discards edits; Cancel keeps both (AC-2.9)', async () => {
@@ -173,6 +159,59 @@ describe('StarterPage input tiles (Phase 18)', () => {
     h.dispatch({ type: 'editServer', text: 'eval("x");', cursor: null });
     expect(ring('1 of 3 ready')).toBeInTheDocument();
     expect(badge('Browser checks')).toBe('review');
+  });
+
+  it('applies the filter when reselecting the loaded recipe without discarding edits', async () => {
+    const h = renderStarter(<StarterPage />);
+    await pickRecipe(h.user, /^Dataverse CRUD/);
+    const text = `${h.session().state.serverText}\n// retained edit`;
+    h.dispatch({ type: 'editServer', text, cursor: null });
+    await h.user.click(radio('PUT'));
+    await h.user.click(screen.getByRole('combobox', { name: 'Recipe' }));
+    await h.user.click(screen.getByRole('option', { name: /^Dataverse CRUD/ }));
+    expect(h.session().state.method).toBe('PUT');
+    expect(h.session().state.serverText).toBe(text);
+    expect(screen.queryByRole('dialog', { name: 'Discard your edits?' })).not.toBeInTheDocument();
+  });
+
+  it('filters recipes without changing session state until a confirmed selection', async () => {
+    const h = renderStarter(<StarterPage />);
+    const before = h.session().state;
+    const editedText = `${before.serverText}// note\n`;
+    h.dispatch({ type: 'editServer', text: editedText, cursor: null });
+    await h.user.click(radio('POST'));
+    expect(radio('POST')).toHaveAttribute('aria-checked', 'true');
+    expect(h.session().state.method).toBe(before.method);
+    expect(h.session().state.serverText).toBe(editedText);
+
+    const input = screen.getByRole('combobox', { name: 'Recipe' });
+    await h.user.click(input);
+    expect(screen.queryAllByRole('option').length).toBeGreaterThan(0);
+    await h.user.clear(input);
+    await h.user.type(input, 'api');
+    const filteredCount = screen.queryAllByRole('option').length;
+    expect(filteredCount).toBeGreaterThan(0);
+    expect(screen.getByRole('region', { name: 'Recipe' })).toHaveTextContent(
+      `${String(filteredCount)} recipes`,
+    );
+    await h.user.clear(input);
+    await h.user.click(screen.getByRole('button', { name: 'Clear method filter' }));
+    expect(screen.getByRole('region', { name: 'Recipe' })).toHaveTextContent('10 recipes');
+    await h.user.click(input);
+    expect(screen.getByRole('option', { name: /^Invoke from Liquid/ })).toBeInTheDocument();
+    await h.user.keyboard('{Escape}');
+
+    await h.user.click(radio('PATCH'));
+    await h.user.click(input);
+    await h.user.click(screen.getByRole('option', { name: /^Call a Dataverse custom API/ }));
+    expect(screen.getByRole('dialog', { name: 'Discard your edits?' })).toBeInTheDocument();
+    expect(h.session().state.recipe).toBe(before.recipe);
+    expect(h.session().state.method).toBe(before.method);
+    expect(h.session().state.serverText).toBe(editedText);
+    await h.user.click(screen.getByRole('button', { name: 'Discard edits' }));
+    expect(h.session().state.recipe).toBe('R10');
+    expect(h.session().state.method).toBe('PATCH');
+    expect(h.session().state.serverText).toBe(h.session().state.generatedText);
   });
 
   it('explains on the Validation pill that edited validation is not rechecked (AC-5.3)', () => {
@@ -229,7 +268,9 @@ describe('StarterPage note and actions (Phase 18)', () => {
     await h.user.click(screen.getByRole('button', { name: 'Start over' }));
     expect(nameInput()).toHaveValue('customer-summary');
     expect(screen.getByRole('combobox', { name: 'Recipe' })).toHaveValue('Read Dataverse records');
-    expect(radio('GET')).toHaveAttribute('aria-checked', 'true');
+    expect(radio('GET')).toHaveAttribute('aria-checked', 'false');
+    expect(h.session().state.method).toBe('GET');
+    expect(h.session().state.recipeMethodFilter).toBeNull();
     expect(ring('2 of 3 ready')).toBeInTheDocument();
     expect(h.session().state.language).toBe('fetch');
   });

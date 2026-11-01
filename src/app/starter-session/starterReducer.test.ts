@@ -19,6 +19,7 @@ describe('initialStarterState (AC-5.9 defaults)', () => {
     expect(initialStarterState(FAKE_STARTER_DEPS)).toEqual({
       name: DEFAULT_NAME,
       method: 'GET',
+      recipeMethodFilter: null,
       recipe: 'R1',
       language: 'fetch',
       serverText: generated('R1'),
@@ -32,6 +33,22 @@ describe('initialStarterState (AC-5.9 defaults)', () => {
 });
 
 describe('selectRecipe (AC-2.8, AC-3.8)', () => {
+  it('uses a selected filter method only when the selected recipe exports it', () => {
+    expect(
+      reduce(initialStarterState(FAKE_STARTER_DEPS), {
+        type: 'selectRecipe',
+        recipe: 'R10',
+        preferredMethod: 'PATCH',
+      }).method,
+    ).toBe('PATCH');
+    expect(
+      reduce(initialStarterState(FAKE_STARTER_DEPS), {
+        type: 'selectRecipe',
+        recipe: 'R1',
+        preferredMethod: 'PATCH',
+      }).method,
+    ).toBe('GET');
+  });
   it('regenerates the text and resets the method to the recipe default', () => {
     const state = run({ type: 'selectRecipe', recipe: 'R2' });
     expect(state.recipe).toBe('R2');
@@ -201,6 +218,15 @@ describe('review (AC-5.4)', () => {
     expect(edited.reviewedText).toBe(generated('R1'));
     const back = reduce(edited, { type: 'editServer', text: generated('R1'), cursor: null });
     expect(back.reviewedText).toBe(back.serverText);
+  });
+});
+
+describe('recipe method filter', () => {
+  it('changes only filter state and resets the filter on Start over', () => {
+    const initial = initialStarterState(FAKE_STARTER_DEPS);
+    const filtered = reduce(initial, { type: 'setRecipeMethodFilter', method: 'PATCH' });
+    expect(filtered).toEqual({ ...initial, recipeMethodFilter: 'PATCH' });
+    expect(reduce(filtered, { type: 'startOver' }).recipeMethodFilter).toBeNull();
   });
 });
 

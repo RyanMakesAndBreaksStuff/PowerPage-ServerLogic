@@ -155,6 +155,7 @@ describe('report and Starter session contracts', () => {
     expectTypeOf<StarterAction['type']>().toEqualTypeOf<
       | 'setName'
       | 'setMethod'
+      | 'setRecipeMethodFilter'
       | 'selectRecipe'
       | 'setLanguage'
       | 'editServer'

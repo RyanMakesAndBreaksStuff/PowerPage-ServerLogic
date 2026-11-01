@@ -6,6 +6,7 @@ import type { RecipeId } from '@/types/recipe';
 export type StarterState = {
   name: string;
   method: HttpMethod | null;
+  recipeMethodFilter: HttpMethod | null;
   recipe: RecipeId;
   language: ClientLanguage;
   serverText: string;
@@ -17,7 +18,8 @@ export type StarterState = {
 export type StarterAction =
   | { type: 'setName'; name: string }
   | { type: 'setMethod'; method: HttpMethod }
-  | { type: 'selectRecipe'; recipe: RecipeId }
+  | { type: 'setRecipeMethodFilter'; method: HttpMethod | null }
+  | { type: 'selectRecipe'; recipe: RecipeId; preferredMethod?: HttpMethod }
   | { type: 'setLanguage'; language: ClientLanguage }
   | { type: 'editServer'; text: string; cursor: number | null }
   | { type: 'setCursor'; cursor: number | null }

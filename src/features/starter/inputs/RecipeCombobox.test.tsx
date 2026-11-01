@@ -1,12 +1,25 @@
-import { render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import type { HttpMethod } from '@/types/http';
 import { describe, expect, it, vi } from 'vitest';
 import { RecipeCombobox } from './RecipeCombobox';
 
-function mount() {
+type MountOptions = {
+  methodFilter?: HttpMethod | null;
+  onVisibleCountChange?: (count: number) => void;
+};
+
+function mount({ methodFilter = null, onVisibleCountChange = () => undefined }: MountOptions = {}) {
   const onSelect = vi.fn();
   const user = userEvent.setup();
-  render(<RecipeCombobox value="R1" onSelect={onSelect} />);
+  render(
+    <RecipeCombobox
+      value="R1"
+      methodFilter={methodFilter}
+      onVisibleCountChange={onVisibleCountChange}
+      onSelect={onSelect}
+    />,
+  );
   return { user, onSelect, input: screen.getByRole('combobox', { name: 'Recipe' }) };
 }
 
@@ -85,6 +98,80 @@ describe('RecipeCombobox (AC-3.1, APG combobox)', () => {
     expect(input).toHaveValue('Read Dataverse records');
     await user.click(input);
     await user.tab();
+    await user.tab();
+    expect(input).toHaveAttribute('aria-expanded', 'false');
+    expect(onSelect).not.toHaveBeenCalled();
+  });
+
+  it('scrolls the keyboard-active option into view and selects it with Enter', async () => {
+    const originalDescriptor = Object.getOwnPropertyDescriptor(
+      HTMLElement.prototype,
+      'scrollIntoView',
+    );
+    const scroll = vi.fn();
+    Object.defineProperty(HTMLElement.prototype, 'scrollIntoView', {
+      configurable: true,
+      value: scroll,
+    });
+    try {
+      const { user, input, onSelect } = mount();
+      await user.click(input);
+      for (let i = 0; i < 9; i += 1) await user.keyboard('{ArrowDown}');
+      const active = activeOption(input);
+      expect(active).toHaveTextContent('Call a Dataverse custom API');
+      expect(scroll).toHaveBeenLastCalledWith({ block: 'nearest' });
+      await user.keyboard('{ArrowDown}');
+      expect(activeOption(input)).not.toHaveTextContent('Call a Dataverse custom API');
+      await user.keyboard('{ArrowUp}');
+      expect(activeOption(input)).toHaveTextContent('Call a Dataverse custom API');
+      await user.keyboard('{Enter}');
+      expect(onSelect).toHaveBeenCalledWith('R10');
+    } finally {
+      if (originalDescriptor === undefined) {
+        Reflect.deleteProperty(HTMLElement.prototype, 'scrollIntoView');
+      } else {
+        Object.defineProperty(HTMLElement.prototype, 'scrollIntoView', originalDescriptor);
+      }
+    }
+  });
+
+  it('combines method and text filters and reports the resulting count', async () => {
+    const onCount = vi.fn();
+    const { user, input } = mount({ methodFilter: 'PATCH', onVisibleCountChange: onCount });
+    await user.click(input);
+    expect(optionNames()).toEqual(['Call a Dataverse custom API']);
+    expect(onCount).toHaveBeenLastCalledWith(1);
+    await user.clear(input);
+    await user.type(input, 'cloudflow');
+    expect(optionNames()).toEqual([]);
+    expect(screen.getByText('No recipes match')).toBeInTheDocument();
+    expect(onCount).toHaveBeenLastCalledWith(0);
+  });
+
+  it('opens and closes through an accessible real chevron toggle', async () => {
+    const { user, input, onSelect } = mount();
+    const toggle = screen.getByRole('button', { name: 'Toggle recipes' });
+    await user.click(toggle);
+    expect(input).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByRole('listbox', { name: 'Recipes' })).toBeVisible();
+    await user.click(toggle);
+    expect(input).toHaveAttribute('aria-expanded', 'false');
+    expect(onSelect).not.toHaveBeenCalled();
+  });
+
+  it('selects an option and dismisses by Escape or outside pointer without selection', async () => {
+    const { user, input, onSelect } = mount();
+    const toggle = screen.getByRole('button', { name: 'Toggle recipes' });
+    await user.click(toggle);
+    await user.click(screen.getByRole('option', { name: /^Dataverse CRUD/ }));
+    expect(onSelect).toHaveBeenCalledWith('R4');
+    expect(input).toHaveAttribute('aria-expanded', 'false');
+    onSelect.mockClear();
+    await user.click(toggle);
+    await user.keyboard('{Escape}');
+    expect(input).toHaveAttribute('aria-expanded', 'false');
+    await user.click(toggle);
+    fireEvent.pointerDown(document.body);
     expect(input).toHaveAttribute('aria-expanded', 'false');
     expect(onSelect).not.toHaveBeenCalled();
   });

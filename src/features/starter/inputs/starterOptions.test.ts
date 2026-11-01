@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { getRecipe } from '@/services/catalogue/recipes';
+import { getRecipe, RECIPES } from '@/services/catalogue/recipes';
+import { HTTP_METHODS } from '@/types/http';
 import type { RecipeId } from '@/types/recipe';
 import {
   collisionNote,
@@ -7,13 +8,9 @@ import {
   LIQUID_BLOCKED_REASON,
   LIQUID_ONLY_REASON,
   languageOptions,
-  methodOptions,
+  methodFilterOptions,
+  recipeSupportsMethod,
 } from './starterOptions';
-
-const methodReasons = (id: RecipeId): Record<string, string | null> =>
-  Object.fromEntries(
-    methodOptions(getRecipe(id)).map((o) => [o.value, o.disabledReason ?? null] as const),
-  );
 
 describe('starter option text', () => {
   it('pins the spec strings', () => {
@@ -28,38 +25,20 @@ describe('starter option text', () => {
   });
 });
 
-describe('methodOptions (AC-2.5, AC-2.10, AC-3.8)', () => {
-  it('always lists the five methods in order', () => {
-    expect(methodOptions(getRecipe('R1')).map((o) => o.label)).toEqual([
-      'GET',
-      'POST',
-      'PUT',
-      'PATCH',
-      'DELETE',
-    ]);
-  });
-
-  it('enables only the methods whose function the recipe exports', () => {
-    expect(methodReasons('R1').POST).toBe("Read Dataverse records doesn't export post()");
-    expect(methodReasons('R4')).toEqual({
-      GET: null,
-      POST: null,
-      PUT: null,
-      PATCH: "Dataverse CRUD doesn't export patch()",
-      DELETE: null,
-    });
-    expect(methodReasons('R5').PATCH).toBe("External service CRUD doesn't export patch()");
-    expect(methodReasons('R10')).toEqual({
-      GET: null,
-      POST: null,
-      PUT: "Call a Dataverse custom API doesn't export put()",
-      PATCH: null,
-      DELETE: "Call a Dataverse custom API doesn't export del()",
-    });
-  });
-
-  it('disables every method for R8 with the Liquid-only reason', () => {
-    expect(new Set(Object.values(methodReasons('R8')))).toEqual(new Set([LIQUID_ONLY_REASON]));
+describe('methodFilterOptions (finding 10)', () => {
+  it('keeps every filter enabled and derives eligibility from exported functions', () => {
+    expect(methodFilterOptions().map(({ value, disabledReason }) => [value, disabledReason])).toEqual(
+      HTTP_METHODS.map((method) => [method, null]),
+    );
+    for (const method of HTTP_METHODS) {
+      expect(
+        RECIPES.filter((recipe) => recipeSupportsMethod(recipe, method)).every(
+          (recipe) => recipe.id !== 'R8',
+        ),
+      ).toBe(true);
+    }
+    expect(recipeSupportsMethod(getRecipe('R10'), 'PATCH')).toBe(true);
+    expect(recipeSupportsMethod(getRecipe('R8'), 'GET')).toBe(false);
   });
 });
 

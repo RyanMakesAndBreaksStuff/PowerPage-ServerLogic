@@ -23,6 +23,7 @@ export function initialStarterState(deps: StarterDeps): StarterState {
   return {
     name: DEFAULT_NAME,
     method: getRecipe(DEFAULT_RECIPE).defaultMethod,
+    recipeMethodFilter: null,
     recipe: DEFAULT_RECIPE,
     language: 'fetch',
     serverText: text,
@@ -58,6 +59,8 @@ export function createStarterReducer(
         return methodEnabled(getRecipe(state.recipe), action.method)
           ? { ...state, method: action.method }
           : state;
+      case 'setRecipeMethodFilter':
+        return { ...state, recipeMethodFilter: action.method };
       case 'selectRecipe': {
         const recipe = getRecipe(action.recipe);
         const text = generated(deps, action.recipe);
@@ -73,7 +76,10 @@ export function createStarterReducer(
         return {
           ...state,
           recipe: action.recipe,
-          method: recipe.defaultMethod,
+          method:
+            action.preferredMethod !== undefined && methodEnabled(recipe, action.preferredMethod)
+              ? action.preferredMethod
+              : recipe.defaultMethod,
           language,
           serverText: text,
           generatedText: text,

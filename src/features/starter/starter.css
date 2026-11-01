@@ -84,6 +84,21 @@
   white-space: nowrap;
 }
 
+.starter-recipe__aside {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 4px;
+}
+
+.starter-recipe__clear {
+  box-sizing: border-box;
+  min-height: 24px;
+  padding: 2px 6px;
+  font-size: 10px;
+  white-space: nowrap;
+}
+
 /* The recipe list opens over the code row, so this tile must not clip it. */
 .starter-tile--recipe {
   position: relative;
@@ -129,6 +144,13 @@
 .starter-combobox__field:focus-within {
   outline: 2px solid var(--primary);
   outline-offset: 2px;
+}
+
+.starter-combobox__toggle {
+  flex: none;
+  min-width: 24px;
+  min-height: 24px;
+  padding: 0;
 }
 
 .starter-combobox__input {
