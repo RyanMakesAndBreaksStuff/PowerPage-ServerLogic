@@ -19,3 +19,10 @@ coverage/
 .rm-frontend-review/
 
 
+/.playwright-mcp
+/.claude
+/LEAN-CTX.md.bak
+/LEAN-CTX.md.v4-migration.lock
+/AGENTS.md.v4-migration.lock
+/AGENTS.md.bak
+/.scratch
