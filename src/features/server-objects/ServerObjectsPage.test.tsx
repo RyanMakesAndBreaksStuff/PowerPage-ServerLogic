@@ -302,4 +302,30 @@ describe('Server Objects page (Story 6)', () => {
       expect.stringContaining('account ·'),
     ]);
   });
+
+  it('keeps an explicit member pill selection after a member search', async () => {
+    const { user } = renderObjects(<ServerObjectsPage />);
+    await user.type(screen.getByRole('searchbox', { name: 'Search objects and methods' }), 'GetAsync');
+    const post = screen.getByRole('radio', { name: 'PostAsync' });
+    await user.click(post);
+    expect(post.getAttribute('aria-checked')).toBe('true');
+    expect(signatures().join('\n')).toContain('PostAsync');
+    expect(signatures().join('\n')).not.toContain('GetAsync');
+    expect(within(detail()).getByLabelText('PostAsync sample')).toBeTruthy();
+  });
+
+  it('keeps an explicit member table selection after a member search', async () => {
+    const { user } = renderObjects(<ServerObjectsPage />);
+    const search = screen.getByRole('searchbox', { name: 'Search objects and methods' });
+    await user.type(search, 'GetAsync');
+    await user.click(within(detail()).getByRole('button', { name: 'PostAsync' }));
+    expect(screen.getByRole('radio', { name: 'PostAsync' }).getAttribute('aria-checked')).toBe('true');
+    expect(signatures().join('\n')).toContain('PostAsync');
+    expect(signatures().join('\n')).not.toContain('GetAsync');
+    expect(within(detail()).getByLabelText('PostAsync sample')).toBeTruthy();
+
+    await user.clear(search);
+    await user.type(search, 'GetAsync');
+    expect(screen.getByRole('radio', { name: 'GetAsync' }).getAttribute('aria-checked')).toBe('true');
+  });
 });

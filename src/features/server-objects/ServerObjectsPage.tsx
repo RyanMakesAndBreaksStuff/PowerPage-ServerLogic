@@ -30,9 +30,9 @@ export function ServerObjectsPage(): ReactElement {
   const [selection, setSelection] = useState<Selection>(DEFAULT_SELECTION);
 
   const listed = listObjects(query, filter, derived.usedMembers);
-  // An edit can shrink "Used here" while this page is hidden, and a row click stores the first member.
-  // Store the reselect during render so the next filter or clear uses what is on screen (AC-6.4a).
-  const next = reselect(listed, selection, query);
+  // Repair objects removed by edits to "Used here", preserving explicit member choices (AC-6.4a).
+  const selectedObjectIsListed = listed.some(({ object }) => object.path === selection.path);
+  const next = selectedObjectIsListed ? selection : reselect(listed, selection, query);
   if (
     next.path !== selection.path ||
     next.member !== selection.member ||
@@ -78,7 +78,7 @@ export function ServerObjectsPage(): ReactElement {
           {`${String(listed.length)} ${listed.length === 1 ? 'object' : 'objects'} listed`}
         </p>
         <ul className="objects-list__items">
-          {listed.map(({ object }) => {
+          {listed.map(({ object, memberMatch }) => {
             const isSelected = current?.object === object;
             return (
               <li key={object.path}>
@@ -87,7 +87,11 @@ export function ServerObjectsPage(): ReactElement {
                   className={classNames('objects-item', isSelected && 'objects-item--selected')}
                   aria-current={isSelected ? 'true' : undefined}
                   onClick={() => {
-                    setSelection({ path: object.path, member: object.members[0].name, variant: 0 });
+                    setSelection({
+                      path: object.path,
+                      member: memberMatch ?? object.members[0].name,
+                      variant: 0,
+                    });
                   }}
                 >
                   <span className="objects-item__row">
