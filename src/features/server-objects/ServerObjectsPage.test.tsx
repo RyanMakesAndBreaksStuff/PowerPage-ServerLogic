@@ -279,4 +279,27 @@ describe('Server Objects page (Story 6)', () => {
     await user.click(screen.getByRole('button', { name: 'Back to Create Logic' }));
     expect(views).toEqual(['starter']);
   });
+
+  it('keeps repeated table grants distinct when recipes change', () => {
+    const { dispatch } = renderObjects(<ServerObjectsPage />);
+    const permissions = (): HTMLElement => screen.getByRole('region', { name: 'Permissions needed' });
+    const contactRows = (): string[] =>
+      within(permissions()).getAllByRole('listitem')
+        .map((row) => row.textContent ?? '')
+        .filter((text) => text.includes('contact ·'));
+
+    dispatch({ type: 'selectRecipe', recipe: 'R4' });
+    expect(contactRows()).toEqual([
+      expect.stringContaining('contact · Read, Write, Delete'),
+      expect.stringContaining('contact · Create'),
+    ]);
+    expect(contactRows()[0]).toContain('Account access');
+    expect(contactRows()[1]).toContain('Global access');
+
+    dispatch({ type: 'selectRecipe', recipe: 'R10' });
+    expect(contactRows()).toHaveLength(0);
+    expect(within(permissions()).getAllByRole('listitem').map((row) => row.textContent)).toEqual([
+      expect.stringContaining('account ·'),
+    ]);
+  });
 });

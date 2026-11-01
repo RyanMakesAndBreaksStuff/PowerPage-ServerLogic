@@ -85,7 +85,7 @@ export function ContextColumn({
         ) : (
           <ul className="objects-grants">
             {recipe.tables.map((table) => (
-              <li key={table.logicalName}>
+              <li key={`${table.logicalName}:${table.accessType}`}>
                 <Pill tone={reviewed ? 'ok' : 'review'} mono>
                   {table.logicalName} · {table.privileges.join(', ')}
                 </Pill>
