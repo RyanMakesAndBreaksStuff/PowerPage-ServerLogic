@@ -4,7 +4,7 @@
 **Baseline:** branch `logic-inspector-v2-build`, HEAD `820d7b8`; requires `p5-1_plan.md` Phases A and B applied (lint runnable, rule file and spec 4.1.0 permit the two download actions).
 **Spec:** FR-7 (4.1.0 host-operation bullet, paging, retry), AC-7.7, AC-7.10, Error Scenarios "A record's code can't be downloaded" / "downloads as an empty file", Security.
 **Audit items:** CR-002 (transport half), WR-003, WR-004, RG-001/002/003 evidence consumers.
-**Status:** Approved by the owner on 2026-11-01; ready for `sdd-superpowers:sdd-execute` after P5.1 Phases A and B land.
+**Status:** Executed 2026-11-01; commit `bae8611`. The A2 test block was adjusted during execution so the pending-resolve capture uses an object holder (TypeScript narrowed the `let` to `null`).
 **Supersedes:** Task 3 of `docs/plans/11-01-2026-phase-5-transport-reader.md`. Every file below was re-read from the checkout on 2026-11-01; review findings T3-01…T3-13 are applied as noted.
 
 ## Goal
@@ -48,7 +48,7 @@ Verified facts the code relies on: `@pptb/types` 1.2.7 `dataverseAPI.execute(req
 
 **Files:** create `src/services/pptb/dataverseRead.phase5.test.ts`, `src/services/pptb/dataverseFiles.test.ts`.
 
-- [ ] **A1. Create `src/services/pptb/dataverseRead.phase5.test.ts`**
+- [x] **A1. Create `src/services/pptb/dataverseRead.phase5.test.ts`**
 
 ```typescript
 // @vitest-environment jsdom
@@ -177,7 +177,7 @@ describe('read provenance and partial evidence', () => {
 });
 ```
 
-- [ ] **A2. Create `src/services/pptb/dataverseFiles.test.ts`**
+- [x] **A2. Create `src/services/pptb/dataverseFiles.test.ts`**
 
 ```typescript
 // @vitest-environment jsdom
@@ -354,8 +354,8 @@ describe('file action protocol through createPptbHost', () => {
   it('waits for an already-dispatched host promise to settle before rejecting cancellation', async () => {
     const h = harness();
     const controller = new AbortController();
-    let resolve: ((value: unknown) => void) | null = null;
-    h.execute.mockImplementationOnce(() => new Promise<unknown>((done) => { resolve = done; }));
+    const pending: { resolve: ((value: unknown) => void) | null } = { resolve: null };
+    h.execute.mockImplementationOnce(() => new Promise<unknown>((done) => { pending.resolve = done; }));
     let settled = false;
     const observed = h.host.downloadFileColumn(REF, controller.signal).then(
       (value): unknown => { settled = true; return value; },
@@ -364,8 +364,8 @@ describe('file action protocol through createPptbHost', () => {
     controller.abort();
     await Promise.resolve();
     expect(settled).toBe(false);
-    if (resolve === null) throw new Error('fixture did not capture resolve');
-    resolve(h.initial);
+    if (pending.resolve === null) throw new Error('fixture did not capture resolve');
+    pending.resolve(h.initial);
     expect(await observed).toMatchObject({ name: 'AbortError' });
     expect(h.execute).toHaveBeenCalledTimes(1);
   });
@@ -390,7 +390,7 @@ describe('file action protocol through createPptbHost', () => {
 
 (The last test proves the only names sent through the production path; the runtime refusal in `pptbHost.ts` is a defence against future callers and is exercised by the `retrieval-only guarantee` describe in `pptbHost.test.ts` below.)
 
-- [ ] **A3. Capture the signal**
+- [x] **A3. Capture the signal**
 
 ```powershell
 npm test -- src/services/pptb/dataverseRead.phase5.test.ts src/services/pptb/dataverseFiles.test.ts
@@ -405,7 +405,7 @@ Expected: the first command fails (type errors on `transport`/`partialRows`/`Fil
 
 **Files:** `host.types.ts`, `hostErrors.ts`, `dataverseRead.ts`, new `dataverseFiles.ts`, `pptbHost.ts`, `fakeHost.ts`.
 
-- [ ] **B1. `src/services/pptb/host.types.ts`** (current L17–L25, L26–L40)
+- [x] **B1. `src/services/pptb/host.types.ts`** (current L17–L25, L26–L40)
 
 ```diff
  export class HostReadError extends Error {
@@ -439,7 +439,7 @@ Expected: the first command fails (type errors on `transport`/`partialRows`/`Fil
  };
 ```
 
-- [ ] **B2. `src/services/pptb/hostErrors.ts`** (current L47–L53; append after)
+- [x] **B2. `src/services/pptb/hostErrors.ts`** (current L47–L53; append after)
 
 ```diff
  /** Maps anything a host read can throw to a HostReadError with a plain-language message and the status. */
@@ -460,7 +460,7 @@ Expected: the first command fails (type errors on `transport`/`partialRows`/`Fil
 +}
 ```
 
-- [ ] **B3. `src/services/pptb/dataverseRead.ts`** — full replacement of the file (current L1–L148)
+- [x] **B3. `src/services/pptb/dataverseRead.ts`** — full replacement of the file (current L1–L148)
 
 ```typescript
 import { HostReadError } from './host.types';
@@ -625,7 +625,7 @@ export function queryAllRows(
 
 Note the repeated-link check runs before the read, so the second identical link is detected after its first page was already pushed; `partialRows` therefore holds both pages (the test above expects `[9, 9]`).
 
-- [ ] **B4. Create `src/services/pptb/dataverseFiles.ts`**
+- [x] **B4. Create `src/services/pptb/dataverseFiles.ts`**
 
 ```typescript
 import { HostReadError } from './host.types';
@@ -746,7 +746,7 @@ export async function downloadColumnContent(
 }
 ```
 
-- [ ] **B5. `src/services/pptb/pptbHost.ts`** (current L1–L12, L124–L132, L198–L201). `host.types.ts` is currently imported only as types (L2–L9), so `HostReadError` gets its own value import.
+- [x] **B5. `src/services/pptb/pptbHost.ts`** (current L1–L12, L124–L132, L198–L201). `host.types.ts` is currently imported only as types (L2–L9), so `HostReadError` gets its own value import.
 
 ```diff
  } from './host.types';
@@ -795,7 +795,7 @@ export async function downloadColumnContent(
 
 `downloadColumnContent` keeps its name but now comes from `dataverseFiles.ts`; nothing else in the file references the old `$value` helper.
 
-- [ ] **B6. `src/services/pptb/fakeHost.ts`**
+- [x] **B6. `src/services/pptb/fakeHost.ts`**
 
 Imports: add `throwIfAborted` to the existing value import from `./hostErrors`, and `FileColumnRef` to the existing `import type` from `./host.types` (one import line each, T3-12).
 
@@ -878,7 +878,7 @@ Update the `fileColumns` doc comment to: `/** File text keyed `<entityLogicalNam
 
 **Files:** `dataverseRead.test.ts`, `pptbHost.test.ts`, `fakeHost.test.ts`, `src/types/contracts.test.ts`.
 
-- [ ] **C1. `src/services/pptb/dataverseRead.test.ts`**
+- [x] **C1. `src/services/pptb/dataverseRead.test.ts`**
 
 Remove `downloadColumnContent` from the import list and the `GUID` constant (L17). Delete the whole `describe('downloadColumnContent', …)` block (its two tests). Replace the test at L166–L171, currently
 
@@ -906,7 +906,7 @@ with
   });
 ```
 
-- [ ] **C2. `src/services/pptb/pptbHost.test.ts`**
+- [x] **C2. `src/services/pptb/pptbHost.test.ts`**
 
 In `makeStubs()` add an `execute` stub next to `queryData` and expose it:
 
@@ -964,18 +964,18 @@ In `describe('read-only guarantee', …)` (L627–L707): rename the describe to 
   });
 ```
 
-- [ ] **C3. `src/services/pptb/fakeHost.test.ts`**
+- [x] **C3. `src/services/pptb/fakeHost.test.ts`**
 
 After `const GUID = …` add `const REF = { entityLogicalName: 'powerpagecomponent', primaryIdAttribute: 'powerpagecomponentid', recordId: GUID, fileAttributeName: 'filecontent' };`. In the `downloadFileColumn` describe: change every `fileColumns` key prefix `powerpagecomponents/` to `powerpagecomponent/`; change every `host.downloadFileColumn('powerpagecomponents', GUID, 'filecontent')` to `host.downloadFileColumn(REF)` and `host.downloadFileColumn('powerpagecomponents', other, 'filecontent')` to `host.downloadFileColumn({ ...REF, recordId: other })`; change the scripted failure `{ operation: 'file', entitySet: 'powerpagecomponents', status: 500, contains: other }` to `entitySet: 'powerpagecomponent'`; and in the recorded-call assertion replace `entitySet: 'powerpagecomponents', id: GUID, column: 'filecontent'` with `ref: REF`. Rename the test `returns canned text by <entitySet>/<id>/<column>` to `returns canned text by <logical-table>/<id>/<column>`.
 
-- [ ] **C4. `src/types/contracts.test.ts`** L101
+- [x] **C4. `src/types/contracts.test.ts`** L101
 
 ```diff
 -    expectTypeOf<PptbHost['queryAll']>().parameters.toEqualTypeOf<[ODataQuery]>();
 +    expectTypeOf<PptbHost['queryAll']>().parameters.toEqualTypeOf<[ODataQuery, (AbortSignal | undefined)?]>();
 ```
 
-- [ ] **C5. Confirm (T3-01: type and lint gates included)**
+- [x] **C5. Confirm (T3-01: type and lint gates included)**
 
 ```powershell
 npm test -- src/services/pptb src/types/contracts.test.ts
@@ -987,7 +987,7 @@ npm run build
 
 Expected: every `src/services/pptb` suite passes, including the two new files (13 + 32 tests); typecheck and scoped lint exit 0; the full suite passes; the IIFE build succeeds. The old assertions "ships with the strict gate on", "does not retry a failure that has no status" and "fails closed on a full page that has no paging link" still pass unchanged.
 
-- [ ] **C6. Commit**
+- [x] **C6. Commit**
 
 ```powershell
 git add -- src/services/pptb/host.types.ts src/services/pptb/hostErrors.ts src/services/pptb/dataverseRead.ts src/services/pptb/dataverseFiles.ts src/services/pptb/pptbHost.ts src/services/pptb/fakeHost.ts src/services/pptb/dataverseRead.test.ts src/services/pptb/pptbHost.test.ts src/services/pptb/fakeHost.test.ts src/services/pptb/dataverseRead.phase5.test.ts src/services/pptb/dataverseFiles.test.ts src/types/contracts.test.ts

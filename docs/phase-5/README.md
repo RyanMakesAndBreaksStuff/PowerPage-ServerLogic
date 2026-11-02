@@ -15,7 +15,7 @@ docs/phase-5/
     inspector-plan-review.md
   evidence/                 what each execution produced, one folder per sub-phase
     p5-1/execution.md       commits, gate output, deviations
-    p5-2/                   empty until P5.2 runs
+    p5-2/execution.md       commits, gate output, deviations
     p5-3/                   empty until P5.3 runs
 ```
 
@@ -31,7 +31,7 @@ docs/phase-5/
 | Sub-phase | Plan | Status | Evidence |
 |---|---|---|---|
 | P5.1 | [plans/p5-1_plan.md](plans/p5-1_plan.md) | Executed 2026-11-01 | [evidence/p5-1/execution.md](evidence/p5-1/execution.md) |
-| P5.2 | [plans/p5-2_plan.md](plans/p5-2_plan.md) | Approved, not started | — |
+| P5.2 | [plans/p5-2_plan.md](plans/p5-2_plan.md) | Executed 2026-11-01 | [evidence/p5-2/execution.md](evidence/p5-2/execution.md) |
 | P5.3 | [plans/p5-3_plan.md](plans/p5-3_plan.md) | Approved, not started (needs P5.1 Phase B, landed) | — |
 
 Brief: `phasse5plan.md` at the repo root. Spec: `docs/specs/001-server-logic-starter-inspector/spec.md` (4.1.0).
