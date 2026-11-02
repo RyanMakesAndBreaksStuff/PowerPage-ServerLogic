@@ -1,11 +1,11 @@
 # P5.1 plan — Retire contradictory constraints and pin the download contract
 
 **Date:** 2026-11-01
-**Baseline:** branch `logic-inspector-v2-build`, HEAD `820d7b8`, clean tree apart from the untracked `CLAUDE2.md` and `docs/plans/inspector-plan-review.md`.
+**Baseline:** branch `logic-inspector-v2-build`, HEAD `820d7b8`, clean tree apart from the untracked `CLAUDE2.md` and `docs/phase-5/review/inspector-plan-review.md`.
 **Spec:** `docs/specs/001-server-logic-starter-inspector/spec.md` v4.0.1 (Approved).
 **Brief:** `phasse5plan.md` §3 and §5 P5.1.
 **Status:** Executed 2026-11-01; commits `7e8b97d`, `1669c7c`, `478898c`, `f8eeb31`. The C1 test block was adjusted during execution so `install` is synchronous (ESLint `require-await`).
-**Supersedes:** `docs/plans/11-01-2026-phase-5-policy.md` (Task 1) and Task 2 of `docs/plans/11-01-2026-phase-5-transport-reader.md`. Those drafts are not trusted; every anchor below was re-read from the checkout on 2026-11-01, and the corrections from `docs/plans/inspector-plan-review.md` (X-01…X-04, T1-01…T1-12, T2-01…T2-09) are applied.
+**Supersedes:** `docs/plans/11-01-2026-phase-5-policy.md` (Task 1) and Task 2 of `docs/plans/11-01-2026-phase-5-transport-reader.md`. Those drafts are not trusted; every anchor below was re-read from the checkout on 2026-11-01, and the corrections from `docs/phase-5/review/inspector-plan-review.md` (X-01…X-04, T1-01…T1-12, T2-01…T2-09) are applied.
 
 ## Goal
 
@@ -254,7 +254,7 @@ L16:
 
 ```diff
 -- **Open risk (Inspector, not Starter):** a file-column download through `queryData` is unverified until Spike S2 (`plan-inspector.md`). If it fails, reading handler code needs `execute`, which the read-only rule forbids, so that would need a spec and rules change.
-+- **Inspector transport (resolved 2026-11-01, spec 4.1.0):** `queryData` cannot return a file column (`$value` gave `{}`, Spike S2 2026-10-22). Handler code is retrieved with the two documented download actions through the host adapter; see `docs/plans/p5-2_plan.md`. A populated-handler wire comparison remains a release gate (`docs/plans/p5-1_plan.md` Phase C).
++- **Inspector transport (resolved 2026-11-01, spec 4.1.0):** `queryData` cannot return a file column (`$value` gave `{}`, Spike S2 2026-10-22). Handler code is retrieved with the two documented download actions through the host adapter; see `docs/phase-5/plans/p5-2_plan.md`. A populated-handler wire comparison remains a release gate (`docs/phase-5/plans/p5-1_plan.md` Phase C).
 ```
 
 L27:
@@ -277,7 +277,7 @@ Contracts block (T1-05: Starter's declarations stay). Replace only these two lin
 -  queryAll(q: ODataQuery): Promise<readonly unknown[]>; // all pages; 429/5xx retried 1s/2s/4s; throws HostReadError with successful page rows in partialRows
 -  downloadFileColumn(entitySet: string, id: string, column: string): Promise<string>;
 +  queryAll(q: ODataQuery, signal?: AbortSignal): Promise<readonly unknown[]>; // all pages; 429/5xx retried 1s/2s/4s; HostReadError carries status, transport and partialRows; AbortError on cancellation
-+  downloadFileColumn(ref: FileColumnRef, signal?: AbortSignal): Promise<string>; // InitializeFileBlocksDownload + DownloadBlock; see docs/plans/p5-2_plan.md
++  downloadFileColumn(ref: FileColumnRef, signal?: AbortSignal): Promise<string>; // InitializeFileBlocksDownload + DownloadBlock; see docs/phase-5/plans/p5-2_plan.md
 ```
 
 And insert immediately before `export class HostReadError extends Error {` (L144):
@@ -304,7 +304,7 @@ L3: replace `(v4.0.0, Approved; v4.0.0 sets the 1a Graphite theme, and reports a
 Insert directly after the H1 (L1) this banner (T1-11):
 
 ```markdown
-> **Execution superseded — 2026-11-01.** `docs/plans/p5-1_plan.md`, `p5-2_plan.md` and `p5-3_plan.md` (and later P5.x plans) own the remaining Inspector implementation, contracts and check commands. This file keeps the stable phase IDs, design choices and probe outcomes; its code blocks, `$value` fallback, blanket API prohibition, Prettier commands and sequencing are not current execution instructions.
+> **Execution superseded — 2026-11-01.** `docs/phase-5/plans/p5-1_plan.md`, `p5-2_plan.md` and `p5-3_plan.md` (and later P5.x plans) own the remaining Inspector implementation, contracts and check commands. This file keeps the stable phase IDs, design choices and probe outcomes; its code blocks, `$value` fallback, blanket API prohibition, Prettier commands and sequencing are not current execution instructions.
 ```
 
 L15 (T1-09: keep the Learn-derived paragraph, mark it): prepend to the paragraph the text `**Superseded 2026-11-01 (spec 4.1.0): the two download actions are now permitted inside the adapter; P5.2 implements them.** ` so the original paragraph follows unchanged.
@@ -318,7 +318,7 @@ L24:
 
 - [x] **B6. Phase-plan banners and old copy**
 
-Insert the same banner as B5 directly after the H1 of each of: `plans/phase-01-host-adapter.md`, `phase-11-inspector-rules.md`, `phase-12-spike-s2.md`, `phase-15-inspector-scan.md`, `phase-16-report-markdown.md`, `phase-20-report-pdf.md`, `phase-23-inspector-page.md`, `phase-24-export-dialog.md`, with the links written as `../../../plans/p5-1_plan.md` etc. For Phase 12 append to the banner: `New S2 observations are appended below the existing table without rewriting historical rows.`
+Insert the same banner as B5 directly after the H1 of each of: `plans/phase-01-host-adapter.md`, `phase-11-inspector-rules.md`, `phase-12-spike-s2.md`, `phase-15-inspector-scan.md`, `phase-16-report-markdown.md`, `phase-20-report-pdf.md`, `phase-23-inspector-page.md`, `phase-24-export-dialog.md`, with the links written as `../../../phase-5/plans/p5-1_plan.md` etc. For Phase 12 append to the banner: `New S2 observations are appended below the existing table without rewriting historical rows.`
 
 In `plans/phase-23-inspector-page.md` L337 and L973 replace `Inspector is read-only but is designed for dev sites.` with `Inspector is designed for dev sites.` (the banner marks the rest historical).
 

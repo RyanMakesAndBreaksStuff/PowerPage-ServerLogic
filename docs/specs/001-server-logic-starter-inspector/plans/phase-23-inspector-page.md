@@ -1,6 +1,6 @@
 # Logic Inspector Page Implementation Plan
 
-> **Execution superseded — 2026-11-01.** `../../../plans/p5-1_plan.md`, `../../../plans/p5-2_plan.md` and `../../../plans/p5-3_plan.md` (and later P5.x plans) own the remaining Inspector implementation, contracts and check commands. This file keeps the stable phase IDs, design choices and probe outcomes; its code blocks, `$value` fallback, blanket API prohibition, Prettier commands and sequencing are not current execution instructions.
+> **Execution superseded — 2026-11-01.** `../../../phase-5/plans/p5-1_plan.md`, `../../../phase-5/plans/p5-2_plan.md` and `../../../phase-5/plans/p5-3_plan.md` (and later P5.x plans) own the remaining Inspector implementation, contracts and check commands. This file keeps the stable phase IDs, design choices and probe outcomes; its code blocks, `$value` fallback, blanket API prohibition, Prettier commands and sequencing are not current execution instructions.
 
 > **Spec v4.0.0 (1a Graphite).** Write this phase's CSS with the variable names below; they are the 1a Graphite tokens in `src/app/theme/tokens.css` (spec FR-11). Use no glass, radius 12px on Inspector tiles, and `--review` on `--review-tint` for needs-review chips. The ◆ checks in both themes compare against the 1a Graphite pages already built (Logic Starter, Server Objects).
 

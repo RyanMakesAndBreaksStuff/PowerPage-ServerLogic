@@ -1,6 +1,6 @@
 # Implementation Plan: Logic Inspector and reports
 
-> **Execution superseded — 2026-11-01.** `docs/plans/p5-1_plan.md`, `docs/plans/p5-2_plan.md` and `docs/plans/p5-3_plan.md` (and later P5.x plans) own the remaining Inspector implementation, contracts and check commands. This file keeps the stable phase IDs, design choices and probe outcomes; its code blocks, `$value` fallback, blanket API prohibition, Prettier commands and sequencing are not current execution instructions.
+> **Execution superseded — 2026-11-01.** `docs/phase-5/plans/p5-1_plan.md`, `docs/phase-5/plans/p5-2_plan.md` and `docs/phase-5/plans/p5-3_plan.md` (and later P5.x plans) own the remaining Inspector implementation, contracts and check commands. This file keeps the stable phase IDs, design choices and probe outcomes; its code blocks, `$value` fallback, blanket API prohibition, Prettier commands and sequencing are not current execution instructions.
 
 **Spec:** docs/specs/001-server-logic-starter-inspector/spec.md (v4.1.0, Approved; 4.0.0 set the 1a Graphite theme, 4.1.0 permits the two download actions and the FR-8 precedence table)
 **Branch:** `001-logic-inspector`

@@ -13,7 +13,7 @@
 - **Wave B1 is planned (2026-10-18):** phases 07–10 have task-level plan files (tasks, red-first tests and acceptance criteria; no code). Goldens are hand-written `__golden__/<id>.*.txt` files compared with `toBe`, ending in one LF.
 - **Wave B2 is planned (2026-10-19):** phases 14, 17 and 19 have task-level plan files. B2a (14 and 17) runs in parallel after B1. B2b (19) runs after 14 and 17 merge, because it removes their `PENDING_R7` exclusions. Spike S3's script half is done and recorded in Phase 19; its collision probe (◆) and the R7 spec update (owner approval) are still open.
 - **Part C is planned (2026-10-19):** phases 18 and 21 have implementation plans with full code, drafted and run green against the repository, then removed. On `5953503`: 1,037 tests after 18 and 1,068 after 21; Phase 17 adds its own tests on top when it lands. Phase 21 needs Phase 18 merged first.
-- **Inspector transport (resolved 2026-11-01, spec 4.1.0):** `queryData` cannot return a file column (`$value` gave `{}`, Spike S2 2026-10-22). Handler code is retrieved with the two documented download actions through the host adapter; see `docs/plans/p5-2_plan.md`. A populated-handler wire comparison remains a release gate (`docs/plans/p5-1_plan.md` Phase C).
+- **Inspector transport (resolved 2026-11-01, spec 4.1.0):** `queryData` cannot return a file column (`$value` gave `{}`, Spike S2 2026-10-22). Handler code is retrieved with the two documented download actions through the host adapter; see `docs/phase-5/plans/p5-2_plan.md`. A populated-handler wire comparison remains a release gate (`docs/phase-5/plans/p5-1_plan.md` Phase C).
 
 ## Scope
 
@@ -173,7 +173,7 @@ export type PptbHost = {
   getActiveConnection(): Promise<Connection | null>;
   onEvent(handler: (e: HostEvent) => void): () => void;
   queryAll(q: ODataQuery, signal?: AbortSignal): Promise<readonly unknown[]>; // all pages; 429/5xx retried 1s/2s/4s; HostReadError carries status, transport and partialRows; AbortError on cancellation
-  downloadFileColumn(ref: FileColumnRef, signal?: AbortSignal): Promise<string>; // InitializeFileBlocksDownload + DownloadBlock; see docs/plans/p5-2_plan.md
+  downloadFileColumn(ref: FileColumnRef, signal?: AbortSignal): Promise<string>; // InitializeFileBlocksDownload + DownloadBlock; see docs/phase-5/plans/p5-2_plan.md
 };
 
 // src/types/inspector.ts

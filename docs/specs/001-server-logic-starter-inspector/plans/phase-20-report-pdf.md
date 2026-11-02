@@ -1,6 +1,6 @@
 # Phase 20: Inspector Vector PDF Reports Implementation Plan
 
-> **Execution superseded — 2026-11-01.** `../../../plans/p5-1_plan.md`, `../../../plans/p5-2_plan.md` and `../../../plans/p5-3_plan.md` (and later P5.x plans) own the remaining Inspector implementation, contracts and check commands. This file keeps the stable phase IDs, design choices and probe outcomes; its code blocks, `$value` fallback, blanket API prohibition, Prettier commands and sequencing are not current execution instructions.
+> **Execution superseded — 2026-11-01.** `../../../phase-5/plans/p5-1_plan.md`, `../../../phase-5/plans/p5-2_plan.md` and `../../../phase-5/plans/p5-3_plan.md` (and later P5.x plans) own the remaining Inspector implementation, contracts and check commands. This file keeps the stable phase IDs, design choices and probe outcomes; its code blocks, `$value` fallback, blanket API prohibition, Prettier commands and sequencing are not current execution instructions.
 
 **Goal:** Save the Phase 16 report content as a readable vector PDF for either scope, with locally embedded licensed fonts, accurate status rings, repeated table headings and complete text across pages.
 
