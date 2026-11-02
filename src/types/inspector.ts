@@ -53,10 +53,13 @@ export type Reason = { text: string; readFailure: boolean };
 export type Finding = {
   check: CheckId;
   status: CheckStatus;
+  /** True when evidence this check needs was not read before the scan was interrupted (FR-8 precedence table). */
+  hasUnscannedEvidence: boolean;
   summary: string;
   reasons: readonly Reason[];
   guidance: string;
   questions: readonly string[];
+  /** Explanation only (reasons, notes, limits). Raw configuration rows live in `FileResult.snapshot`. */
   detail: readonly string[];
 };
 export type Snapshot = {

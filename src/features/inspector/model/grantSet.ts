@@ -18,6 +18,7 @@ export type GrantSet = {
 type ParentChain = {
   top: TablePermissionFact;
   inactive: boolean;
+  /** The chain could not be followed, or (PB-002) a Parent chain ends at a readable ancestor whose scope is unknown. */
   unresolved: boolean;
 };
 
@@ -37,24 +38,33 @@ function parentChain(
     current = parent;
     inactive ||= !current.active;
   }
-  return { top: current, inactive, unresolved: false };
+  return {
+    top: current,
+    inactive,
+    unresolved: permission.scope === 'Parent' && current.scope === null,
+  };
 }
 
 export function buildGrantSet(facts: SiteFacts, file: ServerLogicFileFacts): GrantSet {
-  const base: GrantSet = { grants: [], ignored: [], reasons: [], roleIds: [], notScanned: false };
   const evidence = [facts.roles, facts.permissions, file.roleIds];
+  // Unscanned and failed evidence are reported together (FR-8 precedence): a failure never hides the gap.
+  const base: GrantSet = {
+    grants: [],
+    ignored: [],
+    reasons: [],
+    roleIds: [],
+    notScanned: evidence.some((item) => !item.ok && item.reason === 'not-scanned'),
+  };
   if (evidence.some((item) => !item.ok && item.reason === 'read-failed')) {
     return { ...base, reasons: [{ text: "Couldn't read configuration", readFailure: true }] };
   }
-  if (evidence.some((item) => !item.ok && item.reason === 'not-scanned')) {
-    return { ...base, notScanned: true };
-  }
-  if (!facts.roles.ok || !facts.permissions.ok || !file.roleIds.ok) return base;
+  if (!facts.roles.ok || !file.roleIds.ok) return base;
   const roles = facts.roles.value;
   const byRoleId = new Map(roles.map((role) => [role.id, role]));
   if (file.roleIds.value.some((id) => !byRoleId.has(id))) {
     return { ...base, reasons: [{ text: "Couldn't read configuration", readFailure: true }] };
   }
+  if (!facts.permissions.ok) return base;
   const assigned = roles.filter((role) => file.roleIds.ok && file.roleIds.value.includes(role.id));
   const ids = new Set(file.roleIds.value);
   if (assigned.some((role) => !role.anonymous)) {
@@ -78,7 +88,8 @@ export function buildGrantSet(facts: SiteFacts, file: ServerLogicFileFacts): Gra
     } else if (chain.inactive) {
       if (linked.length > 0)
         ignored.push({ permission, roleNames, reason: 'parent inactive, ignored' });
-    } else if (chain.unresolved) {
+    } else if (chain.unresolved && (chain.top.scope !== null || linked.length > 0)) {
+      // A missing/looping chain is always reported; an unknown-scope terminal only when this file is linked to it.
       reasons.push({
         text: `Couldn't evaluate parent permission \`${permission.name}\``,
         readFailure: false,

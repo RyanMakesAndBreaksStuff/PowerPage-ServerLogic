@@ -14,11 +14,13 @@ import {
   CODE_ANALYSIS_LIMIT,
   CODE_READ_FAILURE,
   CONNECTORS_UNKNOWN,
+  ENVVAR_CACHE_NOTE,
   FLOW_NOTE,
   NOT_SCANNED_TEXT,
   OTHER_ROLES_NOTE,
 } from './copy';
 import { buildGrantSet, permissionSnapshot } from './grantSet';
+import type { GrantSet } from './grantSet';
 import { parseAllowedDomains, parseBooleanSetting, settingSnapshot } from './settings';
 
 type Analysis = {
@@ -51,22 +53,32 @@ function analyse(file: ServerLogicFileFacts): Analysis {
   };
 }
 
+/**
+ * FR-8 precedence: any known reason makes the check Needs review, even when other required evidence is
+ * unscanned; only a check with no reason and unscanned evidence is Not scanned. `hasUnscannedEvidence`
+ * is recorded either way, and `canReviewFinding` refuses review while it is true.
+ */
 function makeFinding(
   check: CheckId,
   configuredSummary: string,
   reasons: readonly Reason[],
   detail: readonly string[],
-  notScanned = false,
+  hasUnscannedEvidence = false,
 ): Finding {
   const copy = CHECK_COPY[check];
   return {
     check,
-    status: notScanned ? 'not-scanned' : reasons.length > 0 ? 'needs-review' : 'configured',
-    summary: notScanned ? NOT_SCANNED_TEXT : (reasons[0]?.text ?? configuredSummary),
+    status: reasons.length > 0 ? 'needs-review' : hasUnscannedEvidence ? 'not-scanned' : 'configured',
+    summary: reasons[0]?.text ?? (hasUnscannedEvidence ? NOT_SCANNED_TEXT : configuredSummary),
+    hasUnscannedEvidence,
     reasons,
     guidance: copy.guidance,
     questions: copy.questions,
-    detail: [...reasons.map((reason) => reason.text), ...detail],
+    detail: [
+      ...reasons.map((reason) => reason.text),
+      ...(hasUnscannedEvidence ? [NOT_SCANNED_TEXT] : []),
+      ...detail,
+    ],
   };
 }
 
@@ -74,19 +86,10 @@ function webRole(facts: SiteFacts, file: ServerLogicFileFacts): Finding {
   const evidence = [facts.roles, file.roleIds];
   const failed = evidence.some((item) => !item.ok && item.reason === 'read-failed');
   const notScanned = evidence.some((item) => !item.ok && item.reason === 'not-scanned');
-  if (failed || notScanned || !facts.roles.ok || !file.roleIds.ok) {
-    return makeFinding(
-      'webRole',
-      '',
-      failed ? [{ text: "Couldn't read configuration", readFailure: true }] : [],
-      [],
-      notScanned,
-    );
-  }
-  const roles = facts.roles.value;
-  const ids = file.roleIds.value;
+  const roles = facts.roles.ok ? facts.roles.value : [];
+  const ids = file.roleIds.ok ? file.roleIds.value : [];
   const reasons: Reason[] = [];
-  if (ids.length === 0)
+  if (file.roleIds.ok && ids.length === 0)
     reasons.push({
       text: 'No web role assigned. No site user can call it yet.',
       readFailure: false,
@@ -94,25 +97,19 @@ function webRole(facts: SiteFacts, file: ServerLogicFileFacts): Finding {
   if (roles.some((role) => ids.includes(role.id) && role.anonymous)) {
     reasons.push({ text: 'Callable by unauthenticated visitors.', readFailure: false });
   }
-  if (ids.some((id) => !roles.some((role) => role.id === id))) {
+  if (
+    failed ||
+    (facts.roles.ok && file.roleIds.ok && ids.some((id) => !roles.some((role) => role.id === id)))
+  ) {
     reasons.push({ text: "Couldn't read configuration", readFailure: true });
   }
-  return makeFinding(
-    'webRole',
-    'Web role assigned.',
-    reasons,
-    roles.filter((role) => ids.includes(role.id)).map((role) => role.name),
-  );
+  // Assigned role names are snapshot rows (FileResult.snapshot.roles), not explanation.
+  return makeFinding('webRole', 'Web role assigned.', reasons, [], notScanned);
 }
 
-function tablePermissions(
-  facts: SiteFacts,
-  file: ServerLogicFileFacts,
-  analysis: Analysis,
-): Finding {
-  const grants = buildGrantSet(facts, file);
+function tablePermissions(grants: GrantSet, analysis: Analysis): Finding {
   const reasons: Reason[] = [];
-  const detail: string[] = [...permissionSnapshot(grants), OTHER_ROLES_NOTE];
+  const detail: string[] = [OTHER_ROLES_NOTE];
   for (const grant of grants.grants) {
     if (grant.permission.scope === 'Global') {
       reasons.push({
@@ -178,31 +175,29 @@ function tablePermissions(
 }
 
 function outbound(facts: SiteFacts, analysis: Analysis): Finding {
-  const snapshot = settingSnapshot(facts);
-  if (analysis.notScanned) return makeFinding('outbound', '', [], snapshot, true);
-  if (analysis.reason !== null) return makeFinding('outbound', '', [analysis.reason], snapshot);
   const connectors = analysis.connectors;
-  if (connectors === null)
-    return makeFinding(
-      'outbound',
-      '',
-      [{ text: CODE_ANALYSIS_LIMIT, readFailure: false }],
-      snapshot,
-    );
-  if (!connectors.httpClient) {
+  // O0 / O1: code-based rows are decided first and never depend on settings (FR-9).
+  if (analysis.reason === null && connectors !== null && !connectors.httpClient) {
     return connectors.undetermined
-      ? makeFinding('outbound', '', [{ text: CONNECTORS_UNKNOWN, readFailure: false }], snapshot)
-      : makeFinding('outbound', 'No HttpClient calls in code.', [], [FLOW_NOTE, ...snapshot]);
+      ? makeFinding('outbound', '', [{ text: CONNECTORS_UNKNOWN, readFailure: false }], [])
+      : makeFinding('outbound', 'No HttpClient calls in code.', [], [FLOW_NOTE]);
   }
+  const codeReason =
+    analysis.reason ??
+    (connectors === null && !analysis.notScanned
+      ? { text: CODE_ANALYSIS_LIMIT, readFailure: false }
+      : null);
+  const reasons: Reason[] = codeReason === null ? [] : [codeReason];
   if (!facts.settings.ok) {
+    if (facts.settings.reason === 'read-failed') {
+      reasons.push({ text: "Couldn't read configuration", readFailure: true });
+    }
     return makeFinding(
       'outbound',
       '',
-      facts.settings.reason === 'read-failed'
-        ? [{ text: "Couldn't read configuration", readFailure: true }]
-        : [],
-      snapshot,
-      facts.settings.reason === 'not-scanned',
+      reasons,
+      [],
+      analysis.notScanned || facts.settings.reason === 'not-scanned',
     );
   }
   const domains = parseAllowedDomains(facts.settings.value['ServerLogic/AllowedDomains']);
@@ -210,11 +205,26 @@ function outbound(facts: SiteFacts, analysis: Analysis): Finding {
     'ServerLogic/AllowNetworkingToAllDomains',
     facts.settings.value['ServerLogic/AllowNetworkingToAllDomains'],
   );
-  if (domains.notScanned || all.notScanned)
-    return makeFinding('outbound', '', [...domains.reasons, ...all.reasons], snapshot, true);
+  // O2 reasons lead; every known wildcard reason is kept with them (WR-006).
   const invalid = [...domains.reasons, ...all.reasons];
-  if (invalid.length > 0 || domains.value === null || all.value === null)
-    return makeFinding('outbound', '', invalid, snapshot);
+  reasons.push(
+    ...invalid,
+    ...(domains.value?.wildcards ?? []).map((entry) => ({
+      text: `Wildcard entries aren't supported: \`${entry}\` matches no host.`,
+      readFailure: false,
+    })),
+  );
+  const notScanned = analysis.notScanned || domains.notScanned || all.notScanned;
+  const detail = domains.fromEnvVar || all.fromEnvVar ? [ENVVAR_CACHE_NOTE] : [];
+  if (
+    codeReason !== null ||
+    notScanned ||
+    invalid.length > 0 ||
+    domains.value === null ||
+    all.value === null
+  ) {
+    return makeFinding('outbound', '', reasons, detail, notScanned);
+  }
   const hosts = domains.value.hosts;
   const row = all.value
     ? hosts.length === 0
@@ -223,18 +233,15 @@ function outbound(facts: SiteFacts, analysis: Analysis): Finding {
     : hosts.length === 0
       ? 'Outbound calls are blocked. The handler calls HttpClient, but no domains are allowed.'
       : `Allowed domains ${hosts.map((host) => `\`${host}\``).join(', ')}. Whether they cover every host the handler calls isn't checked.`;
-  const reasons: Reason[] = domains.value.wildcards.map((entry) => ({
-    text: `Wildcard entries aren't supported: \`${entry}\` matches no host.`,
-    readFailure: false,
-  }));
   if (all.value || hosts.length === 0) reasons.push({ text: row, readFailure: false });
-  return makeFinding('outbound', row, reasons, [row, ...snapshot]);
+  return makeFinding('outbound', row, reasons, [row, ...detail]);
 }
 
 export function evaluateFileChecks(facts: SiteFacts, file: ServerLogicFileFacts): FileResult {
   const analysis = analyse(file);
+  const grants = buildGrantSet(facts, file);
   const web = webRole(facts, file);
-  const tables = tablePermissions(facts, file, analysis);
+  const tables = tablePermissions(grants, analysis);
   const network = outbound(facts, analysis);
   const roles =
     facts.roles.ok && file.roleIds.ok
@@ -252,7 +259,7 @@ export function evaluateFileChecks(facts: SiteFacts, file: ServerLogicFileFacts)
     findings: [web, tables, network],
     snapshot: {
       roles: [...roles, OTHER_ROLES_NOTE],
-      tables: permissionSnapshot(buildGrantSet(facts, file)),
+      tables: permissionSnapshot(grants),
       outbound: [network.summary, ...settingSnapshot(facts)],
     },
   };

@@ -11,7 +11,11 @@ import { defaultRoleBanners } from './grantSet';
 import { settingBanners } from './settings';
 
 export function canReviewFinding(finding: Finding): boolean {
-  return finding.status === 'needs-review' && !finding.reasons.some((reason) => reason.readFailure);
+  return (
+    finding.status === 'needs-review' &&
+    !finding.hasUnscannedEvidence &&
+    !finding.reasons.some((reason) => reason.readFailure)
+  );
 }
 
 export function evaluateSite(facts: SiteFacts, marks: ReadonlySet<ReviewKey>): SiteResult {

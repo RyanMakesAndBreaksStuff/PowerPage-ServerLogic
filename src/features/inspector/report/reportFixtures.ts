@@ -20,6 +20,7 @@ export function reportFinding(check: CheckId, status: CheckStatus): Finding {
   return {
     check,
     status,
+    hasUnscannedEvidence: status === 'not-scanned',
     summary: status === 'not-scanned' ? 'Not read before the connection was lost' : text,
     reasons:
       status === 'needs-review' || status === 'reviewed' ? [{ text, readFailure: false }] : [],

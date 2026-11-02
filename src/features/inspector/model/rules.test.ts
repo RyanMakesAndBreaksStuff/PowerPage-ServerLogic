@@ -16,6 +16,7 @@ const CHECKS: readonly CheckId[] = ['webRole', 'tablePermissions', 'outbound'];
 const stateFinding = (check: CheckId, status: CheckStatus): Finding => ({
   check,
   status,
+  hasUnscannedEvidence: status === 'not-scanned',
   summary: status,
   reasons: [],
   guidance: '',
