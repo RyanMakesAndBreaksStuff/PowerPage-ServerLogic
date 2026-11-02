@@ -4,7 +4,7 @@
 **Baseline:** branch `logic-inspector-v2-build`, HEAD `071415c`; requires `p5-3_plan.md` (commit `85de3ff`): raw configuration rows live only in `FileResult.snapshot`, `Finding.detail` is explanation only, `Finding.hasUnscannedEvidence` exists. Independent of P5.4 and P5.5.
 **Spec:** FR-10 (4.1.0, L794–L805), FR-11 L832 and L835, Story 9 AC-9.1–AC-9.10 (L334–L370), AC-7.9, AC-7.12, AC-8.10, AC-8.12, Assumption A8 (L975–L982), Error Scenarios "PDF generation fails" (L918).
 **Audit items:** CR-003, WR-001 (export behaviour), WR-002; the renderer's share of RG-004 and RG-005 (the live gates close in P5.7 and P5.8).
-**Status:** Accepted by the owner 2026-11-02 (P-01 B, P-12, P-14 with (d) and (f)); not yet executed.
+**Status:** Executed 2026-11-02; commit `7a1a336`. Accepted by the owner 2026-11-02 (P-01 B, P-12, P-14 with (d) and (f)). Evidence: `docs/phase-5/evidence/p5-6/execution.md`.
 **Supersedes:** Tasks 7a–7c of `docs/plans/11-01-2026-phase-5-reports-build.md` (reference only; the defects not repeated are listed under Decisions). The design decisions 1–8 of `docs/specs/001-server-logic-starter-inspector/plans/phase-20-report-pdf.md` are adopted; its code blocks are not.
 
 ## Goal
@@ -52,7 +52,7 @@ Both report scopes produce a vector PDF from the one display-ready `ReportModel`
 
 **Files:** create `testCmap.ts`, `pdfFonts.test.ts`, `pdfDrawing.test.ts`, `pdfTable.test.ts`, `renderPdf.test.ts`; edit `reportFixtures.ts`, `buildReportModel.test.ts`, `renderMarkdown.test.ts` (all under `src/features/inspector/report/`).
 
-- [ ] **A1. Create `src/features/inspector/report/testCmap.ts`** (test support; nothing in the application imports it)
+- [x] **A1. Create `src/features/inspector/report/testCmap.ts`** (test support; nothing in the application imports it)
 
 ```typescript
 // Test-only: reads which code points a TrueType font maps to a glyph (cmap formats 4 and 12).
@@ -119,7 +119,7 @@ export function cmapCodePoints(font: Uint8Array): ReadonlySet<number> {
 }
 ```
 
-- [ ] **A2. `src/features/inspector/report/reportFixtures.ts`: append after L117** (G8). Current tail, verbatim:
+- [x] **A2. `src/features/inspector/report/reportFixtures.ts`: append after L117** (G8). Current tail, verbatim:
 
 ```typescript
       connection: { ...result.facts.connection, name: `environment ${hostile}` },
@@ -188,7 +188,7 @@ export const REPORT_FIXTURE_CASES: readonly {
 ];
 ```
 
-- [ ] **A3. `src/features/inspector/report/buildReportModel.test.ts`** (G4, G5)
+- [x] **A3. `src/features/inspector/report/buildReportModel.test.ts`** (G4, G5)
 
 Add the type import after L1 (`import { describe, expect, it, vi } from 'vitest';`):
 
@@ -486,7 +486,7 @@ describe('inactive files', () => {
 });
 ```
 
-- [ ] **A4. `src/features/inspector/report/renderMarkdown.test.ts`** (G5)
+- [x] **A4. `src/features/inspector/report/renderMarkdown.test.ts`** (G5)
 
 Replace L6 (`reportFile` joins the import):
 
@@ -578,7 +578,7 @@ Insert after L71 (`  });`), with a blank line before it:
   });
 ```
 
-- [ ] **A5. Create `src/features/inspector/report/pdfFonts.test.ts`** (`@vitest-environment node`, because it reads the TTFs through `fs` with a `file:` URL, as `renderMarkdown.test.ts` does; the other three PDF test files run in the default jsdom environment)
+- [x] **A5. Create `src/features/inspector/report/pdfFonts.test.ts`** (`@vitest-environment node`, because it reads the TTFs through `fs` with a `file:` URL, as `renderMarkdown.test.ts` does; the other three PDF test files run in the default jsdom environment)
 
 ```typescript
 // @vitest-environment node
@@ -716,7 +716,7 @@ describe('PDF fonts', () => {
 });
 ```
 
-- [ ] **A6. Create `src/features/inspector/report/pdfDrawing.test.ts`**
+- [x] **A6. Create `src/features/inspector/report/pdfDrawing.test.ts`**
 
 ```typescript
 import { describe, expect, it, vi } from 'vitest';
@@ -888,7 +888,7 @@ describe('drawRing', () => {
 });
 ```
 
-- [ ] **A7. Create `src/features/inspector/report/pdfTable.test.ts`**
+- [x] **A7. Create `src/features/inspector/report/pdfTable.test.ts`**
 
 ```typescript
 import { describe, expect, it, vi } from 'vitest';
@@ -1106,7 +1106,7 @@ describe('drawPdfTable', () => {
 });
 ```
 
-- [ ] **A8. Create `src/features/inspector/report/renderPdf.test.ts`**
+- [x] **A8. Create `src/features/inspector/report/renderPdf.test.ts`**
 
 ```typescript
 import { writeFileSync } from 'node:fs';
@@ -1460,7 +1460,7 @@ describe('renderPdf', () => {
 });
 ```
 
-- [ ] **A9. Capture the signal**
+- [x] **A9. Capture the signal**
 
 ```powershell
 npm test -- src/features/inspector/report
@@ -1478,7 +1478,7 @@ Expected: exit 1, `Test Files  6 failed | 1 passed (7)` and `Tests  6 failed | 3
 
 **Files:** `src/assets/fonts/JetBrainsMono_400Regular.ttf`, `src/assets/fonts/OFL-JetBrainsMono.txt`, `src/features/inspector/report/buildReportModel.ts`, `src/features/inspector/report/reportFileName.ts`, and new `pdfFonts.ts`, `pdfDrawing.ts`, `pdfTable.ts`; `renderPdf.ts` is replaced in full.
 
-- [ ] **B1. JetBrains Mono TTF from the pinned release** (G2, P-01). Work outside the repository.
+- [x] **B1. JetBrains Mono TTF from the pinned release** (G2, P-01). Work outside the repository.
 
 ```powershell
 $tmp = Join-Path $env:TEMP 'jbmono-2.304'
@@ -1504,7 +1504,7 @@ Expected SHA-256 (record all three in the evidence file and put the TTF's in the
 
 Record the zip, the released `OFL.txt`, the normalised licence and the TTF hashes in the evidence file, and the TTF's in the commit message. The licence file is replaced because the release's `OFL.txt` is not the repository's text (see P-01); the diff stat shows a small change. Copy the files; do not retype a binary. If the zip, TTF or released `OFL.txt` hash differs, stop: the pinned release is the only accepted source.
 
-- [ ] **B2. `src/features/inspector/report/buildReportModel.ts`: redactor** (G4, P-04)
+- [x] **B2. `src/features/inspector/report/buildReportModel.ts`: redactor** (G4, P-04)
 
 Replace L27–L53 (the whole `redactor`), verbatim:
 
@@ -1610,7 +1610,7 @@ function redactor(result: SiteResult, enabled: boolean): (text: string) => strin
 
 Nothing else in the file changes: `rowModel` still passes `file.name` unredacted (L81), and `checkModel`, `sections` and the snapshot map still call `redact` on the same fields.
 
-- [ ] **B2a. Inactive label** (G7, P-14(d)): `reportFileName.ts` and `buildReportModel.ts`
+- [x] **B2a. Inactive label** (G7, P-14(d)): `reportFileName.ts` and `buildReportModel.ts`
 
 `src/features/inspector/report/reportFileName.ts`: insert `displayName` between the type alias and `reportIdentity`. Current L5–L7, verbatim:
 
@@ -1647,7 +1647,7 @@ export function reportIdentity(result: SiteResult, options: ReportOptions): Repo
 +    name: displayName(file),
 ```
 
-- [ ] **B3. Create `src/features/inspector/report/pdfFonts.ts`** (P-02, P-03)
+- [x] **B3. Create `src/features/inspector/report/pdfFonts.ts`** (P-02, P-03)
 
 ```typescript
 import { jsPDF } from 'jspdf';
@@ -1803,7 +1803,7 @@ export function createTextGuard(): TextGuard {
 }
 ```
 
-- [ ] **B4. Create `src/features/inspector/report/pdfDrawing.ts`** (P-07, P-13)
+- [x] **B4. Create `src/features/inspector/report/pdfDrawing.ts`** (P-07, P-13)
 
 ```typescript
 import type { jsPDF } from 'jspdf';
@@ -1894,7 +1894,7 @@ export function drawCheckbox(doc: jsPDF, x: number, y: number, size: number, col
 }
 ```
 
-- [ ] **B5. Create `src/features/inspector/report/pdfTable.ts`** (P-08)
+- [x] **B5. Create `src/features/inspector/report/pdfTable.ts`** (P-08)
 
 ```typescript
 import type { jsPDF } from 'jspdf';
@@ -2186,7 +2186,7 @@ export function drawPdfTable(
 }
 ```
 
-- [ ] **B6. Replace `src/features/inspector/report/renderPdf.ts` in full** (G1, P-07, P-09). Current file, verbatim:
+- [x] **B6. Replace `src/features/inspector/report/renderPdf.ts` in full** (G1, P-07, P-09). Current file, verbatim:
 
 ```typescript
 import type { ReportModel } from '@/features/inspector/report/reportModel.types';
@@ -2671,7 +2671,7 @@ export function renderPdf(model: ReportModel): Uint8Array {
 
 ## Phase C — Confirm
 
-- [ ] **C1. Focused suites**
+- [x] **C1. Focused suites**
 
 ```powershell
 npm test -- src/features/inspector/report
@@ -2680,7 +2680,7 @@ git diff --stat -- src/features/inspector/report/__golden__
 
 Expected: `Test Files  7 passed (7)` and `Tests  86 passed (86)` (`buildReportModel` 26, `markdownEscape` 2, `pdfDrawing` 9, `pdfFonts` 9, `pdfTable` 10, `renderMarkdown` 8, `renderPdf` 22). The second command prints nothing: both goldens are untouched (P-06). No console warning from AutoTable ("units width could not fit page") appears.
 
-- [ ] **C2. Type and lint gates**
+- [x] **C2. Type and lint gates**
 
 ```powershell
 npm run typecheck
@@ -2690,7 +2690,7 @@ npm run lint
 
 Expected: all three exit 0 with no output (`npm run lint` is `eslint . --max-warnings=0`, the CI gate). `src/skeleton.test.ts` L145 (`expectTypeOf(renderPdf).toEqualTypeOf<(m: ReportModel) => Uint8Array>()`) is checked by `tsc`.
 
-- [ ] **C3. Whole suite and build**
+- [x] **C3. Whole suite and build**
 
 ```powershell
 npm test
@@ -2699,7 +2699,7 @@ npm run build
 
 Expected: both exit 0. In the dry run on a copy of this tree, `vitest run src` passed 96 files and 1,536 tests; `npm test` also runs `tests/`. `npm run build` output is unchanged (index `932.90 kB`) because nothing outside tests imports `renderPdf` yet (P-11); the fonts enter the single IIFE when P5.7 imports it, and P5.8 measures the size with `npm run size`.
 
-- [ ] **C4. Hygiene**
+- [x] **C4. Hygiene**
 
 ```powershell
 git diff --check
@@ -2708,7 +2708,7 @@ git status --short -- src/assets/fonts
 
 Expected: the first prints nothing. The second prints exactly ` M src/assets/fonts/OFL-JetBrainsMono.txt` and `?? src/assets/fonts/JetBrainsMono_400Regular.ttf`.
 
-- [ ] **C5. Read the PDFs in a reader (RG-005, recorded not asserted)**
+- [x] **C5. Read the PDFs in a reader (RG-005, recorded not asserted)**
 
 ```powershell
 $env:INSPECTOR_PDF_OUT = '1'
@@ -2719,7 +2719,7 @@ Get-ChildItem (Join-Path $env:TEMP 'inspector-report-*.pdf') | Select-Object Nam
 
 Expected: the test run passes and prints six paths; the listing shows `inspector-report-{standard,long,hostile}-{file,site}.pdf`, about 130 and 154 KB for the standard file and site reports, 642 KB for the long site report (29 pages) and 174 KB for the long file report (4 pages). The test writes these six files to `%TEMP%` and leaves them there; delete them afterwards. Open `inspector-report-standard-file.pdf`, `-standard-site.pdf`, `-long-site.pdf` and `-hostile-file.pdf` in a PDF reader and record in the evidence file: (1) text can be selected and copied, and search finds "Tenant outbound policy"; (2) each `✓` is a drawn tick, `!` is text; (3) ring arcs are proportional with visible gaps; (4) in `-long-site.pdf` the head row is on every page, no row is cut at a page bottom, and the 400-character file name has a continuation row `… (continued 2/3)`; (5) the hostile names read as literal text; (6) every page ends with `Page n of m`, bottom right. Optionally, if Xpdf's `pdftotext` is on hand (Git for Windows ships one at `C:\Program Files\Git\ucrt64\bin\pdftotext.exe`), run `pdftotext -enc UTF-8 -layout <pdf> -` and look for "Tenant outbound policy"; judge by content, since `-layout` can reorder cells. The author checked geometry numerically (cursor positions, arc end points, page and row evidence) but had no rasteriser, so this is the first look at the rendered appearance.
 
-- [ ] **C6. Commit**
+- [x] **C6. Commit**
 
 ```powershell
 git add -- src/assets/fonts/JetBrainsMono_400Regular.ttf src/assets/fonts/OFL-JetBrainsMono.txt src/features/inspector/report/buildReportModel.ts src/features/inspector/report/reportFileName.ts src/features/inspector/report/buildReportModel.test.ts src/features/inspector/report/renderMarkdown.test.ts src/features/inspector/report/reportFixtures.ts src/features/inspector/report/renderPdf.ts src/features/inspector/report/renderPdf.test.ts src/features/inspector/report/pdfFonts.ts src/features/inspector/report/pdfFonts.test.ts src/features/inspector/report/pdfDrawing.ts src/features/inspector/report/pdfDrawing.test.ts src/features/inspector/report/pdfTable.ts src/features/inspector/report/pdfTable.test.ts src/features/inspector/report/testCmap.ts
