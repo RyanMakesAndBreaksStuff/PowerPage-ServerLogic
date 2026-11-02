@@ -23,6 +23,7 @@ export default defineConfig([
     'design_handoff_server_logic_tools',
     'mocks',
     'tasks',
+    '.scratch',
   ]),
   {
     files: ['**/*.{ts,tsx}'],
