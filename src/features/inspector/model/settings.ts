@@ -1,5 +1,5 @@
 import type { Reason, SettingName, SettingValue, SiteFacts } from '@/types/inspector';
-import { ENVVAR_CACHE_NOTE, NOT_SCANNED_TEXT, TIMEOUT_NOTE } from './copy';
+import { ENVVAR_CACHE_NOTE, envVarFailureText, NOT_SCANNED_TEXT, TIMEOUT_NOTE } from './copy';
 
 export const SETTING_NAMES: readonly SettingName[] = [
   'ServerLogic/Enabled',
@@ -37,7 +37,7 @@ function unavailable<T>(name: SettingName, setting: SettingValue): ParsedSetting
   if (setting.kind === 'envvar-unreadable') {
     return result<T>(
       null,
-      [{ text: `Couldn't read \`${name}\` from its environment variable`, readFailure: true }],
+      [{ text: envVarFailureText(name, setting.cause), readFailure: true }],
       true,
     );
   }
@@ -151,8 +151,7 @@ export function settingSnapshot(facts: SiteFacts): readonly string[] {
     if (setting.kind === 'value')
       return `\`${name}\` = ${setting.raw.trim()}${setting.fromEnvVar ? ' (environment variable)' : ''}`;
     if (setting.kind === 'duplicate') return `Duplicate \`${name}\``;
-    if (setting.kind === 'envvar-unreadable')
-      return `Couldn't read \`${name}\` from its environment variable`;
+    if (setting.kind === 'envvar-unreadable') return envVarFailureText(name, setting.cause);
     if (setting.kind === 'not-scanned') return `\`${name}\`: ${NOT_SCANNED_TEXT}`;
     const fallback =
       name === 'ServerLogic/AllowedDomains'

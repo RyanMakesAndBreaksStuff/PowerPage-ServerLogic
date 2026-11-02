@@ -54,6 +54,7 @@ import type {
   FileResult,
   Finding,
   ReviewKey,
+  ScanProgress,
   SiteFacts,
   SiteRef,
   SiteResult,
@@ -134,7 +135,8 @@ describe('skeleton: every pinned function exists with its contract signature', (
         connection: Connection,
         site: SiteRef,
         scanId: string,
-        onProgress: (scanned: number, total: number) => void,
+        onProgress: (progress: ScanProgress) => void,
+        options?: { signal?: AbortSignal; now?: () => Date },
       ) => Promise<SiteFacts>
     >();
     expectTypeOf(listSites).toEqualTypeOf<(host: PptbHost) => Promise<readonly SiteRef[]>>();

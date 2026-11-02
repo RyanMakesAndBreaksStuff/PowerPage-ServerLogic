@@ -93,12 +93,12 @@ const INCOMPLETE_CASES: readonly IncompleteCase[] = [
   { name: 'failed outbound settings plus unscanned code', facts: siteFacts({ settings: FAILED, files: [file({ code: UNREAD })] }), check: 'outbound', status: 'needs-review', reasons: [CONFIG_FAILURE] },
   { name: 'failed code plus unscanned outbound settings', facts: siteFacts({ settings: UNREAD, files: [file({ code: FAILED })] }), check: 'outbound', status: 'needs-review', reasons: [CODE_FAILURE] },
   { name: 'downloaded analysis limit plus unscanned outbound settings', facts: siteFacts({ settings: UNREAD, files: [file({ code: read('') })] }), check: 'outbound', status: 'needs-review', reasons: [ANALYSIS_LIMIT] },
-  { name: 'failed domain variable plus unscanned Boolean variable', facts: httpFacts({ settings: read(settings({ 'ServerLogic/AllowedDomains': { kind: 'envvar-unreadable' }, 'ServerLogic/AllowNetworkingToAllDomains': { kind: 'not-scanned' } })) }), check: 'outbound', status: 'needs-review', reasons: [DOMAIN_FAILURE] },
-  { name: 'unscanned domain variable plus failed Boolean variable', facts: httpFacts({ settings: read(settings({ 'ServerLogic/AllowedDomains': { kind: 'not-scanned' }, 'ServerLogic/AllowNetworkingToAllDomains': { kind: 'envvar-unreadable' } })) }), check: 'outbound', status: 'needs-review', reasons: [BOOLEAN_FAILURE] },
+  { name: 'failed domain variable plus unscanned Boolean variable', facts: httpFacts({ settings: read(settings({ 'ServerLogic/AllowedDomains': { kind: 'envvar-unreadable', cause: 'failed' }, 'ServerLogic/AllowNetworkingToAllDomains': { kind: 'not-scanned' } })) }), check: 'outbound', status: 'needs-review', reasons: [DOMAIN_FAILURE] },
+  { name: 'unscanned domain variable plus failed Boolean variable', facts: httpFacts({ settings: read(settings({ 'ServerLogic/AllowedDomains': { kind: 'not-scanned' }, 'ServerLogic/AllowNetworkingToAllDomains': { kind: 'envvar-unreadable', cause: 'failed' } })) }), check: 'outbound', status: 'needs-review', reasons: [BOOLEAN_FAILURE] },
   { name: 'invalid domains plus unscanned Boolean variable', facts: httpFacts({ settings: read(settings({ 'ServerLogic/AllowedDomains': value('https://invalid.example'), 'ServerLogic/AllowNetworkingToAllDomains': { kind: 'not-scanned' } })) }), check: 'outbound', status: 'needs-review', reasons: [{ text: "Couldn't interpret `ServerLogic/AllowedDomains`: `https://invalid.example`", readFailure: false }] },
   { name: 'unscanned domains plus duplicate Boolean setting', facts: httpFacts({ settings: read(settings({ 'ServerLogic/AllowedDomains': { kind: 'not-scanned' }, 'ServerLogic/AllowNetworkingToAllDomains': { kind: 'duplicate' } })) }), check: 'outbound', status: 'needs-review', reasons: [BOOLEAN_DUPLICATE] },
   { name: 'known wildcard plus unscanned Boolean variable', facts: httpFacts({ settings: read(settings({ 'ServerLogic/AllowedDomains': value('*.example.com, api.example.com'), 'ServerLogic/AllowNetworkingToAllDomains': { kind: 'not-scanned' } })) }), check: 'outbound', status: 'needs-review', reasons: [WILDCARD] },
-  { name: 'failed domain variable plus unscanned code', facts: siteFacts({ settings: read(settings({ 'ServerLogic/AllowedDomains': { kind: 'envvar-unreadable' } })), files: [file({ code: UNREAD })] }), check: 'outbound', status: 'needs-review', reasons: [DOMAIN_FAILURE] },
+  { name: 'failed domain variable plus unscanned code', facts: siteFacts({ settings: read(settings({ 'ServerLogic/AllowedDomains': { kind: 'envvar-unreadable', cause: 'failed' } })), files: [file({ code: UNREAD })] }), check: 'outbound', status: 'needs-review', reasons: [DOMAIN_FAILURE] },
   { name: 'known wildcard and duplicate Boolean setting plus unscanned code', facts: siteFacts({ settings: read(settings({ 'ServerLogic/AllowedDomains': value('*.example.com'), 'ServerLogic/AllowNetworkingToAllDomains': { kind: 'duplicate' } })), files: [file({ code: UNREAD })] }), check: 'outbound', status: 'needs-review', reasons: [BOOLEAN_DUPLICATE, WILDCARD] },
   { name: 'failed code and duplicate Boolean setting plus unscanned domains', facts: siteFacts({ settings: read(settings({ 'ServerLogic/AllowedDomains': { kind: 'not-scanned' }, 'ServerLogic/AllowNetworkingToAllDomains': { kind: 'duplicate' } })), files: [file({ code: FAILED })] }), check: 'outbound', status: 'needs-review', reasons: [CODE_FAILURE, BOOLEAN_DUPLICATE] },
   { name: 'unscanned outbound code without an established finding', facts: siteFacts({ files: [file({ code: UNREAD })] }), check: 'outbound', status: 'not-scanned', reasons: [] },
@@ -145,7 +145,7 @@ describe('FR-9 outbound intersections (WR-006)', () => {
   it.each([
     ['invalid', value('maybe'), "Couldn't interpret `ServerLogic/AllowNetworkingToAllDomains`", true],
     ['duplicate', { kind: 'duplicate' }, BOOLEAN_DUPLICATE.text, true],
-    ['unreadable', { kind: 'envvar-unreadable' }, BOOLEAN_FAILURE.text, false],
+    ['unreadable', { kind: 'envvar-unreadable', cause: 'failed' }, BOOLEAN_FAILURE.text, false],
   ] satisfies readonly (readonly [string, SettingValue, string, boolean])[])(
     'keeps O2 first and every known wildcard with an %s Boolean',
     (_label, all, summary, reviewable) => {
@@ -178,7 +178,7 @@ describe('FR-9 outbound intersections (WR-006)', () => {
       FAILED,
       UNREAD,
       read(settings({ 'ServerLogic/AllowedDomains': { kind: 'not-scanned' }, 'ServerLogic/AllowNetworkingToAllDomains': { kind: 'duplicate' } })),
-      read(settings({ 'ServerLogic/AllowedDomains': value('*.example.com'), 'ServerLogic/AllowNetworkingToAllDomains': { kind: 'envvar-unreadable' } })),
+      read(settings({ 'ServerLogic/AllowedDomains': value('*.example.com'), 'ServerLogic/AllowNetworkingToAllDomains': { kind: 'envvar-unreadable', cause: 'failed' } })),
     ];
     for (const settingFacts of irrelevant) {
       const result = finding(siteFacts({ files: [file({ code: read(code) })], settings: settingFacts }), 'outbound');
@@ -197,7 +197,7 @@ describe('FR-9 outbound intersections (WR-006)', () => {
         'ServerLogic/AllowedDomains': value('api.example.com'),
         'ServerLogic/AllowNetworkingToAllDomains': value('false'),
         'ServerLogic/Enabled': { kind: 'not-scanned' },
-        'ServerLogic/TimeoutInSeconds': { kind: 'envvar-unreadable' },
+        'ServerLogic/TimeoutInSeconds': { kind: 'envvar-unreadable', cause: 'failed' },
       })),
     }), 'outbound');
     expect(result.status).toBe('configured');

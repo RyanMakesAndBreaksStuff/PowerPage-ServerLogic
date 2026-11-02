@@ -264,7 +264,7 @@ describe('FR-9 O0–O6 and wildcard entries', () => {
       settings: read(
         settings({
           'ServerLogic/AllowNetworkingToAllDomains': { kind: 'duplicate' },
-          'ServerLogic/AllowedDomains': { kind: 'envvar-unreadable' },
+          'ServerLogic/AllowedDomains': { kind: 'envvar-unreadable', cause: 'failed' },
         }),
       ),
       files: [file({ code: read(HTTP_CODE) })],

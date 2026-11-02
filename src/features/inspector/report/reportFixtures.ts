@@ -89,6 +89,7 @@ export function reportResult(): SiteResult {
       inactiveSettings: [],
       files: [],
       inventoryComplete: true,
+      unreadableRows: [],
       stopped: null,
     },
     files,

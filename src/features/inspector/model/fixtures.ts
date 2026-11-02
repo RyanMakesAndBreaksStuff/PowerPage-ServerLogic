@@ -76,6 +76,7 @@ export const siteFacts = (patch: Partial<SiteFacts> = {}): SiteFacts => ({
   inactiveSettings: [],
   files: [file()],
   inventoryComplete: true,
+  unreadableRows: [],
   stopped: null,
   ...patch,
 });

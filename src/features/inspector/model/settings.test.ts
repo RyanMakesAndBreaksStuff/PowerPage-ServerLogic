@@ -57,7 +57,7 @@ describe('FR-7 settings contract', () => {
       expect(parseBooleanSetting(name, { kind: 'duplicate' }).reasons[0]?.text).toBe(
         `Duplicate \`${name}\``,
       );
-      expect(parseBooleanSetting(name, { kind: 'envvar-unreadable' }).reasons).toEqual([
+      expect(parseBooleanSetting(name, { kind: 'envvar-unreadable', cause: 'failed' }).reasons).toEqual([
         { text: `Couldn't read \`${name}\` from its environment variable`, readFailure: true },
       ]);
       expect(parseBooleanSetting(name, { kind: 'not-scanned' }).notScanned).toBe(true);
@@ -132,7 +132,7 @@ describe('AC-7.9 / AC-7.12 banners and snapshot', () => {
   it.each([
     [{ kind: 'duplicate' }, 'Duplicate `ServerLogic/TimeoutInSeconds`'],
     [
-      { kind: 'envvar-unreadable' },
+      { kind: 'envvar-unreadable', cause: 'failed' },
       "Couldn't read `ServerLogic/TimeoutInSeconds` from its environment variable",
     ],
     [value('false'), "`ServerLogic/TimeoutInSeconds` isn't a positive integer up to 240"],
@@ -153,7 +153,7 @@ describe('AC-7.9 / AC-7.12 banners and snapshot', () => {
       [value(''), "Couldn't interpret `ServerLogic/Enabled`"],
       [{ kind: 'duplicate' }, 'Duplicate `ServerLogic/Enabled`'],
       [
-        { kind: 'envvar-unreadable' },
+        { kind: 'envvar-unreadable', cause: 'failed' },
         "Couldn't read `ServerLogic/Enabled` from its environment variable",
       ],
     ];

@@ -4,7 +4,7 @@
 **Baseline:** branch `logic-inspector-v2-build`, HEAD `071415c`; P5.1, P5.2 (`bae8611`) and P5.3 (`85de3ff`) are executed. The checkout has 95 test files and 1504 tests (P5.3 evidence).
 **Spec:** `docs/specs/001-server-logic-starter-inspector/spec.md` v4.1.0, FR-7 (L623–L682), AC-7.2, AC-7.3, AC-7.4, AC-7.7, AC-7.8, AC-7.10, AC-7.12, FR-8 "Not scanned", Error Scenarios L926–L928, and the 4.2.0 amendments this plan makes (R-14 option B, R-15 option B).
 **Audit items:** CR-002 (reader half), WR-003 (reader half), RG-001/RG-003/RG-004 evidence producer (the live runs stay open).
-**Status:** Accepted by the owner 2026-11-02 (R-06 revised, R-14 B, R-15 B); not yet executed.
+**Status:** Executed 2026-11-02; commit 137720e. Evidence: docs/phase-5/evidence/p5-4/execution.md.
 **Supersedes:** Task 5 of `docs/plans/11-01-2026-phase-5-transport-reader.md` (L1462–L2495). That draft is reference only; its defects (a non-existent `isAbortError`, a pre-flight identity throw and `ScanConfirmationError`, `localeCompare` re-sorting, `%27` pre-encoding, one bad setting row failing every setting, serial config reads) are not repeated.
 
 ## Goal
@@ -83,7 +83,7 @@ The working tree uses CRLF and `core.autocrlf` is `true`. New files in this plan
 
 **Files:** create `src/features/inspector/scan/limiter.test.ts`, `queries.test.ts`, `parseRecords.test.ts`, `scan.test.ts` and `src/features/inspector/model/unreadableRows.test.ts`, `envvarCause.test.ts`.
 
-- [ ] **A1. Create `src/features/inspector/scan/limiter.test.ts`**
+- [x] **A1. Create `src/features/inspector/scan/limiter.test.ts`**
 
 ```typescript
 import { describe, expect, it } from 'vitest';
@@ -148,7 +148,7 @@ describe('createLimiter', () => {
 });
 ```
 
-- [ ] **A2. Create `src/features/inspector/scan/queries.test.ts`**
+- [x] **A2. Create `src/features/inspector/scan/queries.test.ts`**
 
 ```typescript
 import { describe, expect, it } from 'vitest';
@@ -246,7 +246,7 @@ describe('query builders', () => {
 });
 ```
 
-- [ ] **A3. Create `src/features/inspector/scan/parseRecords.test.ts`**
+- [x] **A3. Create `src/features/inspector/scan/parseRecords.test.ts`**
 
 ```typescript
 import { describe, expect, it } from 'vitest';
@@ -554,7 +554,7 @@ describe('environment variables', () => {
 });
 ```
 
-- [ ] **A4. Create `src/features/inspector/scan/scan.test.ts`**
+- [x] **A4. Create `src/features/inspector/scan/scan.test.ts`**
 
 The file imports no module that does not already exist at the baseline except through `./scan`, so every test reaches the stub. `ScanAbandonedError` is a missing named export at the baseline; Vitest resolves it to `undefined`, which fails the identity tests at their assertion. The `gated` helper at the end wraps a fake so a test decides when each read settles (a released call then runs against the fake, which honours the signal exactly as the adapter does) and counts overlapping reads.
 
@@ -1472,7 +1472,7 @@ function flush(): Promise<void> {
 }
 ```
 
-- [ ] **A5. Create `src/features/inspector/model/unreadableRows.test.ts`** (R-14 option B, model side)
+- [x] **A5. Create `src/features/inspector/model/unreadableRows.test.ts`** (R-14 option B, model side)
 
 ```typescript
 import { describe, expect, it } from 'vitest';
@@ -1581,7 +1581,7 @@ describe('skipped role and permission rows (R-14 option B)', () => {
 });
 ```
 
-- [ ] **A6. Create `src/features/inspector/model/envvarCause.test.ts`** (R-15 option B, model side)
+- [x] **A6. Create `src/features/inspector/model/envvarCause.test.ts`** (R-15 option B, model side)
 
 ```typescript
 import { describe, expect, it } from 'vitest';
@@ -1645,7 +1645,7 @@ describe('environment-variable failure causes (R-15 option B)', () => {
 });
 ```
 
-- [ ] **A7. Capture the failure**
+- [x] **A7. Capture the failure**
 
 ```powershell
 npm test -- src/features/inspector/scan src/features/inspector/model/unreadableRows.test.ts src/features/inspector/model/envvarCause.test.ts
@@ -1659,7 +1659,7 @@ Expected: exit 1, `Test Files  6 failed (6)`, `Tests  61 failed (61)`. `limiter.
 
 **Files:** `src/types/inspector.ts`, `src/features/inspector/scan/limiter.ts`, `queries.ts`, `parseRecords.ts`, `scan.ts`, `src/features/inspector/model/copy.ts`, `settings.ts`, `rules.ts`, `fixtures.ts`, `src/features/inspector/report/reportFixtures.ts`, and the three model test files that build `envvar-unreadable` literals.
 
-- [ ] **B1. `src/types/inspector.ts`**
+- [x] **B1. `src/types/inspector.ts`**
 
 Apply this diff (context lines are the exact current lines):
 
@@ -1699,7 +1699,7 @@ Apply this diff (context lines are the exact current lines):
  export type CheckStatus = 'configured' | 'needs-review' | 'reviewed' | 'not-scanned';
 ```
 
-- [ ] **B2. Create `src/features/inspector/scan/limiter.ts`**
+- [x] **B2. Create `src/features/inspector/scan/limiter.ts`**
 
 ```typescript
 export type Limiter = {
@@ -1738,7 +1738,7 @@ export function createLimiter(limit: number): Limiter {
 }
 ```
 
-- [ ] **B3. Create `src/features/inspector/scan/queries.ts`**
+- [x] **B3. Create `src/features/inspector/scan/queries.ts`**
 
 ```typescript
 import type { ODataQuery } from '@/services/pptb/host.types';
@@ -1823,7 +1823,7 @@ export function valueQuery(definitionId: string): ODataQuery {
 }
 ```
 
-- [ ] **B4. Create `src/features/inspector/scan/parseRecords.ts`**
+- [x] **B4. Create `src/features/inspector/scan/parseRecords.ts`**
 
 `parseRoles` and `parsePermissions` return `{ items, unreadable }`: a row whose envelope, `content` JSON or required keys fail validation is skipped and reported with its id and name as far as they could be read (`''` otherwise). The reader never lets one such row hide or fail the others.
 
@@ -2114,7 +2114,7 @@ export function pickEnvVarValue(
 }
 ```
 
-- [ ] **B5. Replace `src/features/inspector/scan/scan.ts` in full** (current 16 lines: the two stubs quoted in G1)
+- [x] **B5. Replace `src/features/inspector/scan/scan.ts` in full** (current 16 lines: the two stubs quoted in G1)
 
 Design notes the code relies on:
 
@@ -2444,7 +2444,7 @@ export async function listSites(host: PptbHost): Promise<readonly SiteRef[]> {
 }
 ```
 
-- [ ] **B6. Model edits (R-13 relaxed for R-14 and R-15)**
+- [x] **B6. Model edits (R-13 relaxed for R-14 and R-15)**
 
 These touch the model only for the skipped-row banner and environment-variable causes; `checks.ts` is not edited. Apply each diff (context lines are exact current lines; `rules.ts` has 73 lines now, `settings.ts` 180, `copy.ts` 55, `fixtures.ts` 81).
 
@@ -2557,7 +2557,7 @@ These touch the model only for the skipped-row banner and environment-variable c
      },
 ```
 
-- [ ] **B7. Give the existing `envvar-unreadable` literals a cause**
+- [x] **B7. Give the existing `envvar-unreadable` literals a cause**
 
 In each file below replace every occurrence of the exact text `{ kind: 'envvar-unreadable' }` with `{ kind: 'envvar-unreadable', cause: 'failed' }`. `failed` keeps the text those tests already assert ("Couldn't read `<setting>` from its environment variable"), so no expectation changes.
 
@@ -2569,7 +2569,7 @@ In each file below replace every occurrence of the exact text `{ kind: 'envvar-u
 
 Check afterwards: `git grep -n "kind: 'envvar-unreadable' }" -- src` prints nothing, and `git grep -c "cause: 'failed'" -- src/features/inspector/model/checks.test.ts src/features/inspector/model/evidence.test.ts src/features/inspector/model/settings.test.ts` prints 1, 6 and 3.
 
-- [ ] **B8. Run the new and neighbouring suites**
+- [x] **B8. Run the new and neighbouring suites**
 
 ```powershell
 npm test -- src/features/inspector/scan src/features/inspector/model
@@ -2581,7 +2581,7 @@ Expected: exit 0, `Test Files  11 passed (11)`, `Tests  383 passed (383)` (scan:
 
 ## Phase C — Confirm
 
-- [ ] **C1. Update the deliberate pin in `src/skeleton.test.ts`**
+- [x] **C1. Update the deliberate pin in `src/skeleton.test.ts`**
 
 ```diff
 --- a/src/skeleton.test.ts
@@ -2604,7 +2604,7 @@ Expected: exit 0, `Test Files  11 passed (11)`, `Tests  383 passed (383)` (scan:
 
 The `listSites` pin on the next line is unchanged.
 
-- [ ] **C2. Amend the spec (4.2.0)**
+- [x] **C2. Amend the spec (4.2.0)**
 
 Edit `docs/specs/001-server-logic-starter-inspector/spec.md` (LF). Each `old` text below is one exact current line or sentence and occurs once.
 
@@ -2648,7 +2648,7 @@ A variable that cannot be read is Needs review on the check that uses it, with o
 
 Check: `git diff --stat -- docs/specs/001-server-logic-starter-inspector/spec.md` shows one file, and `git grep -n "4.2.0" -- docs/specs` prints the three header/log hits.
 
-- [ ] **C3. Focused and neighbouring suites**
+- [x] **C3. Focused and neighbouring suites**
 
 ```powershell
 npm test -- src/features/inspector/scan src/features/inspector/model src/features/inspector/report src/skeleton.test.ts src/types/contracts.test.ts
@@ -2656,7 +2656,7 @@ npm test -- src/features/inspector/scan src/features/inspector/model src/feature
 
 Expected: exit 0, `Test Files  16 passed (16)`, `Tests  420 passed (420)`, with no existing expectation changed (the model, report golden and contract suites pass as they did at the baseline).
 
-- [ ] **C4. Type, lint and build gates**
+- [x] **C4. Type, lint and build gates**
 
 ```powershell
 npm run typecheck
@@ -2669,14 +2669,14 @@ git diff --check
 
 Expected: `typecheck` exits 0 with no output; `eslint` and `npm run lint` (`eslint . --max-warnings=0`) exit 0 with no output; `npm test` exits 0 with `Test Files  101 passed (101)` and `Tests  1658 passed (1658)` (baseline 95 / 1504 plus 6 / 154); `npm run build` exits 0 (`scan.ts` is not yet imported by the app, so the bundle is unchanged apart from the model code); `git diff --check` prints nothing. A diagnostic in any file listed in this plan is a P5.4 failure; an unrelated diagnostic is recorded against the baseline. P5.3's evidence notes that the repo's stop hook can start a second vitest run in the same checkout and make one full run exit 1 with no output; re-run before treating that as a failure.
 
-- [ ] **C5. Commit**
+- [x] **C5. Commit**
 
 ```powershell
 git add -- src/types/inspector.ts src/skeleton.test.ts docs/specs/001-server-logic-starter-inspector/spec.md src/features/inspector/model/copy.ts src/features/inspector/model/settings.ts src/features/inspector/model/rules.ts src/features/inspector/model/fixtures.ts src/features/inspector/model/checks.test.ts src/features/inspector/model/evidence.test.ts src/features/inspector/model/settings.test.ts src/features/inspector/model/unreadableRows.test.ts src/features/inspector/model/envvarCause.test.ts src/features/inspector/report/reportFixtures.ts src/features/inspector/scan/scan.ts src/features/inspector/scan/limiter.ts src/features/inspector/scan/limiter.test.ts src/features/inspector/scan/queries.ts src/features/inspector/scan/queries.test.ts src/features/inspector/scan/parseRecords.ts src/features/inspector/scan/parseRecords.test.ts src/features/inspector/scan/scan.test.ts
 git commit -m "feat(inspector): read enhanced-model site facts through the host adapter"
 ```
 
-- [ ] **C6. Record evidence**
+- [x] **C6. Record evidence**
 
 Create `docs/phase-5/evidence/p5-4/execution.md` with the same sections as `docs/phase-5/evidence/p5-3/execution.md`: a header (plan path, execution date, branch, baseline `071415c`), `## Commits` (the C5 hash and message, files and line counts), `## Gate output` (tables of command / observed / expected for the A7 signal, the B8 confirm and the C3–C4 gates, with the observed numbers from the real run), `## Deviations from the plan text` (anything the executor changed, including line-ending handling and the statement that the Markdown goldens did not change), `## Observation` (the stop-hook note if it recurs) and `## Still open` (RG-001 wire fidelity of the encoded literal and `nextLink` token, RG-002 error shapes, RG-003 populated download and real environment-variable access, RG-004 live timing). Record owner decisions R-14 option B and R-15 option B (both 2026-11-02) under the header. Tick every `- [ ]` in this plan to `- [x]` and set its Status line to `Executed <date>; commit <hash>. Evidence: docs/phase-5/evidence/p5-4/execution.md.`
 
