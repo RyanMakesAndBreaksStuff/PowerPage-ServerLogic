@@ -19,11 +19,13 @@ export type SettingName =
   | 'ServerLogic/AllowedDomains'
   | 'ServerLogic/AllowNetworkingToAllDomains'
   | 'ServerLogic/TimeoutInSeconds';
+/** Why an environment variable could not be read; each cause has its own finding text (FR-7). */
+export type EnvVarCause = 'secret' | 'missing' | 'denied' | 'failed';
 export type SettingValue =
   | { kind: 'absent' }
   | { kind: 'duplicate' }
   | { kind: 'value'; raw: string; fromEnvVar: boolean }
-  | { kind: 'envvar-unreadable' } // secret type, missing variable or failed read
+  | { kind: 'envvar-unreadable'; cause: EnvVarCause }
   | { kind: 'not-scanned' }; // environment-variable read not started before interruption
 export type ServerLogicFileFacts = {
   id: string;
@@ -32,6 +34,8 @@ export type ServerLogicFileFacts = {
   roleIds: Readable<readonly string[]>;
   code: Readable<string>;
 };
+/** A web role (11) or table permission (18) row the reader skipped because it could not be read. */
+export type UnreadableRow = { type: 11 | 18; id: string; name: string };
 export type SiteRef = { id: string; name: string; domain: string; active: boolean };
 export type SiteFacts = {
   scanId: string;
@@ -45,8 +49,12 @@ export type SiteFacts = {
   inactiveSettings: readonly SettingName[];
   files: readonly ServerLogicFileFacts[];
   inventoryComplete: boolean;
+  /** Role and permission rows skipped as unreadable; the site banner names them and findings are graded without them. */
+  unreadableRows: readonly UnreadableRow[];
   stopped: 'connection-lost' | null;
 };
+/** `Scanned X of N`; `total` is only the discovered files while `inventoryComplete` is false. */
+export type ScanProgress = { scanned: number; total: number; inventoryComplete: boolean };
 export type CheckId = 'webRole' | 'tablePermissions' | 'outbound';
 export type CheckStatus = 'configured' | 'needs-review' | 'reviewed' | 'not-scanned';
 export type Reason = { text: string; readFailure: boolean };

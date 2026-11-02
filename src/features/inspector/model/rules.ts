@@ -8,6 +8,7 @@ import type {
 } from '@/types/inspector';
 import { evaluateFileChecks } from './checks';
 import { defaultRoleBanners } from './grantSet';
+import { unreadableRowsBanner } from './copy';
 import { settingBanners } from './settings';
 
 export function canReviewFinding(finding: Finding): boolean {
@@ -40,6 +41,7 @@ export function evaluateSite(facts: SiteFacts, marks: ReadonlySet<ReviewKey>): S
     banners: [
       ...settingBanners(facts),
       ...defaultRoleBanners(facts),
+      ...(facts.unreadableRows.length > 0 ? [unreadableRowsBanner(facts.unreadableRows)] : []),
       ...(!facts.inventoryComplete ? ['Inventory incomplete. Reconnect and rescan.'] : []),
       ...(facts.stopped === 'connection-lost' ? ['Connection lost. Reconnect and rescan.'] : []),
     ],
