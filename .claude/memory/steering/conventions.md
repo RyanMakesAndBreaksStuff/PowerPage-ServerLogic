@@ -15,6 +15,6 @@ Vite `react-compiler-ts` scaffold plus the PPTB build shape (Phase 00) as the ba
 Strict TypeScript, ESLint flat config (typescript-eslint strictTypeChecked); no formatter (Prettier dropped 2026-10-27). See `.claude/rules/typescript.md`, `react.md`, `tooling.md`.
 
 ## Architectural Patterns
-- Single `services/pptb/` adapter over host globals; read-only Dataverse access (`.claude/rules/pptb-host-and-output.md`).
+- Single `services/pptb/` adapter over host globals; retrieval-only Dataverse access (two named download actions allowed inside the adapter) (`.claude/rules/pptb-host-and-output.md`).
 - Pure `(model) => string` generators in `lib/`.
 - Discriminated-union state; React 19 Actions; no effect-driven derived state.

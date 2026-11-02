@@ -1,5 +1,7 @@
 # Phase 16: Inspector Report Model and Markdown Implementation Plan
 
+> **Execution superseded — 2026-11-01.** `../../../plans/p5-1_plan.md`, `../../../plans/p5-2_plan.md` and `../../../plans/p5-3_plan.md` (and later P5.x plans) own the remaining Inspector implementation, contracts and check commands. This file keeps the stable phase IDs, design choices and probe outcomes; its code blocks, `$value` fallback, blanket API prohibition, Prettier commands and sequencing are not current execution instructions.
+
 **Goal:** Export complete file and site readiness reports as escaped Markdown from one immutable display model, preserving the scan interval, banners, all reviewed reasons, include toggles and redacted identities.
 
 **Architecture:** `buildReportModel` owns report scope, display text, redaction, ordering, counts and provenance; it consumes Phase 11's evaluated `SiteResult` without another evaluation. `renderMarkdown` owns escaping and Markdown structure, while `reportFileName` returns a complete suggested filename from the model's format and sanitised stem. Phase 20 consumes the same model for PDF and Phase 24 owns snapshot capture, export eligibility and saving.

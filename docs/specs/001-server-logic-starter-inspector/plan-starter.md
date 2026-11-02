@@ -13,7 +13,7 @@
 - **Wave B1 is planned (2026-10-18):** phases 07–10 have task-level plan files (tasks, red-first tests and acceptance criteria; no code). Goldens are hand-written `__golden__/<id>.*.txt` files compared with `toBe`, ending in one LF.
 - **Wave B2 is planned (2026-10-19):** phases 14, 17 and 19 have task-level plan files. B2a (14 and 17) runs in parallel after B1. B2b (19) runs after 14 and 17 merge, because it removes their `PENDING_R7` exclusions. Spike S3's script half is done and recorded in Phase 19; its collision probe (◆) and the R7 spec update (owner approval) are still open.
 - **Part C is planned (2026-10-19):** phases 18 and 21 have implementation plans with full code, drafted and run green against the repository, then removed. On `5953503`: 1,037 tests after 18 and 1,068 after 21; Phase 17 adds its own tests on top when it lands. Phase 21 needs Phase 18 merged first.
-- **Open risk (Inspector, not Starter):** a file-column download through `queryData` is unverified until Spike S2 (`plan-inspector.md`). If it fails, reading handler code needs `execute`, which the read-only rule forbids, so that would need a spec and rules change.
+- **Inspector transport (resolved 2026-11-01, spec 4.1.0):** `queryData` cannot return a file column (`$value` gave `{}`, Spike S2 2026-10-22). Handler code is retrieved with the two documented download actions through the host adapter; see `docs/plans/p5-2_plan.md`. A populated-handler wire comparison remains a release gate (`docs/plans/p5-1_plan.md` Phase C).
 
 ## Scope
 
@@ -24,14 +24,14 @@ Spec Story 1 (with `plan-server-objects.md` and `plan-inspector.md` for their pa
 - Scaffold with the standard Vite template (`npm create vite@9.2.1` with `--template react-compiler-ts --eslint`; owner decision 2026-10-17, the `yo pptb` generator is not used). Phase 00 adds the PPTB build shape: a **single IIFE bundle** (`build.rolldownOptions.output: { format: 'iife', codeSplitting: false }`), the `fixHtmlForPPTB` plugin, no `type="module"`, no `crossorigin`, no split chunks.
 - Toolchain: React 19.2, Vite 8, `@vitejs/plugin-react` 6 with the React Compiler through `@rolldown/plugin-babel`, TypeScript ~6.0, ESLint 9 (not the template's 10, for `eslint-plugin-jsx-a11y`), Vitest 5.
 - PPTB Desktop is 1.2.7 or later. `features.connections {min:0,max:1}`, `features.minAPI "1.2.7"`, no `cspExceptions`, no CDN, every asset bundled. The npm package is `@ryanmakes/powerpages-serverlogic`.
-- Host globals are touched only in `src/services/pptb/`. Dataverse is read-only: `queryData`, `fetchXmlQuery`, `retrieve` and the metadata getters. Reads page with `Prefer: odata.maxpagesize` and a deterministic `$orderby`, never `$top` (rule amended 2026-10-17). The tool writes nothing to tool settings.
+- Host globals are touched only in `src/services/pptb/`. Dataverse access is retrieval only: `queryData`, `fetchXmlQuery`, `retrieve`, the metadata getters, and `dataverseAPI.execute` for exactly `InitializeFileBlocksDownload` and `DownloadBlock` (spec FR-7, 4.1.0; `.claude/rules/pptb-host-and-output.md`). Reads page with `Prefer: odata.maxpagesize` and a deterministic `$orderby`, never `$top` (rule amended 2026-10-17). The tool writes nothing to tool settings.
 - TS strict, `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, `verbatimModuleSyntax`. No `any`, no `!`, and no `as` casts to silence errors.
 - React 19 with the Compiler. No `forwardRef`, and no `useEffect` for derived state.
 - The feature-first layout is enforced: features never import from another feature. Cross-feature state lives in `src/app/`.
 - Generators are pure `(input) => string` functions with golden-file tests. They are deterministic. String literals are built with `JSON.stringify`.
 - Every generated server file has **zero** FR-4 hits. The generator source must also keep forbidden words out of _emitted_ text: no `with(`, `.startsWith(`, anonymous `function (`, or `delete <name>` in comments.
 - Product code never evals generated code. Only the AC-4.12 test harness runs it, inside `node:vm` under Vitest.
-- Every phase must pass `npx tsc -b`, `npx eslint . --max-warnings=0`, `npx prettier --check .` and `npx vitest run`.
+- Every phase must pass `npm run typecheck`, `npm run lint` and `npm test` (Prettier was dropped by owner decision 2026-10-27, `.claude/rules/tooling.md`).
 - Five HTTP methods are always shown. Exports are Markdown and PDF only.
 - Commits follow `<type>(<scope>): <message>` on branch `001-server-logic-starter-inspector`. `npm publish` only with the owner's explicit confirmation.
 
@@ -142,6 +142,13 @@ export type ODataQuery = {
   orderBy: string | null;
   pageSize: number;
 };
+export type FileColumnRef = {
+  entityLogicalName: string; // 'powerpagecomponent'
+  primaryIdAttribute: string; // 'powerpagecomponentid'
+  recordId: string;
+  fileAttributeName: string; // 'filecontent'
+};
+
 export class HostReadError extends Error {
   constructor(
     message: string,
@@ -165,8 +172,8 @@ export type PptbHost = {
   openExternal(url: string): Promise<void>;
   getActiveConnection(): Promise<Connection | null>;
   onEvent(handler: (e: HostEvent) => void): () => void;
-  queryAll(q: ODataQuery): Promise<readonly unknown[]>; // all pages; 429/5xx retried 1s/2s/4s; throws HostReadError with successful page rows in partialRows
-  downloadFileColumn(entitySet: string, id: string, column: string): Promise<string>;
+  queryAll(q: ODataQuery, signal?: AbortSignal): Promise<readonly unknown[]>; // all pages; 429/5xx retried 1s/2s/4s; HostReadError carries status, transport and partialRows; AbortError on cancellation
+  downloadFileColumn(ref: FileColumnRef, signal?: AbortSignal): Promise<string>; // InitializeFileBlocksDownload + DownloadBlock; see docs/plans/p5-2_plan.md
 };
 
 // src/types/inspector.ts
@@ -450,3 +457,4 @@ ACs, by story. Where a phase owns the state half and another the UI half, both a
 | 2026-10-22 | 11    | Unknown permission scope is `null`; `inactiveSettings` records ignored settings; a per-setting `not-scanned` variant preserves completed inline reads when an environment-variable resolution is interrupted; shared legend/reviewability functions are pinned.                                                   |
 | 2026-10-22 | 15    | `HostReadError` gains optional `transport` and `partialRows`; only the inventory consumes partial rows after a paging failure. No-status host rejections set transport until S2 refines the mapping. `ScanOptions` adds a deterministic clock and logical-read abort, retaining the five existing scan arguments. |
 | 2026-10-22 | 16    | `ReportModel` replaces its Phase 00 placeholder; the complete declaration and all subordinate types are authoritative in Phase 16 Task 2. `reportFileName` returns the complete name including the model's format extension.                                                                                      |
+| 2026-11-01 | P5.1 | `queryAll` and `downloadFileColumn` take an optional `AbortSignal` and reject with `AbortError` on cancellation; `downloadFileColumn` takes a `FileColumnRef`. `HostReadError.transport` is true only for a platform-confirmed network exception; an unknown no-status failure is local (`transport: false`), superseding the 2026-10-22 provisional mapping. `partialRows` keeps every row received before a later-page failure, including the strict terminal-page rejection. |

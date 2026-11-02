@@ -1,5 +1,7 @@
 # Inspector Export Dialog Implementation Plan
 
+> **Execution superseded — 2026-11-01.** `../../../plans/p5-1_plan.md`, `../../../plans/p5-2_plan.md` and `../../../plans/p5-3_plan.md` (and later P5.x plans) own the remaining Inspector implementation, contracts and check commands. This file keeps the stable phase IDs, design choices and probe outcomes; its code blocks, `$value` fallback, blanket API prohibition, Prettier commands and sequencing are not current execution instructions.
+
 **Goal:** Export a frozen readiness review to Markdown or PDF with the requested scope, includes, redaction and save feedback.
 
 **Architecture:** InspectorPage owns the dialog-open snapshot and invalidation. ExportDialog owns options and save feedback; Phase 16 owns report data and filenames; Phase 20 owns PDF drawing; the existing Modal/PillGroup own APG focus and keyboard patterns.

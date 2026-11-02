@@ -1,5 +1,7 @@
 # Phase 01: PPTB host adapter + fake
 
+> **Execution superseded — 2026-11-01.** `../../../plans/p5-1_plan.md`, `../../../plans/p5-2_plan.md` and `../../../plans/p5-3_plan.md` (and later P5.x plans) own the remaining Inspector implementation, contracts and check commands. This file keeps the stable phase IDs, design choices and probe outcomes; its code blocks, `$value` fallback, blanket API prohibition, Prettier commands and sequencing are not current execution instructions.
+
 **Implements:** FR-7 (Dataverse reads: every page, a bounded 429/5xx retry at 1 s, 2 s and 4 s, read-only), FR-12 (one `toolboxAPI.events.on` registration, removed on unsubscribe), FR-1 (the host side of `showNotification` and `openInConnectionBrowser`: reject on failure so the app layer can fall back), NFR Security (no tokens, read-only, only error names logged) | **Satisfies:** no AC row of its own. It supplies the host behaviour that AC-1.6 (theme; a failed read rejects so the shell can choose light at launch or keep the current theme), AC-4.9 and AC-6.7 (copy), AC-5.6, AC-5.10 and AC-9.3 (save, cancel), AC-7.5 and AC-7.11 (environment label, Unknown), AC-7.6 (connection events) and AC-7.7 (a failed read) build on, and the reject half of the Error Scenario "`showNotification` missing, throws or rejects".
 **Depends on:** 00
 **Files:**

@@ -1,5 +1,7 @@
 # PPTB Spike S2 Implementation Plan
 
+> **Execution superseded — 2026-11-01.** `../../../plans/p5-1_plan.md`, `../../../plans/p5-2_plan.md` and `../../../plans/p5-3_plan.md` (and later P5.x plans) own the remaining Inspector implementation, contracts and check commands. This file keeps the stable phase IDs, design choices and probe outcomes; its code blocks, `$value` fallback, blanket API prohibition, Prettier commands and sequencing are not current execution instructions. New S2 observations are appended below the existing table without rewriting historical rows.
+
 **Goal:** Record the actual host contracts required for Inspector reads and local binary export before dependent live work.
 
 **Architecture:** A copy-paste DevTools script records only result shapes, event keys, error names/status and boolean field availability. Phase 01 owns host adapter members; Phase 15 owns transport/partial-read mappings; S2 evidence selects the verified path and never silently changes the approved read-only rule.

@@ -1,7 +1,7 @@
 # Feature 001: Power Pages Server Logic — Logic Starter & Logic Inspector
 
 **Status:** Approved
-**Version:** 4.0.1
+**Version:** 4.1.0
 **Created:** 2026-10-06
 **Updated:** 2026-11-01
 **Branch:** `001-logic-inspector`
@@ -31,6 +31,7 @@
 | 3.0.2 | 2026-10-30 | **PATCH.** Brings the spec in line with the code on branch `starter-objexts-prep`. **Added:** the Implementation Status section, which lists where the code does not yet meet a requirement. **Clarified:** FR-12 names the licence (BSD-3-Clause, with a `LICENSE` file at the root). **Unchanged:** every requirement, including FR-11 and the AC-4.12 matrix. |
 | 4.0.0 | 2026-10-31 | **MAJOR.** Owner decision: the **1a Graphite** palette, already built in `src/app/theme/tokens.css`, is the UI theme; the 3.0.0 theme rework is dropped. Logic Starter and Server Objects are the v1.0.0 release (`npm run build:beta`). **Rewritten:** FR-11's token table now lists the Graphite values under the app's variable names (`--window`, `--tile`, `--primary`, `--review`, `--server`, …); code wells follow the theme (`--code`); the code highlight is 10% `--primary` over `--code` with a 2px inset `--primary` bar (AC-4.2); base text weight 600, emphasis 700; A1 (flat backgrounds, no aurora, glass or `backdrop-filter`) and A2 (Graphite light and dark, host-driven); the glow contrast gate is removed, because Graphite has no gradients and every text pair is tested on a solid surface (Accessibility). **Changed:** AC-1.5, AC-1.6, AC-2.5, AC-5.1, AC-5.4, AC-6.2 and AC-8.2 name Graphite token roles instead of hues; the Implementation Status is re-checked and adds the failing `pptb-validate` run; FR-12's early-beta exception becomes the v1.0.0 exception and keeps only the AC-4.12 matrix. **Unchanged:** layout 10a, reports (README §05 palette, A8, FR-10 fonts). |
 | 4.0.1 | 2026-11-01 | **PATCH.** Owner decision: the manifest icon is the branded Server Logic Tools logo (`public/icons/logo.svg`, manifest `icons/logo.svg`), which keeps its own colours. **Rewritten:** the FR-12 `icon` bullet no longer requires `currentColor`. **Downstream:** `package.json` `icon`, `tests/manifest.test.ts`, `tests/buildShape.test.ts` and the Phase 00 icon steps follow the new file name; the manifest test drops its `currentColor` and no-hex-colour assertions. |
+| 4.1.0 | 2026-11-01 | Phase 5 (owner decision 2026-10-31, `phasse5plan.md`). Inspector may call the two documented unbound retrieval actions `InitializeFileBlocksDownload` and `DownloadBlock` through `dataverseAPI.execute`, inside the host adapter only; every write operation stays prohibited. S2 must prove a populated-handler download. FR-8 gains the mixed-evidence precedence table and `hasUnscannedEvidence`; AC-8.5 excludes unscanned evidence from Mark as reviewed; FR-7 treats a readable unknown-scope terminal ancestor as unresolved; FR-9 collects wildcard reasons before O2; finding detail and `FileResult.snapshot` get distinct ownership. AC-7.5 copy drops "read-only". |
 
 ---
 
@@ -49,7 +50,7 @@ Power Pages server logic lets makers run JavaScript on the server, protected by 
 
 ## Non-Goals
 
-- Writing, publishing or changing anything in the environment or site. Starter only produces downloads; Inspector is read-only.
+- Writing, publishing or changing anything in the environment or site. Starter only produces downloads; Inspector only retrieves. Inline configuration editing, handler upload or deployment, bulk remediation and runtime execution are out of scope.
 - Running, testing or debugging server logic at runtime.
 - Confirming effective access for a real site user. Inspector reviews configuration, not runtime behavior.
 - Reading or evaluating the tenant-level outbound network governance policy. It is always shown as "not verified".
@@ -283,7 +284,7 @@ Where the mocks and Learn disagree, Learn wins. The visual design still applies.
 - [ ] **AC-7.2** Given a connection When sites load Then the title-bar site pill (AC-1.2) offers only the Power Pages sites in that environment for selection. Active sites (`powerpagesite` `statecode` = 0) are selectable; inactive sites are listed disabled with the label "Inactive". No site is preselected, and a single site is not auto-selected. Only enhanced data model sites appear, because sites are read from `powerpagesite`. Standard data model sites are out of scope.
 - [ ] **AC-7.3** Given a site is selected When the scan completes Then the files tile lists "Server logic (N)" with each record's file name and status ("Active" or "Inactive", from `statecode`). Inactive records are listed and checked like active ones, because they can be reactivated. If listing the records fails partway, the files tile shows "Inventory incomplete. Reconnect and rescan.", and the site result can't read as all Ready (F35).
 - [ ] **AC-7.4** Given the site has no server logic When the scan completes Then the empty state reads "No server logic found on this site" and Export report is disabled.
-- [ ] **AC-7.5** Given the PPTB connection is marked as Test, UAT or Production (its `environment` label, which the user sets in PPTB) When Inspector connects Then a persistent warning reads "This isn't a development environment. Inspector is read-only but is designed for dev sites." and scanning stays available.
+- [ ] **AC-7.5** Given the PPTB connection is marked as Test, UAT or Production (its `environment` label, which the user sets in PPTB) When Inspector connects Then a persistent warning reads "This isn't a development environment. Inspector is designed for dev sites." and scanning stays available.
 - [ ] **AC-7.6** Given the active connection changes, whichever tab is visible, Then Inspector's results and review marks are cleared and the site list reloads. The active connection has changed when its id or URL differs from the one the results were read with, or when no connection is active. PPTB fires `connection:created`, `connection:updated` and `connection:deleted` for any connection, so on each one the tool re-reads the active connection and compares; an event that leaves the id and URL unchanged (another connection added, edited or removed, or the active one renamed or relabelled) keeps results and review marks, and only the title bar and the AC-7.5 warning update. Selecting a different site, or rescanning the same site, also clears results and review marks. Results from a superseded scan are discarded and never shown (FR-7 scan ID, F34).
 - [ ] **AC-7.7** Given the connected identity can't read some configuration When the scan runs Then the affected checks show "Needs review – couldn't read configuration" and never "Configured". These checks have the status Needs review, count toward M, and export as "Needs review" with that reason.
 - [ ] **AC-7.8** Given the environment has no Power Pages sites When Inspector loads Then the empty state reads "No enhanced data model Power Pages sites found in this environment. Standard data model sites aren't supported.", no scan runs and Export report is disabled (F36). "Couldn't load sites" stays a separate error (Error Scenarios).
@@ -309,7 +310,7 @@ Where the mocks and Learn disagree, Learn wins. The visual design still applies.
 - [ ] **AC-8.3** Given a file is selected When no finding has been chosen Then the first "Needs review" finding is selected, or the first finding if none need review.
 - [ ] **AC-8.4** Given the selected finding When the detail tile renders Then it shows the title, category, status, guidance text, a "Questions to consider" list and a configuration snapshot (web roles, tables with privileges, outbound).
 - [ ] **AC-8.5** Given a "Needs review" finding When the user selects **Mark as reviewed** Then its status becomes "Reviewed", the file ring, the file's list summary and the snapshot update, and the button becomes "Undo review". The button isn't shown for findings that are "Configured".
-  The button is also not shown when **any** of the finding's reasons is a read failure: "couldn't read configuration" (AC-7.7), "couldn't read handler code" (Error Scenarios) or a parent permission that couldn't be read. The remedy is a rescan with better access, so a file can't become Ready on evidence nobody saw. Analysis limits stay reviewable: "Couldn't determine which connectors the code uses", "Couldn't analyse handler code" (the code downloaded but is empty or can't be parsed), "Couldn't interpret the scope of `<name>`" and a parent chain that loops or points at no record (F33). "Couldn't read handler code" means only that the download failed (owner decision 2026-10-20).
+  The button is also not shown when **any** of the finding's reasons is a read failure: "couldn't read configuration" (AC-7.7), "couldn't read handler code" (Error Scenarios) or a parent permission that couldn't be read; nor when the finding's required evidence is partly unscanned (`hasUnscannedEvidence`, FR-8 precedence table), even if its reasons are all analysis limits or configuration findings. The remedy is a rescan with better access, so a file can't become Ready on evidence nobody saw. Analysis limits stay reviewable: "Couldn't determine which connectors the code uses", "Couldn't analyse handler code" (the code downloaded but is empty or can't be parsed), "Couldn't interpret the scope of `<name>`" and a parent chain that loops or points at no record (F33). "Couldn't read handler code" means only that the download failed (owner decision 2026-10-20).
 - [ ] **AC-8.6** Given the files list When it renders Then each file shows its summary: "All configured" when C = 3; "Ready · V reviewed" when K = 3 and V > 0; otherwise "K/3 · M to review" (F38).
 - [ ] **AC-8.7** Given the files tile When it renders Then its footer always shows "Tenant outbound policy: not verified. This tool doesn't read tenant network policy."
 - [ ] **AC-8.8** Given the check rules (FR-9) When a file is evaluated Then:
@@ -623,8 +624,9 @@ Learn-verified objects (9). Only members that Learn documents are listed. The ex
 
 **Must:**
 - Use the host's active connection.
+- Host operations are typed and feature-owned. Handler code is retrieved with the unbound actions `InitializeFileBlocksDownload` and `DownloadBlock` through `dataverseAPI.execute`, called only inside `src/services/pptb/`, which rejects any other `operationName` at runtime. PPTB supplies authentication and Dataverse enforces the signed-in user's permissions. Feature components never receive a generic execute interface.
 - Give each scan an ID made of the connection, the site and a counter. Results carrying a stale ID are discarded, and starting a rescan supersedes the running one (F34).
-- Read every page of every query (F35). `dataverseAPI.queryData` documents only `value`, so Spike S2 checks whether it also returns `@odata.nextLink`. If it doesn't, list queries use `fetchXmlQuery` with its paging cookie.
+- Read every page of every query (F35). Spike S2 (2026-10-22) observed `@odata.nextLink` on `queryData` results and a second linked page from the relative link; whether the token reaches the wire unchanged is still open (RG-001), so `NEXT_LINK_UNVERIFIED` stays on until the Network panel shows it. If the token is altered, list queries use `fetchXmlQuery` with its paging cookie.
 - Retry a read that fails with 429 or 5xx up to 3 times, waiting 1 s, 2 s and 4 s (PPTB's error object carries `status` but no `Retry-After`). After the last attempt the check is "Needs review – couldn't read configuration" (AC-7.7). PPTB's docs leave retries to the tool.
 - Keep at most 4 reads in flight, so per-record reads and their retry waits overlap and a 50-record scan fits the 30 s NFR. Dataverse's service protection limit is 52 concurrent requests per user (Learn), so 4 stays well inside it. The retry rule applies to each request.
 - In `$filter`, write every string value as an OData literal: double each `'` and URL-encode the result (Learn, "Filter rows using OData"). This covers values that come from configuration, such as environment-variable schema names, which may contain `'`.
@@ -649,7 +651,7 @@ Learn-verified objects (9). Only members that Learn documents are listed. The ex
 - Build each file's **grant set** (F27): the table permissions linked to the file's roles, plus those linked to the Authenticated Users role (`authenticatedusersrole`) when any assigned role isn't anonymous, plus those linked to the Anonymous Users role when the anonymous role is assigned. Learn assigns every authenticated user the Authenticated Users role, so its grants always apply. A Parent-scope permission is linked to the roles of the top permission in its chain, plus any roles listed on the permission itself: Spike S1 found 41 of 42 Parent-scope permissions carry no roles of their own. The snapshot labels each permission with the role it comes from and states "Other roles a user may hold aren't assessed."
 - Count a table permission as linked only when it's active (`statecode` = 0). A Parent-scope permission also needs its parent chain followed (F26):
   - **Known inactive:** if the permission or any ancestor is inactive (`statecode` = 1), the permission is ignored. The snapshot lists it as "(inactive, ignored)" or "(parent inactive, ignored)".
-  - **Unknown:** an ancestor can't be read, the parent reference resolves to no readable record, or the chain loops. Table permissions is then Needs review, "Couldn't evaluate parent permission `<name>`", whatever other permissions are linked. An unresolved chain never leaves a clean Configured result.
+  - **Unknown:** an ancestor can't be read, the parent reference resolves to no readable record, or the chain loops. Table permissions is then Needs review, "Couldn't evaluate parent permission `<name>`", whatever other permissions are linked. An unresolved chain never leaves a clean Configured result. An active terminal ancestor whose `scope` is unknown (FR-7 scope rule) makes every linked descendant unresolved, whether the effective role link comes from the descendant or from the ancestor. When the records were read successfully this is the reviewable analysis limit "Couldn't evaluate parent permission `<name>`"; a failed ancestor or configuration read remains a non-reviewable read failure. A known inactive ancestor still excludes the permission.
   - The parent link is `content.parententitypermission`, the parent permission's `powerpagecomponentid` on the same site (Spike S1: 42 of 42 resolved).
   - The chain uses the type-18 components Inspector already reads, so it adds no query.
 - Parse `ServerLogic/AllowedDomains` as a comma-separated list of hosts, each trimmed (Spike S4: entries with a leading space matched). Learn doesn't document the format, so the parse is strict: split on `,`, trim each entry and drop empty entries. An entry is a host when it matches `^(\*\.)?[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)*$`. Any other entry (a scheme such as `https://`, a path, a port, inner whitespace, or `*` anywhere but a leading `*.`) means the value can't be parsed, and the Outbound check is "Needs review – couldn't interpret `ServerLogic/AllowedDomains`", naming the entry (FR-9, O2). A value with no entries left is "no allow list". An entry that starts with `*.` is a **wildcard entry**: Spike S4 found `*.example.com` matched neither `www.example.com` nor `example.com`, so wildcard entries are reported (FR-9) and don't count toward the list.
@@ -670,12 +672,12 @@ Learn-verified objects (9). Only members that Learn documents are listed. The ex
 |---|---|---|
 | Sites | Dataverse `powerpagesites` (`powerpagesite`): `powerpagesiteid`, `name`, `primarydomainname`, `statecode` (0 Active, 1 Inactive) | Verified on Learn |
 | Server logic records and their status | `powerpagecomponents` (`powerpagecomponent`) where `powerpagecomponenttype` = 35 (Server Logic) and `powerpagesiteid` = the site: `name`, `statecode` (0 Active, 1 Inactive) | Verified on Learn |
-| Server logic code | `powerpagecomponent` `filecontent`, a File column holding `<name>.sl`, downloaded from `powerpagecomponents(<id>)/filecontent/$value`. `content` holds only `display_name`, `description` and the role link | Spike S1; Spike S2 checks that the host can download a file column |
+| Server logic code | `powerpagecomponent` `filecontent`, a File column holding `<name>.sl`. Retrieved with `InitializeFileBlocksDownload` (`Target` = `{ "@odata.type": "Microsoft.Dynamics.CRM.powerpagecomponent", powerpagecomponentid }`, `FileAttributeName: "filecontent"`) and sequential `DownloadBlock` calls; `queryData` cannot return the `$value` byte body (Spike S2, 2026-10-22: `{}`). `content` holds only `display_name`, `description` and the role link | Spike S1; Spike S2 continuation proves a populated handler downloads and matches its stored bytes/text |
 | Web roles | `powerpagecomponent` type 11 (Web Role). `content` keys `anonymoususersrole` and `authenticatedusersrole` (booleans) and an optional `key` | Spike S1 |
 | Web roles assigned to a record | `content.adx_serverlogic_adx_webrole` on the server logic record: an array of web role `powerpagecomponentid`s. The N:N relationship `powerpagecomponent_powerpagecomponent` is empty for these links | Spike S1 |
 | Table permissions per role | `powerpagecomponent` type 18 (Table Permission), state from `statecode`. `content` keys: `entitylogicalname`, `entityname`, `scope` (756150000 Global, 756150001 Contact, 756150002 Account, 756150003 Parent, 756150004 Self), the booleans `read`, `write`, `create`, `delete`, `append` and `appendto`, `contactrelationship` or `accountrelationship` for those scopes, roles in `adx_entitypermission_webrole` (an array of web role IDs), and for Parent scope `parententitypermission` (the parent's ID) and `parentrelationship` | Spike S1 |
 | Site settings | `powerpagecomponent` type 9 (Site Setting), filtered to the site and the `ServerLogic/` prefix. `content.value` (a string) with `source` 0, or `envvar_schema` with `source` 1 and no `value` | Spike S1 |
-| Environment-variable values | `environmentvariabledefinitions` (`schemaname`, `type`, `defaultvalue`) with `environmentvariabledefinition_environmentvariablevalue` (`value`) | Spike S1; Spike S2 checks read access |
+| Environment-variable values | `environmentvariabledefinitions` (`schemaname`, `type`, `defaultvalue`) with `environmentvariabledefinition_environmentvariablevalue` (`value`) | Spike S1; Spike S2 checks nonsecret current/default/missing/denied reads and that a Secret-type definition never triggers a value read |
 | Environment classification (Dev/Test/UAT/Prod) | The PPTB connection's `environment` label (`Dev`, `Test`, `UAT`, `Production`), set by the user in PPTB, not Power Platform's environment type. Missing or unrecognised reads as Unknown (AC-7.11) | PPTB docs |
 
 **Spike S1 (first plan task):** on a sample enhanced-model site, confirm nine things:
@@ -699,7 +701,7 @@ S1 records the exact queries, one redacted sample record per component type, and
 - a save dialog that writes binary files, for the zip and the PDF (AC-5.6, AC-5.10, AC-9.3);
 - clipboard write (AC-4.9, AC-6.7);
 - whether `dataverseAPI.queryData` returns `@odata.nextLink` (FR-7);
-- a way to download a file column, for the server logic code in `filecontent` (Spike S1). Without one, every check that needs the code is "Needs review – couldn't read handler code";
+- a populated type-35 handler downloaded through `InitializeFileBlocksDownload` and `DownloadBlock`: `filecontent_name` and the `regardingfieldname = filecontent` FileAttachment row confirm it is populated; record the initializer property types, `Data` encoding, byte count and local byte/text equality. A failed download stays a per-file non-reviewable read failure; a healthy path that falls back for every file does not meet acceptance;
 - read access to `environmentvariabledefinitions` and `environmentvariablevalues` for settings backed by environment variables (FR-7);
 - what a read returns (error name and `status`) when the network drops and when the connection's sign-in expires, so AC-7.10 can tell connection loss from a 403 (AC-7.7);
 - whether `connection:*` events say which connection changed, or the tool must re-read the active connection on each one (AC-7.6).
@@ -736,18 +738,30 @@ The probe also found that the runtime matches the restricted list case-insensiti
 **Spike evidence** (F59): each spike records, in the plan of the phase that runs it, the queries or calls it made, the host and runtime versions, and the outcome. A result that contradicts the spec becomes a spec update before dependent work starts.
 
 **Must not:**
-- Create, update or delete anything.
+- Create, update or delete anything. The only actions Inspector executes are the two retrieval actions above; the adapter rejects any other operation name.
 
 ### FR-8: Finding model
 
 **Must:**
 - Give each check one of three statuses: Configured, Needs review or Reviewed. Reviewed is user-set, session-only, and only available for Needs review.
 - Add one display state outside those three: **Not scanned** (grey, no icon colour beyond neutral). It applies only to evidence not yet read when a scan is interrupted (AC-7.10, AC-8.11). It is never user-settable.
+- Apply this precedence only to evidence a check actually needs; an irrelevant unread setting never defeats a conclusive code-based no-use result (FR-9 O0/O1).
+
+  | Required evidence | Result | Mark as reviewed |
+  |---|---|---|
+  | A known read failure, including mixed failed and unscanned dependencies | Needs review; all known reasons kept; detail names the missing evidence | Unavailable |
+  | A known adverse finding plus unscanned required evidence | Needs review; the adverse reason kept; detail names the missing evidence | Unavailable until a new scan supplies it |
+  | Unscanned required evidence with no known failure or adverse finding | Not scanned | Unavailable |
+  | Evidence read and a configuration finding applies | Needs review with every applicable reason | Available; original reasons retained |
+  | Evidence read but an analysis limit remains | Needs review | Available; original reasons retained |
+  | Evidence read and no finding applies | Configured | None |
+
+  `canReviewFinding` enforces the table, including marks supplied to `evaluateSite` directly. Unscanned evidence is never labelled a read failure. C/V/M/U/T/K counts and the file-result precedence (AC-8.1, AC-8.10) are unchanged.
 - **"Couldn't read" is not a state.** It is Needs review with the reason "couldn't read configuration" (AC-7.7).
 - Don't offer Mark as reviewed for a check when any of its reasons is a read failure (AC-8.5, F33).
 - Count Configured (C) and Reviewed (V) toward K, Needs review toward M, and Not scanned toward U (AC-8.1, F39).
 - In exports, show Reviewed as "Reviewed" with the original reason (AC-8.12), and Not scanned as "Not scanned", in every format.
-- Attach a category, a summary, guidance, questions and a snapshot to each finding.
+- Each finding owns its category, summary, original reasons, guidance, questions and explanatory detail, plus `hasUnscannedEvidence`. `FileResult.snapshot` owns the optional raw configuration rows (web roles, tables with privileges, outbound settings); finding detail never copies them.
 - Default to Needs review when evidence can't be read.
 
 ### FR-9: Check rules
@@ -763,7 +777,7 @@ The probe also found that the runtime matches the restricted list case-insensiti
   - the code can't be read or analysed (Error Scenarios).
 
   Configured, with the "no table permissions needed" summary, when the grant set is empty and no Dataverse use is detected, unless connector use couldn't be determined (AC-8.8). Only active permissions count, and inactive ones and those with inactive ancestors are ignored. Non-Global access types aren't otherwise flagged in v1.
-- **Outbound networking:** evaluate the first row that matches. "All" means `AllowNetworkingToAllDomains` is `true` or absent. "List" means `AllowedDomains` parses to at least one host that isn't a wildcard entry (FR-7). If any entry is a wildcard entry, Outbound is Needs review and adds the reason "Wildcard entries aren't supported: `<entry>` matches no host." The row below is still chosen with those entries left out, and its message shows as well, so a list of only wildcard entries reads as O5.
+- **Outbound networking:** evaluate the first row that matches. "All" means `AllowNetworkingToAllDomains` is `true` or absent. "List" means `AllowedDomains` parses to at least one host that isn't a wildcard entry (FR-7). If any entry is a wildcard entry, Outbound is Needs review and adds the reason "Wildcard entries aren't supported: `<entry>` matches no host." The row below is still chosen with those entries left out, and its message shows as well, so a list of only wildcard entries reads as O5. Code-based rows O0 and O1 are decided first. Once HttpClient use requires the settings, every known wildcard reason is collected before an O2 result is returned, so an invalid, duplicate or unreadable `AllowNetworkingToAllDomains` keeps the leading O2 summary and all wildcard reasons.
 
   | # | Condition | Result |
   |---|---|---|
@@ -857,7 +871,7 @@ Sources: PPTB tool-development docs (manifest, `pptb-validate`, marketplace poli
 ### Security
 
 - Inspector uses only the signed-in user's permissions; the tool never handles access tokens, and all access goes through the host.
-- Inspector requests read-only access.
+- Inspector performs retrieval only: list/record reads through `queryData` and handler-file retrieval through the two documented download actions, all inside the host adapter with validated responses and host-managed authentication. No write operation is ever issued.
 - No configuration, findings or code are sent to third parties.
 - Files and reports the tool generates contain no tokens or secrets the tool obtained. Code the user edits is downloaded exactly as written; the tool doesn't scan or redact it (F20).
 - Generated code never contains literal secrets.
@@ -911,6 +925,7 @@ Sources: PPTB tool-development docs (manifest, `pptb-validate`, marketplace poli
 | Code can't be tokenized | Restricted patterns are still matched in full and reported as Blocked; the browser-API check falls back to substring matching and reports "May be rejected"; Browser checks notes "Couldn't parse this code" (FR-4) |
 | Site list can't be read | Error state "Couldn't load sites" with the reason and a Retry button; no scan runs |
 | A record's code can't be downloaded | Table permissions and Outbound are "Needs review – couldn't read handler code", a read failure with no Mark as reviewed (AC-8.5); Web role is evaluated normally |
+| A record's code downloads as an empty file | Readable empty code: Table permissions and Outbound are "Needs review – Couldn't analyse handler code" (reviewable); Web role is evaluated normally |
 | A record's code is empty or can't be parsed | Function names are treated as unknown, so the Table permissions write-on-read rule can't apply. Table permissions and Outbound are "Needs review – Couldn't analyse handler code", which can be marked as reviewed (AC-8.5, owner decision 2026-10-20); Web role is evaluated normally |
 | A table permission's scope is missing or unknown | Table permissions: "Needs review – Couldn't interpret the scope of `<name>`" (FR-7) |
 | More than one web role is marked as the Anonymous or Authenticated Users Role | Every flagged role is treated as that default role; site banner, repeated in exports (FR-7) |
