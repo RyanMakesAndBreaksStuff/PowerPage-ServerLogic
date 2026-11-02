@@ -116,3 +116,57 @@ export function hostileReportResult(): SiteResult {
     banners: [`Site banner ${hostile}`],
   };
 }
+
+// 400 characters with no space, so a PDF cell must break inside the word.
+export const LONG_FILE_NAME = `${'long-segment-'.repeat(31).slice(0, 397)}.js`;
+// 3,000 characters of ordinary words: taller than a PDF page once wrapped into a narrow cell.
+export const LONG_REASON = 'Global Read on account via Members. '.repeat(84).slice(0, 3000);
+
+const LONG_CYCLE = [
+  ['configured', 'configured', 'configured'],
+  ['configured', 'needs-review', 'configured'],
+  ['reviewed', 'configured', 'configured'],
+  ['not-scanned', 'not-scanned', 'not-scanned'],
+] as const;
+
+/** Sixty files: fifty-nine ordinary ones and `long-text`: a 400-character name and a 3,000-character Reviewed table-permissions reason and Needs-review outbound reason. */
+export function longReportResult(): SiteResult {
+  const result = reportResult();
+  const files = Array.from({ length: 59 }, (_, index) => {
+    const id = String(index + 1).padStart(2, '0');
+    return reportFile(`file-${id}`, `handler-${id}`, LONG_CYCLE.at(index % 4) ?? LONG_CYCLE[0]);
+  });
+  const long = reportFile('long-text', LONG_FILE_NAME, ['configured', 'reviewed', 'configured']);
+  return {
+    ...result,
+    files: [
+      ...files,
+      {
+        ...long,
+        findings: [
+          long.findings[0],
+          {
+            ...reportFinding('tablePermissions', 'reviewed'),
+            summary: LONG_REASON,
+            reasons: [{ text: LONG_REASON, readFailure: false }],
+          },
+          {
+            ...reportFinding('outbound', 'needs-review'),
+            summary: LONG_REASON,
+            reasons: [{ text: LONG_REASON, readFailure: false }],
+          },
+        ],
+      },
+    ],
+  };
+}
+
+export const REPORT_FIXTURE_CASES: readonly {
+  readonly name: string;
+  readonly result: () => SiteResult;
+  readonly fileId: string;
+}[] = [
+  { name: 'standard', result: reportResult, fileId: 'customer' },
+  { name: 'long', result: longReportResult, fileId: 'long-text' },
+  { name: 'hostile', result: hostileReportResult, fileId: 'hostile' },
+];
