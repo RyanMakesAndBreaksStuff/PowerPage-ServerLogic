@@ -62,3 +62,29 @@ Checked with Git for Windows' `pdftotext` (no `pdfinfo`, no rasteriser, no human
 - B1 used `curl`, `unzip` and `sed` in Git Bash into scratchpad directories instead of the plan's PowerShell script in `$env:TEMP` (PowerShell network access was denied). Same URL, same hashes, same normalisation; the licence file is LF with no trailing-space lines and ends with a newline, 4,398 bytes as the plan states.
 - Existing source files are CRLF; edits were made on LF copies and every touched or new `.ts` file was restored to CRLF before the commit. Git reports an LF-to-CRLF working-copy warning for `OFL-JetBrainsMono.txt` (autocrlf), the committed blob is the LF text.
 - No code, anchor or expected-number deviations; all expected counts matched.
+
+## C5 rendered check (follow-up, 2026-11-02)
+
+The six PDFs were regenerated on `logic-inspector-v2-build` with `INSPECTOR_PDF_OUT=1` and rasterised with `pypdfium2` (PDFium) in a throwaway scratchpad virtual environment, at 1.6x for whole pages and 4x to 5x for crops. Every page of all six files was rendered; the pages below were inspected as images. This is a rendered-image check, not a human check in a PDF reader inside PPTB; RG-005 stays open for that.
+
+| Item | Seen | Result |
+| --- | --- | --- |
+| Tick | Every Configured and Reviewed cell, both scopes | Drawn vector checkmark in the blue role, aligned with the first text line |
+| Pill tints | Result column, standard, long and hostile site reports | Ready blue tint, Needs review orange tint, Incomplete grey tint; text readable on each |
+| Site ring, segmented | Standard site (9 checks), hostile site (3 checks) | One segment per check in file order with visible gaps; blue for Configured and Reviewed, orange for Needs review, grey for Not scanned |
+| Site ring, proportional | Long site (180 checks) | Falls back to three proportional arcs (blue, orange, grey) with gaps between them |
+| Row rings | Every site table row | Small per-file ring matches the row's checks |
+| Head row | Long site pages 2, 5, 6 and 7; long file page 2 | The table head repeats at the top of each page |
+| Row cuts | All table pages | No printed row is cut across a page; the 400-character entry is split into labelled rows `(continued 2/3)` and `(continued 3/3)` |
+| Hostile text | Hostile file and site | Title, path, banner, table cell and Review first heading show the literal characters |
+| Page numbers | All files | `Page n of m` bottom right on every page |
+
+**Defect found and fixed.** The site ring's centre text was wider than the ring hole: "checks addressed" overlapped the ring on both sides in every site report, and the three-digit count `122/180` in the long report overlapped it too. `drawRingLabel` in `renderPdf.ts` now shrinks the count to fit, wraps the caption onto two lines and centres the block on the ring. The test `fits the ring count and caption inside the ring hole (P5.6 C5 reader check)` measures each label at the font and size it is drawn with; it failed before the fix (`expected [ '5/9', 'checks addressed' ] to deeply equal [ '5/9', 'checks', 'addressed' ]`) and passes after. Re-rendered crops of the standard, long and hostile rings show the text clear of the ring.
+
+Gates after the fix: report suites 7 files / 87 tests; `npm test` 105 files / 1727 tests; `npm run typecheck`, `npm run lint` and `npm run build` exit 0 (bundle unchanged at 932.90 kB); `git diff --check` clean.
+
+**Cosmetic, left as is** (no requirement is broken; recorded for P5.8 review):
+
+- Continuation rows carry no tick, so their text starts at the cell padding instead of the tick indent the first row uses.
+- With `rowPageBreak: 'avoid'`, a row taller than the space left moves to the next page. Long file page 1 is about half empty because the 3,000-character Table permissions row starts on page 2.
+- The 400-character test name has no spaces, so the title and the File cell break it mid-word.

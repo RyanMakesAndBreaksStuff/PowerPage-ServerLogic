@@ -38,8 +38,10 @@ type Ctx = {
 const LEADING = 1.4;
 const LABEL_WIDTH = 78;
 const BULLET_INDENT = 14;
-const RING_RADIUS = 50;
-const RING_THICKNESS = 12;
+/** The site ring in the hero: outer radius, stroke thickness, and the clear space kept inside the hole. */
+export const HERO_RING = { radius: 50, thickness: 12, textPadding: 6 } as const;
+const RING_RADIUS = HERO_RING.radius;
+const RING_THICKNESS = HERO_RING.thickness;
 
 const TEXT: TextStyle = { face: 'body', size: 10, color: PALETTE.ink };
 const MUTED: TextStyle = { face: 'body', size: 10, color: PALETTE.muted };
@@ -213,6 +215,29 @@ function drawBanners(ctx: Ctx, banners: readonly string[]): void {
   }
 }
 
+// The count and caption stay inside the ring hole: the count shrinks to fit (three-digit totals) and
+// the caption wraps, and the block is centred vertically on the ring.
+function drawRingLabel(ctx: Ctx, cx: number, cy: number, count: string): void {
+  const width = 2 * (HERO_RING.radius - HERO_RING.thickness) - 2 * HERO_RING.textPadding;
+  const base: TextStyle = { face: 'heading', size: 20, color: PALETTE.ink };
+  setFace(ctx.doc, base.face);
+  const measured = ctx.doc.setFontSize(base.size).getTextWidth(pdfText(ctx, count));
+  const countStyle: TextStyle =
+    measured > width
+      ? { ...base, size: Math.floor((base.size * width * 10) / measured) / 10 }
+      : base;
+  const caption = wrapText(ctx.doc, 'checks addressed', width, SMALL.face, SMALL.size);
+  const step = SMALL.size * 1.2;
+  const gap = 3;
+  let y = cy - (countStyle.size + gap + caption.length * step) / 2;
+  write(ctx, count, cx, y, countStyle, 'center');
+  y += countStyle.size + gap;
+  for (const line of caption) {
+    write(ctx, line, cx, y, SMALL, 'center');
+    y += step;
+  }
+}
+
 // AC-9.3 hero: the site ring over every check, the path, headline, interval and the file counts.
 function drawHero(ctx: Ctx, model: ReportModel): void {
   paragraph(ctx, model.title, TITLE);
@@ -223,9 +248,7 @@ function drawHero(ctx: Ctx, model: ReportModel): void {
   const cy = top + RING_RADIUS + 4;
   const segments = model.rows.flatMap((row) => row.checks.map((check) => ringState(check.status)));
   drawRing(ctx.doc, cx, cy, RING_RADIUS - RING_THICKNESS / 2, RING_THICKNESS, segments);
-  const total = `${String(model.counts.K)}/${String(model.counts.T)}`;
-  write(ctx, total, cx, cy - 16, { face: 'heading', size: 20, color: PALETTE.ink }, 'center');
-  write(ctx, 'checks addressed', cx, cy + 8, SMALL, 'center');
+  drawRingLabel(ctx, cx, cy, `${String(model.counts.K)}/${String(model.counts.T)}`);
   ctx.indent = 2 * RING_RADIUS + 28;
   paragraph(ctx, model.headline, HEADLINE);
   space(ctx, 4);

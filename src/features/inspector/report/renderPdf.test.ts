@@ -18,7 +18,7 @@ import {
   reportFile,
   reportResult,
 } from './reportFixtures';
-import { drawReport, renderPdf } from './renderPdf';
+import { HERO_RING, drawReport, renderPdf } from './renderPdf';
 
 const SCOPES = ['file', 'site'] as const;
 
@@ -186,6 +186,43 @@ describe('renderPdf', () => {
       expect(positions).toEqual(positions.toSorted((x, y) => x - y));
     }
     expect(texts.indexOf(review[0] ?? '')).toBeLessThan(texts.indexOf(pending[0] ?? ''));
+  });
+
+  it('fits the ring count and caption inside the ring hole (P5.6 C5 reader check)', () => {
+    const hole = 2 * (HERO_RING.radius - HERO_RING.thickness) - 2 * HERO_RING.textPadding;
+    for (const result of [reportResult, longReportResult]) {
+      const model = buildReportModel(result(), pdfOptions('site', 'customer'), EXPORTED_AT);
+      const doc = createPdfDocument();
+      const fonts = vi.spyOn(doc, 'setFont');
+      const sizes = vi.spyOn(doc, 'setFontSize');
+      const text = vi.spyOn(doc, 'text');
+      drawReport(doc, model);
+      // The font state in force at a call is the last setFont/setFontSize issued before it.
+      const before = <T extends unknown[]>(
+        spy: { mock: { calls: T[]; invocationCallOrder: number[] } },
+        order: number,
+      ): T | undefined =>
+        spy.mock.calls.filter((_, index) => (spy.mock.invocationCallOrder[index] ?? 0) < order).at(-1);
+      const width = (index: number): number => {
+        const order = text.mock.invocationCallOrder[index] ?? 0;
+        const [family, style] = before(fonts, order) ?? [];
+        const [size] = before(sizes, order) ?? [];
+        const [value] = text.mock.calls[index] ?? [];
+        if (typeof family !== 'string' || typeof size !== 'number' || typeof value !== 'string') {
+          throw new Error('Missing font state for a ring label');
+        }
+        doc.setFont(family, style).setFontSize(size);
+        return doc.getTextWidth(value);
+      };
+      const count = `${String(model.counts.K)}/${String(model.counts.T)}`;
+      const labels = text.mock.calls.flatMap(([value], index) =>
+        value === count || value === 'checks' || value === 'addressed' || value === 'checks addressed'
+          ? [{ value, width: width(index) }]
+          : [],
+      );
+      expect(labels.map((label) => label.value)).toEqual([count, 'checks', 'addressed']);
+      for (const label of labels) expect(label.width).toBeLessThanOrEqual(hole);
+    }
   });
 
   it('draws text as text and never rasterises, fetches or embeds an image', () => {
