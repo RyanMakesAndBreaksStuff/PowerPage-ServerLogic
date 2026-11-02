@@ -98,7 +98,7 @@ describe('host contract', () => {
       [string, string | Uint8Array, readonly FileFilter[]]
     >();
     expectTypeOf<PptbHost['saveFile']>().returns.toEqualTypeOf<Promise<SaveResult>>();
-    expectTypeOf<PptbHost['queryAll']>().parameters.toEqualTypeOf<[ODataQuery]>();
+    expectTypeOf<PptbHost['queryAll']>().parameters.toEqualTypeOf<[ODataQuery, (AbortSignal | undefined)?]>();
     expectTypeOf<PptbHost['queryAll']>().returns.toEqualTypeOf<Promise<readonly unknown[]>>();
     expectTypeOf<PptbHost['getActiveConnection']>().returns.toEqualTypeOf<
       Promise<Connection | null>

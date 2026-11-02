@@ -4,6 +4,7 @@ import type { Connection, HostEvent, ODataQuery, PptbHost } from './host.types';
 import { createFakeHost } from './fakeHost';
 
 const GUID = '0f8fad5b-d9cb-469f-a165-70867728950e';
+const REF = { entityLogicalName: 'powerpagecomponent', primaryIdAttribute: 'powerpagecomponentid', recordId: GUID, fileAttributeName: 'filecontent' };
 const CONNECTION: Connection = {
   id: 'c1',
   name: 'PG DEV',
@@ -228,19 +229,17 @@ describe('queryAll', () => {
 });
 
 describe('downloadFileColumn', () => {
-  it('returns canned text by <entitySet>/<id>/<column>', async () => {
+  it('returns canned text by <logical-table>/<id>/<column>', async () => {
     const host = createFakeHost({
-      fileColumns: { [`powerpagecomponents/${GUID}/filecontent`]: 'export function get() {}' },
+      fileColumns: { [`powerpagecomponent/${GUID}/filecontent`]: 'export function get() {}' },
     });
-    await expect(host.downloadFileColumn('powerpagecomponents', GUID, 'filecontent')).resolves.toBe(
+    await expect(host.downloadFileColumn(REF)).resolves.toBe(
       'export function get() {}',
     );
     expect(host.callsOf('downloadFileColumn')).toEqual([
       {
         method: 'downloadFileColumn',
-        entitySet: 'powerpagecomponents',
-        id: GUID,
-        column: 'filecontent',
+        ref: REF,
       },
     ]);
   });
@@ -248,7 +247,7 @@ describe('downloadFileColumn', () => {
   it('fails with a 404 for a column nobody scripted', async () => {
     const host = createFakeHost();
     await expect(
-      host.downloadFileColumn('powerpagecomponents', GUID, 'filecontent'),
+      host.downloadFileColumn(REF),
     ).rejects.toMatchObject({
       status: 404,
     });
@@ -259,18 +258,18 @@ describe('downloadFileColumn', () => {
     const host = createFakeHost({
       tables: { powerpagecomponents: [] },
       fileColumns: {
-        [`powerpagecomponents/${GUID}/filecontent`]: 'a',
-        [`powerpagecomponents/${other}/filecontent`]: 'b',
+        [`powerpagecomponent/${GUID}/filecontent`]: 'a',
+        [`powerpagecomponent/${other}/filecontent`]: 'b',
       },
       failures: [
-        { operation: 'file', entitySet: 'powerpagecomponents', status: 500, contains: other },
+        { operation: 'file', entitySet: 'powerpagecomponent', status: 500, contains: other },
       ],
     });
-    await expect(host.downloadFileColumn('powerpagecomponents', GUID, 'filecontent')).resolves.toBe(
+    await expect(host.downloadFileColumn(REF)).resolves.toBe(
       'a',
     );
     await expect(
-      host.downloadFileColumn('powerpagecomponents', other, 'filecontent'),
+      host.downloadFileColumn({ ...REF, recordId: other }),
     ).rejects.toMatchObject({
       status: 500,
     });

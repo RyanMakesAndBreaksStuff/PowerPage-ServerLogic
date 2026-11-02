@@ -7,8 +7,11 @@ import type {
   SaveResult,
   ThemeName,
 } from './host.types';
-import { downloadColumnContent, queryAllRows } from './dataverseRead';
+import { HostReadError } from './host.types';
+import { queryAllRows } from './dataverseRead';
 import type { ReadDeps, Sleep } from './dataverseRead';
+import { downloadColumnContent } from './dataverseFiles';
+import type { FileDeps } from './dataverseFiles';
 import { HostCallError, isRecord, logHostFailure } from './hostErrors';
 
 export type PptbHostOptions = { sleep?: Sleep };
@@ -121,14 +124,27 @@ function createEventHub(): PptbHost['onEvent'] {
   };
 }
 
+/** The two retrieval actions the adapter may execute (spec FR-7 4.1.0, rule file). Anything else is refused. */
+const FILE_ACTIONS: ReadonlySet<string> = new Set(['InitializeFileBlocksDownload', 'DownloadBlock']);
+
 /**
- * The only module that touches `window.toolboxAPI` and `window.dataverseAPI`. Dataverse is read-only:
- * `queryData` is the only data call. Every host response is `unknown` until a guard narrows it.
+ * The only module that touches `window.toolboxAPI` and `window.dataverseAPI`. Dataverse access is retrieval only:
+ * `queryData` for lists and the two file-download actions through `execute`. Every host response is `unknown`
+ * until a guard narrows it.
  */
 export function createPptbHost(options: PptbHostOptions = {}): PptbHost {
   const deps: ReadDeps = {
     read: (path, headers) => window.dataverseAPI.queryData(path, undefined, headers),
     sleep: options.sleep ?? defaultSleep,
+  };
+  const files: FileDeps = {
+    execute: (request) => {
+      if (!FILE_ACTIONS.has(request.operationName)) {
+        return Promise.reject(new HostReadError('Refused host operation.', null));
+      }
+      return window.dataverseAPI.execute(request satisfies DataverseAPI.ExecuteRequest);
+    },
+    sleep: deps.sleep,
   };
 
   return {
@@ -195,9 +211,8 @@ export function createPptbHost(options: PptbHostOptions = {}): PptbHost {
 
     onEvent: createEventHub(),
 
-    queryAll: (q) => queryAllRows(q, deps),
+    queryAll: (q, signal) => queryAllRows(q, deps, undefined, signal),
 
-    downloadFileColumn: (entitySet, id, column) =>
-      downloadColumnContent(entitySet, id, column, deps),
+    downloadFileColumn: (ref, signal) => downloadColumnContent(ref, files, signal),
   };
 }

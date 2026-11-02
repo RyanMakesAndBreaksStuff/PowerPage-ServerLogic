@@ -49,5 +49,13 @@ export function toHostReadError(label: string, error: unknown): HostReadError {
   if (error instanceof HostReadError) return error;
   logHostFailure(label, error);
   const status = statusOf(error);
-  return new HostReadError(messageForStatus(status), status);
+  // Only the platform's own network exception is a confirmed transport loss. PPTB's IPC errors are
+  // probably plain objects (live gate RG-002); a no-status failure stays local until S2 records a narrower shape.
+  const transport = error instanceof DOMException && error.name === 'NetworkError';
+  return new HostReadError(messageForStatus(status), status, transport);
+}
+
+/** Throws the standard cancellation error when the caller's signal is aborted. Not a HostReadError: never a finding. */
+export function throwIfAborted(signal: AbortSignal | undefined): void {
+  if (signal?.aborted === true) throw new DOMException('Scan cancelled.', 'AbortError');
 }

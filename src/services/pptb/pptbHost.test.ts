@@ -43,6 +43,15 @@ function makeStubs() {
   const queryData = vi
     .fn<(query: string, target?: unknown, headers?: unknown) => Promise<unknown>>()
     .mockResolvedValue({ value: [] });
+  const execute = vi
+    .fn<(request: DataverseAPI.ExecuteRequest) => Promise<unknown>>()
+    .mockImplementation((request) =>
+      Promise.resolve(
+        request.operationName === 'InitializeFileBlocksDownload'
+          ? { FileContinuationToken: 'token', FileSizeInBytes: 1, FileName: 'a.sl', IsChunkingSupported: true }
+          : { Data: 'YQ==' },
+      ),
+    );
   return {
     getCurrentTheme,
     showNotification,
@@ -55,13 +64,14 @@ function makeStubs() {
     registrations,
     emit,
     queryData,
+    execute,
     toolbox: {
       utils: { getCurrentTheme, showNotification, copyToClipboard, openInConnectionBrowser },
       fileSystem: { saveFile },
       connections: { getActiveConnection },
       events: { on, off },
     },
-    dataverse: { queryData },
+    dataverse: { queryData, execute },
   };
 }
 
@@ -571,60 +581,27 @@ describe('queryAll', () => {
   });
 });
 
-describe('downloadFileColumn', () => {
-  const path = `powerpagecomponents(${GUID})/filecontent/$value`;
+describe('downloadFileColumn boundary', () => {
+  const REF = { entityLogicalName: 'powerpagecomponent', primaryIdAttribute: 'powerpagecomponentid', recordId: GUID, fileAttributeName: 'filecontent' };
 
-  it('reads the file column through queryData and returns the text', async () => {
-    stubs.queryData.mockResolvedValue('export function get() {}');
-    await expect(host.downloadFileColumn('powerpagecomponents', GUID, 'filecontent')).resolves.toBe(
-      'export function get() {}',
-    );
-    expect(stubs.queryData).toHaveBeenCalledWith(path, undefined, {});
-  });
-
-  it('accepts text wrapped in a value member', async () => {
-    stubs.queryData.mockResolvedValue({ value: 'export function get() {}' });
-    await expect(host.downloadFileColumn('powerpagecomponents', GUID, 'filecontent')).resolves.toBe(
-      'export function get() {}',
-    );
-  });
-
-  it('retries a 503 on the same schedule as queryAll', async () => {
-    stubs.queryData
-      .mockRejectedValueOnce({ status: 503 })
-      .mockRejectedValueOnce({ status: 503 })
-      .mockResolvedValueOnce('code');
-    await expect(host.downloadFileColumn('powerpagecomponents', GUID, 'filecontent')).resolves.toBe(
-      'code',
-    );
-    expect(sleep.mock.calls).toEqual([[1000], [2000]]);
-  });
-
-  it.each([
-    ['an object without a string value', { value: [1, 2] }],
-    ['null', null],
-    ['a number', 7],
-  ])('rejects %s', async (_label, response) => {
-    stubs.queryData.mockResolvedValue(response);
-    await expect(
-      host.downloadFileColumn('powerpagecomponents', GUID, 'filecontent'),
-    ).rejects.toMatchObject({
-      name: 'HostReadError',
-      status: null,
-    });
-  });
-
-  it.each([
-    ['an id that is not a GUID', 'powerpagecomponents', '1) or (1', 'filecontent'],
-    ['an entity set with a slash', 'powerpagecomponents/x', GUID, 'filecontent'],
-    ['a column with a slash', 'powerpagecomponents', GUID, 'file/content'],
-  ])('refuses %s without calling the host', async (_label, set, id, column) => {
-    await expect(host.downloadFileColumn(set, id, column)).rejects.toBeInstanceOf(HostReadError);
+  it('sends only the two unbound download actions', async () => {
+    await expect(host.downloadFileColumn(REF)).resolves.toBe('a');
+    expect(stubs.execute.mock.calls.map(([request]) => request.operationName)).toEqual([
+      'InitializeFileBlocksDownload',
+      'DownloadBlock',
+    ]);
+    expect(stubs.execute.mock.calls.every(([request]) =>
+      request.operationType === 'action' && !('entityName' in request) && !('entityId' in request))).toBe(true);
     expect(stubs.queryData).not.toHaveBeenCalled();
+  });
+
+  it('rejects with a HostReadError when dataverseAPI is missing', async () => {
+    Reflect.deleteProperty(window, 'dataverseAPI');
+    await expect(host.downloadFileColumn(REF)).rejects.toMatchObject({ name: 'HostReadError', status: null, transport: false });
   });
 });
 
-describe('read-only guarantee', () => {
+describe('retrieval-only guarantee', () => {
   // Every member the adapter may touch. Reaching for anything else (create, update, delete, execute,
   // associate, *Multiple, publishCustomizations, deploySolution, Post, Put, Patch, ...) is recorded and throws.
   const ALLOWED = [
@@ -637,6 +614,7 @@ describe('read-only guarantee', () => {
     'toolboxAPI.events.on',
     'toolboxAPI.events.off',
     'dataverseAPI.queryData',
+    'dataverseAPI.execute',
   ];
 
   function guarded(
@@ -673,9 +651,7 @@ describe('read-only guarantee', () => {
       url: 'https://x.crm.dynamics.com',
       environment: 'Dev',
     });
-    stubs.queryData
-      .mockResolvedValueOnce({ value: [1] })
-      .mockResolvedValueOnce('export function get() {}');
+    stubs.queryData.mockResolvedValueOnce({ value: [1] });
 
     await host.getTheme();
     await host.notify({ title: 'a', body: 'b', type: 'error' });
@@ -685,7 +661,7 @@ describe('read-only guarantee', () => {
     await host.getActiveConnection();
     host.onEvent(() => undefined)();
     await host.queryAll({ ...QUERY, pageSize: 5 });
-    await host.downloadFileColumn('powerpagecomponents', GUID, 'filecontent');
+    await host.downloadFileColumn({ entityLogicalName: 'powerpagecomponent', primaryIdAttribute: 'powerpagecomponentid', recordId: GUID, fileAttributeName: 'filecontent' });
 
     expect(violations).toEqual([]);
     expect(new Set(touched.filter((name) => ALLOWED.includes(name)))).toEqual(
@@ -700,8 +676,16 @@ describe('read-only guarantee', () => {
       void Reflect.get(guard, 'create');
     }).toThrow(/Forbidden host member: dataverseAPI.create/);
     expect(() => {
-      void Reflect.get(guard, 'execute');
+      void Reflect.get(guard, 'update');
     }).toThrow(/Forbidden/);
-    expect(violations).toEqual(['dataverseAPI.create', 'dataverseAPI.execute']);
+    expect(violations).toEqual(['dataverseAPI.create', 'dataverseAPI.update']);
+  });
+
+  it('refuses to execute any operation other than the two download actions', async () => {
+    // Reach the injected execute through the only production path and prove no other name can be sent:
+    // the initializer response is forged so that the loop issues exactly one DownloadBlock.
+    await host.downloadFileColumn({ entityLogicalName: 'powerpagecomponent', primaryIdAttribute: 'powerpagecomponentid', recordId: GUID, fileAttributeName: 'filecontent' });
+    const names = new Set(stubs.execute.mock.calls.map(([request]) => request.operationName));
+    expect([...names].every((name) => name === 'InitializeFileBlocksDownload' || name === 'DownloadBlock')).toBe(true);
   });
 });

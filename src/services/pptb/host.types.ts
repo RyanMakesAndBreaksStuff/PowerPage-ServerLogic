@@ -18,11 +18,22 @@ export class HostReadError extends Error {
   constructor(
     message: string,
     readonly status: number | null,
+    /** True only for a platform-confirmed network exception (DOMException 'NetworkError'); never inferred from a null status. */
+    readonly transport = false,
+    /** Rows received before a later page failed; still need domain validation. */
+    readonly partialRows: readonly unknown[] = [],
   ) {
     super(message);
     this.name = 'HostReadError';
   }
 }
+/** Explicit file-column target. Inspector uses `powerpagecomponent` / `powerpagecomponentid` / `filecontent`. */
+export type FileColumnRef = {
+  entityLogicalName: string;
+  primaryIdAttribute: string;
+  recordId: string;
+  fileAttributeName: string;
+};
 export type PptbHost = {
   getTheme(): Promise<ThemeName>; // rejects when the host call fails; the caller picks the fallback (AC-1.6)
   notify(n: Notice): Promise<void>; // rejects when host notify is missing/throws/rejects
@@ -35,6 +46,8 @@ export type PptbHost = {
   openExternal(url: string): Promise<void>;
   getActiveConnection(): Promise<Connection | null>;
   onEvent(handler: (e: HostEvent) => void): () => void;
-  queryAll(q: ODataQuery): Promise<readonly unknown[]>; // all pages; 429/5xx retried 1s/2s/4s; throws HostReadError
-  downloadFileColumn(entitySet: string, id: string, column: string): Promise<string>;
+  /** All pages; 429/5xx retried 1s/2s/4s; HostReadError keeps partialRows; DOMException 'AbortError' when `signal` aborts. */
+  queryAll(q: ODataQuery, signal?: AbortSignal): Promise<readonly unknown[]>;
+  /** InitializeFileBlocksDownload + DownloadBlock, decoded as UTF-8 after assembly; same retry/abort rules. */
+  downloadFileColumn(ref: FileColumnRef, signal?: AbortSignal): Promise<string>;
 };

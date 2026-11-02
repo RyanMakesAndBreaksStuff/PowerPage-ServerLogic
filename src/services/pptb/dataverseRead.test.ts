@@ -5,7 +5,6 @@ import {
   NEXT_LINK_UNVERIFIED,
   RETRY_DELAYS_MS,
   buildQueryPath,
-  downloadColumnContent,
   fetchAllPages,
   queryAllRows,
   withRetry,
@@ -14,7 +13,6 @@ import type { RawRead, Sleep } from './dataverseRead';
 import { isRetryable, messageForStatus, statusOf, toHostReadError } from './hostErrors';
 
 const BASE = 'https://org.crm.dynamics.com/api/data/v9.2';
-const GUID = '0f8fad5b-d9cb-469f-a165-70867728950e';
 
 const QUERY: ODataQuery = {
   entitySet: 'powerpagecomponents',
@@ -163,11 +161,15 @@ describe('fetchAllPages', () => {
     );
   });
 
-  it('stops a link loop after 1000 pages', async () => {
+  it('stops when the server repeats a paging link and keeps the rows it received', async () => {
     const link = `${BASE}/powerpagecomponents?$select=name&$skiptoken=A`;
-    await expect(fetchAllPages(() => page([1], link), QUERY, false)).rejects.toThrow(
-      /too many pages/,
-    );
+    const readPage = vi.fn(() => page([1], link));
+    await expect(fetchAllPages(readPage, QUERY, false)).rejects.toMatchObject({
+      name: 'HostReadError',
+      message: 'Dataverse repeated a paging link.',
+      partialRows: [1, 1],
+    });
+    expect(readPage).toHaveBeenCalledTimes(2);
   });
 
   it('ships with the strict gate on until Spike S2 confirms @odata.nextLink', () => {
@@ -180,33 +182,5 @@ describe('queryAllRows', () => {
     const read = vi.fn<RawRead>().mockResolvedValue({ value: [1] });
     await queryAllRows({ ...QUERY, pageSize: 5 }, { read, sleep: noSleep });
     expect(read).toHaveBeenCalledWith(expect.any(String), { Prefer: 'odata.maxpagesize=5' });
-  });
-});
-
-describe('downloadColumnContent', () => {
-  it('reads <set>(<id>)/<column>/$value and returns text', async () => {
-    const read = vi.fn<RawRead>().mockResolvedValue('export function get() {}');
-    const text = await downloadColumnContent('powerpagecomponents', GUID, 'filecontent', {
-      read,
-      sleep: noSleep,
-    });
-    expect(text).toBe('export function get() {}');
-    expect(read).toHaveBeenCalledWith(`powerpagecomponents(${GUID})/filecontent/$value`, {});
-  });
-
-  // Spike S2, 2026-10-22: PPTB's JSON-only queryData answers the binary $value body with an empty
-  // object. That is a per-file read failure, not a transport loss and not a retry.
-  it('rejects the empty-object shape once, with no status and no retry', async () => {
-    const read = vi.fn<RawRead>().mockResolvedValue({});
-    const sleep = vi.fn<Sleep>().mockResolvedValue(undefined);
-    await expect(
-      downloadColumnContent('powerpagecomponents', GUID, 'filecontent', { read, sleep }),
-    ).rejects.toMatchObject({
-      name: 'HostReadError',
-      status: null,
-      message: 'Unexpected file response from Dataverse.',
-    });
-    expect(read).toHaveBeenCalledTimes(1);
-    expect(sleep).not.toHaveBeenCalled();
   });
 });

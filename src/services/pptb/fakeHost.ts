@@ -1,6 +1,7 @@
 import { HostReadError } from './host.types';
 import type {
   Connection,
+  FileColumnRef,
   FileFilter,
   HostEvent,
   Notice,
@@ -9,7 +10,7 @@ import type {
   SaveResult,
   ThemeName,
 } from './host.types';
-import { HostCallError, messageForStatus } from './hostErrors';
+import { HostCallError, messageForStatus, throwIfAborted } from './hostErrors';
 
 /** Rows for one entity set: a flat list, or `pages` to model paging (the fake still returns all rows, as the contract says). */
 export type FakeResult = readonly unknown[] | { pages: readonly (readonly unknown[])[] };
@@ -24,6 +25,10 @@ export type FakeFailure = {
   operation: 'query' | 'file';
   entitySet: string;
   status: number | null;
+  /** Platform-confirmed network loss. */
+  transport?: boolean;
+  /** Rows the fake "received" before failing; returned on the HostReadError. */
+  partialRows?: readonly unknown[];
   contains?: string;
   times?: number;
 };
@@ -38,7 +43,7 @@ export type FakeHostInit = {
   tables?: Readonly<Record<string, FakeResult>>;
   responders?: readonly FakeResponder[];
   failures?: readonly FakeFailure[];
-  /** File column text, keyed `<entitySet>/<id>/<column>`. A missing key fails with a 404. */
+  /** File text keyed `<entityLogicalName>/<recordId>/<fileAttributeName>`. A missing key fails with a 404. */
   fileColumns?: Readonly<Record<string, string>>;
   notify?: NotifyBehaviour;
   save?: SaveBehaviour;
@@ -59,7 +64,7 @@ export type FakeCall =
   | { method: 'openExternal'; url: string }
   | { method: 'getActiveConnection' }
   | { method: 'queryAll'; query: ODataQuery; pages: number }
-  | { method: 'downloadFileColumn'; entitySet: string; id: string; column: string };
+  | { method: 'downloadFileColumn'; ref: FileColumnRef };
 
 export type SavedFile = { path: string; defaultName: string; content: string | Uint8Array };
 
@@ -117,7 +122,12 @@ export function createFakeHost(init: FakeHostInit = {}): PptbHost & FakeHostCont
       const used = failureUses.get(failure) ?? 0;
       if (failure.times !== undefined && used >= failure.times) continue;
       failureUses.set(failure, used + 1);
-      return new HostReadError(messageForStatus(failure.status), failure.status);
+      return new HostReadError(
+        messageForStatus(failure.status),
+        failure.status,
+        failure.transport ?? false,
+        failure.partialRows ?? [],
+      );
     }
     return null;
   }
@@ -174,31 +184,38 @@ export function createFakeHost(init: FakeHostInit = {}): PptbHost & FakeHostCont
       };
     },
 
-    queryAll: (query) => {
+    queryAll: async (query, signal) => {
+      throwIfAborted(signal);
       const call = { method: 'queryAll' as const, query, pages: 0 };
       calls.push(call);
       const failure = scriptedFailure('query', query.entitySet, query.filter ?? '');
-      if (failure !== null) return Promise.reject(failure);
+      if (failure !== null) throw failure;
       let result: FakeResult | undefined;
       for (const responder of init.responders ?? []) {
         result = responder(query);
         if (result !== undefined) break;
       }
       result ??= init.tables?.[query.entitySet];
-      if (result === undefined) return Promise.reject(notFound(`result for ${query.entitySet}`));
+      if (result === undefined) throw notFound(`result for ${query.entitySet}`);
       const pages = pagesOf(result);
       call.pages = pages.length;
-      return Promise.resolve(pages.flat());
+      await Promise.resolve();
+      throwIfAborted(signal);
+      return pages.flat();
     },
 
-    downloadFileColumn: (entitySet, id, column) => {
-      calls.push({ method: 'downloadFileColumn', entitySet, id, column });
-      const failure = scriptedFailure('file', entitySet, id);
-      if (failure !== null) return Promise.reject(failure);
-      const text = init.fileColumns?.[`${entitySet}/${id}/${column}`];
-      return text === undefined
-        ? Promise.reject(notFound(`file column ${entitySet}/${id}/${column}`))
-        : Promise.resolve(text);
+    downloadFileColumn: async (ref, signal) => {
+      throwIfAborted(signal);
+      calls.push({ method: 'downloadFileColumn', ref });
+      // For a file operation, FakeFailure.entitySet is the logical table name.
+      const failure = scriptedFailure('file', ref.entityLogicalName, ref.recordId);
+      if (failure !== null) throw failure;
+      const key = `${ref.entityLogicalName}/${ref.recordId}/${ref.fileAttributeName}`;
+      const text = init.fileColumns?.[key];
+      if (text === undefined) throw notFound('file column');
+      await Promise.resolve();
+      throwIfAborted(signal);
+      return text;
     },
 
     emit: (event) => {
