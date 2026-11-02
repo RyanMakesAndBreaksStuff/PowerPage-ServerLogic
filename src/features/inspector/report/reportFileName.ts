@@ -4,6 +4,11 @@ import type { ReportOptions } from '@/types/report';
 
 type ReportIdentity = Pick<ReportModel, 'scope' | 'format' | 'stem' | 'title'>;
 
+/** The name shown where a file is a label in a list or table. Titles, stems and file names keep the stored name. */
+export function displayName(file: { readonly name: string; readonly active: boolean }): string {
+  return file.active ? file.name : `${file.name} (Inactive)`;
+}
+
 export function reportIdentity(result: SiteResult, options: ReportOptions): ReportIdentity {
   const file = result.files.find((candidate) => candidate.fileId === options.fileId);
   const name =

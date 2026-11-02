@@ -3,7 +3,13 @@ import { readFileSync } from 'node:fs';
 import { describe, expect, it, vi } from 'vitest';
 import { buildReportModel } from './buildReportModel';
 import { escapeInline } from './markdownEscape';
-import { EXPORTED_AT, REPORT_OPTIONS, hostileReportResult, reportResult } from './reportFixtures';
+import {
+  EXPORTED_AT,
+  REPORT_OPTIONS,
+  hostileReportResult,
+  reportFile,
+  reportResult,
+} from './reportFixtures';
 import { renderMarkdown } from './renderMarkdown';
 
 describe('renderMarkdown', () => {
@@ -68,5 +74,59 @@ describe('renderMarkdown', () => {
       expect(report).toContain('### Not scanned');
       expect(report).toContain('Not read before the connection was lost');
     }
+  });
+
+  it.each(['file', 'site'] as const)(
+    'exports a snapshot-only value only under the snapshot, and keeps the reasons (%s)',
+    (scope) => {
+      const sentinel = 'snapshot-only.example';
+      const result = reportResult();
+      const file = reportFile('customer', 'customer-summary.js', [
+        'configured',
+        'needs-review',
+        'configured',
+      ]);
+      result.files = [
+        {
+          ...file,
+          snapshot: { ...file.snapshot, outbound: [`ServerLogic/AllowedDomains = ${sentinel}`] },
+        },
+      ];
+      const off = renderMarkdown(
+        buildReportModel(result, { ...REPORT_OPTIONS, scope, snapshot: false }, EXPORTED_AT),
+      );
+      expect(off).not.toContain(sentinel);
+      expect(off).not.toContain('Configuration snapshot');
+      expect(off).toContain('Global Read on account via Members.');
+      expect(off).toContain('Review tablePermissions configuration.');
+      const on = renderMarkdown(
+        buildReportModel(result, { ...REPORT_OPTIONS, scope, snapshot: true }, EXPORTED_AT),
+      );
+      expect(on.split(sentinel)).toHaveLength(2);
+      expect(on.indexOf(sentinel)).toBeGreaterThan(on.indexOf('### Configuration snapshot'));
+      expect(on).toContain('Global Read on account via Members.');
+    },
+  );
+
+  it('labels an inactive file in the site table and lists, but not the H2 or snapshot heading', () => {
+    const result = reportResult();
+    const inactive = reportFile('old', 'old-handler', [
+      'configured',
+      'needs-review',
+      'not-scanned',
+    ]);
+    result.files = [{ ...inactive, active: false }];
+    const file = renderMarkdown(
+      buildReportModel(result, { ...REPORT_OPTIONS, fileId: 'old' }, EXPORTED_AT),
+    );
+    expect(file).toContain('## Server logic readiness: old-handler\n');
+    expect(file).toContain('- Outbound networking: old-handler (Inactive) — ');
+    const site = renderMarkdown(
+      buildReportModel(result, { ...REPORT_OPTIONS, scope: 'site' }, EXPORTED_AT),
+    );
+    expect(site).toContain('| old-handler (Inactive) |');
+    expect(site).toContain('### Table permissions: old-handler (Inactive)');
+    expect(site).toContain('Outbound networking: old-handler (Inactive) — ');
+    expect(site).toContain('### Configuration snapshot: old-handler\n');
   });
 });

@@ -3,7 +3,7 @@ import { countChecks, filePill, fileSummary } from '@/features/inspector/model/r
 import type { ReportCheck, ReportModel, ReportRow, ReportSection } from './reportModel.types';
 import type { CheckId, CheckStatus, FileResult, Finding, SiteResult } from '@/types/inspector';
 import type { ReportOptions } from '@/types/report';
-import { reportIdentity } from './reportFileName';
+import { displayName, reportIdentity } from './reportFileName';
 
 const CHECK_ORDER: readonly CheckId[] = ['webRole', 'tablePermissions', 'outbound'];
 const STATUS_TEXT: Readonly<Record<CheckStatus, string>> = {
@@ -24,22 +24,60 @@ function utcOffset(date: Date): string {
   return `UTC${minutes < 0 ? '-' : '+'}${String(Math.floor(magnitude / 60)).padStart(2, '0')}:${String(magnitude % 60).padStart(2, '0')}`;
 }
 
+// A host alias counts only when it isn't part of a longer name; the configured strings themselves
+// stay exact, case-sensitive substrings, as before.
+const NAME_CHARACTER = /[A-Za-z0-9_-]/;
+
+type Identifier = {
+  readonly value: string;
+  readonly alias: boolean;
+  readonly replacement: string;
+};
+
+// Local parse only: nothing named by a configuration value is ever fetched (AC-9.10).
+function hostAliases(value: string): readonly string[] {
+  const candidate = value.includes('://') ? value : `https://${value}`;
+  if (value.length === 0 || !URL.canParse(candidate)) return [];
+  const url = new URL(candidate);
+  return [url.hostname, url.host, url.origin];
+}
+
+function identifiers(
+  names: readonly string[],
+  urls: readonly string[],
+  replacement: string,
+): readonly Identifier[] {
+  return [
+    ...[...names, ...urls].map((value) => ({ value, alias: false, replacement })),
+    ...urls.flatMap(hostAliases).map((value) => ({ value, alias: true, replacement })),
+  ].filter(({ value }) => value.length > 0);
+}
+
+function atBoundary(text: string, index: number): boolean {
+  return !NAME_CHARACTER.test(text.charAt(index));
+}
+
+function matches({ value, alias }: Identifier, text: string, index: number): boolean {
+  if (!alias) return text.startsWith(value, index);
+  return (
+    text.slice(index, index + value.length).toLowerCase() === value.toLowerCase() &&
+    atBoundary(text, index - 1) &&
+    atBoundary(text, index + value.length)
+  );
+}
+
 function redactor(result: SiteResult, enabled: boolean): (text: string) => string {
   if (!enabled) return (text) => text;
   const { connection, site } = result.facts;
   const replacements = [
-    { value: connection.name, replacement: '[environment]' },
-    { value: connection.url, replacement: '[environment]' },
-    { value: site.name, replacement: '[site]' },
-    { value: site.domain, replacement: '[site]' },
-  ]
-    .filter(({ value }) => value.length > 0)
-    .sort((a, b) => b.value.length - a.value.length);
+    ...identifiers([connection.name], [connection.url], '[environment]'),
+    ...identifiers([site.name], [site.domain], '[site]'),
+  ].sort((a, b) => b.value.length - a.value.length);
   // Replace in one pass so a shorter identifier never alters an already-redacted placeholder.
   return (text) => {
     let output = '';
     for (let index = 0; index < text.length;) {
-      const match = replacements.find(({ value }) => text.startsWith(value, index));
+      const match = replacements.find((identifier) => matches(identifier, text, index));
       if (match === undefined) {
         output += text.slice(index, index + 1);
         index++;
@@ -78,7 +116,7 @@ function rowModel(
 ): ReportRow {
   return {
     fileId: file.fileId,
-    name: file.name,
+    name: displayName(file),
     active: file.active,
     counts: countChecks(file.findings),
     summary: fileSummary(file),
