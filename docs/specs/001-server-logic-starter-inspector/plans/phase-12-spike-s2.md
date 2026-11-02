@@ -192,6 +192,8 @@ git commit -m "test(pptb): add S2 host contract probe"
 
 **Owns:** Live S2 evidence, before adapter edits or Phase15 execution.
 
+> The checklist below describes the 2026-10-22 flow. The 2026-11-01 continuation operations are listed in `findings/logic/probe_findings.md`.
+
 - [ ] Build: `npm run build`; expect exit0 and dist classic-script files.
 - [ ] Load root with Debug → Load Local Tool, open Tool DevTools, paste the complete Task1 script and run it. Expect each read row returned/rejected with shape/error fields.
 - [ ] Change another connection; rename/relabel the active one; select a different active connection. Record event keys and whether data identifies it.
@@ -214,6 +216,7 @@ git commit -m "test(pptb): add S2 host contract probe"
 | Literal | name eq quote/space literal + network URI | Not in the 2026-10-22 DevTools log | `returned`, `Object`, with the same five keys as the other `$top=1` reads. Row count and the request URI were not in the export. | The filter call was accepted. Literal transport stays open until Network shows that URI once. |
 | Network | s2ReadFailure after network drop, error.name/status | Not measured | Not run | Blocks transport classification acceptance |
 | Expired sign-in | s2ReadFailure after host sign-in expiry | Not measured | Not run | Blocks401mapping acceptance |
+| Phase 5 action continuation | Manual `s2DownloadKnown(recordId)`: owner-selected populated type 35, `filecontent_name` + `regardingfieldname = filecontent` attachment, unbound initializer + sequential blocks, local byte/text comparison | Not measured | Pending — no live action during planning | See `findings/logic/probe_findings.md`, 2026-11-01 continuation. The `$value` and no-status rows above stay historical; fixtures permit local implementation (P5.2), not release acceptance. |
 
 Exported `s2Evidence` pasted 2026-10-22. It has no `connection:*` rows; those remain from the earlier console table. Host version was not recorded. Task 2 stays open: no pending row counts as success.
 

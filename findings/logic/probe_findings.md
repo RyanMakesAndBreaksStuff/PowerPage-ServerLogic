@@ -103,3 +103,25 @@ No file under `src/services/pptb` was edited from this probe.
 | Quote/space call returned | URI encoding still open. |
 | `connection:updated` seen; key names collapsed | Do not change `createEventHub` yet. |
 | Network and expired sign-in not run | Do not classify no-status errors from this session. |
+
+## 2026-11-01 Phase 5 continuation — superseding transport decision
+
+Spec 4.1.0 permits `InitializeFileBlocksDownload` and `DownloadBlock` through `dataverseAPI.execute` inside the host adapter (owner decision 2026-10-31, `phasse5plan.md`). The 2026-10-22 `$value` → `{}` observation above stays valid: `queryData` returns parsed JSON and cannot carry a byte body. It says nothing about the two actions, which Microsoft Learn ("Use file column data") documents for downloading existing content. Local fixture success (`tests/s2Probe.test.ts`) is not a live result.
+
+`scripts/s2-probe.js` now installs manual operations and makes no host call on paste. `s2DownloadKnown(recordId)` requires the owner's populated type-35 record ID, validates `filecontent_name` and a `regardingfieldname = filecontent` FileAttachment row *before* opening the native file picker, performs the two actions, and records shape, byte-count and byte/text comparison facts only. `s2Environment(scenario, schema)`, `s2Paging(siteId)` and `s2VerifyWire(kind, actualUrl)` also require explicit DevTools arguments. `readBinary` is declared as `Promise<Buffer>` in `@pptb/types` 1.2.7; the probe records the returned shape first, then copies the exact byte view. No source, filename, path, connection/site/record identifier, request URL, continuation token or setting value belongs in committed evidence.
+
+| Observation | Manual operation | Status on 2026-11-01 |
+| --- | --- | --- |
+| Host and runtime versions | `s2Versions(host, runtime)` from the PPTB About dialog | Pending |
+| Populated handler: metadata, initializer property types, `Data` base64, byte count, UTF-8 text equality | `await s2DownloadKnown(recordId)` | Pending — fixture coverage only |
+| Site-scoped type-35 paging (max 5 pages at page size 1), full terminal page | `await s2Paging(siteId)` | Pending |
+| Second request URL equals the issued nextLink | `s2VerifyWire('nextLink', urlFromNetworkPanel)` | Pending; `NEXT_LINK_UNVERIFIED` stays true |
+| Apostrophe/space literal encoded once | `await s2Literal()` then `s2VerifyWire('literal', urlFromNetworkPanel)` | Pending |
+| Connection shape; callback argument shapes on created/updated/deleted | `await s2Connection()`; `s2StartEvents()`; edit another connection, rename and relabel the active one | Pending |
+| Unsubscribe after a further connection change | `s2StopEvents()`; change a connection; `s2CheckStopped()` | Pending |
+| Nonsecret current/default/missing/denied; secret → no value read | `await s2Environment(scenario, schema)` for each scenario | Pending; owner supplies schema names locally |
+| Network-loss rejection shape | drop the network; `await s2ReadFailure('network drop')` | Pending; an unknown no-status error stays a local failure |
+| Expired sign-in rejection shape | expire sign-in in the host UI; `await s2ReadFailure('expired sign-in')` | Pending |
+| Explicit 403 denial | `await s2ReadFailure('403 denial')` with a denied identity | Pending |
+
+When a live gate runs, replace only that row's status with passed/failed plus the versions from `s2Versions`; keep failed observations. A byte or text mismatch, or a `Data` shape other than base64, requires a targeted protocol correction in `src/services/pptb/dataverseFiles.ts` before release; never guess a decoder or disable the paging guard.
