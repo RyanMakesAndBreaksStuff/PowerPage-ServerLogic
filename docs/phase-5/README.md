@@ -11,12 +11,17 @@ docs/phase-5/
     p5-1_plan.md
     p5-2_plan.md
     p5-3_plan.md
+    p5-4_plan.md
+    p5-6_plan.md
+    P5-4&6choices.md        owner decisions R-06, R-14, R-15, P-01, P-12, P-14 with context and pro/con
   review/                   reviews that corrected the drafts the plans replace
     inspector-plan-review.md
   evidence/                 what each execution produced, one folder per sub-phase
     p5-1/execution.md       commits, gate output, deviations
     p5-2/execution.md       commits, gate output, deviations
     p5-3/execution.md       commits, gate output, deviations
+    p5-4/execution.md       written when P5.4 lands
+    p5-6/execution.md       written when P5.6 lands
 ```
 
 ## Rules
@@ -33,5 +38,7 @@ docs/phase-5/
 | P5.1 | [plans/p5-1_plan.md](plans/p5-1_plan.md) | Executed 2026-11-01 | [evidence/p5-1/execution.md](evidence/p5-1/execution.md) |
 | P5.2 | [plans/p5-2_plan.md](plans/p5-2_plan.md) | Executed 2026-11-01 | [evidence/p5-2/execution.md](evidence/p5-2/execution.md) |
 | P5.3 | [plans/p5-3_plan.md](plans/p5-3_plan.md) | Executed 2026-11-01 | [evidence/p5-3/execution.md](evidence/p5-3/execution.md) |
+| P5.4 | [plans/p5-4_plan.md](plans/p5-4_plan.md) | Accepted 2026-11-02; executing | [evidence/p5-4/execution.md](evidence/p5-4/execution.md) |
+| P5.6 | [plans/p5-6_plan.md](plans/p5-6_plan.md) | Accepted 2026-11-02; executing | [evidence/p5-6/execution.md](evidence/p5-6/execution.md) |
 
 Brief: `phasse5plan.md` at the repo root. Spec: `docs/specs/001-server-logic-starter-inspector/spec.md` (4.1.0).
