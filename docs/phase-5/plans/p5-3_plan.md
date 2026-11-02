@@ -4,7 +4,7 @@
 **Baseline:** branch `logic-inspector-v2-build`, HEAD `820d7b8`; requires `p5-1_plan.md` Phase B (spec 4.1.0 precedence table, AC-8.5 and FR-7/FR-9 amendments). Independent of P5.2.
 **Spec:** FR-7 grant set and Parent chain (4.1.0), FR-8 precedence table and finding ownership, FR-9 Table permissions and Outbound (O0–O6, wildcard rule), AC-8.1, AC-8.4, AC-8.5, AC-8.8, AC-8.10–AC-8.12, AC-9.2, AC-9.5.
 **Audit items:** PB-001, PB-002, WR-006, WR-001 (model ownership half), PR-001.
-**Supersedes:** Task 4 of `docs/plans/11-01-2026-phase-5-rules.md`. All four source files were re-read verbatim on 2026-11-01 and every case below was traced against them.
+**Status:** Executed 2026-11-01; commit `85de3ff`. Evidence: `docs/phase-5/evidence/p5-3/execution.md`.
 **Status:** Approved by the owner on 2026-11-01 (together with the P5.1 decisions X-01, X-02 and T1-01); ready for `sdd-superpowers:sdd-execute` after P5.1 Phase B lands.
 
 ## Goal
@@ -33,7 +33,7 @@ Existing behaviour that must not change (checked against the current tests): the
 
 **Files:** create `src/features/inspector/model/evidence.test.ts`.
 
-- [ ] **A1. Create `src/features/inspector/model/evidence.test.ts`**
+- [x] **A1. Create `src/features/inspector/model/evidence.test.ts`**
 
 ```typescript
 import { afterEach, describe, expect, expectTypeOf, it, vi } from 'vitest';
@@ -388,7 +388,7 @@ describe('FR-8 finding detail and raw snapshot ownership (WR-001, PR-001)', () =
 });
 ```
 
-- [ ] **A2. Capture the signal**
+- [x] **A2. Capture the signal**
 
 ```powershell
 npm test -- src/features/inspector/model/evidence.test.ts
@@ -402,7 +402,7 @@ Expected: exit 1. Failing at the baseline: the type assertion (checked by `tsc`,
 
 **Files:** `src/types/inspector.ts`, `src/features/inspector/model/checks.ts`, `grantSet.ts`, `rules.ts`, `rules.test.ts`, `src/features/inspector/report/reportFixtures.ts`.
 
-- [ ] **B1. `src/types/inspector.ts`** (L53–L61)
+- [x] **B1. `src/types/inspector.ts`** (L53–L61)
 
 ```diff
  export type Finding = {
@@ -419,7 +419,7 @@ Expected: exit 1. Failing at the baseline: the type assertion (checked by `tsc`,
  };
 ```
 
-- [ ] **B2. `src/features/inspector/model/grantSet.ts`** (L24–L40 and L42–L89)
+- [x] **B2. `src/features/inspector/model/grantSet.ts`** (L24–L40 and L42–L89)
 
 ```diff
  type ParentChain = {
@@ -478,7 +478,7 @@ Expected: exit 1. Failing at the baseline: the type assertion (checked by `tsc`,
 
 Order is preserved: `!permission.active` → `chain.inactive` → `chain.unresolved` → grant, so a known inactive ancestor still wins over an unknown scope.
 
-- [ ] **B3. `src/features/inspector/model/checks.ts`** — full replacement (current 259 lines)
+- [x] **B3. `src/features/inspector/model/checks.ts`** — full replacement (current 259 lines)
 
 ```typescript
 import type { ConnectorUse } from '@/lib/code-analysis/codeAnalysis.types';
@@ -751,7 +751,7 @@ export function evaluateFileChecks(facts: SiteFacts, file: ServerLogicFileFacts)
 
 Behavioural notes verified against the current code: the only outbound path that changes for *complete* evidence is O2, which now also carries wildcard reasons; O3–O6 keep the wildcard-then-row order; a code read failure or analysis limit now also reports known setting problems instead of stopping at the code reason (conservative: no conclusive no-use result exists in that case), and the existing `checks.test.ts` fixtures for those cases use default (absent) settings, so their expected reasons are unchanged.
 
-- [ ] **B4. `src/features/inspector/model/rules.ts`** (L13–L15)
+- [x] **B4. `src/features/inspector/model/rules.ts`** (L13–L15)
 
 ```diff
  export function canReviewFinding(finding: Finding): boolean {
@@ -766,7 +766,7 @@ Behavioural notes verified against the current code: the only outbound path that
 
 `evaluateSite` (L20–L23) already routes every mark through this predicate, so marks for incomplete findings are refused there too.
 
-- [ ] **B5. Fixture constructors** (G9)
+- [x] **B5. Fixture constructors** (G9)
 
 `src/features/inspector/model/rules.test.ts` L15–L23:
 
@@ -794,7 +794,7 @@ Behavioural notes verified against the current code: the only outbound path that
 
 ## Phase C — Confirm
 
-- [ ] **C1. Focused and neighbouring suites**
+- [x] **C1. Focused and neighbouring suites**
 
 ```powershell
 npm test -- src/features/inspector/model/evidence.test.ts
@@ -805,7 +805,7 @@ Expected: the first passes all 49 cases. The second passes with no changed expec
 
 `checks.test.ts` "AC-8.8 Web role" already reads assigned role names from `snapshot.roles` (L36), not from `detail`, so removing the names from web-role detail (G7) breaks no existing assertion.
 
-- [ ] **C2. Type, lint and build gates**
+- [x] **C2. Type, lint and build gates**
 
 ```powershell
 npm run typecheck
@@ -816,7 +816,7 @@ npm run build
 
 Expected: all exit 0. A diagnostic in any file listed in this plan is a P5.3 failure; unrelated diagnostics are recorded against the baseline, not fixed here.
 
-- [ ] **C3. Commit**
+- [x] **C3. Commit**
 
 ```powershell
 git add -- src/types/inspector.ts src/features/inspector/model/checks.ts src/features/inspector/model/grantSet.ts src/features/inspector/model/rules.ts src/features/inspector/model/rules.test.ts src/features/inspector/model/evidence.test.ts src/features/inspector/report/reportFixtures.ts
