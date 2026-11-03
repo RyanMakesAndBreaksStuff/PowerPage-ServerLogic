@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import type { ReactElement, ReactNode } from 'react';
+import { flushSync } from 'react-dom';
 import { useHost } from '@/app/HostContext';
 import {
   ConnectionContext,
@@ -27,21 +28,28 @@ export function ConnectionProvider({ children }: { children: ReactNode }): React
       latest += 1;
       const request = latest;
       setPending(true);
+      // E-04 B: each answer commits synchronously (the render and its passive effects, so the Inspector
+      // session has adopted a changed identity before any later task, such as an export handoff, runs).
+      // This is a host callback, never a render.
       host.getActiveConnection().then(
         (value) => {
           if (request !== latest) return;
-          setPending(false);
-          setState(
-            value === null
-              ? { status: 'disconnected', refreshFailed: false }
-              : { status: 'connected', connection: value, refreshFailed: false },
-          );
+          flushSync(() => {
+            setPending(false);
+            setState(
+              value === null
+                ? { status: 'disconnected', refreshFailed: false }
+                : { status: 'connected', connection: value, refreshFailed: false },
+            );
+          });
         },
         () => {
           // The host could not say (the adapter has logged it): keep what was confirmed and note the failure.
           if (request !== latest) return;
-          setPending(false);
-          setState((current) => ({ ...current, refreshFailed: true }));
+          flushSync(() => {
+            setPending(false);
+            setState((current) => ({ ...current, refreshFailed: true }));
+          });
         },
       );
     };

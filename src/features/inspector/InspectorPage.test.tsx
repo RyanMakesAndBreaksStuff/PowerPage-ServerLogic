@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { act, cleanup, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { INSPECTOR_DEPS } from '@/app/inspector-site/inspectorDeps';
 import type { InspectorDeps } from '@/app/inspector-site/inspectorDeps';
 import { renderInspector } from '@/app/inspector-site/inspectorTestHarness';
 import type { InspectorHarnessOptions } from '@/app/inspector-site/inspectorTestHarness';
@@ -181,6 +182,7 @@ describe('InspectorPage: scanning', () => {
     const finish = deferred<SiteFacts>();
     const holder: { report: (progress: ScanProgress) => void } = { report: () => undefined };
     const deps: InspectorDeps = {
+      ...INSPECTOR_DEPS,
       listSites: () => Promise.resolve([SITE_ALPHA]),
       runScan: (_host, _connection, _site, _scanId, onProgress) => {
         holder.report = onProgress;
@@ -218,6 +220,7 @@ describe('InspectorPage: scanning', () => {
     let fail = true;
     const view = mount({
       deps: {
+        ...INSPECTOR_DEPS,
         listSites: () => Promise.resolve([SITE_ALPHA]),
         runScan: () => (fail ? Promise.reject(new Error('boom')) : Promise.resolve(graded())),
       },
@@ -258,6 +261,7 @@ describe('InspectorPage: scanning', () => {
   it('leaves "the connection changed" by choosing a site', async () => {
     const view = mount({
       deps: {
+        ...INSPECTOR_DEPS,
         listSites: () => Promise.resolve([SITE_ALPHA, SITE_BETA]),
         runScan: (_host, _connection, site) =>
           site.id === SITE_ALPHA.id
@@ -567,6 +571,7 @@ describe('InspectorPage: focus after Retry and Scan again', () => {
     const second = deferred<SiteFacts>();
     let scans = 0;
     const deps: InspectorDeps = {
+      ...INSPECTOR_DEPS,
       listSites: () => Promise.resolve([SITE_ALPHA]),
       runScan: () => {
         scans += 1;

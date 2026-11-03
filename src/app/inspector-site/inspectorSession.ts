@@ -1,11 +1,21 @@
+import {
+  BUILD_FAILED_BODY,
+  EXPORT_CANCELLED_BODY,
+  EXPORT_CANCELLED_TITLE,
+  EXPORT_SLOW_BODY,
+  EXPORT_SLOW_TITLE,
+  SAVE_FAILED_BODY,
+} from '@/features/inspector/export/exportCopy';
+import { evaluateSite } from '@/features/inspector/model/rules';
 import { ScanAbandonedError } from '@/features/inspector/scan/scan';
 import { connectionKey } from '@/app/useActiveConnection';
 import { HostReadError } from '@/services/pptb/host.types';
-import type { Connection, PptbHost } from '@/services/pptb/host.types';
-import { errorName } from '@/services/pptb/hostErrors';
+import type { Connection, FileFilter, Notice, PptbHost } from '@/services/pptb/host.types';
+import { errorName, HostCallError } from '@/services/pptb/hostErrors';
 import type { ReviewKey, SiteRef } from '@/types/inspector';
+import type { ReportFormat, ReportOptions } from '@/types/report';
 import type { InspectorDeps } from './inspectorDeps';
-import type { InspectorActions, InspectorSnapshot } from './inspectorSession.types';
+import type { ExportJob, InspectorActions, InspectorSnapshot } from './inspectorSession.types';
 
 export const EMPTY_MARKS: ReadonlySet<ReviewKey> = new Set<ReviewKey>();
 
@@ -17,7 +27,38 @@ export const INITIAL_SNAPSHOT: InspectorSnapshot = {
   fileId: null,
   marks: EMPTY_MARKS,
   generation: 0,
+  exportJob: null,
+  exportStaleCloses: 0,
 };
+
+/** AC-9.1 defaults apart from the scope, which follows the file selection. Every open starts from them (E-09). */
+const EXPORT_DEFAULTS = {
+  format: 'markdown',
+  questions: true,
+  snapshot: true,
+  redact: false,
+} as const satisfies Omit<ReportOptions, 'scope' | 'fileId'>;
+
+const EXPORT_FILTERS = {
+  markdown: { name: 'Markdown', extensions: ['md'] },
+  pdf: { name: 'PDF', extensions: ['pdf'] },
+} as const satisfies Record<ReportFormat, FileFilter>;
+
+/** E-11 B: how long a build may run before the user is told it is slow. */
+export const EXPORT_WATCHDOG_MS = 5_000;
+
+/** Freezes `value` and everything reachable from it, and returns it with its type unchanged. */
+function freeze<T>(value: T): T {
+  if (typeof value === 'object' && value !== null) {
+    Object.freeze(value);
+    const members: readonly unknown[] = Object.values(value);
+    for (const member of members) freeze(member);
+  }
+  return value;
+}
+
+/** A rejected close-guard call was already logged by the adapter; the export proceeds either way (E-07 B). */
+const ignoreGuardFailure = (): void => undefined;
 
 export type InspectorStore = InspectorActions & {
   subscribe: (listener: () => void) => () => void;
@@ -45,7 +86,11 @@ export const SETTLE_TIMEOUT_MS = 10_000;
  * after every read it started has settled (scan.ts settle-all, B11a), and the next scan or site-list read
  * waits for that, so reads across generations stay at four.
  */
-export function createInspectorStore(host: PptbHost, deps: InspectorDeps): InspectorStore {
+export function createInspectorStore(
+  host: PptbHost,
+  deps: InspectorDeps,
+  notify: (n: Notice) => void,
+): InspectorStore {
   let snapshot: InspectorSnapshot = INITIAL_SNAPSHOT;
   let listToken = 0;
   let controller: AbortController | null = null;
@@ -57,6 +102,77 @@ export function createInspectorStore(host: PptbHost, deps: InspectorDeps): Inspe
     snapshot = { ...snapshot, ...patch };
     for (const listener of [...listeners]) listener();
   };
+
+  /**
+   * Publishes a patch that replaces what a report would capture (a generation bump), and is the one place that
+   * cancels an export for it: an idle or building job is removed, a saving job is kept with its dialog closed
+   * (the host owns the save, AC-9.8). If the dialog was open it counts a stale close and toasts once.
+   */
+  const invalidateExport = (patch: Partial<InspectorSnapshot>): void => {
+    const job = snapshot.exportJob;
+    if (job === null) {
+      publish(patch);
+      return;
+    }
+    const exportJob = job.phase === 'saving' ? { ...job, open: false } : null;
+    if (!job.open) {
+      publish({ ...patch, exportJob });
+      return;
+    }
+    publish({ ...patch, exportJob, exportStaleCloses: snapshot.exportStaleCloses + 1 });
+    notify({ title: EXPORT_CANCELLED_TITLE, body: EXPORT_CANCELLED_BODY, type: 'info' });
+  };
+
+  /** A job is identified by its captured result, which survives the `open: false` and phase copies. */
+  const isCurrent = (job: ExportJob): boolean => snapshot.exportJob?.result === job.result;
+
+  async function runExport(job: ExportJob): Promise<void> {
+    const { result, options } = job;
+    const name = deps.reportFileNameBeforeBuild(result, options);
+    let saving = false;
+    const watchdog = setTimeout(() => {
+      if (isCurrent(job) && snapshot.exportJob?.phase === 'building') {
+        notify({ title: EXPORT_SLOW_TITLE, body: EXPORT_SLOW_BODY, type: 'warning' });
+      }
+    }, deps.exportWatchdogMs ?? EXPORT_WATCHDOG_MS);
+    host.preventClose().catch(ignoreGuardFailure);
+    try {
+      // Lets React paint the busy state before a synchronous build blocks the thread.
+      await deps.yieldToHost();
+      if (!isCurrent(job)) return;
+      const model = deps.buildReportModel(result, options, deps.now());
+      const content =
+        options.format === 'markdown' ? deps.renderMarkdown(model) : deps.renderPdf(model);
+      // Lets a host answer that arrived during the build invalidate the job before the handoff (E-04 B).
+      await deps.yieldToHost();
+      const current = snapshot.exportJob;
+      if (current?.result !== result) return;
+      clearTimeout(watchdog);
+      saving = true;
+      publish({ exportJob: { ...current, phase: 'saving' } });
+      const saved = await host.saveFile(name, content, [EXPORT_FILTERS[options.format]]);
+      if (!isCurrent(job)) return;
+      publish({ exportJob: null });
+      if (saved.status === 'saved') notify({ title: `${name} exported`, body: '', type: 'success' });
+    } catch (error: unknown) {
+      console.error(errorName(error));
+      if (!isCurrent(job)) return;
+      publish({ exportJob: null });
+      notify({
+        title: `Couldn't save ${name}`,
+        body:
+          error instanceof HostCallError
+            ? error.message
+            : saving
+              ? SAVE_FAILED_BODY
+              : BUILD_FAILED_BODY,
+        type: 'error',
+      });
+    } finally {
+      clearTimeout(watchdog);
+      host.releasePreventClose().catch(ignoreGuardFailure);
+    }
+  }
 
   /**
    * Later reads wait for this work; for a scan, until its `runScan` has fully settled. Each work item awaits
@@ -100,7 +216,7 @@ export function createInspectorStore(host: PptbHost, deps: InspectorDeps): Inspe
           if (selected !== null && !sites.some((candidate) => candidate.id === selected.id)) {
             // D-19 C: a successful list that omits the selected site drops the selection and everything under it.
             abortScan();
-            publish({
+            invalidateExport({
               sites: { status: 'ok', sites },
               scan: { status: 'none' },
               fileId: null,
@@ -132,7 +248,7 @@ export function createInspectorStore(host: PptbHost, deps: InspectorDeps): Inspe
     const mine = snapshot.generation + 1;
     const own = new AbortController();
     controller = own;
-    publish({
+    invalidateExport({
       scan: { status: 'scanning', site, progress: null },
       fileId: null,
       marks: EMPTY_MARKS,
@@ -162,7 +278,7 @@ export function createInspectorStore(host: PptbHost, deps: InspectorDeps): Inspe
           if (mine !== snapshot.generation || own.signal.aborted) return;
           if (error instanceof ScanAbandonedError) {
             // The active connection changed under the scan: its facts must not be shown (D-14).
-            publish({ scan: { status: 'connection-changed', site }, generation: mine + 1 });
+            invalidateExport({ scan: { status: 'connection-changed', site }, generation: mine + 1 });
             return;
           }
           console.error('The scan failed.', errorName(error));
@@ -188,7 +304,7 @@ export function createInspectorStore(host: PptbHost, deps: InspectorDeps): Inspe
         return;
       }
       abortScan();
-      publish({
+      invalidateExport({
         ownerKey: key,
         connection,
         sites: { status: 'idle' },
@@ -204,6 +320,7 @@ export function createInspectorStore(host: PptbHost, deps: InspectorDeps): Inspe
     stop: () => {
       abortScan();
       listToken += 1;
+      // Teardown, not a results change: the export job goes with everything else and a pending save settles silently.
       publish({ ...INITIAL_SNAPSHOT, generation: snapshot.generation + 1 });
     },
 
@@ -233,7 +350,61 @@ export function createInspectorStore(host: PptbHost, deps: InspectorDeps): Inspe
       const marks = new Set(snapshot.marks);
       if (reviewed) marks.add(key);
       else marks.delete(key);
-      publish({ marks, generation: snapshot.generation + 1 });
+      invalidateExport({ marks, generation: snapshot.generation + 1 });
+    },
+
+    openExport: () => {
+      const { scan, marks, fileId, exportJob, generation } = snapshot;
+      if (scan.status !== 'done' || exportJob !== null) return;
+      const result = evaluateSite(scan.facts, marks);
+      if (result.files.length === 0) return;
+      const selectedFileId = result.files.some((candidate) => candidate.fileId === fileId)
+        ? fileId
+        : null;
+      publish({
+        exportJob: {
+          result: freeze(structuredClone(result)),
+          selectedFileId,
+          generation,
+          options: {
+            ...EXPORT_DEFAULTS,
+            scope: selectedFileId === null ? 'site' : 'file',
+            fileId: selectedFileId,
+          },
+          phase: 'idle',
+          open: true,
+        },
+      });
+    },
+
+    setExportOptions: (patch) => {
+      const job = snapshot.exportJob;
+      if (job?.phase !== 'idle') return;
+      const { scope = job.options.scope, ...rest } = patch;
+      publish({
+        exportJob: {
+          ...job,
+          options: {
+            ...job.options,
+            ...rest,
+            scope: scope === 'file' && job.selectedFileId === null ? job.options.scope : scope,
+          },
+        },
+      });
+    },
+
+    closeExport: () => {
+      const job = snapshot.exportJob;
+      if (!job?.open) return;
+      publish({ exportJob: job.phase === 'idle' ? null : { ...job, open: false } });
+    },
+
+    submitExport: () => {
+      const job = snapshot.exportJob;
+      if (job?.phase !== 'idle' || !job.open) return;
+      const building: ExportJob = { ...job, phase: 'building' };
+      publish({ exportJob: building });
+      void runExport(building);
     },
   };
 }

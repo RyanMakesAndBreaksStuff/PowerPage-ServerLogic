@@ -3,9 +3,11 @@ import { act, cleanup, screen, waitFor } from '@testing-library/react';
 import { useEffect } from 'react';
 import type { ReactElement } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { EXPORT_CANCELLED_BODY, EXPORT_CANCELLED_TITLE } from '@/features/inspector/export/exportCopy';
 import type { SiteRef } from '@/types/inspector';
 import { CONNECTION, createInspectorHost, OTHER_CONNECTION, SITE_ALPHA, SITE_BETA } from '@/test/inspectorWorld';
 import { INSPECTOR_DEPS } from './inspectorDeps';
+import type { InspectorDeps } from './inspectorDeps';
 import { renderInspector } from './inspectorTestHarness';
 import { useInspector } from './useInspector';
 
@@ -237,5 +239,72 @@ describe('InspectorSessionProvider: no site list reload for a same-identity even
     host.holdDataReads(false);
     expect(await screen.findByText('scan:connection-changed')).toBeTruthy();
     expect(screen.getByText('selected:none')).toBeTruthy();
+  });
+});
+
+/** Drives an export through the real provider chain and shows the job's phase. */
+function ExportProbe(): ReactElement {
+  const session = useInspector();
+  const first = session.sites.status === 'ok' ? session.sites.sites[0] : undefined;
+  return (
+    <div>
+      <p>{`sites:${session.sites.status}`}</p>
+      <p>{`scan:${session.scan.status}`}</p>
+      <p>{`job:${session.exportJob?.phase ?? 'none'}`}</p>
+      <button
+        type="button"
+        onClick={() => {
+          if (first !== undefined) session.selectSite(first);
+        }}
+      >
+        scan first
+      </button>
+      <button
+        type="button"
+        onClick={() => {
+          session.openExport();
+        }}
+      >
+        open export
+      </button>
+      <button
+        type="button"
+        onClick={() => {
+          session.submitExport();
+        }}
+      >
+        submit export
+      </button>
+    </div>
+  );
+}
+
+describe('InspectorSessionProvider: export job (P5.7)', () => {
+  it('commits a confirmed connection synchronously when the host answers, so a job building at that moment is cancelled before the handoff (E-04 B)', async () => {
+    const host = createInspectorHost();
+    const deps: InspectorDeps = {
+      ...INSPECTOR_DEPS,
+      renderMarkdown: (...args) => {
+        host.setConnection(OTHER_CONNECTION);
+        host.emit({ kind: 'connection-changed' });
+        return INSPECTOR_DEPS.renderMarkdown(...args);
+      },
+    };
+    const { user } = renderInspector(<ExportProbe />, { host, deps });
+    await screen.findByText('sites:ok');
+    await user.click(screen.getByRole('button', { name: 'scan first' }));
+    await screen.findByText('scan:done');
+    await user.click(screen.getByRole('button', { name: 'open export' }));
+    await screen.findByText('job:idle');
+    await user.click(screen.getByRole('button', { name: 'submit export' }));
+    await waitFor(() => {
+      expect(host.callsOf('releasePreventClose')).toHaveLength(1);
+    });
+    expect(host.callsOf('saveFile')).toHaveLength(0);
+    expect(host.callsOf('notify').map((call) => call.notice)).toEqual([
+      { title: EXPORT_CANCELLED_TITLE, body: EXPORT_CANCELLED_BODY, type: 'info' },
+    ]);
+    expect(await screen.findByText('job:none')).toBeTruthy();
+    expect(screen.getByText('scan:none')).toBeTruthy();
   });
 });

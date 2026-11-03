@@ -2,6 +2,7 @@ import { useEffect, useState, useSyncExternalStore } from 'react';
 import type { ReactElement, ReactNode } from 'react';
 import { useHost } from '@/app/HostContext';
 import { connectionKey, useConnectionState } from '@/app/useActiveConnection';
+import { useNotify } from '@/app/useNotify';
 import { evaluateSite } from '@/features/inspector/model/rules';
 import type { Connection } from '@/services/pptb/host.types';
 import type { InspectorDeps } from './inspectorDeps';
@@ -34,8 +35,9 @@ export function InspectorSessionProvider({
   readonly deps: InspectorDeps;
 }): ReactElement {
   const host = useHost();
+  const notify = useNotify();
   const connectionState = useConnectionState();
-  const [store] = useState(() => createInspectorStore(host, deps));
+  const [store] = useState(() => createInspectorStore(host, deps, notify));
   const snapshot = useSyncExternalStore(store.subscribe, store.getSnapshot);
 
   // undefined: no read has succeeded yet, so there is nothing to adopt or to invalidate.
@@ -71,6 +73,8 @@ export function InspectorSessionProvider({
     fileId: view.fileId,
     marks: view.marks,
     generation: view.generation,
+    exportJob: view.exportJob,
+    exportStaleCloses: view.exportStaleCloses,
     // S-08: a scan the connection change discarded has no site to show in the picker.
     selectedSite:
       view.scan.status === 'none' || view.scan.status === 'connection-changed' ? null : view.scan.site,
@@ -80,6 +84,10 @@ export function InspectorSessionProvider({
     retrySites: store.retrySites,
     selectFile: store.selectFile,
     setReviewed: store.setReviewed,
+    openExport: store.openExport,
+    setExportOptions: store.setExportOptions,
+    closeExport: store.closeExport,
+    submitExport: store.submitExport,
   };
 
   return <InspectorSessionContext value={session}>{children}</InspectorSessionContext>;
