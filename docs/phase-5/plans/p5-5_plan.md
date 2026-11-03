@@ -103,7 +103,7 @@ Each sub-slice leaves the tree compiling with all tests passing and is committed
 
 ### Phase A1 — Failing tests
 
-- [ ] **A1. Create `src/test/gatedHost.test.ts`**
+- [x] **A1. Create `src/test/gatedHost.test.ts`**
 
 ```typescript
 import { describe, expect, it } from 'vitest';
@@ -198,7 +198,7 @@ describe('gateHost', () => {
 });
 ```
 
-- [ ] **A2. Replace the entire content of `src/app/ConnectionProvider.test.tsx`**
+- [x] **A2. Replace the entire content of `src/app/ConnectionProvider.test.tsx`**
 
 ```tsx
 // @vitest-environment jsdom
@@ -537,7 +537,7 @@ describe('ConnectionProvider: Retry (D-05, S-06)', () => {
 });
 ```
 
-- [ ] **A3. Edit existing tests**
+- [x] **A3. Edit existing tests**
 
 In `src/app/shell/connectionLabel.test.ts`:
 
@@ -603,7 +603,7 @@ In `src/app/App.test.tsx`:
    it('registers one host event listener for the whole app and removes it on unmount', async () => {
 ```
 
-- [ ] **A4. Run the new tests with the implementation still absent**
+- [x] **A4. Run the new tests with the implementation still absent**
 
 ```powershell
 npm test -- src/test/gatedHost.test.ts src/app/ConnectionProvider.test.tsx src/app/shell/connectionLabel.test.ts src/app/App.test.tsx
@@ -613,7 +613,7 @@ Expected: exit 1; `Test Files  4 failed (4)`, `Tests  5 failed | 6 passed (11)`.
 
 ### Phase A2 — Implementation
 
-- [ ] **A5. Create `src/test/gatedHost.ts`**
+- [x] **A5. Create `src/test/gatedHost.ts`**
 
 ```typescript
 import type { FakeHostControls } from '@/services/pptb/fakeHost';
@@ -737,7 +737,7 @@ export function gateHost(base: FakeHost): GatedHost {
 }
 ```
 
-- [ ] **A6. Edit existing code**
+- [x] **A6. Edit existing code**
 
 In `src/app/useActiveConnection.ts`:
 
@@ -973,7 +973,7 @@ In `src/app/shell/TitleBar.tsx`:
 +        <span>{connectionStateLabel(connection)}</span>
 ```
 
-- [ ] **A7. Run the slice tests again**
+- [x] **A7. Run the slice tests again**
 
 ```powershell
 npm test -- src/test/gatedHost.test.ts src/app/ConnectionProvider.test.tsx src/app/shell/connectionLabel.test.ts src/app/App.test.tsx
@@ -981,7 +981,7 @@ npm test -- src/test/gatedHost.test.ts src/app/ConnectionProvider.test.tsx src/a
 
 Expected: exit 0; `Test Files  4 passed (4)`, `Tests  44 passed (44)`.
 
-- [ ] **A8. Type, lint and full-suite gates for this slice**
+- [x] **A8. Type, lint and full-suite gates for this slice**
 
 ```powershell
 npm run typecheck
@@ -991,7 +991,7 @@ npm test
 
 Expected: `typecheck` and `eslint` exit 0 with no output; `npm test` exits 0 with `Test Files  106 passed (106)`, `Tests  1754 passed (1754)` (baseline 105 / 1727 plus 1 / 27).
 
-- [ ] **A9. Commit**
+- [x] **A9. Commit**
 
 ```powershell
 git add -- src/test/gatedHost.test.ts src/app/ConnectionProvider.test.tsx src/test/gatedHost.ts src/app/shell/connectionLabel.test.ts src/app/App.test.tsx src/app/useActiveConnection.ts src/app/ConnectionProvider.tsx src/app/shell/connectionLabel.ts src/app/shell/TitleBar.tsx
@@ -1005,7 +1005,7 @@ git commit -m "fix(app): keep the last confirmed connection when a refresh fails
 
 ### Phase B1 — Failing tests
 
-- [ ] **B1. Create `src/test/deferred.ts`**
+- [x] **B1. Create `src/test/deferred.ts`**
 
 ```typescript
 export type Deferred<T> = {
@@ -1028,7 +1028,7 @@ export function deferred<T>(): Deferred<T> {
 }
 ```
 
-- [ ] **B2. Create `src/test/inspectorWorld.ts`**
+- [x] **B2. Create `src/test/inspectorWorld.ts`**
 
 ```typescript
 import { createFakeHost } from '@/services/pptb/fakeHost';
@@ -1206,7 +1206,7 @@ export function createInspectorHost(
 }
 ```
 
-- [ ] **B3. Create `src/app/inspector-site/inspectorTestHarness.tsx`**
+- [x] **B3. Create `src/app/inspector-site/inspectorTestHarness.tsx`**
 
 ```tsx
 import { render } from '@testing-library/react';
@@ -1255,7 +1255,7 @@ export function renderInspector(ui: ReactElement, options: InspectorHarnessOptio
 }
 ```
 
-- [ ] **B3a. Add two tests to `src/features/inspector/scan/scan.test.ts`** (S-02: `runScan` settles only after every read has settled)
+- [x] **B3a. Add two tests to `src/features/inspector/scan/scan.test.ts`** (S-02: `runScan` settles only after every read has settled)
 
 In `src/features/inspector/scan/scan.test.ts`, inside `describe('runScan cancellation and concurrency')`, after the test "never has more than four reads in flight":
 
@@ -1328,7 +1328,7 @@ In `src/features/inspector/scan/scan.test.ts`, inside `describe('runScan cancell
  type Hold = { key: string; release: () => void };
 ```
 
-- [ ] **B4. Create `src/app/inspector-site/inspectorSession.test.ts`**
+- [x] **B4. Create `src/app/inspector-site/inspectorSession.test.ts`**
 
 ```typescript
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -1828,7 +1828,7 @@ describe('switching away during a delayed scan', () => {
 });
 ```
 
-- [ ] **B5. Create `src/app/inspector-site/InspectorSessionProvider.test.tsx`**
+- [x] **B5. Create `src/app/inspector-site/InspectorSessionProvider.test.tsx`**
 
 ```tsx
 // @vitest-environment jsdom
@@ -2074,7 +2074,7 @@ describe('InspectorSessionProvider: no site list reload for a same-identity even
 });
 ```
 
-- [ ] **B6. Create `src/app/shell/SiteCombobox.test.tsx`**
+- [x] **B6. Create `src/app/shell/SiteCombobox.test.tsx`**
 
 ```tsx
 // @vitest-environment jsdom
@@ -2296,7 +2296,7 @@ describe('SiteCombobox: a selection the options do not carry', () => {
 });
 ```
 
-- [ ] **B7. Create `src/app/shell/SitePill.test.tsx`**
+- [x] **B7. Create `src/app/shell/SitePill.test.tsx`**
 
 ```tsx
 // @vitest-environment jsdom
@@ -2449,7 +2449,7 @@ describe('SitePill (AC-1.2, AC-1.3, AC-7.2)', () => {
 });
 ```
 
-- [ ] **B8. Edit existing tests**
+- [x] **B8. Edit existing tests**
 
 In `src/app/App.test.tsx`:
 
@@ -2491,7 +2491,7 @@ In `src/app/App.test.tsx`:
      host.setConnection(null);
 ```
 
-- [ ] **B9. Run the new tests with the implementation still absent**
+- [x] **B9. Run the new tests with the implementation still absent**
 
 ```powershell
 npm test -- src/features/inspector/scan/scan.test.ts src/app/inspector-site src/app/shell/SiteCombobox.test.tsx src/app/shell/SitePill.test.tsx src/app/App.test.tsx
@@ -2501,7 +2501,7 @@ Expected: exit 1; `Test Files  6 failed (6)`, `Tests  4 failed | 52 passed (56)`
 
 ### Phase B2 — Implementation
 
-- [ ] **B10. Create `src/app/inspector-site/inspectorDeps.ts`**
+- [x] **B10. Create `src/app/inspector-site/inspectorDeps.ts`**
 
 ```typescript
 import { listSites, runScan } from '@/features/inspector/scan/scan';
@@ -2518,7 +2518,7 @@ export type InspectorDeps = {
 export const INSPECTOR_DEPS: InspectorDeps = { listSites, runScan };
 ```
 
-- [ ] **B11. Create `src/app/inspector-site/inspectorSession.types.ts`**
+- [x] **B11. Create `src/app/inspector-site/inspectorSession.types.ts`**
 
 ```typescript
 import type { Connection } from '@/services/pptb/host.types';
@@ -2572,7 +2572,7 @@ export type InspectorSession = Omit<InspectorSnapshot, 'ownerKey'> &
   };
 ```
 
-- [ ] **B11a. Edit `src/features/inspector/scan/scan.ts`: settle every read before `runScan` settles**
+- [x] **B11a. Edit `src/features/inspector/scan/scan.ts`: settle every read before `runScan` settles**
 
 Cause: `Promise.all` rejects on the first `AbortError` while the other reads of that scan are still running (the adapter cannot interrupt a `queryData` in progress), so the store started the next scan's four reads on top of them (reproduced peak 7). The three `Promise.all` calls become `Promise.allSettled`; `fulfilledValue` then rethrows the first rejection in input order, so the first-error behaviour and `AbortError` propagation are unchanged. `limiter` and `guarded` are not touched.
 
@@ -2665,7 +2665,7 @@ In `src/features/inspector/scan/scan.ts`:
      throwIfAborted(signal);
 ```
 
-- [ ] **B12. Create `src/app/inspector-site/inspectorSession.ts`**
+- [x] **B12. Create `src/app/inspector-site/inspectorSession.ts`**
 
 ```typescript
 import { ScanAbandonedError } from '@/features/inspector/scan/scan';
@@ -2889,7 +2889,7 @@ export function createInspectorStore(host: PptbHost, deps: InspectorDeps): Inspe
 }
 ```
 
-- [ ] **B13. Create `src/app/inspector-site/useInspector.ts`**
+- [x] **B13. Create `src/app/inspector-site/useInspector.ts`**
 
 ```typescript
 import { createContext, use } from 'react';
@@ -2906,7 +2906,7 @@ export function useInspector(): InspectorSession {
 }
 ```
 
-- [ ] **B14. Create `src/app/inspector-site/InspectorSessionProvider.tsx`**
+- [x] **B14. Create `src/app/inspector-site/InspectorSessionProvider.tsx`**
 
 ```tsx
 import { useEffect, useState, useSyncExternalStore } from 'react';
@@ -2997,7 +2997,7 @@ export function InspectorSessionProvider({
 }
 ```
 
-- [ ] **B15. Create `src/app/shell/SiteCombobox.tsx`**
+- [x] **B15. Create `src/app/shell/SiteCombobox.tsx`**
 
 ```tsx
 import { useEffect, useId, useRef, useState } from 'react';
@@ -3264,7 +3264,7 @@ export function SiteCombobox({
 }
 ```
 
-- [ ] **B16. Create `src/app/shell/siteCombobox.css`**
+- [x] **B16. Create `src/app/shell/siteCombobox.css`**
 
 ```css
 /* Title-bar site picker (APG select-only combobox). Colours come only from the theme tokens. */
@@ -3394,7 +3394,7 @@ export function SiteCombobox({
 }
 ```
 
-- [ ] **B17. Edit existing code**
+- [x] **B17. Edit existing code**
 
 In `src/app/shell/SitePill.tsx`:
 
@@ -3590,7 +3590,7 @@ In `src/app/shell/shell.css`:
  }
 ```
 
-- [ ] **B18. Run the slice tests again**
+- [x] **B18. Run the slice tests again**
 
 ```powershell
 npm test -- src/features/inspector/scan/scan.test.ts src/app/inspector-site src/app/shell/SiteCombobox.test.tsx src/app/shell/SitePill.test.tsx src/app/App.test.tsx
@@ -3598,7 +3598,7 @@ npm test -- src/features/inspector/scan/scan.test.ts src/app/inspector-site src/
 
 Expected: exit 0; `Test Files  6 passed (6)`, `Tests  129 passed (129)` (the 135 of the previous draft less 6: four D-16 B store reload tests, the D-20 provider test and one `SiteCombobox` D-19 label test; the 47 `scan.test.ts` tests are unchanged).
 
-- [ ] **B19. Type, lint and full-suite gates for this slice**
+- [x] **B19. Type, lint and full-suite gates for this slice**
 
 ```powershell
 npm run typecheck
@@ -3608,7 +3608,7 @@ npm test
 
 Expected: `typecheck` and `eslint` exit 0 with no output; `npm test` exits 0 with `Test Files  110 passed (110)`, `Tests  1830 passed (1830)` (the three `buildShape` builds still pass: the placeholder is untouched and the new code is gated).
 
-- [ ] **B20. Commit**
+- [x] **B20. Commit**
 
 ```powershell
 git add -- src/features/inspector/scan/scan.ts src/features/inspector/scan/scan.test.ts src/test/deferred.ts src/test/inspectorWorld.ts src/app/inspector-site/inspectorTestHarness.tsx src/app/inspector-site/inspectorSession.test.ts src/app/inspector-site/InspectorSessionProvider.test.tsx src/app/shell/SiteCombobox.test.tsx src/app/shell/SitePill.test.tsx src/app/inspector-site/inspectorDeps.ts src/app/inspector-site/inspectorSession.types.ts src/app/inspector-site/inspectorSession.ts src/app/inspector-site/useInspector.ts src/app/inspector-site/InspectorSessionProvider.tsx src/app/shell/SiteCombobox.tsx src/app/shell/siteCombobox.css src/app/App.test.tsx src/app/shell/SitePill.tsx src/app/App.tsx src/app/shell/TitleBar.tsx src/app/shell/shell.css
@@ -3622,7 +3622,7 @@ git commit -m "feat(app): add the app-scoped Inspector session and the title-bar
 
 ### Phase C1 — Failing tests
 
-- [ ] **C1. Create `src/test/fixedDeps.ts`**
+- [x] **C1. Create `src/test/fixedDeps.ts`**
 
 ```typescript
 import type { InspectorDeps } from '@/app/inspector-site/inspectorDeps';
@@ -3645,7 +3645,7 @@ export function fixedDeps(
 }
 ```
 
-- [ ] **C2. Create `src/features/inspector/InspectorPage.test.tsx`**
+- [x] **C2. Create `src/features/inspector/InspectorPage.test.tsx`**
 
 ```tsx
 // @vitest-environment jsdom
@@ -4292,7 +4292,7 @@ describe('InspectorPage: focus after Retry and Scan again', () => {
 
 D-19 C is enforced by the store guard in B (`loadSites` success omitting the selected site clears the selection); no page test can reach it through the public API under D-16 A, so it is covered by the store's code only (noted in the self-review).
 
-- [ ] **C3. Create `src/app/App.inspector.test.tsx`**
+- [x] **C3. Create `src/app/App.inspector.test.tsx`**
 
 ```tsx
 // @vitest-environment jsdom
@@ -4382,7 +4382,7 @@ describe('Logic Inspector in the app (CR-001, AC-7.6)', () => {
 });
 ```
 
-- [ ] **C4. Edit existing tests**
+- [x] **C4. Edit existing tests**
 
 In `tests/buildShape.test.ts`:
 
@@ -4418,7 +4418,7 @@ In `tests/buildShape.test.ts`:
        expect(code).not.toContain('No site selected');
 ```
 
-- [ ] **C5. Run the new tests with the implementation still absent**
+- [x] **C5. Run the new tests with the implementation still absent**
 
 ```powershell
 npm test -- src/features/inspector/InspectorPage.test.tsx src/app/App.inspector.test.tsx tests/buildShape.test.ts
@@ -4428,7 +4428,7 @@ Expected: exit 1; `Test Files  3 failed (3)`, `Tests  4 failed | 12 passed (16)`
 
 ### Phase C2 — Implementation
 
-- [ ] **C6. Create `src/features/inspector/pageState.ts`**
+- [x] **C6. Create `src/features/inspector/pageState.ts`**
 
 ```typescript
 import type { InspectorSession } from '@/app/inspector-site/inspectorSession.types';
@@ -4488,7 +4488,7 @@ export function derivePageState(connection: ConnectionState, session: InspectorS
 }
 ```
 
-- [ ] **C7. Create `src/features/inspector/pageCopy.ts`**
+- [x] **C7. Create `src/features/inspector/pageCopy.ts`**
 
 ```typescript
 import type { ScanProgress, SiteRef } from '@/types/inspector';
@@ -4564,7 +4564,7 @@ export function announcementFor(state: PageState): string {
 }
 ```
 
-- [ ] **C8. Create `src/features/inspector/StatePanel.tsx`**
+- [x] **C8. Create `src/features/inspector/StatePanel.tsx`**
 
 ```tsx
 import type { ReactElement, ReactNode, Ref } from 'react';
@@ -4607,7 +4607,7 @@ export function StatePanel({
 }
 ```
 
-- [ ] **C9. Create `src/features/inspector/FilesRail.tsx`**
+- [x] **C9. Create `src/features/inspector/FilesRail.tsx`**
 
 ```tsx
 import type { ReactElement } from 'react';
@@ -4671,7 +4671,7 @@ export function FilesRail({ files, selectedId, complete, onSelect }: FilesRailPr
 }
 ```
 
-- [ ] **C10. Create `src/features/inspector/ResultsView.tsx`**
+- [x] **C10. Create `src/features/inspector/ResultsView.tsx`**
 
 ```tsx
 import type { ReactElement, Ref } from 'react';
@@ -4760,7 +4760,7 @@ export function ResultsView({ result, headingRef, onRescan }: ResultsViewProps):
 }
 ```
 
-- [ ] **C11. Create `src/features/inspector/inspector.css`**
+- [x] **C11. Create `src/features/inspector/inspector.css`**
 
 ```css
 /* Logic Inspector, layout 10a on the Graphite tokens. Colours come only from the theme tokens. */
@@ -4979,7 +4979,7 @@ export function ResultsView({ result, headingRef, onRescan }: ResultsViewProps):
 }
 ```
 
-- [ ] **C12. Replace the entire content of `src/features/inspector/InspectorPage.tsx`**
+- [x] **C12. Replace the entire content of `src/features/inspector/InspectorPage.tsx`**
 
 ```tsx
 import { useEffect, useRef } from 'react';
@@ -5234,7 +5234,7 @@ export function InspectorPage(): ReactElement {
 }
 ```
 
-- [ ] **C13. Run the slice tests again**
+- [x] **C13. Run the slice tests again**
 
 ```powershell
 npm test -- src/features/inspector/InspectorPage.test.tsx src/app/App.inspector.test.tsx tests/buildShape.test.ts
@@ -5242,7 +5242,7 @@ npm test -- src/features/inspector/InspectorPage.test.tsx src/app/App.inspector.
 
 Expected: exit 0; `Test Files  3 passed (3)`, `Tests  51 passed (51)` (`InspectorPage.test.tsx` 35, `App.inspector.test.tsx` 3, `buildShape.test.ts` 13).
 
-- [ ] **C14. Type, lint and full-suite gates for this slice**
+- [x] **C14. Type, lint and full-suite gates for this slice**
 
 ```powershell
 npm run typecheck
@@ -5252,7 +5252,7 @@ npm test
 
 Expected: `typecheck` and `eslint` exit 0 with no output; `npm test` exits 0 with `Test Files  112 passed (112)`, `Tests  1868 passed (1868)`.
 
-- [ ] **C15. Commit**
+- [x] **C15. Commit**
 
 ```powershell
 git add -- src/test/fixedDeps.ts src/features/inspector/InspectorPage.test.tsx src/app/App.inspector.test.tsx src/features/inspector/pageState.ts src/features/inspector/pageCopy.ts src/features/inspector/StatePanel.tsx src/features/inspector/FilesRail.tsx src/features/inspector/ResultsView.tsx src/features/inspector/inspector.css src/features/inspector/InspectorPage.tsx tests/buildShape.test.ts
@@ -5266,7 +5266,7 @@ git commit -m "feat(inspector): build the Inspector page states, files rail and 
 
 ### Phase D1 — Failing tests
 
-- [ ] **D1. Create `src/features/inspector/ResultsView.test.tsx`**
+- [x] **D1. Create `src/features/inspector/ResultsView.test.tsx`**
 
 ```tsx
 // @vitest-environment jsdom
@@ -5671,7 +5671,7 @@ describe('review marks are session state (AC-8.9, AC-7.6)', () => {
 });
 ```
 
-- [ ] **D2. Run the new tests with the implementation still absent**
+- [x] **D2. Run the new tests with the implementation still absent**
 
 ```powershell
 npm test -- src/features/inspector/ResultsView.test.tsx
@@ -5681,7 +5681,7 @@ Expected: exit 1; `Test Files  1 failed (1)`, `Tests  23 failed | 4 passed (27)`
 
 ### Phase D2 — Implementation
 
-- [ ] **D3. Create `src/features/inspector/ReadinessTile.tsx`**
+- [x] **D3. Create `src/features/inspector/ReadinessTile.tsx`**
 
 ```tsx
 import type { ReactElement } from 'react';
@@ -5714,7 +5714,7 @@ export function ReadinessTile({ file }: { file: FileResult }): ReactElement {
 }
 ```
 
-- [ ] **D4. Create `src/features/inspector/FindingTile.tsx`**
+- [x] **D4. Create `src/features/inspector/FindingTile.tsx`**
 
 ```tsx
 import type { ReactElement } from 'react';
@@ -5772,7 +5772,7 @@ export function FindingTile({ finding, slot, selected, onSelect }: FindingTilePr
 }
 ```
 
-- [ ] **D5. Create `src/features/inspector/FindingDetail.tsx`**
+- [x] **D5. Create `src/features/inspector/FindingDetail.tsx`**
 
 ```tsx
 import type { ReactElement } from 'react';
@@ -5893,7 +5893,7 @@ export function FindingDetail({ file, finding, onToggleReview }: FindingDetailPr
 }
 ```
 
-- [ ] **D6. Edit existing code**
+- [x] **D6. Edit existing code**
 
 In `src/features/inspector/ResultsView.tsx`:
 
@@ -6183,7 +6183,7 @@ In `src/features/inspector/inspector.css`:
 +}
 ```
 
-- [ ] **D7. Run the slice tests again**
+- [x] **D7. Run the slice tests again**
 
 ```powershell
 npm test -- src/features/inspector/ResultsView.test.tsx
@@ -6191,7 +6191,7 @@ npm test -- src/features/inspector/ResultsView.test.tsx
 
 Expected: exit 0; `Test Files  1 passed (1)`, `Tests  27 passed (27)`.
 
-- [ ] **D8. Type, lint and full-suite gates for this slice**
+- [x] **D8. Type, lint and full-suite gates for this slice**
 
 ```powershell
 npm run typecheck
@@ -6201,7 +6201,7 @@ npm test
 
 Expected: `typecheck` and `eslint` exit 0 with no output; `npm test` exits 0 with `Test Files  113 passed (113)`, `Tests  1895 passed (1895)`.
 
-- [ ] **D9. Commit**
+- [x] **D9. Commit**
 
 ```powershell
 git add -- src/features/inspector/ResultsView.test.tsx src/features/inspector/ReadinessTile.tsx src/features/inspector/FindingTile.tsx src/features/inspector/FindingDetail.tsx src/features/inspector/ResultsView.tsx src/features/inspector/inspector.css
@@ -6215,7 +6215,7 @@ git commit -m "feat(inspector): add the readiness ring, finding tiles, detail ti
 
 The repo has no tracked hostless preview: `@shko.online/pptb-mock` is not a dependency and `vite.config.ts` applies `fixHtmlForPPTB`, which strips `type="module"` and so cannot run as a dev server. This step uses the fake host the tests already use. The three files live in `.rm-frontend-review/p5-5/` (a git-ignored directory) and are removed afterwards; they are not part of any commit and must not exist when `npm run lint` runs (ESLint would lint `preview.ts` outside a TypeScript project).
 
-- [ ] **R1. Create the three files**
+- [x] **R1. Create the three files**
 
 `.rm-frontend-review/p5-5/preview.html`:
 
@@ -6324,7 +6324,7 @@ export default defineConfig({
 });
 ```
 
-- [ ] **R2. Start the review server**
+- [x] **R2. Start the review server**
 
 ```powershell
 npx vite --config .rm-frontend-review/p5-5/vite.config.ts --port 5178 --host 127.0.0.1
@@ -6340,7 +6340,7 @@ Open `http://127.0.0.1:5178/.rm-frontend-review/p5-5/preview.html?theme=light` (
 
 For each: `document.documentElement.scrollWidth` equals the viewport width (no horizontal scroll), the picker stays on screen, the files rail and the detail tile scroll inside their cells, the selected file uses the primary border and the selected finding tile shows the primary inset ring (D-21 B), every Needs-review tile is tinted (`--review-tint` background, `--review` border) and shows the tinted `!` icon, glyph and word; the tile tint is a deliberate FR-11 interpretation (D-21 B), so compare layout, not tint, against references 05 and 06, the focus ring is visible on the tiles, files and picker (Tab through them), and nothing is clipped.
 
-- [ ] **R3. Remove the files**
+- [x] **R3. Remove the files**
 
 ```powershell
 Remove-Item -Recurse -Force .rm-frontend-review/p5-5
@@ -6366,7 +6366,7 @@ Expected: `typecheck` exits 0 with no output; `eslint` and `npm run lint` exit 0
 
 ## Evidence
 
-- [ ] **E1. Record evidence**
+- [x] **E1. Record evidence**
 
 Create `docs/phase-5/evidence/p5-5/execution.md` with the same sections as `docs/phase-5/evidence/p5-4/execution.md`: a header (plan path, execution date, branch, baseline `1e0156b`), `## Commits` (the four hashes and messages), `## Gate output` (tables of command / observed / expected for each slice's failing signal, its confirm run and its full-suite count, then the final gates above), `## Rendered check` (the R2 matrix: viewport, theme, result, and where the screenshots were saved), `## Deviations from the plan text` (anything the executor changed, including line-ending handling and the statement that `scan.test.ts` and `src/services/pptb/` were not touched), `## Observation` (the stop-hook note if it applied), and `## Still open` (RG-002 live host contract, RG-005 screen-reader, zoom and host keyboard checks, P5.7 export, the owner's pending D-xx answers).
 
