@@ -5,6 +5,7 @@ import { App } from '@/app/App';
 import { FAKE_STARTER_DEPS } from '@/app/starter-session/fakeStarterDeps';
 import { createFakeHost } from '@/services/pptb/fakeHost';
 import type { Connection } from '@/services/pptb/host.types';
+import { gateHost } from '@/test/gatedHost';
 
 afterEach(cleanup);
 
@@ -77,6 +78,24 @@ describe('App shell', () => {
       await Promise.resolve();
     });
     expect(screen.getByText('Not connected')).toBeTruthy();
+  });
+
+  it('does not call an unreadable connection "Not connected" (WR-005)', async () => {
+    const host = gateHost(createFakeHost({ connection: CONTOSO }));
+    host.setConnectionRead('reject');
+    render(<App host={host} starterDeps={FAKE_STARTER_DEPS} />);
+    await act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+    expect(screen.getByText('Connection unavailable')).toBeTruthy();
+    expect(screen.queryByText('Not connected')).toBeNull();
+    host.setConnectionRead('ok');
+    await act(async () => {
+      window.dispatchEvent(new Event('focus'));
+      await Promise.resolve();
+    });
+    expect(screen.getByText('Contoso · Development')).toBeTruthy();
   });
 
   it('registers one host event listener for the whole app and removes it on unmount', async () => {
