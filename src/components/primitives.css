@@ -106,6 +106,31 @@
   cursor: not-allowed;
 }
 
+/* Listed after the blocked rule so a blocked selected pill keeps readable text on its filled background. */
+.ui-pill--selected[aria-disabled='true'] {
+  color: var(--on-primary);
+}
+
+.ui-checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-2);
+  font-size: 12px;
+  line-height: 1.4;
+  cursor: pointer;
+}
+
+.ui-checkbox input {
+  margin: 0;
+  accent-color: var(--primary);
+}
+
+.ui-checkbox[aria-disabled='true'] {
+  color: var(--muted);
+  cursor: not-allowed;
+}
+
 .ui-pill-group {
   display: flex;
   flex-wrap: wrap;

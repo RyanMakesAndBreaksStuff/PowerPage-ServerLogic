@@ -6,7 +6,7 @@ import { Modal } from './Modal';
 
 afterEach(cleanup);
 
-function Harness({ width }: { width?: number }) {
+function Harness({ width, skipFirst = false }: { width?: number; skipFirst?: boolean }) {
   const [open, setOpen] = useState(false);
   return (
     <>
@@ -27,6 +27,11 @@ function Harness({ width }: { width?: number }) {
         }}
         footer={<button type="button">Export Markdown</button>}
       >
+        {skipFirst ? (
+          <button type="button" tabIndex={-1}>
+            Roving
+          </button>
+        ) : null}
         <label>
           Format
           <input type="text" />
@@ -126,6 +131,22 @@ describe('Modal, APG modal dialog', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Close' }));
     expect(screen.queryByRole('dialog')).toBeNull();
     expect(document.activeElement).toBe(opener);
+  });
+
+  it('skips controls with tabindex -1 on entry and in the Tab trap', () => {
+    render(<Harness skipFirst />);
+    openModal();
+    const roving = screen.getByRole('button', { name: 'Roving' });
+    expect(document.activeElement).toBe(screen.getByRole('textbox'));
+    const close = screen.getByRole('button', { name: 'Close' });
+    const last = screen.getByRole('button', { name: 'Export Markdown' });
+    last.focus();
+    expect(fireEvent.keyDown(last, { key: 'Tab' })).toBe(false);
+    expect(document.activeElement).toBe(close);
+    expect(document.activeElement).not.toBe(roving);
+    close.focus();
+    expect(fireEvent.keyDown(close, { key: 'Tab', shiftKey: true })).toBe(false);
+    expect(document.activeElement).toBe(last);
   });
 
   it('does not close when the scrim is clicked', () => {
