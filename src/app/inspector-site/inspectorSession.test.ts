@@ -1003,6 +1003,26 @@ describe('export job (P5.7)', () => {
     });
   });
 
+  it('settles a job whose filename cannot be built: closes it, reports one error, releases the guard and saves nothing', async () => {
+    const { host, store, snap, notify, settled } = await finishedStore({
+      reportFileNameBeforeBuild: () => {
+        throw new RangeError('internal detail');
+      },
+    });
+    store.openExport();
+    store.submitExport();
+    await settled();
+    expect(snap().exportJob).toBeNull();
+    expect(notify).toHaveBeenCalledTimes(1);
+    expect(notify).toHaveBeenCalledWith({
+      title: "Couldn't save the report",
+      body: BUILD_FAILED_BODY,
+      type: 'error',
+    });
+    expect(guardCalls(host)).toEqual(['preventClose', 'releasePreventClose']);
+    expect(host.callsOf('saveFile')).toEqual([]);
+  });
+
   it('ignores a second submit and option changes while building or saving; closeExport only hides the dialog', async () => {
     const holder: { store: InspectorStore | null } = { store: null };
     const { host, store, snap, notify, job, settled, toasts } = await finishedStore({

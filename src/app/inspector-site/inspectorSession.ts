@@ -128,7 +128,7 @@ export function createInspectorStore(
 
   async function runExport(job: ExportJob): Promise<void> {
     const { result, options } = job;
-    const name = deps.reportFileNameBeforeBuild(result, options);
+    let name = 'the report'; // Stands in for the filename until it is built, so a failure there still has a title.
     let saving = false;
     const watchdog = setTimeout(() => {
       if (isCurrent(job) && snapshot.exportJob?.phase === 'building') {
@@ -137,6 +137,7 @@ export function createInspectorStore(
     }, deps.exportWatchdogMs ?? EXPORT_WATCHDOG_MS);
     host.preventClose().catch(ignoreGuardFailure);
     try {
+      name = deps.reportFileNameBeforeBuild(result, options);
       // Lets React paint the busy state before a synchronous build blocks the thread.
       await deps.yieldToHost();
       if (!isCurrent(job)) return;

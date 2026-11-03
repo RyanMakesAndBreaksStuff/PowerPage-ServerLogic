@@ -11,14 +11,16 @@ import type { InspectorSnapshot, InspectorSession } from './inspectorSession.typ
 import { InspectorSessionContext } from './useInspector';
 
 /** The snapshot as it must read for a connection the store has not adopted yet: nothing carries over (AC-7.6). */
-function blankFor(connection: Connection | null, generation: number): InspectorSnapshot {
+function blankFor(connection: Connection | null, snapshot: InspectorSnapshot): InspectorSnapshot {
   return {
     ...INITIAL_SNAPSHOT,
     ownerKey: connection === null ? null : connectionKey(connection),
     connection,
     sites: connection === null ? { status: 'idle' } : { status: 'loading' },
     marks: EMPTY_MARKS,
-    generation,
+    generation: snapshot.generation,
+    // The close counter is not connection state; blanking it would read as N, 0, N and re-fire the page's focus effect.
+    exportStaleCloses: snapshot.exportStaleCloses,
   };
 }
 
@@ -64,7 +66,7 @@ export function InspectorSessionProvider({
   const stale =
     confirmed !== undefined &&
     snapshot.ownerKey !== (confirmed === null ? null : connectionKey(confirmed));
-  const view = stale ? blankFor(confirmed, snapshot.generation) : snapshot;
+  const view = stale ? blankFor(confirmed, snapshot) : snapshot;
 
   const session: InspectorSession = {
     connection: view.connection,

@@ -553,6 +553,30 @@ describe('InspectorPage: results', () => {
       });
     });
 
+    it('moves focus to the heading only for a close, not for a later connection change with no dialog open (E-10)', async () => {
+      const { host, user } = await finished();
+      await user.click(exportReport());
+      host.setConnection(OTHER_CONNECTION);
+      await connectionEvent(host);
+      await gone();
+      const next = await heading('Select a site');
+      await waitFor(() => {
+        expect(document.activeElement).toBe(next);
+      });
+      act(() => {
+        picker().focus();
+      });
+      expect(document.activeElement).toBe(picker());
+      const toasts = notices(host).length;
+      host.setConnection(CONNECTION);
+      await connectionEvent(host);
+      await act(async () => {
+        await Promise.resolve();
+      });
+      expect(document.activeElement).toBe(picker());
+      expect(notices(host)).toHaveLength(toasts);
+    });
+
     it('keeps the dialog and the export when the connection is renamed while it is open (AC-7.6)', async () => {
       const { host, user } = await finished();
       await user.click(exportReport());

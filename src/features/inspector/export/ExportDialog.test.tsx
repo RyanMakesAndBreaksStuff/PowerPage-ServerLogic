@@ -113,9 +113,9 @@ describe('Export dialog: open', () => {
     expect(radio('Site summary').getAttribute('aria-checked')).toBe('false');
     expect(radio('Markdown').getAttribute('aria-checked')).toBe('true');
     expect(radio('PDF').getAttribute('aria-checked')).toBe('false');
-    expect((checkbox('Questions to consider') as HTMLInputElement).checked).toBe(true);
-    expect((checkbox('Configuration snapshot') as HTMLInputElement).checked).toBe(true);
-    expect((checkbox('Redact environment and site names') as HTMLInputElement).checked).toBe(false);
+    expect(checkbox('Questions to consider')).toBeChecked();
+    expect(checkbox('Configuration snapshot')).toBeChecked();
+    expect(checkbox('Redact environment and site names')).not.toBeChecked();
     expect(within(modal).getByRole('button', { name: 'Export Markdown' })).toBeTruthy();
     expect(within(modal).getByRole('button', { name: 'Cancel' })).toBeTruthy();
     expect(within(modal).getByRole('status').textContent).toBe('');
@@ -274,7 +274,7 @@ describe('Export dialog: busy phases', () => {
     await view.user.click(radio('Site summary'));
     await view.user.click(checkbox('Redact environment and site names'));
     expect(radio('This file').getAttribute('aria-checked')).toBe('true');
-    expect((checkbox('Redact environment and site names') as HTMLInputElement).checked).toBe(false);
+    expect(checkbox('Redact environment and site names')).not.toBeChecked();
 
     gate.resolve(undefined);
     await saved(view.host);
