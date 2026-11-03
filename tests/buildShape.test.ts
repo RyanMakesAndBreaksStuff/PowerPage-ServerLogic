@@ -98,7 +98,8 @@ describe('built tool: PPTB loading shape (all pages released)', () => {
     const code = read(dist, file);
     expect(code).toContain('Discard your edits?'); // text only the Starter page renders
     expect(code).toContain('Search objects and methods');
-    expect(code).toContain('Logic Inspector page placeholder');
+    expect(code).toContain('Review server logic readiness'); // text only the finished Inspector page renders
+    expect(code).toContain('useInspector must be used inside the Inspector session provider');
     expect(code).toContain('No site selected');
   });
 });
@@ -113,14 +114,15 @@ describe('released pages (FR-1): unreleased page code is left out of the bundle'
       const code = read(dist, file);
       expect(code).toContain('Discard your edits?'); // text only the Starter page renders
       expect(code).not.toContain('Search objects and methods');
-      expect(code).not.toContain('Logic Inspector page placeholder');
+      expect(code).not.toContain('Review server logic readiness');
+      expect(code).not.toContain('useInspector must be used inside the Inspector session provider');
       expect(code).not.toContain('Browse all in Server Objects');
     },
     BUILD_TIMEOUT,
   );
 
   it(
-    'ships Starter and Server Objects but not the Inspector placeholder in --mode beta',
+    'ships Starter and Server Objects but not the Inspector in --mode beta',
     async () => {
       const dist = await buildTool('beta-mode', undefined, 'beta');
       const [file] = filesIn(dist, '.js');
@@ -128,7 +130,8 @@ describe('released pages (FR-1): unreleased page code is left out of the bundle'
       const code = read(dist, file);
       expect(code).toContain('Discard your edits?');
       expect(code).toContain('Search objects and methods');
-      expect(code).not.toContain('Logic Inspector page placeholder');
+      expect(code).not.toContain('Review server logic readiness');
+      expect(code).not.toContain('useInspector must be used inside the Inspector session provider');
       expect(code).not.toContain('No site selected');
     },
     BUILD_TIMEOUT,
