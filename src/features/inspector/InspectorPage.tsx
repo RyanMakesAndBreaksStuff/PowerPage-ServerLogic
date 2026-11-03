@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { ReactElement, RefObject } from 'react';
 import { useInspector } from '@/app/inspector-site/useInspector';
 import { useConnectionState, useRefreshConnection } from '@/app/useActiveConnection';
@@ -26,29 +26,45 @@ import './inspector.css';
 /**
  * Retry hides itself while its read runs (D-05) and Scan again unmounts the panel it sits in, so the focused
  * button would vanish and focus would fall to the page body. `request()` is called from those two handlers;
- * after the next commit the heading of the panel on screen (`ref`) takes focus, once. The heading has
+ * after that commit the heading of the panel on screen (`ref`) takes focus, once. The heading has
  * `tabIndex={-1}`: reachable by script, not a new Tab stop. Retry stays unmounted while pending, not
  * `aria-disabled` (D-05).
+ *
+ * When a scan ends, its panel unmounts too. If the scanning heading still held focus, the heading of the
+ * panel that replaces it takes focus; if the user moved focus elsewhere during the scan, it is left alone.
  */
-function useHeadingFocus(): { ref: RefObject<HTMLHeadingElement | null>; request: () => void } {
+function useHeadingFocus(scanning: boolean): {
+  ref: RefObject<HTMLHeadingElement | null>;
+  request: () => void;
+} {
   const ref = useRef<HTMLHeadingElement>(null);
-  const wanted = useRef(false);
-  // Subscribes to the refresh context so a Retry that only flips `pending` still re-renders the page and runs the effect.
-  useRefreshConnection();
+  const [requests, setRequests] = useState(0);
   useEffect(() => {
-    if (!wanted.current) return;
-    wanted.current = false;
-    ref.current?.focus();
-  });
+    if (requests > 0) ref.current?.focus();
+  }, [requests]);
+  useEffect(() => {
+    if (!scanning) return;
+    const heading = (): HTMLHeadingElement | null => ref.current;
+    let follow = document.activeElement !== null && document.activeElement === heading();
+    const onFocusIn = (event: FocusEvent): void => {
+      follow = event.target === heading();
+    };
+    document.addEventListener('focusin', onFocusIn);
+    return () => {
+      document.removeEventListener('focusin', onFocusIn);
+      // The scanning heading is gone by now; focus fell to the body only if it was still on that heading.
+      const active = document.activeElement;
+      if (follow && (active === null || active === document.body)) heading()?.focus();
+    };
+  }, [scanning]);
   return {
     ref,
     request: () => {
-      wanted.current = true;
+      setRequests((count) => count + 1);
     },
   };
 }
 
-/** D-05: re-reads the connection on demand; offered only after a read rejected, never while one is in flight. */
 function RetryConnection({ onRetry }: { onRetry: () => void }): ReactElement | null {
   const { refresh, pending } = useRefreshConnection();
   if (pending) return null;
@@ -239,7 +255,7 @@ export function InspectorPage(): ReactElement {
   const connection = useConnectionState();
   const session = useInspector();
   const state = derivePageState(connection, session);
-  const focus = useHeadingFocus();
+  const focus = useHeadingFocus(state.kind === 'scanning');
   return (
     <section className="inspector" aria-label="Logic Inspector">
       <div role="status" aria-label="Inspector status" className="inspector-sr-only">

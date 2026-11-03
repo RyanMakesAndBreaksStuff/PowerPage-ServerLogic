@@ -34,6 +34,9 @@ export type InspectorStore = InspectorActions & {
 
 const noop = (): void => undefined;
 
+/** How long a new read waits for the previous generation's reads to settle before it starts anyway. */
+export const SETTLE_TIMEOUT_MS = 10_000;
+
 /**
  * The one owner of the selected site, the scan generation and its AbortController, the facts, the file
  * selection and the review marks. It is plain TypeScript so the async lifecycle can be tested without React.
@@ -48,15 +51,32 @@ export function createInspectorStore(host: PptbHost, deps: InspectorDeps): Inspe
   let controller: AbortController | null = null;
   let settled: Promise<void> = Promise.resolve();
   const listeners = new Set<() => void>();
+  const settleTimeoutMs = deps.settleTimeoutMs ?? SETTLE_TIMEOUT_MS;
 
   const publish = (patch: Partial<InspectorSnapshot>): void => {
     snapshot = { ...snapshot, ...patch };
     for (const listener of [...listeners]) listener();
   };
 
-  /** Work that never rejects. Later reads wait for it; for a scan, until its `runScan` has fully settled. */
+  /**
+   * Later reads wait for this work; for a scan, until its `runScan` has fully settled. Each work item awaits
+   * the one before it, so the chain is transitive, and it never rejects, so one failure cannot poison it.
+   */
   const track = (work: Promise<void>): void => {
-    settled = Promise.all([settled, work]).then(noop);
+    settled = work.then(noop, noop);
+  };
+
+  /** Waits for `previous` to settle, but no longer than the settle timeout, so a hung host read cannot stall. */
+  const settle = async (previous: Promise<void>): Promise<void> => {
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const elapsed = new Promise<void>((resolve) => {
+      timer = setTimeout(resolve, settleTimeoutMs);
+    });
+    try {
+      await Promise.race([previous, elapsed]);
+    } finally {
+      clearTimeout(timer);
+    }
   };
 
   const abortScan = (): void => {
@@ -71,7 +91,7 @@ export function createInspectorStore(host: PptbHost, deps: InspectorDeps): Inspe
     const previous = settled;
     track(
       (async () => {
-        await previous;
+        await settle(previous);
         if (token !== listToken) return;
         try {
           const sites = await deps.listSites(host);
@@ -121,7 +141,7 @@ export function createInspectorStore(host: PptbHost, deps: InspectorDeps): Inspe
     const previous = settled;
     track(
       (async () => {
-        await previous;
+        await settle(previous);
         if (mine !== snapshot.generation) return;
         try {
           const facts = await deps.runScan(

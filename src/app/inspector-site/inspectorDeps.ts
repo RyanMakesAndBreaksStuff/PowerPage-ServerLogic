@@ -7,6 +7,8 @@ import { listSites, runScan } from '@/features/inspector/scan/scan';
 export type InspectorDeps = {
   listSites: typeof listSites;
   runScan: typeof runScan;
+  /** Overrides how long a new read waits for the previous generation to settle (tests). */
+  settleTimeoutMs?: number;
 };
 
 export const INSPECTOR_DEPS: InspectorDeps = { listSites, runScan };

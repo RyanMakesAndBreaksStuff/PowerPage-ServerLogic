@@ -493,3 +493,67 @@ describe('switching away during a delayed scan', () => {
     await until(() => snap().sites.status === 'ok');
   });
 });
+
+describe('settle chain', () => {
+  it('survives a previous read that rejected, so later loads still run', async () => {
+    const reads: ReturnType<typeof deferred<readonly SiteRef[]>>[] = [];
+    const deps: InspectorDeps = {
+      ...INSPECTOR_DEPS,
+      listSites: () => {
+        const read = deferred<readonly SiteRef[]>();
+        reads.push(read);
+        return read.promise;
+      },
+    };
+    const { store, snap } = setup(createInspectorHost(), deps);
+    let throws = 2;
+    store.subscribe(() => {
+      // A listener that throws on both the answer and the error publish makes the tracked load reject.
+      const { status } = snap().sites;
+      if ((status === 'ok' || status === 'error') && throws > 0) {
+        throws -= 1;
+        throw new Error('listener failed');
+      }
+    });
+    store.adopt(CONNECTION);
+    await until(() => reads.length === 1);
+    reads[0]?.resolve([SITE_ALPHA]);
+    await until(() => throws === 0);
+    expect(snap().sites.status).toBe('error');
+    store.retrySites();
+    await until(() => reads.length === 2);
+    reads[1]?.resolve([SITE_BETA]);
+    await until(() => snap().sites.status === 'ok');
+    expect(snap().sites).toEqual({ status: 'ok', sites: [SITE_BETA] });
+  });
+
+  it('waits for a hung previous read for at most the settle timeout', async () => {
+    vi.useFakeTimers();
+    try {
+      const reads: ReturnType<typeof deferred<readonly SiteRef[]>>[] = [];
+      const deps: InspectorDeps = {
+        ...INSPECTOR_DEPS,
+        settleTimeoutMs: 1_000,
+        listSites: () => {
+          const read = deferred<readonly SiteRef[]>();
+          reads.push(read);
+          return read.promise;
+        },
+      };
+      const { store, snap } = setup(createInspectorHost(), deps);
+      store.adopt(CONNECTION);
+      await vi.advanceTimersByTimeAsync(0);
+      expect(reads).toHaveLength(1);
+      store.adopt(OTHER_CONNECTION);
+      await vi.advanceTimersByTimeAsync(999);
+      expect(reads).toHaveLength(1);
+      await vi.advanceTimersByTimeAsync(1);
+      expect(reads).toHaveLength(2);
+      reads[1]?.resolve([SITE_BETA]);
+      await vi.advanceTimersByTimeAsync(0);
+      expect(snap().sites).toEqual({ status: 'ok', sites: [SITE_BETA] });
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+});

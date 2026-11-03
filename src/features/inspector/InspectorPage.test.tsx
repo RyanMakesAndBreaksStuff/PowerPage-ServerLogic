@@ -637,4 +637,31 @@ describe('InspectorPage: focus after Retry and Scan again', () => {
     expect(document.activeElement).toBe(await heading('Scanning Alpha portal'));
     await finishSecond(run.second);
   });
+
+  it('keeps focus on the results heading when the scan Scan again started finishes', async () => {
+    const run = scansThen(() => Promise.resolve(graded()));
+    const view = mount({ deps: run.deps });
+    await heading('Select a site');
+    await pick(view, /Alpha portal/);
+    await heading('Review server logic readiness');
+    await view.user.click(screen.getByRole('button', { name: 'Scan again' }));
+    expect(document.activeElement).toBe(await heading('Scanning Alpha portal'));
+    await finishSecond(run.second);
+    expect(document.activeElement).toBe(await heading('Review server logic readiness'));
+  });
+
+  it('leaves focus alone when the user moved it away during the scan', async () => {
+    const run = scansThen(() => Promise.resolve(graded()));
+    const view = mount({ deps: run.deps });
+    await heading('Select a site');
+    await pick(view, /Alpha portal/);
+    await heading('Review server logic readiness');
+    await view.user.click(screen.getByRole('button', { name: 'Scan again' }));
+    expect(document.activeElement).toBe(await heading('Scanning Alpha portal'));
+    await view.user.tab({ shift: true });
+    expect(document.activeElement).toBe(picker());
+    await finishSecond(run.second);
+    await heading('Review server logic readiness');
+    expect(document.activeElement).toBe(picker());
+  });
 });
