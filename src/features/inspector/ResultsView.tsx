@@ -9,7 +9,13 @@ import { FilesRail } from './FilesRail';
 import { FindingDetail } from './FindingDetail';
 import { FindingTile } from './FindingTile';
 import { CHECK_COPY } from './model/copy';
-import { EXPORT_REASON, NO_FILE_TEXT, plain } from './pageCopy';
+import {
+  EXPORT_IN_PROGRESS_REASON,
+  EXPORT_NO_FILES_REASON,
+  EXPORT_NOTHING_READ_REASON,
+  NO_FILE_TEXT,
+  plain,
+} from './pageCopy';
 import { ReadinessTile } from './ReadinessTile';
 
 export type ResultsViewProps = {
@@ -18,10 +24,20 @@ export type ResultsViewProps = {
   headingRef: Ref<HTMLHeadingElement>;
   /** Scan again. The page wraps `session.rescan` so that focus follows to the scanning panel's heading. */
   onRescan: () => void;
+  /** Opens the export dialog; null when the result has no files to export. */
+  onExport: (() => void) | null;
+  /** An export job exists (its dialog may be closed while it finishes), so a second one cannot start. */
+  exportBusy: boolean;
 };
 
 /** A finished or stopped scan (AC-7.3, AC-7.9, AC-7.10, AC-8.1). Mounted with the scan id as its key. */
-export function ResultsView({ result, headingRef, onRescan }: ResultsViewProps): ReactElement {
+export function ResultsView({
+  result,
+  headingRef,
+  onRescan,
+  onExport,
+  exportBusy,
+}: ResultsViewProps): ReactElement {
   const session = useInspector();
   const { files, banners, facts } = result;
   // No file is selected until the user picks one (D-03); the title tile then shows that file (AC-8.1).
@@ -57,9 +73,16 @@ export function ResultsView({ result, headingRef, onRescan }: ResultsViewProps):
     );
   };
 
-  // Export report is always disabled in P5.5 (D-09, D-17); P5.7 enables it and replaces the reason.
+  // AC-9.1, AC-7.4: enabled for a finished or stopped scan with files; the reason names what is missing.
+  const exportReason = exportBusy
+    ? EXPORT_IN_PROGRESS_REASON
+    : onExport !== null
+      ? null
+      : facts.inventoryComplete
+        ? EXPORT_NO_FILES_REASON
+        : EXPORT_NOTHING_READ_REASON;
   const exportReport = (
-    <Button disabledReason={EXPORT_REASON}>
+    <Button variant="primary" onClick={onExport ?? undefined} disabledReason={exportReason}>
       <Icon name="arrow-download" size={14} />
       Export report
     </Button>

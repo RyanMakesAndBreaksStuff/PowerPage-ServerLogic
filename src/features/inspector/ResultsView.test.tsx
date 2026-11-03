@@ -9,7 +9,13 @@ import { CONNECTION, createInspectorHost, OTHER_CONNECTION, SITE_ALPHA } from '@
 import type { SiteFacts } from '@/types/inspector';
 import { CHECK_COPY, NOT_SCANNED_TEXT } from './model/copy';
 import { file, permission, read, role, siteFacts } from './model/fixtures';
-import { EXPORT_REASON, NO_FILE_TEXT, NO_FILES_TEXT, NOTHING_READ_TEXT } from './pageCopy';
+import {
+  EXPORT_NO_FILES_REASON,
+  EXPORT_NOTHING_READ_REASON,
+  NO_FILE_TEXT,
+  NO_FILES_TEXT,
+  NOTHING_READ_TEXT,
+} from './pageCopy';
 import { InspectorPage } from './InspectorPage';
 
 afterEach(cleanup);
@@ -146,22 +152,36 @@ describe('lines that repeat inside one finding', () => {
   });
 });
 
-describe('Export report (D-09, D-17)', () => {
-  it('is present, disabled with its reason, and a click changes nothing', async () => {
+describe('Export report (P5.7)', () => {
+  it('opens the Export report dialog for a finished scan with files', async () => {
     const { user } = await open();
     const button = screen.getByRole('button', { name: 'Export report' });
-    expect(button.getAttribute('aria-disabled')).toBe('true');
-    await user.hover(button);
-    expect(screen.getByText(EXPORT_REASON)).toBeTruthy();
+    expect(button.getAttribute('aria-disabled')).toBeNull();
+    expect(screen.queryByRole('dialog')).toBeNull();
     await user.click(button);
-    expect(screen.getByRole('img', { name: '2 of 3 addressed' })).toBeTruthy();
-    expect(screen.getByRole('button', { name: 'Export report' }).getAttribute('aria-disabled')).toBe('true');
+    expect(screen.getByRole('dialog', { name: 'Export report' })).toBeTruthy();
   });
 
-  it('is present for a stopped scan', async () => {
+  it.each([
+    ['a complete empty result', true, null, EXPORT_NO_FILES_REASON],
+    ['a stopped empty result', false, 'connection-lost', EXPORT_NOTHING_READ_REASON],
+  ] as const)(
+    'is disabled with its reason for %s',
+    async (_label, inventoryComplete, stopped, reason) => {
+      const { user } = await scanned(facts({ files: [], inventoryComplete, stopped }));
+      const button = screen.getByRole('button', { name: 'Export report' });
+      expect(button.getAttribute('aria-disabled')).toBe('true');
+      await user.hover(button);
+      expect(screen.getByText(reason)).toBeTruthy();
+      await user.click(button);
+      expect(screen.queryByRole('dialog')).toBeNull();
+    },
+  );
+
+  it('stays present and enabled for a stopped scan with files', async () => {
     await scanned(facts({ stopped: 'connection-lost', inventoryComplete: false }));
     expect(screen.getByText('Connection lost. Reconnect and rescan.')).toBeTruthy();
-    expect(screen.getByRole('button', { name: 'Export report' }).getAttribute('aria-disabled')).toBe('true');
+    expect(screen.getByRole('button', { name: 'Export report' }).getAttribute('aria-disabled')).toBeNull();
     expect(screen.getByRole('button', { name: 'Scan again' })).toBeTruthy();
   });
 });

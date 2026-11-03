@@ -1,0 +1,28 @@
+/* Export report dialog (AC-9.1). Colours come only from the theme tokens; the Modal supplies the frame. */
+.export-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text);
+}
+
+/* A long site or file name with no break points wraps instead of widening the dialog. */
+.export-dialog__context {
+  margin: 0;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+
+.export-dialog__includes {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.export-dialog__status {
+  min-height: 1.5em;
+  margin: 0;
+  color: var(--text-2);
+}

@@ -23,7 +23,9 @@ import {
   CONNECTION_CHANGED_TITLE,
   connectionChangedText,
   DISCONNECTED_TEXT,
-  EXPORT_REASON,
+  EXPORT_NO_FILES_REASON,
+  EXPORT_NO_SITES_REASON,
+  EXPORT_NOTHING_READ_REASON,
   NO_FILES_TEXT,
   NO_SITES_TEXT,
   NON_DEV_WARNING,
@@ -70,12 +72,12 @@ const connectionEvent = (host: Mounted['host']) =>
   });
 
 /** The AC-7.4 and AC-7.8 control: present, `aria-disabled`, explains itself and ignores clicks (D-09, D-17). */
-async function expectDisabledExport(user: Mounted['user']) {
+async function expectDisabledExport(user: Mounted['user'], reason: string) {
   const button = exportReport();
   expect(button.getAttribute('aria-disabled')).toBe('true');
   expect(button.hasAttribute('disabled')).toBe(false);
   await user.hover(button);
-  expect(screen.getByText(EXPORT_REASON)).toBeTruthy();
+  expect(screen.getByText(reason)).toBeTruthy();
   await user.click(button);
   expect(button.getAttribute('aria-disabled')).toBe('true');
 }
@@ -152,7 +154,7 @@ describe('InspectorPage: connection and site list states', () => {
     expect(screen.getByText(NO_SITES_TEXT)).toBeTruthy();
     expect(componentReads(host)).toHaveLength(0);
     expect(screen.queryByRole('button', { name: /retry|scan again/i })).toBeNull();
-    await expectDisabledExport(user);
+    await expectDisabledExport(user, EXPORT_NO_SITES_REASON);
   });
 
   it('shows the reason and a Retry that reloads the list when the site list fails', async () => {
@@ -373,12 +375,6 @@ describe('InspectorPage: results', () => {
     expect(await heading('Review server logic readiness')).toBeTruthy();
   });
 
-  it('shows Export report disabled, with its reason, for a finished scan (D-09, D-17)', async () => {
-    const { user } = await finished();
-    await expectDisabledExport(user);
-    expect(screen.getByRole('heading', { name: 'Review server logic readiness' })).toBeTruthy();
-  });
-
   it('says there is no server logic only when the list was read completely, with Export report disabled (AC-7.4)', async () => {
     const view = mount({ host: createInspectorHost({ sites: [{ ref: SITE_ALPHA, files: [] }] }) });
     await heading('Select a site');
@@ -387,17 +383,19 @@ describe('InspectorPage: results', () => {
     expect(screen.getByText('Server logic (0)')).toBeTruthy();
     expect(screen.getByText(NO_FILES_TEXT)).toBeTruthy();
     expect(screen.getByRole('status', { name: 'Inspector status' }).textContent).toBe(`${NO_FILES_TEXT}.`);
-    await expectDisabledExport(view.user);
+    await expectDisabledExport(view.user, EXPORT_NO_FILES_REASON);
   });
 
   it('does not claim "no server logic" when nothing was read before the scan stopped', async () => {
-    await finished(graded({ files: [], inventoryComplete: false, stopped: 'connection-lost' }));
+    const { user } = await finished(
+      graded({ files: [], inventoryComplete: false, stopped: 'connection-lost' }),
+    );
     expect(screen.getByText(NOTHING_READ_TEXT)).toBeTruthy();
     expect(screen.queryByText(NO_FILES_TEXT)).toBeNull();
     expect(screen.getByText('Connection lost. Reconnect and rescan.')).toBeTruthy();
     expect(screen.getByText('Inventory incomplete. Reconnect and rescan.')).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Scan again' })).toBeTruthy();
-    expect(exportReport().getAttribute('aria-disabled')).toBe('true');
+    await expectDisabledExport(user, EXPORT_NOTHING_READ_REASON);
   });
 
   it('announces "nothing was read", never "no server logic", when an incomplete list is empty and no stop was recorded', async () => {
@@ -445,6 +443,160 @@ describe('InspectorPage: results', () => {
     expect(notices.getByText(/More than one web role is marked as the Anonymous Users Role/)).toBeTruthy();
     expect(notices.getByText(/couldn't be read and was skipped: broken-role/)).toBeTruthy();
     expect(notices.getByText('Inventory incomplete. Reconnect and rescan.')).toBeTruthy();
+  });
+
+  describe('Export report (P5.7)', () => {
+    const dialog = () => screen.getByRole('dialog', { name: 'Export report' });
+    const notices = (host: Mounted['host']) => host.callsOf('notify').map((call) => call.notice);
+    const selectFile = (user: Mounted['user'], name: RegExp) =>
+      user.click(
+        within(screen.getByRole('region', { name: /^Server logic \(/ })).getByRole('button', { name }),
+      );
+    const gone = () =>
+      waitFor(() => {
+        expect(screen.queryByRole('dialog')).toBeNull();
+      });
+    const exportMarkdown = (user: Mounted['user']) =>
+      user.click(within(dialog()).getByRole('button', { name: 'Export Markdown' }));
+    const CHECK_TITLE = /^(Web role assigned|Table permissions|Outbound networking)/;
+    const STATUS_WORD = /^(Configured|Reviewed|Needs review|Not scanned)$/;
+
+    it('opens the export dialog from a finished scan, saves This file as Markdown and toasts the filename (AC-9.8)', async () => {
+      const { host, user } = await finished();
+      await selectFile(user, /customer-summary/);
+      await user.click(exportReport());
+      await exportMarkdown(user);
+      await gone();
+      const [savedFile] = host.savedFiles;
+      expect(host.savedFiles).toHaveLength(1);
+      expect(savedFile?.defaultName).toBe('customer-summary-readiness.md');
+      const content = savedFile?.content;
+      expect(typeof content).toBe('string');
+      expect(content).toContain('## Server logic readiness: customer-summary');
+      // The report carries the statuses the finding tiles show on screen, in the same order.
+      const shown = screen
+        .getAllByRole('button', { name: CHECK_TITLE })
+        .map((tile) => within(tile).getByText(STATUS_WORD).textContent);
+      const reported = String(content)
+        .split('\n')
+        .map((line) => /^\| (?:Web role|Table permissions|Outbound networking) \| ([^|]+) \|/.exec(line)?.[1])
+        .filter((status) => status !== undefined);
+      expect(shown).toHaveLength(3);
+      expect(reported).toEqual(shown);
+      expect(notices(host)).toEqual([
+        { title: 'customer-summary-readiness.md exported', body: '', type: 'success' },
+      ]);
+      expect(document.activeElement).toBe(exportReport());
+    });
+
+    it('exports Site summary as PDF with no file selected', async () => {
+      const { host, user } = await finished();
+      await user.click(exportReport());
+      expect(
+        within(dialog()).getByRole('radio', { name: 'Site summary' }).getAttribute('aria-checked'),
+      ).toBe('true');
+      await user.click(within(dialog()).getByRole('radio', { name: 'PDF' }));
+      await user.click(within(dialog()).getByRole('button', { name: 'Export PDF' }));
+      await gone();
+      const [savedFile] = host.savedFiles;
+      expect(savedFile?.defaultName).toBe('Alpha-portal-site-readiness.pdf');
+      expect(savedFile?.content).toBeInstanceOf(Uint8Array);
+      const bytes = savedFile?.content instanceof Uint8Array ? savedFile.content : new Uint8Array();
+      expect(new TextDecoder().decode(bytes.slice(0, 5))).toBe('%PDF-');
+      expect(notices(host)).toEqual([
+        { title: 'Alpha-portal-site-readiness.pdf exported', body: '', type: 'success' },
+      ]);
+    });
+
+    it("a stopped scan's report carries the connection-lost notice (AC-7.10)", async () => {
+      const { host, user } = await finished(
+        graded({ stopped: 'connection-lost', inventoryComplete: false }),
+      );
+      await user.click(exportReport());
+      await exportMarkdown(user);
+      await gone();
+      const content = host.savedFiles[0]?.content;
+      expect(content).toContain('Connection lost. Reconnect and rescan.');
+      expect(content).toContain('Inventory incomplete. Reconnect and rescan.');
+    });
+
+    it.each([
+      ['an empty complete site', graded({ files: [] }), EXPORT_NO_FILES_REASON],
+      [
+        'an empty stopped scan',
+        graded({ files: [], inventoryComplete: false, stopped: 'connection-lost' }),
+        EXPORT_NOTHING_READ_REASON,
+      ],
+    ] as const)(
+      'shows Export report disabled with the right reason for %s (AC-7.4, AC-7.8)',
+      async (_label, facts, reason) => {
+        const { user } = await finished(facts);
+        await expectDisabledExport(user, reason);
+        expect(screen.queryByRole('dialog')).toBeNull();
+      },
+    );
+
+    it('closes the dialog with the Results changed toast and saves nothing when the connection changes while it is open; focus lands on the new panel heading', async () => {
+      const { host, user } = await finished();
+      await user.click(exportReport());
+      expect(dialog()).toBeTruthy();
+      host.setConnection(OTHER_CONNECTION);
+      await connectionEvent(host);
+      await gone();
+      expect(host.callsOf('saveFile')).toEqual([]);
+      expect(notices(host)).toEqual([
+        { title: 'Results changed, so the export was cancelled.', body: '', type: 'info' },
+      ]);
+      const next = await heading('Select a site');
+      await waitFor(() => {
+        expect(document.activeElement).toBe(next);
+      });
+    });
+
+    it('keeps the dialog and the export when the connection is renamed while it is open (AC-7.6)', async () => {
+      const { host, user } = await finished();
+      await user.click(exportReport());
+      host.setConnection({ ...CONNECTION, name: 'Renamed' });
+      await connectionEvent(host);
+      expect(dialog()).toBeTruthy();
+      await exportMarkdown(user);
+      await gone();
+      expect(host.savedFiles).toHaveLength(1);
+      expect(notices(host).map((notice) => notice.type)).toEqual(['success']);
+    });
+
+    it('closes the dialog when the connection changes during a pending save, finishes the save, and moves focus to the heading', async () => {
+      const { host, user } = await finished();
+      await user.click(exportReport());
+      host.holdSaves(true);
+      await exportMarkdown(user);
+      await waitFor(() => {
+        expect(host.pendingSaves).toBe(1);
+      });
+      host.setConnection(OTHER_CONNECTION);
+      await connectionEvent(host);
+      await gone();
+      expect(notices(host)).toEqual([
+        { title: 'Results changed, so the export was cancelled.', body: '', type: 'info' },
+      ]);
+      host.releaseHeldSaves(1);
+      await waitFor(() => {
+        expect(notices(host).map((notice) => notice.type)).toEqual(['info', 'success']);
+      });
+      expect(host.savedFiles).toHaveLength(1);
+      const next = await heading('Select a site');
+      expect(document.activeElement).toBe(next);
+    });
+
+    it('exports under StrictMode', async () => {
+      const { host, user } = await finished(graded(), { strict: true });
+      await user.click(exportReport());
+      await exportMarkdown(user);
+      await gone();
+      expect(host.savedFiles).toHaveLength(1);
+      expect(notices(host).map((notice) => notice.type)).toEqual(['success']);
+      expect(exportReport().getAttribute('aria-disabled')).toBeNull();
+    });
   });
 });
 

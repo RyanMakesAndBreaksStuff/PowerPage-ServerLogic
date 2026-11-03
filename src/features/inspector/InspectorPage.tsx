@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useEffectEvent, useRef, useState } from 'react';
 import type { ReactElement, RefObject } from 'react';
 import { useInspector } from '@/app/inspector-site/useInspector';
 import { useConnectionState, useRefreshConnection } from '@/app/useActiveConnection';
@@ -11,12 +11,13 @@ import {
   CONNECTION_UNREADABLE_TEXT,
   connectionChangedText,
   DISCONNECTED_TEXT,
-  EXPORT_REASON,
+  EXPORT_NO_SITES_REASON,
   NO_SITES_TEXT,
   NON_DEV_WARNING,
   progressText,
   REFRESH_FAILED_TEXT,
 } from './pageCopy';
+import { ExportDialog } from './export/ExportDialog';
 import { derivePageState } from './pageState';
 import type { PageState } from './pageState';
 import { ResultsView } from './ResultsView';
@@ -185,7 +186,7 @@ function PageBody({
       // AC-7.8 says "Export report is disabled", so the control is shown here too (D-09, D-17).
       return (
         <StatePanel icon="info" title="No sites found" text={NO_SITES_TEXT} headingRef={headingRef}>
-          <Button disabledReason={EXPORT_REASON}>
+          <Button disabledReason={EXPORT_NO_SITES_REASON}>
             <Icon name="arrow-download" size={14} />
             Export report
           </Button>
@@ -241,6 +242,8 @@ function PageBody({
           result={state.result}
           headingRef={headingRef}
           onRescan={rescan}
+          onExport={state.result.files.length === 0 ? null : session.openExport}
+          exportBusy={session.exportJob !== null}
         />
       );
     default: {
@@ -256,6 +259,17 @@ export function InspectorPage(): ReactElement {
   const session = useInspector();
   const state = derivePageState(connection, session);
   const focus = useHeadingFocus(state.kind === 'scanning');
+  // E-10: an open export dialog closed by a results change takes its focus return with it, so the heading of
+  // the panel now on screen takes focus. The store counts those closes; the ref skips the mount run.
+  const staleCloses = session.exportStaleCloses;
+  const seenStaleCloses = useRef(staleCloses);
+  const requestFocus = useEffectEvent(focus.request);
+  useEffect(() => {
+    if (seenStaleCloses.current !== staleCloses) {
+      seenStaleCloses.current = staleCloses;
+      requestFocus();
+    }
+  }, [staleCloses]);
   return (
     <section className="inspector" aria-label="Logic Inspector">
       <div role="status" aria-label="Inspector status" className="inspector-sr-only">
@@ -263,6 +277,7 @@ export function InspectorPage(): ReactElement {
       </div>
       <PageNotices connection={connection} onRetry={focus.request} />
       <PageBody state={state} focus={focus} />
+      {session.exportJob?.open === true ? <ExportDialog job={session.exportJob} /> : null}
     </section>
   );
 }

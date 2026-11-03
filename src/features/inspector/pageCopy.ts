@@ -15,8 +15,12 @@ export const CONNECTION_UNREADABLE_TEXT =
 export const CONNECTION_CHANGED_TITLE = 'The connection changed while scanning';
 export const connectionChangedText = (site: SiteRef): string =>
   `The scan of ${site.name} was discarded. Choose a site in the title bar to scan again.`;
-/** D-09, D-17: Export report is always disabled in P5.5; P5.7 replaces this with the real action. */
-export const EXPORT_REASON = 'Report export arrives in a later update.';
+/** AC-7.4, AC-7.8: why Export report is disabled. The first two split on whether the inventory was read completely. */
+export const EXPORT_NO_FILES_REASON = 'Nothing to export: no server logic files were found.';
+export const EXPORT_NOTHING_READ_REASON = 'Nothing to export: no server logic records were read.';
+export const EXPORT_NO_SITES_REASON = 'Nothing to export: no sites were found.';
+/** E-07 B: the dialog was closed while its job still builds or saves. */
+export const EXPORT_IN_PROGRESS_REASON = 'An export is still in progress.';
 /** D-03, D-18: shown in place of the ring, findings and detail until a file is chosen. */
 export const NO_FILE_TEXT = 'Select a file to review its readiness.';
 
