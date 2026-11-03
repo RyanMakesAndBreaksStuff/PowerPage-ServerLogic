@@ -94,6 +94,14 @@
   font-size: 12px;
   color: var(--muted);
   white-space: nowrap;
+  min-width: 0;
+}
+
+/* A long connection name is cut with an ellipsis (its full text is the tooltip) so the site picker stays on screen. */
+.shell__connection {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .shell__content {

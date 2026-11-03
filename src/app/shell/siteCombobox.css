@@ -1,0 +1,125 @@
+/* Title-bar site picker (APG select-only combobox). Colours come only from the theme tokens. */
+
+.site-combobox {
+  position: relative;
+}
+
+.site-combobox__trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-sizing: border-box;
+  max-width: 240px;
+  padding: 3px 10px;
+  background: transparent;
+  border: 1px solid var(--control-border);
+  border-radius: 99px;
+  color: var(--text-2);
+  cursor: pointer;
+  font-size: 11.5px;
+  line-height: 1.3;
+}
+
+/* The ellipsis lives on the label: text-overflow does nothing on an inline-flex container. */
+.site-combobox__label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.site-combobox__trigger > svg {
+  flex: none;
+}
+
+.site-combobox__trigger--selected {
+  color: var(--text);
+  font-weight: 700;
+}
+
+/* An unavailable control: dashed outline and muted text, so the state is not colour alone. */
+.site-combobox__trigger[aria-disabled='true'] {
+  border-style: dashed;
+  color: var(--muted);
+  cursor: not-allowed;
+}
+
+.site-combobox__list {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 60;
+  box-sizing: border-box;
+  width: max-content;
+  min-width: 100%;
+  max-width: 360px;
+  max-height: 260px;
+  margin: 0;
+  padding: 4px;
+  overflow-y: auto;
+  background: var(--tile);
+  border: 1px solid var(--control-border);
+  border-radius: 10px;
+  color: var(--text);
+  list-style: none;
+}
+
+.site-combobox__list[hidden] {
+  display: none;
+}
+
+.site-combobox__option {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 6px 10px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+/* The highlighted option uses the primary role (FR-11), never the needs-review colour. */
+.site-combobox__option[data-active='true'] {
+  border-color: var(--primary);
+}
+
+.site-combobox__option[aria-selected='true'] .site-combobox__name {
+  font-weight: 700;
+}
+
+.site-combobox__option--disabled {
+  color: var(--muted);
+  cursor: not-allowed;
+}
+
+.site-combobox__name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.site-combobox__detail {
+  margin-left: auto;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.site-combobox__tag {
+  padding: 0 7px;
+  border: 1px dashed var(--control-border);
+  border-radius: 99px;
+  color: var(--muted);
+  font-size: 10.5px;
+  white-space: nowrap;
+}
+
+/* The control sits at the right edge of the title bar, so its reason opens leftwards. */
+.site-combobox .ui-reason {
+  right: 0;
+  left: auto;
+}

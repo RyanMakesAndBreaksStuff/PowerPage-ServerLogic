@@ -134,6 +134,19 @@ async function readList<T>(
   return { list: { ok: true, value: items }, unreadable };
 }
 
+/**
+ * The value of a settled read, or its rejection rethrown. Callers wait with `Promise.allSettled` first, so a
+ * scan never settles while one of its reads is still in flight: the adapter cannot interrupt a `queryData`
+ * call in progress, and the session starts the next scan's reads as soon as this one settles (S-02).
+ */
+function fulfilledValue<T>(result: PromiseSettledResult<T>): T {
+  if (result.status === 'rejected') {
+    const reason: unknown = result.reason;
+    throw reason;
+  }
+  return result.value;
+}
+
 async function readFiles(
   reader: Reader,
   inventory: Promise<Outcome<readonly unknown[]>>,
@@ -147,7 +160,7 @@ async function readFiles(
   const total = records.length;
   onProgress({ scanned: 0, total, inventoryComplete });
   let scanned = 0;
-  const files = await Promise.all(
+  const settled = await Promise.allSettled(
     records.map(async (record): Promise<ServerLogicFileFacts> => {
       const result = await reader.download(record.id);
       if (result.kind !== 'unread') {
@@ -157,6 +170,7 @@ async function readFiles(
       return { ...record, code: result.kind === 'ok' ? { ok: true, value: result.value } : failureOf(result) };
     }),
   );
+  const files = settled.map(fulfilledValue);
   return { files, inventoryComplete };
 }
 
@@ -221,12 +235,16 @@ async function readSettings(
   const parsed = parseSettings(outcome.value);
   if (parsed === null) return { settings: { ok: false, reason: 'read-failed' }, inactive: [] };
   const { bindings } = parsed;
-  const [enabled, allowedDomains, allowAll, timeout] = await Promise.all([
+  const [enabledRead, domainsRead, allowAllRead, timeoutRead] = await Promise.allSettled([
     resolveBinding(reader, bindings['ServerLogic/Enabled']),
     resolveBinding(reader, bindings['ServerLogic/AllowedDomains']),
     resolveBinding(reader, bindings['ServerLogic/AllowNetworkingToAllDomains']),
     resolveBinding(reader, bindings['ServerLogic/TimeoutInSeconds']),
   ]);
+  const enabled = fulfilledValue(enabledRead);
+  const allowedDomains = fulfilledValue(domainsRead);
+  const allowAll = fulfilledValue(allowAllRead);
+  const timeout = fulfilledValue(timeoutRead);
   return {
     settings: {
       ok: true,
@@ -263,6 +281,8 @@ async function confirmIdentity(host: PptbHost, connection: Connection): Promise<
  * Reads one site's Server Logic facts. The reads are separate requests, not an atomic snapshot.
  * Rejects with the adapter's AbortError when `options.signal` aborts, and with ScanAbandonedError when the
  * active connection changed. Connection loss resolves with `stopped: 'connection-lost'` instead.
+ * It settles only after every read it started has settled, so a caller that starts the next scan after this
+ * one never runs more than four reads at once (FR-7, S-02).
  */
 export async function runScan(
   host: PptbHost,
@@ -282,12 +302,16 @@ export async function runScan(
     const roles = reader.query(componentQuery(site.id, COMPONENT_TYPE.webRole));
     const permissions = reader.query(componentQuery(site.id, COMPONENT_TYPE.tablePermission));
     const settings = reader.query(componentQuery(site.id, COMPONENT_TYPE.siteSetting));
-    const [inventoryResult, rolesResult, permissionsResult, settingsResult] = await Promise.all([
+    const [inventoryRead, rolesRead, permissionsRead, settingsRead] = await Promise.allSettled([
       readFiles(reader, inventory, onProgress),
       readList(roles, parseRoles),
       readList(permissions, parsePermissions),
       readSettings(reader, settings),
     ]);
+    const inventoryResult = fulfilledValue(inventoryRead);
+    const rolesResult = fulfilledValue(rolesRead);
+    const permissionsResult = fulfilledValue(permissionsRead);
+    const settingsResult = fulfilledValue(settingsRead);
     throwIfAborted(signal);
     await confirmIdentity(host, connection);
     throwIfAborted(signal);

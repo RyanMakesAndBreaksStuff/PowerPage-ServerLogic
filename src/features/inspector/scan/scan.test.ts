@@ -817,6 +817,66 @@ describe('runScan cancellation and concurrency', () => {
     expect(gate.stats.fileStarts).toHaveLength(12);
     expect(facts.files.every((file) => file.code.ok)).toBe(true);
   });
+
+  it('does not settle after an abort until every query already in flight has settled', async () => {
+    const controller = new AbortController();
+    const gate = gated(createWorld(HAPPY), { holdQueries: true });
+    const result = scan(gate.host, { signal: controller.signal });
+    const state = { settled: false };
+    const outcome = result.then(
+      () => {
+        state.settled = true;
+      },
+      () => {
+        state.settled = true;
+      },
+    );
+    await vi.waitFor(
+      () => {
+        expect(gate.holds).toHaveLength(4);
+      },
+      { interval: 1 },
+    );
+    controller.abort();
+    gate.holds.splice(0, 1)[0]?.release();
+    await flush();
+    expect(state.settled).toBe(false);
+    expect(gate.stats.inFlight).toBe(3);
+    gate.releaseAll();
+    await outcome;
+    await expect(result).rejects.toMatchObject({ name: 'AbortError' });
+    expect(gate.stats.inFlight).toBe(0);
+  });
+
+  it('does not settle after an abort until every download already in flight has settled', async () => {
+    const controller = new AbortController();
+    const gate = gated(createWorld({ ...HAPPY, logic: specs(4) }), { holdFiles: true });
+    const result = scan(gate.host, { signal: controller.signal });
+    const state = { settled: false };
+    const outcome = result.then(
+      () => {
+        state.settled = true;
+      },
+      () => {
+        state.settled = true;
+      },
+    );
+    await vi.waitFor(
+      () => {
+        expect(gate.holds).toHaveLength(4);
+      },
+      { interval: 1 },
+    );
+    controller.abort();
+    gate.holds.splice(0, 1)[0]?.release();
+    await flush();
+    expect(state.settled).toBe(false);
+    expect(gate.stats.inFlight).toBe(3);
+    gate.releaseAll();
+    await outcome;
+    await expect(result).rejects.toMatchObject({ name: 'AbortError' });
+    expect(gate.stats.inFlight).toBe(0);
+  });
 });
 
 type Hold = { key: string; release: () => void };

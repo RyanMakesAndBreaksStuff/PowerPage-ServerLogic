@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { App } from '@/app/App';
 import { FAKE_STARTER_DEPS } from '@/app/starter-session/fakeStarterDeps';
@@ -54,7 +54,7 @@ describe('App shell', () => {
   it('reads "Not connected" and keeps the site pill disabled without a connection (AC-1.3)', async () => {
     await mount(null);
     expect(screen.getByText('Not connected')).toBeTruthy();
-    expect(screen.getByText('No site selected').getAttribute('aria-disabled')).toBe('true');
+    expect(screen.getByRole('combobox', { name: 'Power Pages site' }).getAttribute('aria-disabled')).toBe('true');
     expect(screen.getByRole('region', { name: 'Logic name' })).toBeTruthy();
   });
 
@@ -72,12 +72,32 @@ describe('App shell', () => {
   it('shows the connection and its environment (AC-1.2), and follows connection changes', async () => {
     const host = await mount(CONTOSO);
     expect(screen.getByText('Contoso · Development')).toBeTruthy();
+    expect(screen.getByText('Contoso · Development').getAttribute('title')).toBe('Contoso · Development');
     host.setConnection(null);
     await act(async () => {
       host.emit({ kind: 'connection-changed' });
       await Promise.resolve();
     });
     expect(screen.getByText('Not connected')).toBeTruthy();
+  });
+
+  it('keeps following the connection while Logic Starter is visible (CR-001)', async () => {
+    const host = gateHost(createFakeHost({ connection: CONTOSO, tables: { powerpagesites: [] } }));
+    render(<App host={host} starterDeps={FAKE_STARTER_DEPS} />);
+    const siteListReads = () =>
+      host.callsOf('queryAll').filter((call) => call.query.entitySet === 'powerpagesites');
+    await waitFor(() => {
+      expect(siteListReads()).toHaveLength(1);
+    });
+    expect(panel('starter')?.hidden).toBe(false);
+    host.setConnection({ ...CONTOSO, id: 'c2' });
+    await act(async () => {
+      host.emit({ kind: 'connection-changed' });
+      await Promise.resolve();
+    });
+    await waitFor(() => {
+      expect(siteListReads()).toHaveLength(2);
+    });
   });
 
   it('does not call an unreadable connection "Not connected" (WR-005)', async () => {
