@@ -44,6 +44,9 @@ export type PptbHost = {
     filters: readonly FileFilter[],
   ): Promise<SaveResult>;
   openExternal(url: string): Promise<void>;
+  /** Asks the host to warn before this tool instance closes (PPTB 1.2.6). Rejects as every other host call does. */
+  preventClose(): Promise<void>;
+  releasePreventClose(): Promise<void>;
   getActiveConnection(): Promise<Connection | null>;
   onEvent(handler: (e: HostEvent) => void): () => void;
   /** All pages; 429/5xx retried 1s/2s/4s; HostReadError keeps partialRows; DOMException 'AbortError' when `signal` aborts. */

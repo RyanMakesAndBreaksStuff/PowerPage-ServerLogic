@@ -49,6 +49,8 @@ export type FakeHostInit = {
   save?: SaveBehaviour;
   copy?: SimpleBehaviour;
   openExternal?: SimpleBehaviour;
+  /** Applies to both `preventClose` and `releasePreventClose`. */
+  closeGuard?: SimpleBehaviour;
 };
 
 export type FakeCall =
@@ -62,6 +64,8 @@ export type FakeCall =
       filters: readonly FileFilter[];
     }
   | { method: 'openExternal'; url: string }
+  | { method: 'preventClose' }
+  | { method: 'releasePreventClose' }
   | { method: 'getActiveConnection' }
   | { method: 'queryAll'; query: ODataQuery; pages: number }
   | { method: 'downloadFileColumn'; ref: FileColumnRef };
@@ -85,6 +89,8 @@ export type FakeHostControls = {
   setSave(behaviour: SaveBehaviour): void;
   setCopy(behaviour: SimpleBehaviour): void;
   setOpenExternal(behaviour: SimpleBehaviour): void;
+  /** Applies to both `preventClose` and `releasePreventClose`. */
+  setCloseGuard(behaviour: SimpleBehaviour): void;
 };
 
 function notFound(what: string): HostReadError {
@@ -106,6 +112,7 @@ export function createFakeHost(init: FakeHostInit = {}): PptbHost & FakeHostCont
   let save: SaveBehaviour = init.save ?? 'save';
   let copy: SimpleBehaviour = init.copy ?? 'ok';
   let open: SimpleBehaviour = init.openExternal ?? 'ok';
+  let closeGuard: SimpleBehaviour = init.closeGuard ?? 'ok';
   const calls: FakeCall[] = [];
   const savedFiles: SavedFile[] = [];
   const handlers = new Set<(e: HostEvent) => void>();
@@ -170,6 +177,20 @@ export function createFakeHost(init: FakeHostInit = {}): PptbHost & FakeHostCont
       return open === 'ok'
         ? Promise.resolve()
         : Promise.reject(new HostCallError('Host call failed: openInConnectionBrowser.'));
+    },
+
+    preventClose: () => {
+      calls.push({ method: 'preventClose' });
+      return closeGuard === 'ok'
+        ? Promise.resolve()
+        : Promise.reject(new HostCallError('Host call failed: preventClose.'));
+    },
+
+    releasePreventClose: () => {
+      calls.push({ method: 'releasePreventClose' });
+      return closeGuard === 'ok'
+        ? Promise.resolve()
+        : Promise.reject(new HostCallError('Host call failed: releasePreventClose.'));
     },
 
     getActiveConnection: () => {
@@ -259,6 +280,9 @@ export function createFakeHost(init: FakeHostInit = {}): PptbHost & FakeHostCont
     },
     setOpenExternal: (next) => {
       open = next;
+    },
+    setCloseGuard: (next) => {
+      closeGuard = next;
     },
   };
 }

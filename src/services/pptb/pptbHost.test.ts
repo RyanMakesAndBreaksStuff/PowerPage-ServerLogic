@@ -23,6 +23,8 @@ function makeStubs() {
     .fn<(name: string, content: unknown, filters?: unknown) => Promise<unknown>>()
     .mockResolvedValue('C:\\out\\file.zip');
   const getActiveConnection = vi.fn<() => Promise<unknown>>().mockResolvedValue(null);
+  const preventClose = vi.fn<() => Promise<unknown>>().mockResolvedValue(true);
+  const releasePreventClose = vi.fn<() => Promise<unknown>>().mockResolvedValue(true);
   const registrations = new Set<EventCallback>();
   const off = vi.fn<(callback: EventCallback) => void>((callback) => {
     registrations.delete(callback);
@@ -59,6 +61,8 @@ function makeStubs() {
     openInConnectionBrowser,
     saveFile,
     getActiveConnection,
+    preventClose,
+    releasePreventClose,
     on,
     off,
     registrations,
@@ -66,6 +70,8 @@ function makeStubs() {
     queryData,
     execute,
     toolbox: {
+      preventClose,
+      releasePreventClose,
       utils: { getCurrentTheme, showNotification, copyToClipboard, openInConnectionBrowser },
       fileSystem: { saveFile },
       connections: { getActiveConnection },
@@ -257,6 +263,38 @@ describe('openExternal', () => {
   it('rejects when the host fails', async () => {
     stubs.openInConnectionBrowser.mockRejectedValue(new Error('blocked'));
     await expect(host.openExternal('https://github.com/')).rejects.toBeInstanceOf(HostCallError);
+  });
+});
+
+describe('preventClose and releasePreventClose', () => {
+  it('preventClose and releasePreventClose call the host once each and resolve', async () => {
+    await expect(host.preventClose()).resolves.toBeUndefined();
+    expect(stubs.preventClose).toHaveBeenCalledTimes(1);
+    expect(stubs.releasePreventClose).not.toHaveBeenCalled();
+    await expect(host.releasePreventClose()).resolves.toBeUndefined();
+    expect(stubs.releasePreventClose).toHaveBeenCalledTimes(1);
+    expect(stubs.preventClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('resolves when the host reports it did not apply the guard', async () => {
+    stubs.preventClose.mockResolvedValue(false);
+    await expect(host.preventClose()).resolves.toBeUndefined();
+  });
+
+  it('reject with a HostCallError when the host call fails, logging only the error name', async () => {
+    stubs.preventClose.mockRejectedValue(new TypeError('SECRET-BODY https://org.example/x'));
+    stubs.releasePreventClose.mockRejectedValue(new RangeError('SECRET-BODY https://org.example/y'));
+    await expect(host.preventClose()).rejects.toMatchObject({
+      name: 'HostCallError',
+      message: 'Host call failed: preventClose.',
+    });
+    await expect(host.releasePreventClose()).rejects.toMatchObject({
+      name: 'HostCallError',
+      message: 'Host call failed: releasePreventClose.',
+    });
+    expect(logged()).toContain('TypeError');
+    expect(logged()).toContain('RangeError');
+    expect(logged()).not.toContain('SECRET');
   });
 });
 
@@ -611,6 +649,8 @@ describe('retrieval-only guarantee', () => {
     'toolboxAPI.utils.openInConnectionBrowser',
     'toolboxAPI.fileSystem.saveFile',
     'toolboxAPI.connections.getActiveConnection',
+    'toolboxAPI.preventClose',
+    'toolboxAPI.releasePreventClose',
     'toolboxAPI.events.on',
     'toolboxAPI.events.off',
     'dataverseAPI.queryData',
@@ -659,6 +699,8 @@ describe('retrieval-only guarantee', () => {
     await host.saveFile('a.md', 'x', [{ name: 'Markdown', extensions: ['md'] }]);
     await host.openExternal('https://learn.microsoft.com/');
     await host.getActiveConnection();
+    await host.preventClose();
+    await host.releasePreventClose();
     host.onEvent(() => undefined)();
     await host.queryAll({ ...QUERY, pageSize: 5 });
     await host.downloadFileColumn({ entityLogicalName: 'powerpagecomponent', primaryIdAttribute: 'powerpagecomponentid', recordId: GUID, fileAttributeName: 'filecontent' });

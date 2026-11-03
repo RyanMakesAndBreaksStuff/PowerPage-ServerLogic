@@ -34,6 +34,11 @@ export type GatedHost = FakeHost & {
   /** Releases the oldest `count` parked data reads and keeps the hold on, so a test can settle reads one at a time. */
   releaseHeldDataReads(count: number): void;
   readonly dataReads: DataReadStats;
+  /** While true, `saveFile` parks before it reaches the fake; the fake's `save` behaviour applies when released. */
+  holdSaves(hold: boolean): void;
+  /** Releases the oldest `count` parked saves and keeps the hold on. */
+  releaseHeldSaves(count: number): void;
+  readonly pendingSaves: number;
 };
 
 export function gateHost(base: FakeHost): GatedHost {
@@ -43,6 +48,8 @@ export function gateHost(base: FakeHost): GatedHost {
   const parked: ParkedRead[] = [];
   const waiting = new Set<() => void>();
   const stats: DataReadStats = { started: 0, inFlight: 0, peak: 0 };
+  let holdingSaves = false;
+  const parkedSaves: (() => void)[] = [];
 
   async function gated<T>(signal: AbortSignal | undefined, work: () => Promise<T>): Promise<T> {
     stats.started += 1;
@@ -92,6 +99,14 @@ export function gateHost(base: FakeHost): GatedHost {
     queryAll: (query, signal) => gated(signal, () => base.queryAll(query, signal)),
     downloadFileColumn: (ref, signal) =>
       gated(signal, () => base.downloadFileColumn(ref, signal)),
+    saveFile: async (defaultName, content, filters) => {
+      if (holdingSaves) {
+        await new Promise<void>((resolve) => {
+          parkedSaves.push(resolve);
+        });
+      }
+      return base.saveFile(defaultName, content, filters);
+    },
     setConnectionRead: (next) => {
       mode = next;
     },
@@ -114,6 +129,16 @@ export function gateHost(base: FakeHost): GatedHost {
     },
     get dataReads() {
       return stats;
+    },
+    holdSaves: (next) => {
+      holdingSaves = next;
+      if (!holdingSaves) for (const release of parkedSaves.splice(0)) release();
+    },
+    releaseHeldSaves: (count) => {
+      for (const release of parkedSaves.splice(0, count)) release();
+    },
+    get pendingSaves() {
+      return parkedSaves.length;
     },
   };
 }

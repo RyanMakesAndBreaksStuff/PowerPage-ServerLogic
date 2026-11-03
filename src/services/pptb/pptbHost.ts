@@ -188,6 +188,14 @@ export function createPptbHost(options: PptbHostOptions = {}): PptbHost {
       );
     },
 
+    preventClose: () =>
+      hostCall('preventClose', () => window.toolboxAPI.preventClose()).then(() => undefined),
+
+    releasePreventClose: () =>
+      hostCall('releasePreventClose', () => window.toolboxAPI.releasePreventClose()).then(
+        () => undefined,
+      ),
+
     async getActiveConnection(): Promise<Connection | null> {
       const raw: unknown = await hostCall('getActiveConnection', () =>
         window.toolboxAPI.connections.getActiveConnection(),
