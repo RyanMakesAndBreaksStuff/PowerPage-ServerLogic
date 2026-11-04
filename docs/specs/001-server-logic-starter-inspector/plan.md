@@ -1,6 +1,8 @@
 # Implementation Plan: Server Logic Tools (index)
 
-**Spec:** docs/specs/001-server-logic-starter-inspector/spec.md (v4.0.0, Approved)
+**Spec:** docs/specs/001-server-logic-starter-inspector/spec.md (v4.3.0, Approved)
+
+> **Status 2026-11-03.** Every phase in the three plans is built except Phase 17 (behaviour harness) and the rest of Phase 19. The Inspector phases (11, 15, 16, 20, 23, 24) were executed as P5.1–P5.7 under `docs/phase-5/` (plans, owner decisions and evidence), which supersede `plan-inspector.md`'s phase files. Open work is owner-only: the three release gates, Spike S2's continuation, the S3 collision probe and the R4 bound-create probe. The tables and "Next step" below are kept as the historical record; read the spec's Implementation Status and Phase 5 addendum first.
 **Decisions:** no ADRs; library and phasing decisions are in the spec's Resolved log, and the 2026-10-17 owner decisions are in `plan-starter.md`.
 **Created:** 2026-10-16. **Split into three page plans:** 2026-10-17.
 
@@ -8,9 +10,9 @@ This file is now an index. The 25-phase layout was replaced by three plans, one 
 
 | Plan                                               | Page                                                                                         | Depends on       | Status                                                           |
 | -------------------------------------------------- | -------------------------------------------------------------------------------------------- | ---------------- | ---------------------------------------------------------------- |
-| [`plan-starter.md`](plan-starter.md)               | Logic Starter, **plus Part A, the shared foundation**, and the Contracts every plan consumes | —                | Part A fully planned (phases 00–06, 18a). Parts B and C outlined.                               |
-| [`plan-server-objects.md`](plan-server-objects.md) | Server Objects                                                                               | Part A, Phase 21 | Planned (phases 13, 22); spec v2.2.0                             |
-| [`plan-inspector.md`](plan-inspector.md)           | Logic Inspector and reports                                                                  | Part A only      | Planned (phases 11, 12, 15, 16, 20, 23, 24); spec v2.3.0         |
+| [`plan-starter.md`](plan-starter.md)               | Logic Starter, **plus Part A, the shared foundation**, and the Contracts every plan consumes | —                | Built (Parts A, B, C), except Phase 17 and the rest of Phase 19; Starter gate open               |
+| [`plan-server-objects.md`](plan-server-objects.md) | Server Objects                                                                               | Part A, Phase 21 | Built (phases 13, 22); Server Objects gate open                  |
+| [`plan-inspector.md`](plan-inspector.md)           | Logic Inspector and reports                                                                  | Part A only      | Built as P5.1–P5.7 (`docs/phase-5/`); Phase 12 S2 continuation and Inspector gate open |
 
 Phase numbers are stable IDs carried over from the original layout, so cross-references in the phase files stay valid. `18a` is the session state moved out of old Phase 18 into Part A.
 
@@ -48,10 +50,10 @@ Changes made along the way, recorded in the phase files: Phase 01's `getTheme` n
 The 1a Graphite palette in `src/app/theme/tokens.css` is the UI theme (spec FR-11, A1, A2). It keeps the variable names of Phases 04, 06, 18, 21 and 22, so no rename phase is needed.
 
 - **Superseded in part:** Phase 04's token values and glass, and the colour values in the CSS of Phases 06, 18, 21 and 22. Each of those files says so at the top. Their behaviour, structure and tests of behaviour stand.
-- **To build against Graphite:** Phase 23 (not built yet), with the variable names it already uses.
-- **Unchanged:** reports (Phases 16, 20, 24), layout 10a, the host-driven theme with no toggle.
+- **To build against Graphite:** Phase 23 (built in P5.5, 2026-11-02), with the variable names it already uses.
+- **Unchanged:** reports (Phases 16, 20, 24; P5.6 later added the P-14 Inactive label and page numbers), layout 10a, the host-driven theme with no toggle.
 - **Gates:** the glass contrast check is removed; `tokens.test.ts` asserts every text pair.
 
-## Next step
+## Next step (historical, 2026-10-17)
 
 Start building Part A with Phase 00 (`plans/phase-00-skeleton.md`), then waves A1–A3 as listed in `plan-starter.md`. Write the Part B and Part C phase files (07–10, 14, 17–19, 21) before their waves; the first page to release is Logic Starter.

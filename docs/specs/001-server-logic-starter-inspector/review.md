@@ -1,5 +1,7 @@
 # Spec Review: Feature 001, Logic Starter & Logic Inspector
 
+> **Historical (2026-10-07).** This review covers spec v0.4.0 (Draft). Its findings were applied in 0.5.0–0.7.0 and the spec is Approved (4.3.0 on 2026-11-03). Kept as the record of the review; nothing in it is current guidance.
+
 - **Spec:** [001-server-logic-starter-inspector-spec.md](spec.md) (v0.4.0, Draft)
 - **Review type:** SDD Mode A, a spec review before planning
 - **Date:** 2026-10-07

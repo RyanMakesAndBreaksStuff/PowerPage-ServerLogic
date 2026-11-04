@@ -50,4 +50,4 @@ docs/phase-5/
 | P5.6 | [plans/p5-6_plan.md](plans/p5-6_plan.md) | Executed 2026-11-02 (7a1a336); rendered check 2026-11-02, ring label fixed | [evidence/p5-6/execution.md](evidence/p5-6/execution.md) |
 | P5.7 | [plans/p5-7_plan.md](plans/p5-7_plan.md) | Executed 2026-11-03 (309eb14); verify pass: ship; rendered check 2026-11-03 | [evidence/p5-7/execution.md](evidence/p5-7/execution.md) |
 
-Brief: `phasse5plan.md` at the repo root. Spec: `docs/specs/001-server-logic-starter-inspector/spec.md` (4.2.1).
+Brief: `phasse5plan.md` at the repo root. Spec: `docs/specs/001-server-logic-starter-inspector/spec.md` (4.3.0; its Phase 5 addendum records the owner decisions from the choices files).

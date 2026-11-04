@@ -1,12 +1,16 @@
 # Implementation Plan: Logic Starter (with Part A, the shared foundation)
 
-**Spec:** docs/specs/001-server-logic-starter-inspector/spec.md (v4.0.0, Approved; v4.0.0 sets the 1a Graphite theme, already built)
+**Spec:** docs/specs/001-server-logic-starter-inspector/spec.md (v4.3.0, Approved; v4.0.0 sets the 1a Graphite theme, already built)
 **Sibling plans:** `plan-server-objects.md` and `plan-inspector.md`. Both depend on Part A of this plan only, and consume its Contracts unchanged.
 **Index:** `plan.md` (the split, the phase DAG across all three plans, and the owner decisions).
 **Created:** 2026-10-16. **Split from `plan.md`:** 2026-10-17.
 **Phase plans:** one file per phase in `plans/phase-NN-<slug>.md`. Phase numbers are the stable IDs from the original 25-phase layout, so cross-references in the phase files stay valid; `18a` is the session state moved out of old Phase 18.
 
-## Status (2026-10-19)
+## Status (2026-11-03)
+
+Parts A, B and C are built on `refine-app` (commits in `status-2026-10-23.md` § Built; later work on `001-logic-inspector`, `logic-inspector-v2-build` and `refine-app`). Still open: Phase 17 (behaviour harness) and the rest of Phase 19 (R7 behaviour cases), both agent work; the Starter release gate, the S3 collision probe and the R4 bound-create probe, all owner-only. Fix 7 (2026-11-01, spec addendum) changed the method pills into recipe filters and removed the request-path strip. The Contracts changelog below stops at P5.1; the P5.2–P5.7 contract changes (`HostReadError`, `preventClose`/`releasePreventClose`, `InspectorDeps` with `buildReportModel`, `renderMarkdown`, `renderPdf`, `now`, `exportWatchdogMs`, `SiteFacts.unreadableRows`, `envvar-unreadable.cause`) are recorded in `docs/phase-5/plans/p5-*_plan.md`.
+
+### Status (2026-10-19, historical)
 
 - **Part A is fully planned:** phases 00–06 and 18a have plan files.
 - **Part A is built** (waves A0–A3 merged and green).
@@ -363,7 +367,7 @@ export type StarterPackageInput = {
 - All original npm dependencies are installed in Phase 00: acorn, the CodeMirror 6 packages, fflate, jspdf 4.2.1, jspdf-autotable 5.0.8, `@fluentui/react-icons`, and the fonts (JetBrains Mono woff2; DM Sans and Space Grotesk as static TTF for the PDF). Phase 20 alone adds the JetBrains Mono static TTF mirror as a development dependency, as FR-10 requires.
 - **Owner gates (◆)** are not agent tasks; they need the owner and a live PPTB or site. They block only their dependents.
 
-## Part A: Foundation (fully planned)
+## Part A: Foundation (built)
 
 | Wave | Phase | Title                                                        | Depends on     | Implements / Satisfies (summary)                                                                                                                                                          |
 | ---- | ----- | ------------------------------------------------------------ | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -378,7 +382,7 @@ export type StarterPackageInput = {
 
 **Part A is done when** waves A0–A3 are merged and green, and `npm run build` still produces one IIFE bundle. From then on `plan-server-objects.md`, `plan-inspector.md` and Parts B and C of this plan can run in parallel.
 
-## Part B: Generators (B1 and B2 planned)
+## Part B: Generators (built, except Phase 17 and the rest of Phase 19)
 
 | Wave  | Phase | Title                            | Depends on                                | Implements / Satisfies (summary)                                                                                                                           |
 | ----- | ----- | -------------------------------- | ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -390,7 +394,7 @@ export type StarterPackageInput = {
 | B2a   | 17    | Behavior harness                 | 07, 08, 09, 10                            | AC-4.12: 36 configurations, 6 shared client failure cases, demo-page cases, sentinel secret; also the R4 F08 option cases handed over by Phase 08 (Task 2) |
 | ◆→B2b | 19    | Spike S3 + Handler R7            | 05, 02, 14, 17, ◆S3 probe, R7 spec update | S3 evidence (commit `7efe699`, script half done 2026-10-19; collision probe ◆); R7 Musts (F05/F06). Extends the 14 and 17 test tables with R7              |
 
-## Part C: Starter UI (planned)
+## Part C: Starter UI (built)
 
 | Wave | Phase | Title               | Depends on          | Implements / Satisfies (summary)                                                                                                                                    |
 | ---- | ----- | ------------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

@@ -1,11 +1,14 @@
 # Implementation Plan: Server Objects
 
-**Spec:** docs/specs/001-server-logic-starter-inspector/spec.md (v4.0.0, Approved; v2.2.0 records Decision 1; v4.0.0 sets the 1a Graphite theme, already built)
+**Spec:** docs/specs/001-server-logic-starter-inspector/spec.md (v4.3.0, Approved; v2.2.0 records Decision 1; v4.0.0 sets the 1a Graphite theme, already built)
 **Depends on:** Part A of `plan-starter.md` (phases 00–06 and 18a) and **Phase 21** (Part C). Part A's Contracts are consumed unchanged. This plan pins `SERVER_OBJECTS` and its types (Phase 13) and moves nothing else.
 **Index:** `plan.md`. **Split from `plan.md`:** 2026-10-17.
 **Phase plans:** `plans/phase-NN-<slug>.md`, with the stable phase numbers from the original layout.
 
-## Status (2026-10-20)
+## Status (2026-11-03)
+Built: Phase 13 (`src/services/catalogue/serverObjects.ts`) and Phase 22 (`src/features/server-objects/`), released with Logic Starter in `npm run build:beta` (v1.0.0). Fix 7 (2026-11-01) added explicit member selection, permission-row reconciliation and compact action sizing. Open: the Server Objects release gate below (owner).
+
+### Status (2026-10-20, historical)
 Planned. Phases 13 and 22 have implementation plans with full code. Both were drafted and run green against the repository on `001-server-objects` (`9ecf8ac`), then removed: 77 files and 1,118 tests passed, tsc, ESLint and Prettier were clean, and a 1100×780 render was checked in light and dark.
 - Phase 13 can start now, in parallel with any Part B or C work.
 - Phase 22 waits for Phase 21 and the spec PATCH.

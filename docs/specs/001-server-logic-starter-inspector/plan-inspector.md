@@ -2,13 +2,17 @@
 
 > **Execution superseded — 2026-11-01.** `docs/phase-5/plans/p5-1_plan.md`, `docs/phase-5/plans/p5-2_plan.md` and `docs/phase-5/plans/p5-3_plan.md` (and later P5.x plans) own the remaining Inspector implementation, contracts and check commands. This file keeps the stable phase IDs, design choices and probe outcomes; its code blocks, `$value` fallback, blanket API prohibition, Prettier commands and sequencing are not current execution instructions.
 
-**Spec:** docs/specs/001-server-logic-starter-inspector/spec.md (v4.1.0, Approved; 4.0.0 set the 1a Graphite theme, 4.1.0 permits the two download actions and the FR-8 precedence table)
-**Branch:** `001-logic-inspector`
+**Spec:** docs/specs/001-server-logic-starter-inspector/spec.md (v4.3.0, Approved; 4.0.0 set the 1a Graphite theme, 4.1.0 permits the two download actions and the FR-8 precedence table, 4.3.0 records the Phase 5 owner decisions)
+**Branch:** `refine-app` (planned on `001-logic-inspector`)
 **Depends on:** Part A of `plan-starter.md` only (phases 00–06 and 18a). Its Contracts include the Inspector amendments recorded on 2026-10-22.
 **Index:** `plan.md`. **Split from `plan.md`:** 2026-10-17.
 **Phase plans:** `plans/phase-NN-<slug>.md`, with the stable phase numbers from the original layout.
 
-## Status (2026-10-23)
+## Status (2026-11-03)
+
+Phases 11, 15, 16, 20, 23 and 24 were executed as P5.1–P5.7 (`docs/phase-5/README.md`; evidence in `docs/phase-5/evidence/`), last at `309eb14`/`7f24e80`. The owner decisions taken on the way (R-06, R-14 B, R-15 B, P-01 B, P-12, P-14, D-01 to D-21, E-01 to E-12) are in the spec's Phase 5 addendum (4.3.0). Open: Phase 12's S2 continuation rows (all Pending in `findings/logic/probe_findings.md`), the live gates RG-001 to RG-005, the P5.8 size gate for the eager `renderPdf` import, and the Inspector release gate below. Spec AC-1.7 hides the site pill while Inspector is unreleased (the "disabled" wording below is superseded).
+
+### Status (2026-10-23, historical)
 
 Phase 12 Task 1 is done (`scripts/s2-probe.js`). Task 2 ran once in PPTB on 2026-10-22; the shape-only evidence is in `findings/logic/probe_findings.md` and the Phase 12 table. Accepted: connection shape, `Uint8Array` save, clipboard. Observed but open: paging (second request not seen in Network), `connection:updated` payload key names, environment-variable reads (not denied, row counts unknown), the quote/space literal URI. Not run: network drop, expired sign-in, `s2StopEvents()` follow-up, host version. Phase files 11, 15, 16, 20, 23 and 24 remain written and unexecuted.
 
