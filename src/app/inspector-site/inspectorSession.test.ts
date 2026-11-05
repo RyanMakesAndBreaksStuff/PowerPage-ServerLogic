@@ -787,8 +787,7 @@ describe('export job (P5.7)', () => {
   );
 
   it('settles a PDF export whose render runs longer than one second (full-suite load)', async () => {
-    // The real renderer embeds four fonts and under full-suite load regularly runs past 1 s; `settled()`
-    // must outlast that, so a blocking render of 1.2 s stands in for it deterministically.
+    // A blocking 1.2 s render stands in, deterministically, for the real one running past 1 s under load.
     const { host, store, snap, toasts, settled } = await finishedStore({
       renderPdf: (...args) => {
         const started = performance.now();
