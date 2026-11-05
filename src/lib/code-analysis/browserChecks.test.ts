@@ -211,6 +211,14 @@ describe('line numbers and ordering', () => {
     expect(runBrowserChecks('a();\rfetch(u);').hits).toEqual([blocked('fetch', 2)]);
   });
 
+  it.each([
+    ['U+2028', '\u2028'],
+    ['U+2029', '\u2029'],
+  ])('does not count %s as a line break, so lines match the LF-only editor', (_name, sep) => {
+    const code = `const s = "a${sep}b";\neval("x");`;
+    expect(runBrowserChecks(code).hits).toEqual([blocked('eval(', 2)]);
+  });
+
   it('sorts by line, then pattern, then severity, and de-duplicates per pattern, line and severity', () => {
     const code = 'fetch(a); fetch(b); // fetch fetch\nwindow.x; with (o) {} with (p) {}';
     expect(runBrowserChecks(code).hits).toEqual([

@@ -86,13 +86,16 @@ const WHOLE_TOKEN = BROWSER_APIS.map(
 
 type Found = { pattern: string; offset: number; severity: CheckSeverity };
 
-/** Offsets at which each line starts. Line breaks are the ones acorn uses: CRLF, CR, LF, U+2028, U+2029. */
+/**
+ * Offsets at which each line starts. Line breaks match the editor (CRLF, CR, LF), not acorn's ECMAScript
+ * line terminators: U+2028 and U+2029 are not breaks in the LF-only model or in CodeMirror's gutter.
+ */
 function lineStarts(code: string): number[] {
   const starts = [0];
   for (let i = 0; i < code.length; i++) {
     const c = code.charCodeAt(i);
     if (c === 13 && code.charCodeAt(i + 1) === 10) i++;
-    else if (c !== 10 && c !== 13 && c !== 0x2028 && c !== 0x2029) continue;
+    else if (c !== 10 && c !== 13) continue;
     starts.push(i + 1);
   }
   return starts;
