@@ -127,6 +127,11 @@ function createEventHub(): PptbHost['onEvent'] {
 /** The two retrieval actions the adapter may execute (spec FR-7 4.1.0, rule file). Anything else is refused. */
 const FILE_ACTIONS: ReadonlySet<string> = new Set(['InitializeFileBlocksDownload', 'DownloadBlock']);
 
+/** True for the two retrieval actions the adapter may execute; exported so the refusal rule is testable. */
+export function isFileAction(name: string): boolean {
+  return FILE_ACTIONS.has(name);
+}
+
 /**
  * The only module that touches `window.toolboxAPI` and `window.dataverseAPI`. Dataverse access is retrieval only:
  * `queryData` for lists and the two file-download actions through `execute`. Every host response is `unknown`
@@ -139,7 +144,7 @@ export function createPptbHost(options: PptbHostOptions = {}): PptbHost {
   };
   const files: FileDeps = {
     execute: (request) => {
-      if (!FILE_ACTIONS.has(request.operationName)) {
+      if (!isFileAction(request.operationName)) {
         return Promise.reject(new HostReadError('Refused host operation.', null));
       }
       return window.dataverseAPI.execute(request satisfies DataverseAPI.ExecuteRequest);

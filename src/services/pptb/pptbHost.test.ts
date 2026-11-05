@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { HostReadError } from './host.types';
 import type { HostEvent, ODataQuery, PptbHost } from './host.types';
 import { HostCallError, isRecord } from './hostErrors';
-import { createPptbHost } from './pptbHost';
+import { createPptbHost, isFileAction } from './pptbHost';
 
 const BASE = 'https://org.crm.dynamics.com/api/data/v9.2';
 const GUID = '0f8fad5b-d9cb-469f-a165-70867728950e';
@@ -711,7 +711,7 @@ describe('retrieval-only guarantee', () => {
     );
   });
 
-  it('refuses to reach a write member, as the guard proves', () => {
+  it('the test guard proxy throws on write members', () => {
     const violations: string[] = [];
     const guard = guarded('dataverseAPI', stubs.dataverse, [], violations);
     expect(() => {
@@ -723,11 +723,13 @@ describe('retrieval-only guarantee', () => {
     expect(violations).toEqual(['dataverseAPI.create', 'dataverseAPI.update']);
   });
 
-  it('refuses to execute any operation other than the two download actions', async () => {
-    // Reach the injected execute through the only production path and prove no other name can be sent:
-    // the initializer response is forged so that the loop issues exactly one DownloadBlock.
-    await host.downloadFileColumn({ entityLogicalName: 'powerpagecomponent', primaryIdAttribute: 'powerpagecomponentid', recordId: GUID, fileAttributeName: 'filecontent' });
-    const names = new Set(stubs.execute.mock.calls.map(([request]) => request.operationName));
-    expect([...names].every((name) => name === 'InitializeFileBlocksDownload' || name === 'DownloadBlock')).toBe(true);
+  it.each([
+    ['InitializeFileBlocksDownload', true],
+    ['DownloadBlock', true],
+    ['CreateRecord', false],
+    ['DeleteRecord', false],
+    ['', false],
+  ])('isFileAction(%j) is %s', (name, expected) => {
+    expect(isFileAction(name)).toBe(expected);
   });
 });
