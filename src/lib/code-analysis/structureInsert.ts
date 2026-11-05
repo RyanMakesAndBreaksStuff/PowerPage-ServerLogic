@@ -74,8 +74,12 @@ export function buildInsertion(
 
 /** Applies changes whose offsets all refer to `code`, the way one CodeMirror transaction does. */
 export function applyChanges(code: string, changes: readonly TextChange[]): string {
+  // Descending `from`; equal offsets go by descending array index so earlier entries end up first in the text.
+  const ordered = changes
+    .map((change, index) => ({ change, index }))
+    .sort((a, b) => b.change.from - a.change.from || b.index - a.index);
   let text = code;
-  for (const change of [...changes].sort((a, b) => b.from - a.from)) {
+  for (const { change } of ordered) {
     text = text.slice(0, change.from) + change.insert + text.slice(change.to);
   }
   return text;

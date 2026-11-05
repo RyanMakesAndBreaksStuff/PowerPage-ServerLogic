@@ -1,8 +1,8 @@
 import { getRecipe, methodEnabled } from '@/services/catalogue/recipes';
 import type { Notice } from '@/services/pptb/host.types';
+import { applyChanges } from '@/lib/code-analysis/structureInsert';
 import { normalizeLf } from '@/lib/text';
 import type { RecipeId } from '@/types/recipe';
-import { applyTextChanges } from './applyTextChanges';
 import type { StarterDeps } from './starterDeps';
 import type { StarterAction, StarterState } from './starterSession.types';
 
@@ -103,7 +103,7 @@ export function createStarterReducer(
       case 'setCursor':
         return { ...state, cursor: action.cursor };
       case 'applyChanges':
-        return withText(state, applyTextChanges(state.serverText, action.changes), action.cursor);
+        return withText(state, applyChanges(state.serverText, action.changes), action.cursor);
       case 'markReviewed':
         return { ...state, reviewedText: state.serverText };
       case 'undoReview':
