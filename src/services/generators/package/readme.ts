@@ -58,6 +58,10 @@ function section(title: string, body: string): string {
   return `## ${title}\n\n${body}`;
 }
 
+function lowerFirst(text: string): string {
+  return text.charAt(0).toLowerCase() + text.slice(1);
+}
+
 function setupBody(slug: string, recipe: RecipeMeta, language: ClientLanguage): string {
   const clientName = `${slug}${language === 'liquid' ? '.client.liquid' : '.client.js'}`;
   const paste =
@@ -69,7 +73,9 @@ function setupBody(slug: string, recipe: RecipeMeta, language: ClientLanguage): 
     '2. Open Server logic.',
     '3. Select + New server logic.',
     `4. Name it exactly \`${slug}\`. That name is the API resource name.`,
-    `5. Select + Add roles and add \`${recipe.webRole}\`.`,
+    recipe.webRoleKind === 'name'
+      ? `5. Select + Add roles and add \`${recipe.webRole}\`.`
+      : `5. Select + Add roles and add ${lowerFirst(recipe.webRole)}.`,
     '6. Select Edit code, then Open Visual Studio Code.',
     `7. Replace the file content with \`${slug}.js\` and save.`,
     '8. Configure the site settings, allowed domains and table permissions as listed in permission-checklist.md.',

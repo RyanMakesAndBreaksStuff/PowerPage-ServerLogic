@@ -25,6 +25,7 @@ export type RecipeMeta = {
   outboundDomains: readonly string[];
   siteSettings: readonly string[];
   webRole: string;
+  webRoleKind: 'name' | 'description'; // 'name' is a literal role to add; 'description' says which role to pick
   permissionNote: string;
   prerequisites: readonly string[];
   learnUrl: string | null;

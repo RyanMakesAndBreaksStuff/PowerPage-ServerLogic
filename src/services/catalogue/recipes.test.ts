@@ -594,4 +594,10 @@ describe('checklistLines (AC-5.6)', () => {
       }
     }
   });
+
+  it('marks only R5 and R6 web roles as fixed names, the rest as descriptions', () => {
+    for (const recipe of RECIPES) {
+      expect(recipe.webRoleKind).toBe(recipe.id === 'R5' || recipe.id === 'R6' ? 'name' : 'description');
+    }
+  });
 });

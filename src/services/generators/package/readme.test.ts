@@ -149,8 +149,18 @@ describe('buildReadme', () => {
     const readme = buildReadme(input);
     expect(readme).toContain(`Name it exactly \`${input.derived.slug}\``);
     expect(readme).toContain('API resource name');
-    expect(readme).toContain(getRecipe('R1').webRole);
+    expect(readme).toContain('5. Select + Add roles and add a web role the caller holds.');
     expect(readme).toContain(`${input.derived.slug}.js`);
+  });
+
+  it('quotes a fixed role name (R5) and writes a descriptive role in prose (R1, R8)', () => {
+    expect(buildReadme(inputFor('R5'))).toContain('5. Select + Add roles and add `Administrators`.');
+    expect(buildReadme(inputFor('R1'))).toContain(
+      '5. Select + Add roles and add a web role the caller holds.',
+    );
+    const r8 = buildReadme(inputFor('R8'));
+    expect(r8).toContain('5. Select + Add roles and add a web role the visiting user holds.');
+    expect(r8).not.toContain('`A web role');
   });
 
   it('endpoint is the path, and for R8 the Liquid tag', () => {

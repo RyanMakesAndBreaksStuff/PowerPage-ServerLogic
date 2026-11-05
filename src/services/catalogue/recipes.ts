@@ -47,6 +47,7 @@ export const RECIPES: readonly RecipeMeta[] = [
     outboundDomains: [],
     siteSettings: [],
     webRole: CALLER_ROLE,
+    webRoleKind: 'description',
     permissionNote:
       "Grant Read on `contact` with Account access to the caller's web role, then validate on your development site.",
     prerequisites: [ACCOUNT_TEST_USER_LINE],
@@ -70,6 +71,7 @@ export const RECIPES: readonly RecipeMeta[] = [
     outboundDomains: [],
     siteSettings: [],
     webRole: CALLER_ROLE,
+    webRoleKind: 'description',
     permissionNote:
       "Assign the caller's web role to this server logic, then validate on your development site. No table permissions are needed: the handler rejects invalid input before any data access.",
     prerequisites: [],
@@ -99,6 +101,7 @@ export const RECIPES: readonly RecipeMeta[] = [
     outboundDomains: ['<target-host>'],
     siteSettings: ['ExternalApi/BaseUrl'],
     webRole: CALLER_ROLE,
+    webRoleKind: 'description',
     permissionNote: withUpstreamLine(
       "Add the target API's host to the allowed domains, set `ExternalApi/BaseUrl`, and assign the caller's web role to this server logic, then validate on your development site.",
     ),
@@ -149,6 +152,7 @@ export const RECIPES: readonly RecipeMeta[] = [
     outboundDomains: [],
     siteSettings: [],
     webRole: CALLER_ROLE,
+    webRoleKind: 'description',
     permissionNote:
       "Grant Read, Write and Delete on `contact` with Account access, and Create on `contact` with Global access, to the recipe's web role, then validate on your development site.",
     prerequisites: [ACCOUNT_TEST_USER_LINE],
@@ -196,6 +200,7 @@ export const RECIPES: readonly RecipeMeta[] = [
     outboundDomains: ['services.odata.org'],
     siteSettings: [],
     webRole: 'Administrators',
+    webRoleKind: 'name',
     permissionNote: withUpstreamLine(
       'Add `services.odata.org` to the allowed domains (replace it if you point at another service) and assign the Administrators web role, then validate on your development site.',
     ),
@@ -246,6 +251,7 @@ export const RECIPES: readonly RecipeMeta[] = [
     outboundDomains: ['<function-app>.azurewebsites.net'],
     siteSettings: ['AZURE_FUNCTION_URL'],
     webRole: 'Authenticated Users',
+    webRoleKind: 'name',
     permissionNote: withUpstreamLine(
       "Set `AZURE_FUNCTION_URL`, add your function app's host to the allowed domains and assign the Authenticated Users web role, then validate on your development site.",
     ),
@@ -285,6 +291,7 @@ export const RECIPES: readonly RecipeMeta[] = [
     outboundDomains: ['login.microsoftonline.com', 'graph.microsoft.com'],
     siteSettings: ['CLIENT_ID', 'CLIENT_SECRET', 'TENANT_ID', 'HOSTNAME', 'SITE_PATH'],
     webRole: CALLER_ROLE,
+    webRoleKind: 'description',
     permissionNote: withUpstreamLine(
       "Set `CLIENT_ID`, `CLIENT_SECRET`, `TENANT_ID`, `HOSTNAME` and `SITE_PATH`, allow `login.microsoftonline.com` and `graph.microsoft.com`, and grant Create on `crd69_eventregistration` with Global access to the caller's web role, then validate on your development site.",
     ),
@@ -329,6 +336,7 @@ export const RECIPES: readonly RecipeMeta[] = [
     outboundDomains: [],
     siteSettings: [],
     webRole: 'A web role the visiting user holds',
+    webRoleKind: 'description',
     permissionNote:
       'Assign a web role the visiting user holds to this server logic, then validate on your development site. No table permissions are needed.',
     prerequisites: [],
@@ -358,6 +366,7 @@ export const RECIPES: readonly RecipeMeta[] = [
     outboundDomains: [],
     siteSettings: ['CLOUD_FLOW_ID'],
     webRole: 'An authorized web role that the caller holds',
+    webRoleKind: 'description',
     permissionNote: withUpstreamLine(
       'Create the cloud flow, add it to the site with a web role the caller holds, and set `CLOUD_FLOW_ID`, then validate on your development site.',
     ),
@@ -398,6 +407,7 @@ export const RECIPES: readonly RecipeMeta[] = [
     outboundDomains: [],
     siteSettings: [],
     webRole: CALLER_ROLE,
+    webRoleKind: 'description',
     permissionNote:
       "Grant Read and Write on `account` with Account access to the caller's web role and replace the three placeholder API names (`new_CustomBoundFunction`, `new_Action`, `new_CustomBoundAction`), then validate on your development site.",
     prerequisites: [

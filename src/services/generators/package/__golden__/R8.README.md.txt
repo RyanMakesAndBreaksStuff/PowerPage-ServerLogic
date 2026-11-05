@@ -8,7 +8,7 @@ Invoke from Liquid
 2. Open Server logic.
 3. Select + New server logic.
 4. Name it exactly `customer-summary`. That name is the API resource name.
-5. Select + Add roles and add `A web role the visiting user holds`.
+5. Select + Add roles and add a web role the visiting user holds.
 6. Select Edit code, then Open Visual Studio Code.
 7. Replace the file content with `customer-summary.js` and save.
 8. Configure the site settings, allowed domains and table permissions as listed in permission-checklist.md.
