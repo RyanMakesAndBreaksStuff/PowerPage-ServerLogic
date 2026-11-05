@@ -7,17 +7,44 @@ const call = (name: string): RegExp => new RegExp(`${name}\\s*\\(`, 'i');
 /** The pattern's literal text, with `.` matched literally. */
 const literal = (text: string): RegExp => new RegExp(escapeRegExp(text), 'i');
 
+/** How far past each `import` the `import from` scan looks for `from`. */
+const IMPORT_WINDOW = 2000;
+
+/**
+ * Offsets of every whole-word `import` followed by a whole-word `from` before the next `;`, both ignoring case.
+ * A scan, not one regex: nested whitespace quantifiers backtrack super-linearly on long blank runs.
+ * The bound guarantees each `import` costs at most IMPORT_WINDOW characters of work, so the scan is linear in
+ * the code length; a `from` further away than that is missed (raise the window if real import lists are longer).
+ */
+function importFromOffsets(code: string): number[] {
+  const offsets: number[] = [];
+  for (const m of code.matchAll(/\bimport\b/gi)) {
+    const start = m.index + 'import'.length;
+    const window = code.slice(start, start + IMPORT_WINDOW);
+    const semicolon = window.indexOf(';');
+    const end = semicolon === -1 ? window.length : semicolon;
+    // Four extra characters so `\b` sees the real character after a `from` that starts just before `end`.
+    const from = /\bfrom\b/i.exec(code.slice(start, start + end + 4));
+    if (from && from.index < end) offsets.push(m.index);
+  }
+  return offsets;
+}
+
+type RestrictedPattern =
+  | { readonly label: string; readonly regex: RegExp }
+  | { readonly label: string; readonly match: (code: string) => number[] };
+
 /**
  * Learn's restricted list (FR-4 Must), as the runtime matches it (Spike S4): case-insensitive regexes over
- * the raw text. Do not add the `g` flag here; the matcher builds its own global copies.
+ * the raw text, and one scan where a regex can't stay linear. Do not add the `g` flag here; the matcher
+ * builds its own global copies.
  */
-export const RESTRICTED_PATTERNS: readonly { readonly label: string; readonly regex: RegExp }[] = [
+export const RESTRICTED_PATTERNS: readonly RestrictedPattern[] = [
   { label: '__dirname', regex: literal('__dirname') },
   { label: '__filename', regex: literal('__filename') },
   { label: 'import(', regex: call('import') },
-  // `import`, whitespace, then `from` as a word later in the same statement (no `;` in between).
-  // shortcut: looks at most 2 000 characters ahead so repeated "import" text stays linear; raise it if a real import list is longer.
-  { label: 'import from', regex: /import\s+[^;]{0,2000}?\s+from\b/i },
+  // `import`, then `from` as a word later in the same statement (no `;` in between).
+  { label: 'import from', match: importFromOffsets },
   { label: 'eval(', regex: call('eval') },
   { label: 'Function(', regex: call('Function') },
   { label: 'setTimeout(', regex: call('setTimeout') },
@@ -85,8 +112,15 @@ function lineAt(starts: readonly number[], offset: number): number {
 
 function restrictedHits(code: string): Found[] {
   const found: Found[] = [];
-  for (const { label, regex } of RESTRICTED_PATTERNS) {
-    const re = new RegExp(regex.source, 'gi');
+  for (const row of RESTRICTED_PATTERNS) {
+    const label = row.label;
+    if ('match' in row) {
+      for (const offset of row.match(code)) {
+        found.push({ pattern: label, offset, severity: 'blocked' });
+      }
+      continue;
+    }
+    const re = new RegExp(row.regex.source, 'gi');
     // No pattern matches the empty string, so the loop always advances.
     for (let m = re.exec(code); m; m = re.exec(code)) {
       found.push({ pattern: label, offset: m.index, severity: 'blocked' });

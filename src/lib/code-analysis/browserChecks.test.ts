@@ -43,9 +43,9 @@ const LEARN_SAMPLES: readonly (readonly [label: string, sample: string])[] = [
 describe('RESTRICTED_PATTERNS', () => {
   it('lists the 27 patterns of Learn, in the spec order, with case-insensitive non-global regexes', () => {
     expect(RESTRICTED_PATTERNS.map((p) => p.label)).toEqual(LEARN_SAMPLES.map(([label]) => label));
-    for (const { regex } of RESTRICTED_PATTERNS) {
-      expect(regex.flags).toBe('i');
-    }
+    // Every row but `import from` (a linear scan) is a regex.
+    const flags = RESTRICTED_PATTERNS.flatMap((p) => ('regex' in p ? [p.regex.flags] : []));
+    expect(flags).toEqual(Array.from({ length: 26 }, () => 'i'));
   });
 
   it.each(LEARN_SAMPLES)(
@@ -68,6 +68,22 @@ describe('RESTRICTED_PATTERNS', () => {
   it('matches an import statement that spans lines, at the line where it starts', () => {
     const text = 'const a = 1;\nimport {\n  b,\n  c,\n} from "d";';
     expect(runBrowserChecks(text).hits).toContainEqual(blocked('import from', 2));
+  });
+
+  it('reports no import when only whitespace follows "import"', () => {
+    const imports = (text: string): CheckHit[] =>
+      runBrowserChecks(text).hits.filter((h) => h.pattern === 'import from');
+    expect(imports('import \n\t  \r\n   ')).toEqual([]);
+    expect(imports(`import${' '.repeat(5000)}x`)).toEqual([]);
+  });
+
+  it('looks for "from" within 2 000 characters of "import"', () => {
+    const imports = (gap: number): CheckHit[] =>
+      runBrowserChecks(`import a${' '.repeat(gap)}from "b";`).hits.filter(
+        (h) => h.pattern === 'import from',
+      );
+    expect(imports(1900)).toEqual([blocked('import from')]);
+    expect(imports(2500)).toEqual([]);
   });
 });
 
@@ -244,5 +260,15 @@ describe('performance (NFR: 300 ms for a 2 000-line file)', () => {
   it('stays inside the budget when "import" is repeated on every line without a closing "from"', () => {
     const worst = Array.from({ length: 2000 }, (_, i) => `// import note ${String(i)}`).join('\n');
     expect(fastestRun(worst)).toBeLessThan(300);
+  }, TIMING_TIMEOUT);
+
+  it('stays inside the budget when "import" is followed by 5 000 spaces and no "from"', () => {
+    const spaces = `import${' '.repeat(5000)}x`;
+    expect(fastestRun(spaces)).toBeLessThan(300);
+  }, TIMING_TIMEOUT);
+
+  it('stays inside the budget when "import" is followed by 2 000 indented blank lines', () => {
+    const blankLines = `import${'\n    '.repeat(2000)}x`;
+    expect(fastestRun(blankLines)).toBeLessThan(300);
   }, TIMING_TIMEOUT);
 });
