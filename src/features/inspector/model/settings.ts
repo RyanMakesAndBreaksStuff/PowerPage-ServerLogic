@@ -8,6 +8,8 @@ export const SETTING_NAMES: readonly SettingName[] = [
   'ServerLogic/TimeoutInSeconds',
 ];
 
+const TIMEOUT_INVALID_TEXT = "`ServerLogic/TimeoutInSeconds` isn't a positive integer up to 240";
+
 export type ParsedSetting<T> = {
   value: T | null;
   reasons: readonly Reason[];
@@ -33,6 +35,13 @@ function result<T>(
 function unavailable<T>(name: SettingName, setting: SettingValue): ParsedSetting<T> | null {
   if (setting.kind === 'duplicate') {
     return result<T>(null, [{ text: `Duplicate \`${name}\``, readFailure: false }]);
+  }
+  if (setting.kind === 'unparseable') {
+    const text =
+      name === 'ServerLogic/TimeoutInSeconds'
+        ? TIMEOUT_INVALID_TEXT
+        : `Couldn't interpret \`${name}\``;
+    return result<T>(null, [{ text, readFailure: false }]);
   }
   if (setting.kind === 'envvar-unreadable') {
     return result<T>(
@@ -110,12 +119,7 @@ export function parseTimeout(setting: SettingValue): ParsedSetting<number> {
     ? result(seconds, [], setting.fromEnvVar)
     : result<number>(
         null,
-        [
-          {
-            text: "`ServerLogic/TimeoutInSeconds` isn't a positive integer up to 240",
-            readFailure: false,
-          },
-        ],
+        [{ text: TIMEOUT_INVALID_TEXT, readFailure: false }],
         setting.fromEnvVar,
       );
 }
@@ -151,6 +155,7 @@ export function settingSnapshot(facts: SiteFacts): readonly string[] {
     if (setting.kind === 'value')
       return `\`${name}\` = ${setting.raw.trim()}${setting.fromEnvVar ? ' (environment variable)' : ''}`;
     if (setting.kind === 'duplicate') return `Duplicate \`${name}\``;
+    if (setting.kind === 'unparseable') return `Couldn't interpret \`${name}\``;
     if (setting.kind === 'envvar-unreadable') return envVarFailureText(name, setting.cause);
     if (setting.kind === 'not-scanned') return `\`${name}\`: ${NOT_SCANNED_TEXT}`;
     const fallback =

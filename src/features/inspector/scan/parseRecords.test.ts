@@ -248,9 +248,9 @@ describe('parseSettings', () => {
     ['no value', named('ServerLogic/Enabled', { source: 0 })],
     ['a numeric value', named('ServerLogic/Enabled', { value: 1 })],
     ['a blank schema name', named('ServerLogic/Enabled', { source: 1, envvar_schema: '  ' })],
-  ])('degrades only that setting to an empty value for %s', (_label, bad) => {
+  ])('degrades only that setting to an unparseable binding for %s', (_label, bad) => {
     const parsed = parseSettings([bad, named('ServerLogic/TimeoutInSeconds', { value: '30' })]);
-    expect(parsed?.bindings['ServerLogic/Enabled']).toEqual({ kind: 'value', raw: '' });
+    expect(parsed?.bindings['ServerLogic/Enabled']).toEqual({ kind: 'unparseable' });
     expect(parsed?.bindings['ServerLogic/TimeoutInSeconds']).toEqual({ kind: 'value', raw: '30' });
   });
 

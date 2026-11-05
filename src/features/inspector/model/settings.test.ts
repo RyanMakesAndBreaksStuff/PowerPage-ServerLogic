@@ -104,6 +104,47 @@ describe('FR-7 strict AllowedDomains', () => {
   });
 });
 
+describe('unparseable setting content', () => {
+  const unparseable = { kind: 'unparseable' } as const satisfies SettingValue;
+
+  it.each(['ServerLogic/Enabled', 'ServerLogic/AllowNetworkingToAllDomains'] as const)(
+    'reports %s as uninterpretable and still reviewable',
+    (name) => {
+      const parsed = parseBooleanSetting(name, unparseable);
+      expect(parsed.value).toBeNull();
+      expect(parsed.reasons).toEqual([
+        { text: `Couldn't interpret \`${name}\``, readFailure: false },
+      ]);
+    },
+  );
+
+  it('reports AllowedDomains as uninterpretable instead of an empty allow list', () => {
+    const parsed = parseAllowedDomains(unparseable);
+    expect(parsed.value).toBeNull();
+    expect(parsed.reasons).toEqual([
+      { text: "Couldn't interpret `ServerLogic/AllowedDomains`", readFailure: false },
+    ]);
+  });
+
+  it('keeps the timeout text so banners do not change', () => {
+    const parsed = parseTimeout(unparseable);
+    expect(parsed.value).toBeNull();
+    expect(parsed.reasons).toEqual([
+      {
+        text: "`ServerLogic/TimeoutInSeconds` isn't a positive integer up to 240",
+        readFailure: false,
+      },
+    ]);
+  });
+
+  it('lists the unparseable setting in the snapshot', () => {
+    const facts = siteFacts({
+      settings: read(settings({ 'ServerLogic/AllowedDomains': unparseable })),
+    });
+    expect(settingSnapshot(facts)).toContain("Couldn't interpret `ServerLogic/AllowedDomains`");
+  });
+});
+
 describe('AC-7.9 / AC-7.12 banners and snapshot', () => {
   it.each(['1', '120', '121', '240', '0001', ' 0240 '])('accepts timeout %s', (raw) => {
     expect(parseTimeout(value(raw)).value).toBe(Number(raw.trim()));

@@ -218,6 +218,8 @@ function resolveBinding(reader: Reader, binding: SettingBinding): Promise<Settin
       return Promise.resolve({ kind: 'duplicate' });
     case 'value':
       return Promise.resolve({ kind: 'value', raw: binding.raw, fromEnvVar: false });
+    case 'unparseable':
+      return Promise.resolve({ kind: 'unparseable' });
     case 'envvar':
       return readEnvVar(reader, binding.schema);
   }

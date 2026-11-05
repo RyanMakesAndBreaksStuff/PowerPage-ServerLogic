@@ -26,6 +26,7 @@ export type SettingValue =
   | { kind: 'duplicate' }
   | { kind: 'value'; raw: string; fromEnvVar: boolean }
   | { kind: 'envvar-unreadable'; cause: EnvVarCause }
+  | { kind: 'unparseable' } // active row whose content has no readable string value
   | { kind: 'not-scanned' }; // environment-variable read not started before interruption
 export type ServerLogicFileFacts = {
   id: string;

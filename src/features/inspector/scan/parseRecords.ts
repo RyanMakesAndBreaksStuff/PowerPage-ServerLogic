@@ -208,7 +208,9 @@ export type SettingBinding =
   | { kind: 'absent' }
   | { kind: 'duplicate' }
   | { kind: 'value'; raw: string }
-  | { kind: 'envvar'; schema: string };
+  | { kind: 'envvar'; schema: string }
+  /** The row is active but its content has no readable string value, which is not the same as an empty value. */
+  | { kind: 'unparseable' };
 
 export type ParsedSettings = {
   bindings: Readonly<Record<SettingName, SettingBinding>>;
@@ -216,12 +218,14 @@ export type ParsedSettings = {
 };
 
 function bindingFromContent(content: JsonObject | null): SettingBinding {
-  if (content === null) return { kind: 'value', raw: '' };
+  if (content === null) return { kind: 'unparseable' };
   const schema = content.envvar_schema;
   if (content.source === 1 && typeof schema === 'string' && schema.trim() !== '') {
     return { kind: 'envvar', schema: schema.trim() };
   }
-  return { kind: 'value', raw: typeof content.value === 'string' ? content.value : '' };
+  return typeof content.value === 'string'
+    ? { kind: 'value', raw: content.value }
+    : { kind: 'unparseable' };
 }
 
 function bindingOf(rows: readonly ComponentRow[]): SettingBinding {

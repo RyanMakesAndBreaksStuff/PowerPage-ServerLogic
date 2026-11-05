@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { evaluateSite } from '@/features/inspector/model/rules';
+import { canReviewFinding, evaluateSite } from '@/features/inspector/model/rules';
 import { createFakeHost } from '@/services/pptb/fakeHost';
 import type { FakeFailure, FakeResponder } from '@/services/pptb/fakeHost';
 import { HostReadError } from '@/services/pptb/host.types';
@@ -527,7 +527,7 @@ describe('runScan settings', () => {
     });
   });
 
-  it('degrades one malformed setting to an empty value without failing the others', async () => {
+  it('degrades one malformed setting to an unparseable value without failing the others', async () => {
     const broken = { ...setting(1, 'ServerLogic/TimeoutInSeconds', {}), content: '{not json' };
     const facts = await scan(
       createWorld({
@@ -536,14 +536,33 @@ describe('runScan settings', () => {
       }),
     );
     expect(facts.settings.ok).toBe(true);
-    expect(settingsOf(facts)['ServerLogic/TimeoutInSeconds']).toEqual({
-      kind: 'value',
-      raw: '',
-      fromEnvVar: false,
-    });
+    expect(settingsOf(facts)['ServerLogic/TimeoutInSeconds']).toEqual({ kind: 'unparseable' });
     const banners = evaluateSite(facts, new Set<ReviewKey>()).banners;
     expect(banners).toContain("`ServerLogic/TimeoutInSeconds` isn't a positive integer up to 240");
     expect(banners).toContain('Server logic is disabled on this site (`ServerLogic/Enabled` = false)');
+  });
+});
+
+describe('runScan unreadable allow list', () => {
+  it('asks for review, not "outbound calls are blocked", when AllowedDomains content cannot be read', async () => {
+    const broken = { ...setting(1, 'ServerLogic/AllowedDomains', {}), content: '{not json' };
+    const facts = await scan(
+      createWorld({
+        ...HAPPY,
+        settings: [
+          broken,
+          setting(2, 'ServerLogic/AllowNetworkingToAllDomains', { value: 'false', source: 0 }),
+        ],
+      }),
+    );
+    expect(settingsOf(facts)['ServerLogic/AllowedDomains']).toEqual({ kind: 'unparseable' });
+    const outbound = evaluateSite(facts, new Set<ReviewKey>()).files[1]?.findings[2];
+    expect(outbound?.status).toBe('needs-review');
+    expect(outbound?.summary).toBe("Couldn't interpret `ServerLogic/AllowedDomains`");
+    expect(outbound?.reasons).toEqual([
+      { text: "Couldn't interpret `ServerLogic/AllowedDomains`", readFailure: false },
+    ]);
+    expect(outbound !== undefined && canReviewFinding(outbound)).toBe(true);
   });
 });
 
