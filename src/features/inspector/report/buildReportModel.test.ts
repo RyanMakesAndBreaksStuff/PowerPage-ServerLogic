@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import type { SiteResult } from '@/types/inspector';
+import type { CheckStatus, SiteResult } from '@/types/inspector';
 import { buildReportModel } from './buildReportModel';
 import { EXPORTED_AT, REPORT_OPTIONS, reportFile, reportResult } from './reportFixtures';
 import { reportFileName, reportFileNameBeforeBuild } from './reportFileName';
@@ -75,7 +75,7 @@ describe('buildReportModel', () => {
             reasons: [{ text, readFailure: false }],
             guidance: text,
             questions: [text],
-            detail: [text],
+            detail: [text, `Note: ${text}`],
           },
           file.findings[2],
         ],
@@ -90,6 +90,9 @@ describe('buildReportModel', () => {
     );
     const serialised = JSON.stringify(model);
     for (const identifier of identifiers) expect(serialised).not.toContain(identifier);
+    expect(model.rows[0]?.checks[1]?.detail).toEqual([
+      'Note: [environment] / [environment] / [site] / [site]',
+    ]);
     expect(serialised).toContain('[environment]');
     expect(serialised).toContain('[site]');
     expect(serialised).toContain('customer-summary.js');
@@ -237,7 +240,7 @@ describe('redaction aliases (WR-002)', () => {
             reasons: [{ text: unredacted, readFailure: false }],
             guidance: unredacted,
             questions: [unredacted],
-            detail: [unredacted],
+            detail: [unredacted, `Note: ${unredacted}`],
           },
           file.findings[2],
         ],
@@ -268,12 +271,12 @@ describe('redaction aliases (WR-002)', () => {
           reasons: [expected],
           guidance: expected,
           questions: [expected],
-          detail: [expected],
+          detail: [`Note: ${expected}`],
         });
         expect(section).toMatchObject({
           summary: expected,
           guidance: expected,
-          detail: [expected],
+          detail: [`Note: ${expected}`],
         });
         expect(model.banners).toEqual([expected]);
         expect(model.snapshot?.[0]).toMatchObject({
@@ -367,6 +370,51 @@ describe('redaction aliases (WR-002)', () => {
       EXPORTED_AT,
     );
     expect(model.banners).toEqual([unredacted]);
+  });
+});
+
+describe('detail lines that repeat a reason (inspector-ui-and-report-001)', () => {
+  function detailResult(detail: readonly string[], status: CheckStatus = 'needs-review'): SiteResult {
+    const result = reportResult();
+    const file = reportFile('customer', 'customer-summary.js', [
+      'configured',
+      status,
+      'configured',
+    ]);
+    result.files = [
+      {
+        ...file,
+        findings: [file.findings[0], { ...file.findings[1], detail: [...detail] }, file.findings[2]],
+      },
+    ];
+    return result;
+  }
+
+  it.each(['file', 'site'] as const)(
+    'drops a detail line equal to a reason and keeps the rest in the %s model',
+    (scope) => {
+      const model = buildReportModel(
+        detailResult(['Global Read on account via Members.', 'extra note']),
+        { ...REPORT_OPTIONS, scope },
+        EXPORTED_AT,
+      );
+      const section = (scope === 'file' ? model.needsReview : model.reviewFirst)[0];
+      expect(model.rows[0]?.checks[1]?.reasons).toEqual(['Global Read on account via Members.']);
+      expect(model.rows[0]?.checks[1]?.detail).toEqual(['extra note']);
+      expect(section?.detail).toEqual(['extra note']);
+    },
+  );
+
+  it('drops the summary line of a check that has no reasons', () => {
+    const summary = 'Not read before the connection was lost';
+    const model = buildReportModel(
+      detailResult([summary, 'extra note'], 'not-scanned'),
+      REPORT_OPTIONS,
+      EXPORTED_AT,
+    );
+    expect(model.rows[0]?.checks[1]).toMatchObject({ reasons: [], finding: summary });
+    expect(model.rows[0]?.checks[1]?.detail).toEqual(['extra note']);
+    expect(model.notScanned[0]?.detail).toEqual(['extra note']);
   });
 });
 

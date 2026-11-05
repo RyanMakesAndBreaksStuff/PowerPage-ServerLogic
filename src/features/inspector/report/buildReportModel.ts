@@ -96,16 +96,19 @@ function checkModel(
   redact: (text: string) => string,
 ): ReportCheck {
   const reasons = finding.reasons.map((reason) => redact(reason.text));
+  const summary = redact(finding.summary);
+  // Like the screen, drop detail lines that repeat a reason; with no reasons the summary is printed instead.
+  const repeated = reasons.length === 0 ? [summary] : reasons;
   return {
     check: finding.check,
     title: CHECK_COPY[finding.check].category,
     status: finding.status,
     statusText: STATUS_TEXT[finding.status],
-    finding: reasons.length === 0 ? redact(finding.summary) : reasons.join('; '),
+    finding: reasons.length === 0 ? summary : reasons.join('; '),
     reasons,
     guidance: redact(finding.guidance),
     questions: questions ? finding.questions.map(redact) : [],
-    detail: finding.detail.map(redact),
+    detail: finding.detail.map(redact).filter((line) => !repeated.includes(line)),
   };
 }
 
