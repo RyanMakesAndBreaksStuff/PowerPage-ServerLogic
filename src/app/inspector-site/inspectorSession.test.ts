@@ -59,10 +59,17 @@ function setup(
   return { host, store, seen, snap };
 }
 
+/**
+ * Polls until `check` holds. The budget outlasts a PDF export's synchronous render (its own AC-9.9 budget is 5 s,
+ * and under full-suite load it passes vi.waitFor's 1 s default), while staying inside the 15 s test timeout.
+ */
 const until = (check: () => boolean) =>
-  vi.waitFor(() => {
-    expect(check()).toBe(true);
-  });
+  vi.waitFor(
+    () => {
+      expect(check()).toBe(true);
+    },
+    { timeout: 10_000 },
+  );
 
 const MARK: ReviewKey = `${guid(0x1001)}:webRole`;
 const componentReads = (host: GatedHost) =>
@@ -778,6 +785,28 @@ describe('export job (P5.7)', () => {
       expect(guardCalls(host)).toEqual(['preventClose', 'releasePreventClose']);
     },
   );
+
+  it('settles a PDF export whose render runs longer than one second (full-suite load)', async () => {
+    // The real renderer embeds four fonts and under full-suite load regularly runs past 1 s; `settled()`
+    // must outlast that, so a blocking render of 1.2 s stands in for it deterministically.
+    const { host, store, snap, toasts, settled } = await finishedStore({
+      renderPdf: (...args) => {
+        const started = performance.now();
+        while (performance.now() - started < 1_200) {
+          // busy wait: the real render is synchronous too
+        }
+        return renderPdf(...args);
+      },
+    });
+    store.openExport();
+    store.setExportOptions({ format: 'pdf' });
+    store.submitExport();
+    await settled();
+    expect(host.savedFiles).toHaveLength(1);
+    expect(toasts('success')).toHaveLength(1);
+    expect(toasts('warning')).toHaveLength(0);
+    expect(snap().exportJob).toBeNull();
+  });
 
   it('paints the busy phase before the build runs', async () => {
     const order: string[] = [];
