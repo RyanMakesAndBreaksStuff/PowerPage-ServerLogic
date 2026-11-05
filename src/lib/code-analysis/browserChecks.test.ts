@@ -77,6 +77,13 @@ describe('RESTRICTED_PATTERNS', () => {
     expect(imports(`import${' '.repeat(5000)}x`)).toEqual([]);
   });
 
+  it('matches whole words only: import{a}from"x" is reported, reimport x from y is not', () => {
+    const imports = (text: string): CheckHit[] =>
+      runBrowserChecks(text).hits.filter((h) => h.pattern === 'import from');
+    expect(imports('import{a}from"x";')).toEqual([blocked('import from', 1)]);
+    expect(imports('reimport x from y;')).toEqual([]);
+  });
+
   it('looks for "from" within 2 000 characters of "import"', () => {
     const imports = (gap: number): CheckHit[] =>
       runBrowserChecks(`import a${' '.repeat(gap)}from "b";`).hits.filter(
