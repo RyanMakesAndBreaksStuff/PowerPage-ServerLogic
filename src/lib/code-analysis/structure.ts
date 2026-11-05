@@ -109,19 +109,35 @@ function staticKey(property: AstNode, computed: boolean): string | null {
   return property.type === 'Literal' && typeof property.value === 'string' ? property.value : null;
 }
 
+/**
+ * The static part of a member chain: its root `Identifier` and the keys after it, stopping before the first key that
+ * isn't static (`complete` is then false). `Server.Context[k].Body` is `['Server', 'Context']`, not complete. `null`
+ * when the root isn't an `Identifier`. Iterative (it walks `.object` down to the root), so a long chain can't overflow
+ * the stack.
+ */
+function chainPrefix(node: AstNode): { chain: readonly string[]; complete: boolean } | null {
+  const keys: (string | null)[] = [];
+  let current: AstNode | null = node;
+  while (current?.type === 'MemberExpression') {
+    const property = nodeProp(current, 'property');
+    keys.push(property === null ? null : staticKey(property, current.computed === true));
+    current = nodeProp(current, 'object');
+  }
+  const root = current?.type === 'Identifier' ? nodeName(current) : null;
+  if (root === null) return null;
+  const chain = [root];
+  for (let i = keys.length - 1; i >= 0; i--) {
+    const key = keys[i];
+    if (key === null || key === undefined) return { chain, complete: false };
+    chain.push(key);
+  }
+  return { chain, complete: true };
+}
+
 /** `Server.Connector["HttpClient"].GetAsync` as `['Server', 'Connector', 'HttpClient', 'GetAsync']`; `null` when not a static chain. */
 function chainOf(node: AstNode): readonly string[] | null {
-  if (node.type === 'Identifier') {
-    const name = nodeName(node);
-    return name === null ? null : [name];
-  }
-  if (node.type !== 'MemberExpression') return null;
-  const object = nodeProp(node, 'object');
-  const property = nodeProp(node, 'property');
-  if (object === null || property === null) return null;
-  const head = chainOf(object);
-  const key = staticKey(property, node.computed === true);
-  return head === null || key === null ? null : [...head, key];
+  const prefix = chainPrefix(node);
+  return prefix?.complete === true ? prefix.chain : null;
 }
 
 /** `const { Body, Url: u } = Server.Context;` reads `Body` and `Url`. */
@@ -177,10 +193,16 @@ export function usedServerMembers(code: string): ReadonlyMap<string, readonly st
     recordFromTokens(used, scanTokens(code).tokens);
     return used;
   }
+  // Only the outermost MemberExpression of a chain is read: its static prefix covers every inner one, and reading each
+  // inner one too would be quadratic in the chain length. Parents are visited first, so inner ones are marked in time.
+  const inner = new Set<AstNode>();
   walk(parsed.program, (node) => {
     if (node.type === 'MemberExpression') {
-      const chain = chainOf(node);
-      if (chain !== null) recordChain(used, chain);
+      const object = nodeProp(node, 'object');
+      if (object?.type === 'MemberExpression') inner.add(object);
+      if (inner.has(node)) return;
+      const prefix = chainPrefix(node);
+      if (prefix !== null) recordChain(used, prefix.chain);
     } else if (node.type === 'VariableDeclarator') {
       recordDestructuring(used, node);
     }

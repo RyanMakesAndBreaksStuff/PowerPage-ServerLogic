@@ -84,4 +84,24 @@ describe('StarterSessionProvider', () => {
       'useStarterSession must be used inside StarterSessionProvider',
     );
   });
+
+  it('renders server text holding a 10 000-segment member chain without throwing', () => {
+    const longChain = `Server.Connector${'.a'.repeat(9998)};`;
+    const deps = {
+      ...FAKE_STARTER_DEPS,
+      generateHandler: () => ({ text: longChain, highlightLines: [] }),
+    };
+    expect(() =>
+      render(
+        <HostContext value={createFakeHost()}>
+          <NotifyProvider>
+            <StarterSessionProvider deps={deps}>
+              <Probe />
+            </StarterSessionProvider>
+          </NotifyProvider>
+        </HostContext>,
+      ),
+    ).not.toThrow();
+    expect(screen.getByText('customer-summary fetch 2/3')).toBeTruthy();
+  });
 });

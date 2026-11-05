@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { readsHttpOnlyContext, usedServerMembers } from './structure';
+import { parseScript, walk } from './structureAst';
 
 /** The map as sorted-by-first-use entries, so a failure shows the whole picture. */
 const used = (code: string): [string, readonly string[]][] => [...usedServerMembers(code)];
@@ -194,5 +195,77 @@ describe('readsHttpOnlyContext (AC-4.7)', () => {
 
   it('is false for empty code', () => {
     expect(readsHttpOnlyContext('')).toBe(false);
+  });
+});
+
+describe('walk', () => {
+  it('visits parents before children, in source order', () => {
+    const parsed = parseScript(
+      'function f(a, [b]) { if (a) { return a.b + g(1, b); } }\nconst { x } = Server.Context;',
+    );
+    const visited: string[] = [];
+    if (parsed !== null) walk(parsed.program, (n) => visited.push(`${n.type}@${String(n.start)}`));
+    expect(visited).toEqual([
+      'Program@0',
+      'FunctionDeclaration@0',
+      'Identifier@9',
+      'Identifier@11',
+      'ArrayPattern@14',
+      'Identifier@15',
+      'BlockStatement@19',
+      'IfStatement@21',
+      'Identifier@25',
+      'BlockStatement@28',
+      'ReturnStatement@30',
+      'BinaryExpression@37',
+      'MemberExpression@37',
+      'Identifier@37',
+      'Identifier@39',
+      'CallExpression@43',
+      'Identifier@43',
+      'Literal@45',
+      'Identifier@48',
+      'VariableDeclaration@56',
+      'VariableDeclarator@62',
+      'ObjectPattern@62',
+      'Property@64',
+      'Identifier@64',
+      'Identifier@64',
+      'MemberExpression@70',
+      'Identifier@70',
+      'Identifier@77',
+    ]);
+  });
+});
+
+describe('very long or deeply nested code (no recursion overflow)', () => {
+  // `Server.Connector` plus 9 998 `.a` steps: 10 000 segments in one member chain.
+  const LONG_CHAIN = `Server.Connector${'.a'.repeat(9998)};`;
+
+  // CPU time, not wall time, as in browserChecks.test.ts: parallel test workers inflate wall time. Best of 5.
+  const fastestRun = (input: string): number => {
+    usedServerMembers(input); // warm-up
+    let best = Infinity;
+    for (let i = 0; i < 5; i++) {
+      const started = process.cpuUsage();
+      usedServerMembers(input);
+      const { user, system } = process.cpuUsage(started);
+      best = Math.min(best, (user + system) / 1000);
+    }
+    return best;
+  };
+
+  it('reads a 10 000-segment member chain without throwing, inside the budget', () => {
+    expect(used(LONG_CHAIN)).toEqual([]);
+    expect(fastestRun(LONG_CHAIN)).toBeLessThan(300);
+  }, 20_000);
+
+  it('readsHttpOnlyContext is false for the 10 000-segment chain, without throwing', () => {
+    expect(readsHttpOnlyContext(LONG_CHAIN)).toBe(false);
+  });
+
+  it('does not throw on a 4 000-term binary expression', () => {
+    const code = `const n = ${Array.from({ length: 4000 }, () => '1').join('+')};`;
+    expect(() => usedServerMembers(code)).not.toThrow();
   });
 });

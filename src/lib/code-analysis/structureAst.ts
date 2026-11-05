@@ -43,14 +43,26 @@ export function nodeName(node: AstNode | null): string | null {
   return typeof name === 'string' ? name : null;
 }
 
-/** Visits `node` and every descendant, parents before children, in source order. */
+/**
+ * Visits `node` and every descendant, parents before children, in source order. Iterative (an explicit stack), so a
+ * very deep tree can't overflow the call stack.
+ */
 export function walk(node: AstNode, visit: (n: AstNode) => void): void {
-  visit(node);
-  for (const value of Object.values(node)) {
-    if (Array.isArray(value)) {
-      for (const item of value.filter(isAstNode)) walk(item, visit);
-    } else if (isAstNode(value)) {
-      walk(value, visit);
+  const stack: AstNode[] = [node];
+  for (let current = stack.pop(); current !== undefined; current = stack.pop()) {
+    visit(current);
+    const children: AstNode[] = [];
+    for (const value of Object.values(current)) {
+      if (Array.isArray(value)) {
+        for (const item of value) if (isAstNode(item)) children.push(item);
+      } else if (isAstNode(value)) {
+        children.push(value);
+      }
+    }
+    // Pushed in reverse, so they pop in source order.
+    for (let i = children.length - 1; i >= 0; i--) {
+      const child = children[i];
+      if (child !== undefined) stack.push(child);
     }
   }
 }
