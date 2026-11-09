@@ -124,6 +124,30 @@ const PERMISSIONS: readonly Row[] = [
 
 const COMPONENT_FILTER = /_powerpagesiteid_value eq (\S+) and powerpagecomponenttype eq (\d+)/;
 
+/** The `powerpagesites` rows a world returns; shared by the fake host and the live-probe scenarios. */
+export function worldSiteRows(world: World): readonly Row[] {
+  return world.sites.map((site) => ({
+    powerpagesiteid: site.ref.id,
+    name: site.ref.name,
+    primarydomainname: site.ref.domain,
+    statecode: site.ref.active ? 0 : 1,
+  }));
+}
+
+/** The rows of one component type on one site; shared by the fake host and the live-probe scenarios. */
+export function worldComponentRows(site: WorldSite | undefined, type: number): readonly Row[] {
+  switch (type) {
+    case 35:
+      return site?.files.map(logicRow) ?? [];
+    case 11:
+      return ROLES;
+    case 18:
+      return PERMISSIONS;
+    default:
+      return [];
+  }
+}
+
 /** The fake ignores `$select` and `$filter`, so this responder applies the two filters the reader writes. */
 export function createInspectorHost(
   world: World = DEFAULT_WORLD,
@@ -133,16 +157,7 @@ export function createInspectorHost(
     if (query.entitySet !== 'powerpagecomponents') return undefined;
     const match = COMPONENT_FILTER.exec(query.filter ?? '');
     const site = world.sites.find((candidate) => candidate.ref.id === match?.[1]);
-    switch (Number(match?.[2])) {
-      case 35:
-        return site?.files.map(logicRow) ?? [];
-      case 11:
-        return ROLES;
-      case 18:
-        return PERMISSIONS;
-      default:
-        return [];
-    }
+    return worldComponentRows(site, Number(match?.[2]));
   };
   const fileColumns = Object.fromEntries(
     world.sites.flatMap((site) =>
@@ -158,12 +173,7 @@ export function createInspectorHost(
     createFakeHost({
       connection,
       tables: {
-        powerpagesites: world.sites.map((site) => ({
-          powerpagesiteid: site.ref.id,
-          name: site.ref.name,
-          primarydomainname: site.ref.domain,
-          statecode: site.ref.active ? 0 : 1,
-        })),
+        powerpagesites: worldSiteRows(world),
       },
       responders: [responder],
       fileColumns,
