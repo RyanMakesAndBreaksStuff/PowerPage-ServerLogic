@@ -26,3 +26,6 @@ coverage/
 /AGENTS.md.v4-migration.lock
 /AGENTS.md.bak
 /.scratch
+/probes/reports/
+/probes/**/shots/
+/probes/.local.json
