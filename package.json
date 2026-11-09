@@ -17,7 +17,7 @@
     "test": "vitest run",
     "probe:size": "vite build --mode probe && node scripts/bundle-size.mjs dist-probe",
     "size": "node scripts/bundle-size.mjs dist/assets",
-    "probe:live": "node scripts/probe-live.mjs basic",
+    "probe:live": "node scripts/probe-live.mjs basic host",
     "probe:live:connected": "node scripts/probe-live.mjs connected live pending",
     "probe:live:pack": "node scripts/probe-live.mjs --pack basic"
   },
