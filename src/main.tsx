@@ -23,6 +23,8 @@ void host
   .catch((): ThemeName => 'light')
   .then((theme) => {
     applyTheme(theme);
+    // Live probes read this mark to measure host-theme latency before the first frame (AC-1.6, A9).
+    performance.mark('sl:theme-applied');
     createRoot(root, {
       onCaughtError: (error) => {
         logRenderError(error);
