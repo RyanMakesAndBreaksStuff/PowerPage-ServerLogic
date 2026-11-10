@@ -518,13 +518,26 @@
       }
     },
     {
-      "name": "held: the save is pending",
+      "name": "held: close guard taken",
       "calls": "{{tool}}",
-      "channel": "filesystem:save-file",
+      "channel": "tool-window:prevent-close",
       "since": "{{held}}",
       "waitFor": {
         "timeoutMs": 5000
       },
+      "expect": {
+        "length": 1
+      }
+    },
+    {
+      "name": "held: let the save call start",
+      "sleep": 500
+    },
+    {
+      "name": "held: the save is pending",
+      "calls": "{{tool}}",
+      "channel": "filesystem:save-file",
+      "since": "{{held}}",
       "expect": {
         "path": "0.outcome",
         "equals": "pending"

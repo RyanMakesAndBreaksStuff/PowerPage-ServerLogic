@@ -405,7 +405,10 @@ function scanCanned(): Scenario {
       { name: 'Markdown save takes 3 s', intercept: TOOL, channel: 'filesystem:save-file', times: 1, action: { kind: 'delay-then-respond', ms: 3000, value: 'C:/probe-out/report.md' } },
       markCalls('held'),
       ...openExport('held', 'Markdown'),
-      { name: 'held: the save is pending', calls: TOOL, channel: 'filesystem:save-file', since: '{{held}}', waitFor: { timeoutMs: 5000 }, expect: { path: '0.outcome', equals: 'pending' } },
+      // The tool's waitFor counts settled calls only, so wait on the close guard (it settles before the save starts), then read the save without waiting.
+      { name: 'held: close guard taken', calls: TOOL, channel: 'tool-window:prevent-close', since: '{{held}}', waitFor: { timeoutMs: 5000 }, expect: { length: 1 } },
+      { name: 'held: let the save call start', sleep: 500 },
+      { name: 'held: the save is pending', calls: TOOL, channel: 'filesystem:save-file', since: '{{held}}', expect: { path: '0.outcome', equals: 'pending' } },
       { name: 'held: close guard still held', calls: TOOL, channel: 'tool-window:release-prevent-close', since: '{{held}}', expect: { length: 0 } },
       { name: 'held: close guard released after the save', calls: TOOL, channel: 'tool-window:release-prevent-close', since: '{{held}}', waitFor: { timeoutMs: 8000 }, expect: { length: 1 } },
       ...retrievalOnlyGuard('c0'),
