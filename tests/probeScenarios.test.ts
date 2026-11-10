@@ -360,7 +360,7 @@ function siteListFailures(): Scenario {
     );
   }
   steps.push(...retrievalOnlyGuard('c0'));
-  return { name: 'Site list host failures map to plain-language messages (A3; red until hostErrors reads message text)', vars: { toolPath: TOOL_PATH }, steps };
+  return { name: 'Site list host failures map to plain-language messages (A3)', vars: { toolPath: TOOL_PATH }, steps };
 }
 
 function scanCanned(): Scenario {
@@ -454,7 +454,7 @@ describe('live probe scenarios', () => {
   it('connected/scan-scale', async () => {
     await expect(scenarioJson(scanScale())).toMatchFileSnapshot('../probes/generated/connected/scan-scale.json');
   });
-  it('pending/site-list-failures', async () => {
-    await expect(scenarioJson(siteListFailures())).toMatchFileSnapshot('../probes/generated/pending/site-list-failures.json');
+  it('connected/site-list-failures', async () => {
+    await expect(scenarioJson(siteListFailures())).toMatchFileSnapshot('../probes/generated/connected/site-list-failures.json');
   });
 });

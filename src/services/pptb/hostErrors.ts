@@ -17,11 +17,50 @@ export function errorName(error: unknown): string {
   return error instanceof Error ? error.name : 'NonError';
 }
 
-/** PPTB's error object carries a numeric `status` (error-handling docs); anything else reads as no status. */
+/**
+ * No numeric status crosses Electron IPC, so a PPTB read failure reaches the tool as message text only:
+ * `Error invoking remote method '<channel>': Error: Dataverse <op> failed: <detail>`. PPTB's
+ * dataverseManager writes the detail as `<0x code>: <message>` when Dataverse sent an error body,
+ * `HTTP <n>` when it did not, `Request failed: <reason>` when the request never got a response, or a
+ * sign-in message when no token could be had. Each pattern only matches at the start of a `: ` segment.
+ */
+const SEGMENT = '(?:^|: )';
+const DATAVERSE_CODE = new RegExp(`${SEGMENT}(0x[0-9a-f]{8}): `, 'i');
+const HTTP_STATUS = new RegExp(`${SEGMENT}HTTP (\\d{3})\\b`);
+const SIGN_IN = new RegExp(
+  `${SEGMENT}(?:Authentication expired for connection |No access token found for |Token refresh failed for |Client secret authentication failed for )`,
+);
+const TRANSPORT = new RegExp(`${SEGMENT}Request failed: `);
+
+/** Dataverse error codes that stand for an HTTP status (Learn: "Web service error codes", "Service protection API limits"). */
+const DATAVERSE_CODE_STATUS: Readonly<Record<string, number>> = {
+  '0x80040220': 403, // PrivilegeDenied
+  '0x80040217': 404, // ObjectDoesNotExist
+  '0x80060888': 404, // Resource not found for the segment
+  '0x80072321': 429, // service protection: combined execution time
+  '0x80072322': 429, // service protection: number of requests
+  '0x80072326': 429, // service protection: concurrent requests
+  '0x8005f103': 429, // Throttling
+};
+
+function messageOf(error: unknown): string {
+  return isRecord(error) && typeof error.message === 'string' ? error.message : '';
+}
+
+function statusFromMessage(message: string): number | null {
+  const code = DATAVERSE_CODE.exec(message)?.[1];
+  if (code !== undefined) return DATAVERSE_CODE_STATUS[code.toLowerCase()] ?? null;
+  const http = HTTP_STATUS.exec(message)?.[1];
+  if (http !== undefined) return Number(http);
+  return SIGN_IN.test(message) ? 401 : null;
+}
+
+/** A numeric `status` on the error (PPTB error-handling docs) wins; otherwise the status PPTB's message text names. */
 export function statusOf(error: unknown): number | null {
   if (!isRecord(error)) return null;
   const status = error.status;
-  return typeof status === 'number' && Number.isInteger(status) ? status : null;
+  if (typeof status === 'number' && Number.isInteger(status)) return status;
+  return statusFromMessage(messageOf(error));
 }
 
 /** Technical detail goes to the console by error name and status only: never a message, body, URL or token. */
@@ -49,9 +88,10 @@ export function toHostReadError(label: string, error: unknown): HostReadError {
   if (error instanceof HostReadError) return error;
   logHostFailure(label, error);
   const status = statusOf(error);
-  // Only the platform's own network exception is a confirmed transport loss. PPTB's IPC errors are
-  // probably plain objects (live gate RG-002); a no-status failure stays local until S2 records a narrower shape.
-  const transport = error instanceof DOMException && error.name === 'NetworkError';
+  // A confirmed transport loss (AC-7.10) is the platform's own network exception or PPTB's `Request failed:`,
+  // which it raises only when the request got no response. Any other no-status failure stays local.
+  const transport =
+    (error instanceof DOMException && error.name === 'NetworkError') || TRANSPORT.test(messageOf(error));
   return new HostReadError(messageForStatus(status), status, transport);
 }
 

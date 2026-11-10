@@ -35,7 +35,7 @@ const ROWS = [
   { observation: 'Explicit 403 denial', steps: [['live/s2-restricted.json', '403 denial is rejected'], ['live/s2-restricted.json', '403 host call failed']] },
   {
     observation: 'Network-loss and expired sign-in rejection shapes',
-    steps: [['pending/site-list-failures.json', 'network: no host error text on screen'], ['pending/site-list-failures.json', 'expired sign-in: no host error text on screen']],
+    steps: [['connected/site-list-failures.json', 'network: no host error text on screen'], ['connected/site-list-failures.json', 'expired sign-in: no host error text on screen']],
     note: 'injected host faults; a real network drop and token expiry stay manual',
   },
   { observation: 'Retrieval only at runtime', steps: [['live/s2-dev.json', 'dataverse.execute only runs InitializeFileBlocksDownload and DownloadBlock'], ['connected/scan-canned.json', 'dataverse.execute only runs InitializeFileBlocksDownload and DownloadBlock']] },

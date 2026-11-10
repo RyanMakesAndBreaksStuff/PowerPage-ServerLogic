@@ -1,5 +1,5 @@
 {
-  "name": "Site list host failures map to plain-language messages (A3; red until hostErrors reads message text)",
+  "name": "Site list host failures map to plain-language messages (A3)",
   "vars": {
     "toolPath": "C:/Users/RyanDev/source/repos/Server Logic"
   },

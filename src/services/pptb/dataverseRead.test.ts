@@ -41,6 +41,39 @@ describe('hostErrors', () => {
     expect(statusOf({ status: '404' })).toBeNull();
   });
 
+  // No numeric status crosses Electron IPC: the renderer gets PPTB's message text, wrapped by the IPC layer.
+  const ipc = (text: string): Error =>
+    new Error(`Error invoking remote method 'dataverse.queryData': Error: Dataverse queryData failed: ${text}`);
+
+  it.each([
+    ['HTTP 401', 401],
+    ['HTTP 503: Service Unavailable', 503],
+    ['0x80040220: Principal user (Id=x) is missing prvReadmspp_website privilege.', 403],
+    ['0x80040217: The specified object was not found.', 404],
+    ["0x80060888: Resource not found for the segment 'powerpagesites'.", 404],
+    ['0x80072322: Number of requests exceeded the limit of 6000 over time window of 300 seconds.', 429],
+    ["Authentication expired for connection 'Dev'. Please reconnect to continue.", 401],
+    ["No access token found for 'Dev'. Please reconnect to the environment.", 401],
+    ["Token refresh failed for 'Dev'. Please sign in again.", 401],
+    ["Client secret authentication failed for 'Dev'. Please verify your credentials.", 401],
+  ])('reads the status from PPTB message text: %s', (text, status) => {
+    expect(statusOf(ipc(text))).toBe(status);
+    expect(statusOf(new Error(text))).toBe(status);
+    expect(toHostReadError('queryData', ipc(text))).toMatchObject({ status, message: messageForStatus(status) });
+  });
+
+  it('leaves unknown codes and text mid-sentence unclassified', () => {
+    expect(statusOf(ipc('0x80040265: Some other failure.'))).toBeNull();
+    expect(statusOf(new Error('see HTTP 404 docs'))).toBeNull();
+    expect(statusOf({ message: 42 })).toBeNull();
+  });
+
+  it('treats PPTB "Request failed:" as a confirmed transport loss', () => {
+    const lost = toHostReadError('queryData', ipc('Request failed: getaddrinfo ENOTFOUND org.example'));
+    expect(lost).toMatchObject({ status: null, transport: true, message: "Couldn't read data from Dataverse." });
+    expect(toHostReadError('queryData', ipc('HTTP 401'))).toMatchObject({ transport: false });
+  });
+
   it('retries only 429 and 5xx', () => {
     expect([429, 500, 502, 503, 599].map(isRetryable)).toEqual([true, true, true, true, true]);
     expect([null, 400, 401, 403, 404, 600].map(isRetryable)).toEqual([
