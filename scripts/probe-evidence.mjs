@@ -30,8 +30,8 @@ const ROWS = [
       ['live/s2-restricted.json', 'environment variable: denied'],
     ],
   },
-  // s2-dev.json has no secret step until the Dev environment has a Key Vault-backed secret variable; this row reads "not run".
-  { observation: 'Secret environment variable', steps: [['live/s2-dev.json', 'environment variable: secret']] },
+  // Owner decision 2026-11-10: not covered. Add an s2-dev step and drop `status` once Dev has a Key Vault-backed secret variable.
+  { observation: 'Secret environment variable', steps: [], status: 'not covered', note: 'the Dev environment has no Key Vault-backed secret environment variable' },
   { observation: 'Explicit 403 denial', steps: [['live/s2-restricted.json', '403 denial is rejected'], ['live/s2-restricted.json', '403 host call failed']] },
   {
     observation: 'Network-loss and expired sign-in rejection shapes',
@@ -88,7 +88,11 @@ const block = [
   '',
   '| Observation | Status | Proved by |',
   '| --- | --- | --- |',
-  ...ROWS.map((row) => `| ${row.observation} | ${status(row.steps)} | ${row.steps.map(([file, step]) => `\`${file}\`: ${step}`).join('; ')}${row.note ? ` (${row.note})` : ''} |`),
+  ...ROWS.map((row) => {
+    const proof = row.steps.map(([file, step]) => `\`${file}\`: ${step}`).join('; ');
+    const note = row.note ? (proof === '' ? row.note : ` (${row.note})`) : '';
+    return `| ${row.observation} | ${row.status ?? status(row.steps)} | ${proof}${note} |`;
+  }),
   END,
 ].join('\n');
 

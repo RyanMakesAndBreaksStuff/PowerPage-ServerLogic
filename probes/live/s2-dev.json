@@ -31,7 +31,8 @@
     { "name": "environment variable: current", "eval": "await window.s2Environment('current', '{{envSchemaCurrent}}'); return window.s2Evidence.at(-1)", "expect": { "path": "outcome", "equals": "returned" }, "report": true },
     { "name": "environment variable: default", "eval": "await window.s2Environment('default', '{{envSchemaDefault}}'); return window.s2Evidence.at(-1)", "expect": { "path": "outcome", "equals": "returned" }, "report": true },
     { "name": "environment variable: missing", "eval": "await window.s2Environment('missing', '{{envSchemaMissing}}'); return window.s2Evidence.at(-1)", "expect": { "path": "outcome", "equals": "returned" }, "report": true },
-    { "name": "populated handler download matches", "eval": "await window.s2DownloadKnown('{{recordId}}'); return window.s2Evidence.at(-1)", "timeoutMs": 120000, "expect": { "all": [{ "path": "bytesMatch", "equals": true }, { "path": "textMatch", "equals": true }] } },
+    { "name": "start the populated handler download (attended: pick the local copy)", "eval": "(window.__s2Download = null, window.s2DownloadKnown('{{recordId}}').then(() => { window.__s2Download = window.s2Evidence.at(-1); }), true)", "expect": { "equals": true } },
+    { "name": "populated handler download matches", "eval": "window.__s2Download", "waitFor": { "timeoutMs": 600000, "intervalMs": 2000 }, "expect":{ "all": [{ "path": "bytesMatch", "equals": true }, { "path": "textMatch", "equals": true }] } },
     { "name": "dataverse.execute only runs InitializeFileBlocksDownload and DownloadBlock", "calls": "{{tool}}", "channel": "dataverse.execute", "since": "{{c0}}", "argsExcludes": ["InitializeFileBlocksDownload", "DownloadBlock"], "expect": { "length": 0 } }
   ]
 }
