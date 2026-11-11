@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react';
-import { checkStatusBadge } from '@/components/checkStatusBadge';
+import { checkStatusBadge } from './checkStatusBadge';
 import { Icon } from '@/components/Icon';
 import type { IconName } from '@/components/icons';
 import { StatusBadge } from '@/components/StatusBadge';

@@ -1,5 +1,5 @@
 import type { CheckStatus } from '@/types/inspector';
-import type { StatusBadgeProps } from './StatusBadge';
+import type { StatusBadgeProps } from '@/components/StatusBadge';
 
 export function checkStatusBadge(status: CheckStatus): StatusBadgeProps {
   switch (status) {
