@@ -11,7 +11,7 @@ import { ScanAbandonedError } from '@/features/inspector/scan/scan';
 import { connectionKey } from '@/app/useActiveConnection';
 import { HostReadError } from '@/services/pptb/host.types';
 import type { Connection, FileFilter, Notice, PptbHost } from '@/services/pptb/host.types';
-import { errorName, HostCallError } from '@/services/pptb/hostErrors';
+import { errorName } from '@/services/pptb/hostErrors';
 import type { ReviewKey, SiteRef } from '@/types/inspector';
 import type { ReportFormat, ReportOptions } from '@/types/report';
 import type { InspectorDeps } from './inspectorDeps';
@@ -44,7 +44,7 @@ const EXPORT_FILTERS = {
   pdf: { name: 'PDF', extensions: ['pdf'] },
 } as const satisfies Record<ReportFormat, FileFilter>;
 
-/** E-11 B: how long a build may run before the user is told it is slow. */
+/** E-11 B: a build that took longer than this is reported as slow once it returns. */
 export const EXPORT_WATCHDOG_MS = 5_000;
 
 /** Freezes `value` and everything reachable from it, and returns it with its type unchanged. */
@@ -106,7 +106,8 @@ export function createInspectorStore(
   /**
    * Publishes a patch that replaces what a report would capture (a generation bump), and is the one place that
    * cancels an export for it: an idle or building job is removed, a saving job is kept with its dialog closed
-   * (the host owns the save, AC-9.8). If the dialog was open it counts a stale close and toasts once.
+   * (the host owns the save, AC-9.8). If the dialog was open it counts a stale close; only a job that is really
+   * cancelled toasts, so a saving job closes silently and its own outcome toast follows.
    */
   const invalidateExport = (patch: Partial<InspectorSnapshot>): void => {
     const job = snapshot.exportJob;
@@ -114,13 +115,14 @@ export function createInspectorStore(
       publish(patch);
       return;
     }
-    const exportJob = job.phase === 'saving' ? { ...job, open: false } : null;
+    const saving = job.phase === 'saving';
+    const exportJob = saving ? { ...job, open: false } : null;
     if (!job.open) {
       publish({ ...patch, exportJob });
       return;
     }
     publish({ ...patch, exportJob, exportStaleCloses: snapshot.exportStaleCloses + 1 });
-    notify({ title: EXPORT_CANCELLED_TITLE, body: EXPORT_CANCELLED_BODY, type: 'info' });
+    if (!saving) notify({ title: EXPORT_CANCELLED_TITLE, body: EXPORT_CANCELLED_BODY, type: 'info' });
   };
 
   /** A job is identified by its captured result, which survives the `open: false` and phase copies. */
@@ -130,25 +132,24 @@ export function createInspectorStore(
     const { result, options } = job;
     let name = 'the report'; // Stands in for the filename until it is built, so a failure there still has a title.
     let saving = false;
-    const watchdog = setTimeout(() => {
-      if (isCurrent(job) && snapshot.exportJob?.phase === 'building') {
-        notify({ title: EXPORT_SLOW_TITLE, body: EXPORT_SLOW_BODY, type: 'warning' });
-      }
-    }, deps.exportWatchdogMs ?? EXPORT_WATCHDOG_MS);
     host.preventClose().catch(ignoreGuardFailure);
     try {
       name = deps.reportFileNameBeforeBuild(result, options);
       // Lets React paint the busy state before a synchronous build blocks the thread.
       await deps.yieldToHost();
       if (!isCurrent(job)) return;
-      const model = deps.buildReportModel(result, options, deps.now());
+      const startedAt = deps.now();
+      const model = deps.buildReportModel(result, options, startedAt);
       const content =
         options.format === 'markdown' ? deps.renderMarkdown(model) : deps.renderPdf(model);
+      // The build blocks the thread, so no timer can fire during it (N4): it is timed and reported once it returns.
+      const slow =
+        deps.now().getTime() - startedAt.getTime() > (deps.exportWatchdogMs ?? EXPORT_WATCHDOG_MS);
       // Lets a host answer that arrived during the build invalidate the job before the handoff (E-04 B).
       await deps.yieldToHost();
       const current = snapshot.exportJob;
       if (current?.result !== result) return;
-      clearTimeout(watchdog);
+      if (slow) notify({ title: EXPORT_SLOW_TITLE, body: EXPORT_SLOW_BODY, type: 'warning' });
       saving = true;
       publish({ exportJob: { ...current, phase: 'saving' } });
       const saved = await host.saveFile(name, content, [EXPORT_FILTERS[options.format]]);
@@ -156,21 +157,16 @@ export function createInspectorStore(
       publish({ exportJob: null });
       if (saved.status === 'saved') notify({ title: `${name} exported`, body: '', type: 'success' });
     } catch (error: unknown) {
+      // Only the error's name: messages can carry bodies, URLs or tokens, and the toast shows a plain reason.
       console.error(errorName(error));
       if (!isCurrent(job)) return;
       publish({ exportJob: null });
       notify({
         title: `Couldn't save ${name}`,
-        body:
-          error instanceof HostCallError
-            ? error.message
-            : saving
-              ? SAVE_FAILED_BODY
-              : BUILD_FAILED_BODY,
+        body: saving ? SAVE_FAILED_BODY : BUILD_FAILED_BODY,
         type: 'error',
       });
     } finally {
-      clearTimeout(watchdog);
       host.releasePreventClose().catch(ignoreGuardFailure);
     }
   }
@@ -355,22 +351,18 @@ export function createInspectorStore(
     },
 
     openExport: () => {
-      const { scan, marks, fileId, exportJob, generation } = snapshot;
+      const { scan, marks, fileId, exportJob } = snapshot;
       if (scan.status !== 'done' || exportJob !== null) return;
       const result = evaluateSite(scan.facts, marks);
       if (result.files.length === 0) return;
-      const selectedFileId = result.files.some((candidate) => candidate.fileId === fileId)
-        ? fileId
-        : null;
+      const selected = result.files.some((candidate) => candidate.fileId === fileId) ? fileId : null;
       publish({
         exportJob: {
           result: freeze(structuredClone(result)),
-          selectedFileId,
-          generation,
           options: {
             ...EXPORT_DEFAULTS,
-            scope: selectedFileId === null ? 'site' : 'file',
-            fileId: selectedFileId,
+            scope: selected === null ? 'site' : 'file',
+            fileId: selected,
           },
           phase: 'idle',
           open: true,
@@ -388,7 +380,7 @@ export function createInspectorStore(
           options: {
             ...job.options,
             ...rest,
-            scope: scope === 'file' && job.selectedFileId === null ? job.options.scope : scope,
+            scope: scope === 'file' && job.options.fileId === null ? job.options.scope : scope,
           },
         },
       });

@@ -25,7 +25,10 @@ export type InspectorDeps = {
    * (E-04 B commits it synchronously) has invalidated the job before the handoff. Not a timeout.
    */
   yieldToHost: () => Promise<void>;
-  /** E-11 B: a build still running this long after submit is reported with a warning toast. Default 5000. */
+  /**
+   * E-11 B, N4: a build that took longer than this many ms is reported with a warning toast once it returns
+   * (the build is synchronous, so nothing can fire during it). Default 5000.
+   */
   exportWatchdogMs?: number;
 };
 

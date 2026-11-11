@@ -43,11 +43,7 @@ export type ExportPhase = 'idle' | 'building' | 'saving';
 export type ExportJob = {
   /** Deep-frozen structured clone of `evaluateSite(facts, marks)` at open. */
   readonly result: SiteResult;
-  /** Null when the selected file id is not in `result.files`. */
-  readonly selectedFileId: string | null;
-  /** `snapshot.generation` at open (E-02). */
-  readonly generation: number;
-  /** `fileId` mirrors `selectedFileId`. */
+  /** `fileId` is the file selected at open, or null when it is not in `result.files`. It never changes. */
   readonly options: ReportOptions;
   readonly phase: ExportPhase;
   /** False once the user closed the dialog or the results were cleared; the job may still be saving (E-07 B). */

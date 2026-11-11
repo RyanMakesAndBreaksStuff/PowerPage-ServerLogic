@@ -27,7 +27,7 @@ export function ExportDialog({ job }: { job: ExportJob }): ReactElement {
   const idle = phase === 'idle';
   const busyReason = idle ? null : EXPORT_BUSY_REASON;
   const { site } = job.result.facts;
-  const selected = job.result.files.find((candidate) => candidate.fileId === job.selectedFileId);
+  const selected = job.result.files.find((candidate) => candidate.fileId === options.fileId);
   const context = selected === undefined ? site.name : `${site.name} · ${selected.name}`;
 
   return (
@@ -54,7 +54,7 @@ export function ExportDialog({ job }: { job: ExportJob }): ReactElement {
             {
               value: 'file',
               label: 'This file',
-              disabledReason: busyReason ?? (job.selectedFileId === null ? SELECT_FILE_REASON : null),
+              disabledReason: busyReason ?? (options.fileId === null ? SELECT_FILE_REASON : null),
             },
             { value: 'site', label: 'Site summary', disabledReason: busyReason },
           ]}
