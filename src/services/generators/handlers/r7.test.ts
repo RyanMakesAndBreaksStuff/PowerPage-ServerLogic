@@ -257,7 +257,7 @@ describe('generateR7', () => {
 
   it('reads the five settings only through Get', () => {
     const { text } = generateR7();
-    expect(text).toContain(requireSettingsCode(SETTINGS, '  '));
+    expect(text).toContain(requireSettingsCode(SETTINGS, '    '));
     let stripped = text;
     for (const name of SETTINGS) {
       stripped = stripped

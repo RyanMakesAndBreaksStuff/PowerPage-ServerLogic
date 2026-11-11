@@ -81,7 +81,7 @@ describe('generateR9', () => {
     const validation = text.indexOf(
       validationFailureReturn([{ field: 'body', message: 'Body must be a JSON object.' }], '    '),
     );
-    const setting = text.indexOf(requireSettingsCode(['CLOUD_FLOW_ID'], '  '));
+    const setting = text.indexOf(requireSettingsCode(['CLOUD_FLOW_ID'], '    '));
     const call = text.indexOf('await Server.Connector.CloudFlow.TriggerAsync(');
     expect(validation).toBeGreaterThanOrEqual(0);
     expect(setting).toBeGreaterThan(validation);
