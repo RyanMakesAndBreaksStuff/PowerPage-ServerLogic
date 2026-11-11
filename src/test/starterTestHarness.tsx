@@ -17,12 +17,13 @@ import { createFakeHost } from '@/services/pptb/fakeHost';
 import type { FakeHostInit } from '@/services/pptb/fakeHost';
 import type { PptbHost } from '@/services/pptb/host.types';
 import type { View } from '@/types/http';
+import { renderWithHost } from '@/test/renderWithHost';
 
 type Session = ReturnType<typeof useStarterSession>;
 
 export function renderStarter(
   ui: ReactElement,
-  options: { deps?: StarterDeps; host?: FakeHostInit } = {},
+  options: { deps?: StarterDeps; host?: FakeHostInit; view?: View } = {},
 ) {
   const host = createFakeHost(options.host);
   const user = userEvent.setup();
@@ -34,7 +35,7 @@ export function renderStarter(
   render(
     <HostContext value={host}>
       <NotifyProvider>
-        <ViewContext value={['starter', setView]}>
+        <ViewContext value={[options.view ?? 'starter', setView]}>
           <StarterSessionProvider deps={options.deps ?? FAKE_STARTER_DEPS}>
             {ui}
             {/* A render function, not a component, so the capture stays out of the app's lint rules. */}
@@ -66,13 +67,7 @@ export function renderStarter(
  * deps, the real generators), with no view context. For tests that build their own host.
  */
 export function renderInStarterSession(host: PptbHost, ui: ReactElement): RenderResult {
-  return render(
-    <HostContext value={host}>
-      <NotifyProvider>
-        <StarterSessionProvider>{ui}</StarterSessionProvider>
-      </NotifyProvider>
-    </HostContext>,
-  );
+  return renderWithHost(host, <StarterSessionProvider>{ui}</StarterSessionProvider>);
 }
 
 /** Mounts `ui` under the host and notification providers with a fixed Starter session value. */
@@ -81,13 +76,7 @@ export function renderWithStarterSession(
   session: Session,
   ui: ReactElement,
 ): RenderResult {
-  return render(
-    <HostContext value={host}>
-      <NotifyProvider>
-        <StarterSessionContext value={session}>{ui}</StarterSessionContext>
-      </NotifyProvider>
-    </HostContext>,
-  );
+  return renderWithHost(host, <StarterSessionContext value={session}>{ui}</StarterSessionContext>);
 }
 
 /** The CodeMirror view behind a code pane, found by its textbox name. */

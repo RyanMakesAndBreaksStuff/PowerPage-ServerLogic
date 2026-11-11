@@ -76,12 +76,9 @@ function ModalDialog({
       const target = items.find((el) => !el.hasAttribute('data-modal-close')) ?? items[0] ?? dialog;
       target.focus();
     }
-    const listener = (event: KeyboardEvent): void => {
-      handleKey(event);
-    };
-    document.addEventListener('keydown', listener);
+    document.addEventListener('keydown', handleKey);
     return () => {
-      document.removeEventListener('keydown', listener);
+      document.removeEventListener('keydown', handleKey);
       opener?.focus();
     };
   }, []);

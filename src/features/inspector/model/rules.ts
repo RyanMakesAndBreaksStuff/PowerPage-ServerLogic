@@ -1,4 +1,6 @@
+import type { RingState } from '@/lib/ringGeometry';
 import type {
+  CheckStatus,
   Counts,
   FileResult,
   Finding,
@@ -55,6 +57,14 @@ export function countChecks(findings: readonly Finding[]): Counts {
   const U = findings.filter((finding) => finding.status === 'not-scanned').length;
   return { C, V, M, U, T: findings.length, K: C + V };
 }
+
+// Configured and Reviewed both count toward K (AC-8.1); Not scanned is its own grey segment.
+export const RING_STATE = {
+  configured: 'done',
+  reviewed: 'done',
+  'needs-review': 'review',
+  'not-scanned': 'not-scanned',
+} as const satisfies Record<CheckStatus, RingState>;
 
 export function ringLegend(counts: Counts): string {
   return `${String(counts.C)} configured${counts.V > 0 ? ` · ${String(counts.V)} reviewed` : ''} · ${String(counts.M)} review${counts.U > 0 ? ` · ${String(counts.U)} not scanned` : ''}`;

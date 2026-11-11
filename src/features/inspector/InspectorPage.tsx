@@ -242,8 +242,6 @@ function PageBody({
           result={state.result}
           headingRef={headingRef}
           onRescan={rescan}
-          onExport={state.result.files.length === 0 ? null : session.openExport}
-          exportBusy={session.exportJob !== null}
         />
       );
     default: {

@@ -1,14 +1,8 @@
-import { readFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
+import { readGolden } from '@/test/readGolden';
 import type { ClientLanguage, HttpMethod } from '@/types/http';
 import type { RecipeId } from '@/types/recipe';
 import { generateClient } from './client';
-
-// fileURLToPath: a `new URL('./x', import.meta.url)` whose path contains %20 fails readFileSync here.
-const golden = (name: string): string =>
-  readFileSync(join(dirname(fileURLToPath(import.meta.url)), '__golden__', name), 'utf8');
 
 const expectGolden = (
   name: string,
@@ -18,7 +12,7 @@ const expectGolden = (
   language: ClientLanguage,
   slug: string,
 ): void => {
-  expect(generateClient({ slug, recipe, fn, method, language })).toBe(golden(name));
+  expect(generateClient({ slug, recipe, fn, method, language })).toBe(readGolden(import.meta.url, name));
 };
 
 describe('fetch', () => {

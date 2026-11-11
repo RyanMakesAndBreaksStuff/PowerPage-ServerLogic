@@ -1,8 +1,8 @@
 // @vitest-environment node
-import { readFileSync } from 'node:fs';
 import { runInNewContext } from 'node:vm';
 import { parse } from 'acorn';
 import { describe, expect, it, vi } from 'vitest';
+import { readGolden } from '@/test/readGolden';
 import type { RecipeId } from '@/types/recipe';
 import { generateDemoPage } from './demoPages';
 
@@ -14,10 +14,6 @@ const HOSTILE_SLUGS = [
   "a'b&c",
   '../x',
 ] as const;
-
-function readGolden(name: string): string {
-  return readFileSync(new URL(`./__golden__/${name}`, import.meta.url), 'utf8');
-}
 
 function requirePage(id: 'R4' | 'R5' | 'R6', slug = SLUG): string {
   const page = generateDemoPage(id, slug);
@@ -161,8 +157,8 @@ describe('generateDemoPage', () => {
   });
 
   it('hostile slugs do not break out', () => {
-    const goldenScripts = countOf(readGolden('R6.page.html.txt'), '<script');
-    const goldenCloses = countOf(readGolden('R6.page.html.txt'), '</script>');
+    const goldenScripts = countOf(readGolden(import.meta.url, 'R6.page.html.txt'), '<script');
+    const goldenCloses = countOf(readGolden(import.meta.url, 'R6.page.html.txt'), '</script>');
     for (const slug of HOSTILE_SLUGS) {
       for (const id of ['R4', 'R5', 'R6'] as const) {
         const page = requirePage(id, slug);
@@ -179,7 +175,7 @@ describe('generateDemoPage', () => {
 describe('R6 demo page', () => {
   it('R6 page equals the golden for slug customer-summary', () => {
     const page = requirePage('R6');
-    expect(page).toBe(readGolden('R6.page.html.txt'));
+    expect(page).toBe(readGolden(import.meta.url, 'R6.page.html.txt'));
   });
 
   it('endpoint appears as /_api/serverlogics/customer-summary', () => {
@@ -217,7 +213,7 @@ describe('R6 demo page', () => {
 
 describe('R4 demo page', () => {
   it('R4 page equals the golden', () => {
-    expect(requirePage('R4')).toBe(readGolden('R4.page.html.txt'));
+    expect(requirePage('R4')).toBe(readGolden(import.meta.url, 'R4.page.html.txt'));
   });
 
   it('every record value is escaped before insertion', () => {
@@ -291,7 +287,7 @@ describe('R4 demo page', () => {
 
 describe('R5 demo page', () => {
   it('R5 page equals the golden', () => {
-    expect(requirePage('R5')).toBe(readGolden('R5.page.html.txt'));
+    expect(requirePage('R5')).toBe(readGolden(import.meta.url, 'R5.page.html.txt'));
   });
 
   it('session parse is bounded, validated and falls back to empty', () => {

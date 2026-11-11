@@ -1,4 +1,4 @@
-/** Toast and reason texts for the export job (P5.7). The session store and the Export dialog import them. */
+/** Toast and reason texts for the export job. The session store and the Export dialog import them. */
 
 /** Info toast when the results change under an open dialog while idle or building. A saving job is not cancelled (AC-9.8). */
 export const EXPORT_CANCELLED_TITLE = 'Results changed, so the export was cancelled.';
@@ -13,5 +13,5 @@ export const SAVE_FAILED_BODY = "The file couldn't be written.";
 export const EXPORT_SLOW_TITLE = 'The report took longer than expected to build.';
 export const EXPORT_SLOW_BODY = 'It has finished building. The save dialog opens next.';
 
-/** Reason on every dialog control while a job is building or saving (Sub-slice D). */
+/** Reason on every dialog control while a job is building or saving. */
 export const EXPORT_BUSY_REASON = 'Wait for the export to finish, or close this dialog.';

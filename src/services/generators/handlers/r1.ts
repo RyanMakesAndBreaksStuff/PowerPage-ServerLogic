@@ -1,6 +1,6 @@
 import type { GeneratedHandler } from '@/types/recipe';
 import { getRecipe } from '@/services/catalogue/recipes';
-import { TO_RESULT, failureReturn, headerComment, logLine } from './snippets';
+import { TO_RESULT, failureReturn, headerComment, logLine, singleHighlight } from './snippets';
 
 const FAILURE = "Couldn't read contacts.";
 const OPERATION = 'R1 get';
@@ -48,7 +48,5 @@ export function generateR1(): GeneratedHandler {
   ];
 
   const text = [...lines, ''].join('\n');
-  const highlight = text.split('\n').indexOf(readLine);
-  if (highlight < 0) throw new Error('R1 highlight line missing');
-  return { text, highlightLines: [highlight + 1] };
+  return singleHighlight('R1', text, readLine);
 }

@@ -1,7 +1,7 @@
 import type { CheckId, CheckStatus, Counts } from '@/types/inspector';
 import type { ReportFormat, ReportScope } from '@/types/report';
 
-export type ReportLine = { readonly label: string; readonly text: string };
+type ReportLine = { readonly label: string; readonly text: string };
 export type ReportCheck = {
   readonly check: CheckId;
   readonly title: string;
@@ -14,10 +14,7 @@ export type ReportCheck = {
   readonly detail: readonly string[];
 };
 export type ReportRow = {
-  readonly fileId: string;
   readonly name: string;
-  readonly active: boolean;
-  readonly counts: Counts;
   readonly summary: string;
   readonly result: 'Ready' | 'Needs review' | 'Incomplete';
   readonly checks: readonly ReportCheck[];
@@ -27,7 +24,6 @@ export type ReportSection = {
   readonly check: CheckId;
   readonly title: string;
   readonly summary: string;
-  readonly reasons: readonly string[];
   readonly guidance: string;
   readonly questions: readonly string[];
   readonly detail: readonly string[];

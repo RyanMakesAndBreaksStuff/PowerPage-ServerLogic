@@ -1,6 +1,6 @@
-import { readFileSync } from 'node:fs';
 import { parse } from 'acorn';
 import { describe, expect, it } from 'vitest';
+import { readGolden } from '@/test/readGolden';
 import { runBrowserChecks } from '@/lib/code-analysis/browserChecks';
 import { detectConnectorUse, exportedFunctionNames } from '@/lib/code-analysis/structure';
 import { getRecipe } from '@/services/catalogue/recipes';
@@ -9,12 +9,6 @@ import { R5_DIFFERENCES, generateR5 } from './r5';
 
 /** Counted in the committed golden: the four `Server.Connector.` call lines (Decision 6). */
 const CONNECTOR_LINES = [42, 68, 94, 122] as const;
-
-const readGolden = (): string => {
-  // A string literal here is rewritten by Vite to an http asset URL, which readFileSync rejects.
-  const relative = './__golden__/R5.js.txt';
-  return readFileSync(new URL(relative, import.meta.url), 'utf8');
-};
 
 /**
  * A logger call may be a fixed JSON string, then only StatusCode, ReasonPhrase, `<var>.name`
@@ -48,7 +42,7 @@ const functionText = (text: string, name: 'get' | 'post' | 'put' | 'del'): strin
 describe('generateR5', () => {
   it('matches the golden file', () => {
     const text = generateR5().text;
-    expect(text).toBe(readGolden());
+    expect(text).toBe(readGolden(import.meta.url, 'R5.js.txt'));
     expect(text.startsWith(`${headerComment(getRecipe('R5'))}\n\n`)).toBe(true);
     expect(text.endsWith('\n')).toBe(true);
     expect(text.endsWith('\n\n')).toBe(false);

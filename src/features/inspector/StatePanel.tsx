@@ -3,7 +3,7 @@ import { Icon } from '@/components/Icon';
 import type { IconName } from '@/components/icons';
 import { Tile } from '@/components/Tile';
 
-export type StatePanelProps = {
+type StatePanelProps = {
   icon: IconName;
   title: string;
   /** The page moves focus here after Retry or Scan again, whose button hides or unmounts (see `InspectorPage`). */

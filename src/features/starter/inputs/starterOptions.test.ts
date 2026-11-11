@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { getRecipe, RECIPES } from '@/services/catalogue/recipes';
+import { getRecipe, methodEnabled, RECIPES } from '@/services/catalogue/recipes';
 import { HTTP_METHODS } from '@/types/http';
 import type { RecipeId } from '@/types/recipe';
 import {
@@ -10,8 +10,7 @@ import {
   LIQUID_BLOCKED_REASON,
   LIQUID_ONLY_REASON,
   languageOptions,
-  methodFilterOptions,
-  recipeSupportsMethod,
+  METHOD_FILTER_OPTIONS,
 } from './starterOptions';
 
 describe('starter option text', () => {
@@ -43,20 +42,20 @@ describe('visibleRecipes', () => {
   });
 });
 
-describe('methodFilterOptions (finding 10)', () => {
+describe('METHOD_FILTER_OPTIONS', () => {
   it('keeps every filter enabled and derives eligibility from exported functions', () => {
-    expect(methodFilterOptions().map(({ value, disabledReason }) => [value, disabledReason])).toEqual(
-      HTTP_METHODS.map((method) => [method, null]),
-    );
+    expect(
+      METHOD_FILTER_OPTIONS.map(({ value, disabledReason }) => [value, disabledReason ?? null]),
+    ).toEqual(HTTP_METHODS.map((method) => [method, null]));
     for (const method of HTTP_METHODS) {
       expect(
-        RECIPES.filter((recipe) => recipeSupportsMethod(recipe, method)).every(
+        RECIPES.filter((recipe) => methodEnabled(recipe, method)).every(
           (recipe) => recipe.id !== 'R8',
         ),
       ).toBe(true);
     }
-    expect(recipeSupportsMethod(getRecipe('R10'), 'PATCH')).toBe(true);
-    expect(recipeSupportsMethod(getRecipe('R8'), 'GET')).toBe(false);
+    expect(methodEnabled(getRecipe('R10'), 'PATCH')).toBe(true);
+    expect(methodEnabled(getRecipe('R8'), 'GET')).toBe(false);
   });
 });
 

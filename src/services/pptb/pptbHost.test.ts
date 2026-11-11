@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { HostReadError } from './host.types';
 import type { HostEvent, ODataQuery, PptbHost } from './host.types';
 import { HostCallError, isRecord } from './hostErrors';
-import { createPptbHost, isAllowedFileRequest, isFileAction } from './pptbHost';
+import { createPptbHost, isAllowedFileRequest } from './pptbHost';
 
 const BASE = 'https://org.crm.dynamics.com/api/data/v9.2';
 const GUID = '0f8fad5b-d9cb-469f-a165-70867728950e';
@@ -739,17 +739,17 @@ describe('retrieval-only guarantee', () => {
     expect(violations).toEqual(['dataverseAPI.create', 'dataverseAPI.update']);
   });
 
+  const download = { operationName: 'DownloadBlock', operationType: 'action', parameters: {} };
+
   it.each([
     ['InitializeFileBlocksDownload', true],
     ['DownloadBlock', true],
     ['CreateRecord', false],
     ['DeleteRecord', false],
     ['', false],
-  ])('isFileAction(%j) is %s', (name, expected) => {
-    expect(isFileAction(name)).toBe(expected);
+  ])('isAllowedFileRequest for operation name %j is %s', (name, expected) => {
+    expect(isAllowedFileRequest({ ...download, operationName: name })).toBe(expected);
   });
-
-  const download = { operationName: 'DownloadBlock', operationType: 'action', parameters: {} };
 
   it.each([
     ['an unbound DownloadBlock action', download, true],

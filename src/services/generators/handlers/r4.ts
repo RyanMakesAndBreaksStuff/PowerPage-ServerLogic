@@ -4,10 +4,13 @@ import {
   IS_GUID,
   TO_RESULT,
   failureReturn,
+  fieldErrorLiteral,
   headerComment,
+  lineNumbersMatching,
   logLine,
   validationFailureReturnFor,
 } from './snippets';
+import type { LearnDifference } from './snippets';
 
 // Arrow helpers stay out of exportedFunctionNames, which counts function declarations only.
 // Each Logger call stays inline so the operation name is a string literal.
@@ -25,7 +28,7 @@ const MSG = {
   body: 'Body must be a JSON object.',
 } as const;
 
-export const R4_DIFFERENCES: readonly { change: string; reason: string }[] = [
+export const R4_DIFFERENCES: readonly LearnDifference[] = [
   {
     change: 'Allowlist and GUID check',
     reason:
@@ -74,7 +77,7 @@ export const R4_DIFFERENCES: readonly { change: string; reason: string }[] = [
 ];
 
 function pushError(field: string, message: string, indent: string): string {
-  return `${indent}errors.push({ field: ${JSON.stringify(field)}, message: ${JSON.stringify(message)} });`;
+  return `${indent}errors.push(${fieldErrorLiteral(field, message)});`;
 }
 
 function successReturn(indent: string, extra?: string): string {
@@ -300,17 +303,11 @@ function handlerLines(): string[] {
   ];
 }
 
-function connectorHighlightLines(text: string): readonly number[] {
-  const highlights: number[] = [];
-  const lines = text.split('\n');
-  for (let index = 0; index < lines.length; index += 1) {
-    if (lines[index]?.includes('Server.Connector.') === true) highlights.push(index + 1);
-  }
-  return highlights;
-}
-
 export function generateR4(): GeneratedHandler {
   const text = `${handlerLines().join('\n')}\n`;
   if (text.includes('${')) throw new Error('Handler text contains a template placeholder');
-  return { text, highlightLines: connectorHighlightLines(text) };
+  return {
+    text,
+    highlightLines: lineNumbersMatching(text, (line) => line.includes('Server.Connector.')),
+  };
 }

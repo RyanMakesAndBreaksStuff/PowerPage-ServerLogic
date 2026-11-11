@@ -1,7 +1,7 @@
-export type MemberKind = 'method' | 'property';
-export type CallTiming = 'sync' | 'async'; // connectors only (corrections 7 and 19)
+type MemberKind = 'method' | 'property';
+type CallTiming = 'sync' | 'async'; // connectors only (corrections 7 and 19)
 export type ContextScope = 'both' | 'http' | 'liquid'; // Server.Context only (correction 13)
-export type SampleVariant = { readonly label: string; readonly code: string };
+type SampleVariant = { readonly label: string; readonly code: string };
 export type ObjectMember = {
   readonly name: string;
   readonly kind: MemberKind;

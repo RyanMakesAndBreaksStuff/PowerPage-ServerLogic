@@ -1,6 +1,6 @@
 // @vitest-environment node
-import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
+import { readGolden } from '@/test/readGolden';
 import { deriveStarter } from '@/session/deriveStarter';
 import { STARTER_DEPS } from '@/session/starterDeps';
 import { createStarterReducer, initialStarterState } from '@/session/starterReducer';
@@ -45,10 +45,6 @@ const R1_HEADINGS = [
 ];
 
 const R4_HEADINGS = [...R1_HEADINGS, 'Differences from Learn', 'Notes'];
-
-function readGolden(name: string): string {
-  return readFileSync(new URL(`./__golden__/${name}`, import.meta.url), 'utf8');
-}
 
 function headings(text: string): string[] {
   return text
@@ -128,15 +124,15 @@ function catalogueOutbound(recipeId: RecipeId): boolean {
 
 describe('buildReadme', () => {
   it('R1 README matches the golden', () => {
-    expect(buildReadme(inputFor('R1'))).toBe(readGolden('R1.README.md.txt'));
+    expect(buildReadme(inputFor('R1'))).toBe(readGolden(import.meta.url, 'R1.README.md.txt'));
   });
 
   it('R4 README matches the golden', () => {
-    expect(buildReadme(r4Reviewed())).toBe(readGolden('R4.README.md.txt'));
+    expect(buildReadme(r4Reviewed())).toBe(readGolden(import.meta.url, 'R4.README.md.txt'));
   });
 
   it('R8 README matches the golden', () => {
-    expect(buildReadme(inputFor('R8'))).toBe(readGolden('R8.README.md.txt'));
+    expect(buildReadme(inputFor('R8'))).toBe(readGolden(import.meta.url, 'R8.README.md.txt'));
   });
 
   it('sections appear in the specified order', () => {

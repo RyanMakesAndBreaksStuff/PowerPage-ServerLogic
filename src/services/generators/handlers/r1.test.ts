@@ -1,13 +1,13 @@
 // @vitest-environment node
-import { readFileSync } from 'node:fs';
 import { parse } from 'acorn';
 import { describe, expect, it } from 'vitest';
+import { readGolden } from '@/test/readGolden';
 import { runBrowserChecks } from '@/lib/code-analysis/browserChecks';
 import { getRecipe } from '@/services/catalogue/recipes';
 import { generateR1 } from './r1';
 import { headerComment } from './snippets';
 
-const golden = readFileSync(new URL('./__golden__/R1.js.txt', import.meta.url), 'utf8');
+const golden = readGolden(import.meta.url, 'R1.js.txt');
 
 /** ECMAScript 2023 script parse (AC-3.2). The generated text is parsed, never run. */
 function parseEs2023(code: string): void {

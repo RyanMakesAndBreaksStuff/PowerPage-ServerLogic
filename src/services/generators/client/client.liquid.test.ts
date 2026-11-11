@@ -1,13 +1,7 @@
-import { readFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
+import { readGolden } from '@/test/readGolden';
 import { LIQUID_SERVER_NOTE, generateClient } from './client';
 import { checkLiquidSyntax } from './liquidCheck.testkit';
-
-// fileURLToPath: a `new URL('./x', import.meta.url)` whose path contains %20 fails readFileSync here.
-const golden = (name: string): string =>
-  readFileSync(join(dirname(fileURLToPath(import.meta.url)), '__golden__', name), 'utf8');
 
 const KNOWN_GOOD = [
   '{% assign inputData = \'{"category":"news"}\' %}',
@@ -76,7 +70,7 @@ describe('liquid client', () => {
 
   it('R1 output matches liquid-r1-get', () => {
     const text = r1();
-    expect(text).toBe(golden('liquid-r1-get.liquid.txt'));
+    expect(text).toBe(readGolden(import.meta.url, 'liquid-r1-get.liquid.txt'));
     expect(() => {
       checkLiquidSyntax(text);
     }).not.toThrow();
@@ -90,7 +84,7 @@ describe('liquid client', () => {
       method: null,
       language: 'liquid',
     });
-    expect(text).toBe(golden('liquid-r8-getsummary.liquid.txt'));
+    expect(text).toBe(readGolden(import.meta.url, 'liquid-r8-getsummary.liquid.txt'));
     expect(() => {
       checkLiquidSyntax(text);
     }).not.toThrow();

@@ -45,7 +45,7 @@ const EXPORT_FILTERS = {
 } as const satisfies Record<ReportFormat, FileFilter>;
 
 /** E-11 B: a build that took longer than this is reported as slow once it returns. */
-export const EXPORT_WATCHDOG_MS = 5_000;
+const EXPORT_WATCHDOG_MS = 5_000;
 
 /** Freezes `value` and everything reachable from it, and returns it with its type unchanged. */
 function freeze<T>(value: T): T {
@@ -56,9 +56,6 @@ function freeze<T>(value: T): T {
   }
   return value;
 }
-
-/** A rejected close-guard call was already logged by the adapter; the export proceeds either way (E-07 B). */
-const ignoreGuardFailure = (): void => undefined;
 
 export type InspectorStore = InspectorActions & {
   subscribe: (listener: () => void) => () => void;
@@ -76,7 +73,7 @@ export type InspectorStore = InspectorActions & {
 const noop = (): void => undefined;
 
 /** How long a new read waits for the previous generation's reads to settle before it starts anyway. */
-export const SETTLE_TIMEOUT_MS = 10_000;
+const SETTLE_TIMEOUT_MS = 10_000;
 
 /**
  * The one owner of the selected site, the scan generation and its AbortController, the facts, the file
@@ -132,7 +129,8 @@ export function createInspectorStore(
     const { result, options } = job;
     let name = 'the report'; // Stands in for the filename until it is built, so a failure there still has a title.
     let saving = false;
-    host.preventClose().catch(ignoreGuardFailure);
+    // A rejected close-guard call was already logged by the adapter; the export proceeds either way (E-07 B).
+    host.preventClose().catch(noop);
     try {
       name = deps.reportFileNameBeforeBuild(result, options);
       // Lets React paint the busy state before a synchronous build blocks the thread.
@@ -167,7 +165,7 @@ export function createInspectorStore(
         type: 'error',
       });
     } finally {
-      host.releasePreventClose().catch(ignoreGuardFailure);
+      host.releasePreventClose().catch(noop);
     }
   }
 

@@ -6,11 +6,13 @@ import {
   headerComment,
   logLine,
   requireSettingsCode,
+  singleHighlight,
   validationFailureReturn,
 } from './snippets';
+import type { LearnDifference } from './snippets';
 
 /** Differences from the Learn Azure Function tutorial (AC-3.7, Decision 16). */
-export const R6_DIFFERENCES: readonly { change: string; reason: string }[] = [
+export const R6_DIFFERENCES: readonly LearnDifference[] = [
   {
     change:
       'The function URL, including its key, is read from the site setting AZURE_FUNCTION_URL.',
@@ -113,7 +115,5 @@ export function generateR6(): GeneratedHandler {
     '}',
   ];
   const text = [...lines, ''].join('\n');
-  const highlight = text.split('\n').indexOf(callLine);
-  if (highlight < 0) throw new Error('R6 highlight line missing');
-  return { text, highlightLines: [highlight + 1] };
+  return singleHighlight('R6', text, callLine);
 }

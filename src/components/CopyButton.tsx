@@ -4,6 +4,7 @@ import { useHost } from '@/session/HostContext';
 import { useNotify } from '@/session/useNotify';
 import { Button } from '@/components/Button';
 import { Icon } from '@/components/Icon';
+import { errorName } from '@/services/pptb/hostErrors';
 
 // AC-4.9, AC-6.7, F49: copies plain text (never line numbers) and is disabled while copying.
 export function CopyButton({
@@ -25,7 +26,7 @@ export function CopyButton({
         await host.copyText(text);
         notify({ title: 'Code copied', body: '', type: 'success' });
       } catch (error: unknown) {
-        console.error(error instanceof Error ? error.name : 'Error'); // name only: no text, no URL
+        console.error(errorName(error));
         notify({ title: "Couldn't copy", body: '', type: 'error' });
       }
     });

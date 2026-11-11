@@ -53,24 +53,21 @@ export function ConnectionProvider({ children }: { children: ReactNode }): React
         },
       );
     };
-    const retry = (): void => {
-      load();
-    };
     const onVisibility = (): void => {
       if (document.visibilityState === 'visible') load();
     };
-    reload.current = retry;
+    reload.current = load;
     load();
     const unsubscribe = host.onEvent((event) => {
       if (event.kind === 'connection-changed') load();
     });
-    window.addEventListener('focus', retry);
+    window.addEventListener('focus', load);
     document.addEventListener('visibilitychange', onVisibility);
     return () => {
       latest += 1;
       reload.current = () => undefined;
       unsubscribe();
-      window.removeEventListener('focus', retry);
+      window.removeEventListener('focus', load);
       document.removeEventListener('visibilitychange', onVisibility);
     };
   }, [host]);

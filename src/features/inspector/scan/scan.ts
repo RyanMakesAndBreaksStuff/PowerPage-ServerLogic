@@ -26,14 +26,14 @@ import type { ParsedList, SettingBinding } from './parseRecords';
 import { COMPONENT_TYPE, componentQuery, definitionQuery, SITES_QUERY, valueQuery } from './queries';
 
 /** FR-7: at most four reads in flight. Every `queryAll` and `downloadFileColumn` call passes one limiter. */
-export const SCAN_CONCURRENCY = 4;
+const SCAN_CONCURRENCY = 4;
 
 export type ScanOptions = { signal?: AbortSignal; now?: () => Date };
 
 /** The active connection changed (or none is active) while the scan ran; its facts must not be shown. */
 export class ScanAbandonedError extends Error {
-  constructor(message = 'The active connection changed while the scan was running.') {
-    super(message);
+  constructor() {
+    super('The active connection changed while the scan was running.');
     this.name = 'ScanAbandonedError';
   }
 }
@@ -243,18 +243,14 @@ async function readSettings(
     resolveBinding(reader, bindings['ServerLogic/AllowNetworkingToAllDomains']),
     resolveBinding(reader, bindings['ServerLogic/TimeoutInSeconds']),
   ]);
-  const enabled = fulfilledValue(enabledRead);
-  const allowedDomains = fulfilledValue(domainsRead);
-  const allowAll = fulfilledValue(allowAllRead);
-  const timeout = fulfilledValue(timeoutRead);
   return {
     settings: {
       ok: true,
       value: {
-        'ServerLogic/Enabled': enabled,
-        'ServerLogic/AllowedDomains': allowedDomains,
-        'ServerLogic/AllowNetworkingToAllDomains': allowAll,
-        'ServerLogic/TimeoutInSeconds': timeout,
+        'ServerLogic/Enabled': fulfilledValue(enabledRead),
+        'ServerLogic/AllowedDomains': fulfilledValue(domainsRead),
+        'ServerLogic/AllowNetworkingToAllDomains': fulfilledValue(allowAllRead),
+        'ServerLogic/TimeoutInSeconds': fulfilledValue(timeoutRead),
       },
     },
     inactive: parsed.inactive,
@@ -263,7 +259,7 @@ async function readSettings(
 
 /**
  * Reads the active connection again once every read has settled (AC-7.6). A different identity, or none,
- * abandons the scan. A refresh that rejects is transient: P5.5 keeps the last confirmed identity, so the
+ * abandons the scan. A refresh that rejects is transient: the last confirmed identity stands, so the
  * finished scan is accepted.
  */
 async function confirmIdentity(host: PptbHost, connection: Connection): Promise<void> {

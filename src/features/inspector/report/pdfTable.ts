@@ -30,15 +30,15 @@ export type PdfRow = {
   /** Mini status ring drawn in the first column of the row's first printed part. */
   readonly ring: readonly RingState[] | null;
 };
-export type PdfTableSpec = {
+type PdfTableSpec = {
   readonly columns: readonly PdfColumn[];
   readonly rows: readonly PdfRow[];
   /** The column whose cell carries the continuation label. */
   readonly labelColumn: number;
   readonly startY: number;
 };
-export type PreparedCell = { readonly lines: readonly string[]; readonly cell: PdfCell };
-export type PreparedRow = {
+type PreparedCell = { readonly lines: readonly string[]; readonly cell: PdfCell };
+type PreparedRow = {
   readonly owner: number;
   readonly part: number;
   readonly parts: number;

@@ -1,16 +1,5 @@
-import { readFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { expect } from 'vitest';
 import { runBrowserChecks } from '@/lib/code-analysis/browserChecks';
-
-/**
- * Golden file next to the handlers, read as UTF-8. `name` is the file name, such as `R4.js.txt`.
- * `fileURLToPath` avoids Vite's client rewrite of `new URL` and Windows paths that contain spaces.
- */
-export function readGolden(name: string): string {
-  return readFileSync(join(dirname(fileURLToPath(import.meta.url)), '__golden__', name), 'utf8');
-}
 
 /**
  * Decision 22: a Logger call may be only a fixed JSON string, then zero or more of

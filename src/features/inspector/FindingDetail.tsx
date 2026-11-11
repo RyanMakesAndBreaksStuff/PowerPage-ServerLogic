@@ -8,7 +8,7 @@ import { CHECK_COPY } from './model/copy';
 import { canReviewFinding } from './model/rules';
 import { plain } from './pageCopy';
 
-export type FindingDetailProps = {
+type FindingDetailProps = {
   file: FileResult;
   finding: Finding;
   /** Marks the finding reviewed, or undoes the mark. Only offered when the rules allow it. */
@@ -28,6 +28,16 @@ function keyedLines(lines: readonly string[]): readonly { key: string; text: str
   });
 }
 
+function PlainLines({ lines }: { lines: readonly string[] }): ReactElement {
+  return (
+    <ul>
+      {keyedLines(lines).map(({ key, text }) => (
+        <li key={key}>{plain(text)}</li>
+      ))}
+    </ul>
+  );
+}
+
 function SnapshotGroup({ term, items }: { term: string; items: readonly string[] }): ReactElement {
   return (
     <>
@@ -36,11 +46,7 @@ function SnapshotGroup({ term, items }: { term: string; items: readonly string[]
         {items.length === 0 ? (
           'None'
         ) : (
-          <ul>
-            {keyedLines(items).map(({ key, text }) => (
-              <li key={key}>{plain(text)}</li>
-            ))}
-          </ul>
+          <PlainLines lines={items} />
         )}
       </dd>
     </>
@@ -80,19 +86,11 @@ export function FindingDetail({ file, finding, onToggleReview }: FindingDetailPr
           <h3 className="inspector-detail__heading">
             {finding.status === 'reviewed' ? 'Original reasons' : 'Why this needs review'}
           </h3>
-          <ul>
-            {keyedLines(reasons).map(({ key, text }) => (
-              <li key={key}>{plain(text)}</li>
-            ))}
-          </ul>
+          <PlainLines lines={reasons} />
         </section>
       )}
       {notes.length === 0 ? null : (
-        <ul>
-          {keyedLines(notes).map(({ key, text }) => (
-            <li key={key}>{plain(text)}</li>
-          ))}
-        </ul>
+        <PlainLines lines={notes} />
       )}
       <p>{finding.guidance}</p>
       <section>

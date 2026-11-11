@@ -1,6 +1,6 @@
 // @vitest-environment node
-import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
+import { readGolden } from '@/test/readGolden';
 import { runBrowserChecks } from '@/lib/code-analysis/browserChecks';
 import { detectConnectorUse, exportedFunctionNames } from '@/lib/code-analysis/structure';
 import { getRecipe } from '@/services/catalogue/recipes';
@@ -11,7 +11,7 @@ import {
   validationFailureReturn,
 } from '@/services/generators/handlers/snippets';
 
-const GOLDEN = readFileSync(new URL('./__golden__/R6.js.txt', import.meta.url), 'utf8');
+const GOLDEN = readGolden(import.meta.url, 'R6.js.txt');
 const MISSING_SETTING = "Server logic isn't configured: missing site setting AZURE_FUNCTION_URL";
 const NAME_MESSAGE = 'Name is required and must be from 1 to 100 characters.';
 const GET_ASYNC_LINE = '    const r = toResult(await Server.Connector.HttpClient.GetAsync(url));';

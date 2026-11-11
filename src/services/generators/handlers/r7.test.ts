@@ -1,8 +1,8 @@
 // @vitest-environment node
-import { readFileSync } from 'node:fs';
 import { parse } from 'acorn';
 import type { Options } from 'acorn';
 import { describe, expect, it } from 'vitest';
+import { readGolden } from '@/test/readGolden';
 import { runBrowserChecks } from '@/lib/code-analysis/browserChecks';
 import { detectConnectorUse, exportedFunctionNames } from '@/lib/code-analysis/structure';
 import { getRecipe } from '@/services/catalogue/recipes';
@@ -11,7 +11,7 @@ import { R7_DIFFERENCES, generateR7 } from '@/services/generators/handlers/r7';
 import { headerComment, requireSettingsCode } from '@/services/generators/handlers/snippets';
 
 const ACORN_OPTIONS = { ecmaVersion: 2023, sourceType: 'script' } as const satisfies Options;
-const GOLDEN = readFileSync(new URL('./__golden__/R7.js.txt', import.meta.url), 'utf8');
+const GOLDEN = readGolden(import.meta.url, 'R7.js.txt');
 const HIGHLIGHTS = [52, 135, 147, 176, 195] as const;
 const CALLS = ['PostAsync(', 'GetAsync(', 'GetAsync(', 'PutAsync(', 'CreateRecord('] as const;
 const SETTINGS = ['CLIENT_ID', 'CLIENT_SECRET', 'TENANT_ID', 'HOSTNAME', 'SITE_PATH'] as const;

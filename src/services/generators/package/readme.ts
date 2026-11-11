@@ -9,6 +9,7 @@ import { R4_DIFFERENCES } from '@/services/generators/handlers/r4';
 import { R5_DIFFERENCES } from '@/services/generators/handlers/r5';
 import { R6_DIFFERENCES } from '@/services/generators/handlers/r6';
 import { R7_DIFFERENCES } from '@/services/generators/handlers/r7';
+import type { LearnDifference } from '@/services/generators/handlers/snippets';
 import type { ClientLanguage } from '@/types/http';
 import type { RecipeId, RecipeMeta } from '@/types/recipe';
 import { README_NOTES } from './readmeNotes';
@@ -32,12 +33,27 @@ const PERMISSIONS_OPEN =
 const SECRETS =
   'Hold secrets in Azure Key Vault, surface them through an environment variable, and reference them through a site setting. The generated code never holds a literal secret.';
 
-const DIFFERENCES: Partial<Record<RecipeId, readonly { change: string; reason: string }[]>> = {
+const DIFFERENCES: Partial<Record<RecipeId, readonly LearnDifference[]>> = {
   R4: R4_DIFFERENCES,
   R5: R5_DIFFERENCES,
   R6: R6_DIFFERENCES,
   R7: R7_DIFFERENCES,
 };
+
+/** File-name suffix of the generated client; the README names the file buildPackageFiles writes. */
+export function clientSuffix(language: ClientLanguage): string {
+  switch (language) {
+    case 'liquid':
+      return '.client.liquid';
+    case 'fetch':
+    case 'jquery':
+      return '.client.js';
+    default: {
+      const unreachable: never = language;
+      return unreachable;
+    }
+  }
+}
 
 function mark(done: boolean, item: string): string {
   return done ? `✓ ${item}` : `! Needs attention: ${item}`;
@@ -63,7 +79,7 @@ function lowerFirst(text: string): string {
 }
 
 function setupBody(slug: string, recipe: RecipeMeta, language: ClientLanguage): string {
-  const clientName = `${slug}${language === 'liquid' ? '.client.liquid' : '.client.js'}`;
+  const clientName = `${slug}${clientSuffix(language)}`;
   const paste =
     language === 'liquid'
       ? `Paste \`${clientName}\` into a page or web template.`

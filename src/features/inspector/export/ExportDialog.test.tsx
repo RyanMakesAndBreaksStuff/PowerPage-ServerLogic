@@ -16,7 +16,6 @@ import { EXPORT_IN_PROGRESS_REASON } from '../pageCopy';
 import { InspectorPage } from '../InspectorPage';
 import { EXPORT_BUSY_REASON, SAVE_FAILED_BODY } from './exportCopy';
 
-afterEach(cleanup);
 beforeEach(() => {
   vi.spyOn(console, 'error').mockImplementation(() => undefined);
 });

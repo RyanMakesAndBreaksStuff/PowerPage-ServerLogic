@@ -1,7 +1,6 @@
 import { useEffect, useEffectEvent, useId, useRef, useState } from 'react';
 import type { KeyboardEvent, ReactElement } from 'react';
 import { Icon } from '@/components/Icon';
-import { classNames } from '@/lib/classNames';
 import { getRecipe } from '@/services/catalogue/recipes';
 import type { HttpMethod } from '@/types/http';
 import type { RecipeGroup, RecipeId } from '@/types/recipe';
@@ -147,8 +146,7 @@ export function RecipeCombobox({
             if (open) close();
             else {
               inputRef.current?.focus();
-              setActive(value);
-              setOpen(true);
+              openList();
             }
           }}
         >
@@ -184,7 +182,7 @@ export function RecipeCombobox({
                   }}
                 >
                   <span>{recipe.name}</span>{' '}
-                  <span className={classNames('ui-mono', 'starter-combobox__object')}>
+                  <span className="ui-mono starter-combobox__object">
                     {recipe.mainObject}
                   </span>
                 </div>

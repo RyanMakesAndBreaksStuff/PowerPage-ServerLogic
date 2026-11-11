@@ -18,26 +18,16 @@ import {
 } from './pageCopy';
 import { ReadinessTile } from './ReadinessTile';
 
-export type ResultsViewProps = {
+type ResultsViewProps = {
   result: SiteResult;
   /** The title heading: the page moves focus here after Retry in the refresh-failed notice hides itself. */
   headingRef: Ref<HTMLHeadingElement>;
   /** Scan again. The page wraps `session.rescan` so that focus follows to the scanning panel's heading. */
   onRescan: () => void;
-  /** Opens the export dialog; null when the result has no files to export. */
-  onExport: (() => void) | null;
-  /** An export job exists (its dialog may be closed while it finishes), so a second one cannot start. */
-  exportBusy: boolean;
 };
 
 /** A finished or stopped scan (AC-7.3, AC-7.9, AC-7.10, AC-8.1). Mounted with the scan id as its key. */
-export function ResultsView({
-  result,
-  headingRef,
-  onRescan,
-  onExport,
-  exportBusy,
-}: ResultsViewProps): ReactElement {
+export function ResultsView({ result, headingRef, onRescan }: ResultsViewProps): ReactElement {
   const session = useInspector();
   const { files, banners, facts } = result;
   // No file is selected until the user picks one (D-03); the title tile then shows that file (AC-8.1).
@@ -73,16 +63,19 @@ export function ResultsView({
     );
   };
 
-  // AC-9.1, AC-7.4: enabled for a finished or stopped scan with files; the reason names what is missing.
-  const exportReason = exportBusy
-    ? EXPORT_IN_PROGRESS_REASON
-    : onExport !== null
-      ? null
-      : facts.inventoryComplete
-        ? EXPORT_NO_FILES_REASON
-        : EXPORT_NOTHING_READ_REASON;
+  // AC-9.1, AC-7.4: enabled for a finished or stopped scan with files; the reason names what is missing. An
+  // export job may outlive its closed dialog, and while it exists a second one cannot start.
+  const exportReason =
+    session.exportJob !== null
+      ? EXPORT_IN_PROGRESS_REASON
+      : files.length > 0
+        ? null
+        : facts.inventoryComplete
+          ? EXPORT_NO_FILES_REASON
+          : EXPORT_NOTHING_READ_REASON;
+  const onExport = files.length === 0 ? undefined : session.openExport;
   const exportReport = (
-    <Button variant="primary" onClick={onExport ?? undefined} disabledReason={exportReason}>
+    <Button variant="primary" onClick={onExport} disabledReason={exportReason}>
       <Icon name="arrow-download" size={14} />
       Export report
     </Button>

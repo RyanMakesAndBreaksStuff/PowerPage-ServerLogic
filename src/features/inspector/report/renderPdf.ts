@@ -1,6 +1,5 @@
 import type { jsPDF } from 'jspdf';
-import type { RingState } from '@/lib/ringGeometry';
-import type { CheckStatus } from '@/types/inspector';
+import { RING_STATE } from '@/features/inspector/model/rules';
 import {
   PAGE_MARGIN,
   REPORT_PALETTE as PALETTE,
@@ -40,8 +39,6 @@ const LABEL_WIDTH = 78;
 const BULLET_INDENT = 14;
 /** The site ring in the hero: outer radius, stroke thickness, and the clear space kept inside the hole. */
 export const HERO_RING = { radius: 50, thickness: 12, textPadding: 6 } as const;
-const RING_RADIUS = HERO_RING.radius;
-const RING_THICKNESS = HERO_RING.thickness;
 
 const TEXT: TextStyle = { face: 'body', size: 10, color: PALETTE.ink };
 const MUTED: TextStyle = { face: 'body', size: 10, color: PALETTE.muted };
@@ -173,18 +170,6 @@ function drawRun(
   ctx.y += 10 * LEADING;
 }
 
-function ringState(status: CheckStatus): RingState {
-  switch (status) {
-    case 'configured':
-    case 'reviewed':
-      return 'done';
-    case 'needs-review':
-      return 'review';
-    case 'not-scanned':
-      return 'not-scanned';
-  }
-}
-
 function drawHeader(ctx: Ctx, model: ReportModel): void {
   ctx.doc.setFillColor(PALETTE.blueChip).roundedRect(PAGE_MARGIN, ctx.y, 16, 16, 3, 3, 'F');
   drawCheckmark(ctx.doc, PAGE_MARGIN + 3.5, ctx.y + 3.5, 9, PALETTE.white);
@@ -242,14 +227,14 @@ function drawRingLabel(ctx: Ctx, cx: number, cy: number, count: string): void {
 function drawHero(ctx: Ctx, model: ReportModel): void {
   paragraph(ctx, model.title, TITLE);
   space(ctx, 10);
-  ensure(ctx, 2 * RING_RADIUS + 8);
+  ensure(ctx, 2 * HERO_RING.radius + 8);
   const top = ctx.y;
-  const cx = PAGE_MARGIN + RING_RADIUS + 4;
-  const cy = top + RING_RADIUS + 4;
-  const segments = model.rows.flatMap((row) => row.checks.map((check) => ringState(check.status)));
-  drawRing(ctx.doc, cx, cy, RING_RADIUS - RING_THICKNESS / 2, RING_THICKNESS, segments);
+  const cx = PAGE_MARGIN + HERO_RING.radius + 4;
+  const cy = top + HERO_RING.radius + 4;
+  const segments = model.rows.flatMap((row) => row.checks.map((check) => RING_STATE[check.status]));
+  drawRing(ctx.doc, cx, cy, HERO_RING.radius - HERO_RING.thickness / 2, HERO_RING.thickness, segments);
   drawRingLabel(ctx, cx, cy, `${String(model.counts.K)}/${String(model.counts.T)}`);
-  ctx.indent = 2 * RING_RADIUS + 28;
+  ctx.indent = 2 * HERO_RING.radius + 28;
   paragraph(ctx, model.headline, HEADLINE);
   space(ctx, 4);
   drawLines(ctx, model.lines);
@@ -261,7 +246,7 @@ function drawHero(ctx: Ctx, model: ReportModel): void {
     { text: 'Not verified: Tenant outbound policy', style: MUTED },
   ]);
   ctx.indent = 0;
-  ctx.y = Math.max(ctx.y, top + 2 * RING_RADIUS + 8) + 8;
+  ctx.y = Math.max(ctx.y, top + 2 * HERO_RING.radius + 8) + 8;
 }
 
 function statusCell(check: ReportCheck, withReason: boolean): PdfCell {
@@ -323,7 +308,7 @@ function drawFileTable(ctx: Ctx, model: ReportModel): PdfTableEvidence {
 function drawSiteTable(ctx: Ctx, model: ReportModel): PdfTableEvidence {
   const rows = model.rows.map((row): PdfRow => ({
     label: row.name,
-    ring: row.checks.map((check) => ringState(check.status)),
+    ring: row.checks.map((check) => RING_STATE[check.status]),
     cells: [
       pdfCell(''),
       pdfCell(row.name, { face: 'mono' }),

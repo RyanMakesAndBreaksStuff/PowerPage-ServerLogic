@@ -13,7 +13,6 @@ export type InspectorDeps = {
   runScan: typeof runScan;
   /** Overrides how long a new read waits for the previous generation to settle (tests). */
   settleTimeoutMs?: number;
-  // P5.7: what an export needs. Tests inject fakes the way they inject listSites/runScan.
   buildReportModel: typeof buildReportModel;
   renderMarkdown: typeof renderMarkdown;
   renderPdf: typeof renderPdf;

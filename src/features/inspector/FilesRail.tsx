@@ -13,7 +13,7 @@ const PILL_KIND = { Ready: 'ok', 'Needs review': 'review', Incomplete: 'unknown'
   BadgeKind
 >;
 
-export type FilesRailProps = {
+type FilesRailProps = {
   files: readonly FileResult[];
   selectedId: string | null;
   /** True when the record list was read completely, so an empty list really means "none". */

@@ -10,7 +10,7 @@ import { PermissionNote } from './inputs/PermissionNote';
 import { StarterInputs } from './inputs/StarterInputs';
 import './starter.css';
 
-// Create Logic, layout 10a §2: the input row, the code row (Phase 21) and the action row.
+// Create Logic, layout 10a §2: the input row, the code row and the action row.
 export function StarterPage(): ReactElement {
   const { dispatch } = useStarterSession();
   const [, setView] = useView();

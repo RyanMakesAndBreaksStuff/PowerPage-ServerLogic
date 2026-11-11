@@ -20,7 +20,7 @@ import { StarterPage } from '@/features/starter/StarterPage';
 import type { PptbHost } from '@/services/pptb/host.types';
 import type { View } from '@/types/http';
 
-export type AppProps = { host: PptbHost; starterDeps?: StarterDeps; inspectorDeps?: InspectorDeps };
+type AppProps ={ host: PptbHost; starterDeps?: StarterDeps; inspectorDeps?: InspectorDeps };
 
 /**
  * The Inspector session wraps the title bar and every page, so it keeps following connection changes while
@@ -82,7 +82,7 @@ export function App({ host, starterDeps = STARTER_DEPS, inspectorDeps }: AppProp
                 <div className="shell">
                   <TitleBar />
                   <main className="shell__content">
-                    {/* Constant conditions: unreleased pages are dropped from the bundle (FR-1, Phase 00). */}
+                    {/* Constant conditions: unreleased pages are dropped from the bundle (FR-1). */}
                     {__PAGE_STARTER__ ? (
                       <StarterSessionProvider deps={starterDeps}>
                         <Panel id="starter" label="Logic Starter" view={view}>

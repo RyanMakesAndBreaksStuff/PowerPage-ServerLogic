@@ -1,20 +1,20 @@
 // @vitest-environment node
-import { readFileSync } from 'node:fs';
 import { parse } from 'acorn';
 import { describe, expect, it } from 'vitest';
+import { readGolden } from '@/test/readGolden';
 import { runBrowserChecks } from '@/lib/code-analysis/browserChecks';
 import { getRecipe } from '@/services/catalogue/recipes';
 import { generateR3 } from './r3';
 import { headerComment, requireSettingsCode, validationFailureReturnFor } from './snippets';
 
-const golden = readFileSync(new URL('./__golden__/R3.js.txt', import.meta.url), 'utf8');
+const golden = readGolden(import.meta.url, 'R3.js.txt');
 
 /** ECMAScript 2023 script parse (AC-3.2). The generated text is parsed, never run. */
 function parseEs2023(code: string): void {
   parse(code, { ecmaVersion: 2023, sourceType: 'script' });
 }
 
-/** Task 1 logging-rule regex: a JSON string, then only status, reason, e.name or ActivityId. */
+/** Logging-rule regex: a JSON string, then only status, reason, e.name or ActivityId. */
 const LOGGER_LINE =
   /^\s*Server\.Logger\.(?:Log|Warn|Error)\((?:"(?:[^"\\]|\\.)*")(?: \+ " " \+ (?:r\.StatusCode|r\.ReasonPhrase|e\.name|Server\.Context\.ActivityId))*\);$/;
 

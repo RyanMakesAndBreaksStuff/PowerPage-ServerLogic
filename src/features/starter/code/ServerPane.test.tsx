@@ -23,7 +23,7 @@ function typeAtStart(text: string): void {
   });
 }
 
-describe('ServerPane (Phase 21)', () => {
+describe('ServerPane', () => {
   it('shows <slug>.js, the Server pill, the session text and the footer (AC-4.2, AC-2.4, AC-4.10)', () => {
     const h = renderStarter(<ServerPane />, { deps: STARTER_DEPS });
     const pane = screen.getByRole('region', { name: 'Server handler' });
@@ -62,7 +62,7 @@ describe('ServerPane (Phase 21)', () => {
     expect(serverText()).toBe(h.session().state.generatedText);
   });
 
-  it('takes a Server Objects insert as one undo step and moves the cursor (AC-6.8, Phase 18a Decision 1)', () => {
+  it('takes a Server Objects insert as one undo step and moves the cursor (AC-6.8)', () => {
     const h = renderStarter(<ServerPane />);
     const before = h.session().state.serverText;
     h.dispatch({

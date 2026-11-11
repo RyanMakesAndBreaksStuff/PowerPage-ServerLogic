@@ -14,8 +14,8 @@ function Panes() {
   return <ClientPane />;
 }
 
-describe('ClientPane (Phase 21)', () => {
-  it('shows the generated client call, read-only, matching the download (AC-4.4, Phase 14 Risk 2)', () => {
+describe('ClientPane', () => {
+  it('shows the generated client call, read-only, matching the download (AC-4.4)', () => {
     const h = renderStarter(<Panes />, { deps: STARTER_DEPS });
     const { state, derived } = h.session();
     expect(clientText()).toBe(

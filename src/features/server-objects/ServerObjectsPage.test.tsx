@@ -1,8 +1,11 @@
 // @vitest-environment jsdom
 import { fireEvent, screen, waitFor, within } from '@testing-library/react';
+import type { ReactElement } from 'react';
 import { describe, expect, it } from 'vitest';
 import { ServerObjectsPage } from './ServerObjectsPage';
-import { renderObjects } from '@/test/objectsTestHarness';
+import { renderStarter } from '@/test/starterTestHarness';
+
+const renderObjects = (ui: ReactElement) => renderStarter(ui, { view: 'objects' });
 
 const list = (): HTMLElement => screen.getByRole('region', { name: 'Server objects' });
 const detail = (): HTMLElement => screen.getByRole('region', { name: 'Object detail' });

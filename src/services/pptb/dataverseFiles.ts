@@ -1,7 +1,7 @@
 import { HostReadError } from './host.types';
 import type { FileColumnRef } from './host.types';
 import { isRecord, throwIfAborted } from './hostErrors';
-import { withRetry } from './dataverseRead';
+import { NAME, withRetry } from './dataverseRead';
 import type { Sleep } from './dataverseRead';
 
 /** The only two actions the adapter ever executes (spec FR-7 4.1.0). Unbound: the record travels in `Target`. */
@@ -13,10 +13,9 @@ export type FileAction = {
 export type FileDeps = { execute: (request: FileAction) => Promise<unknown>; sleep: Sleep };
 
 /** Learn: blocks of up to 4 MiB; `filecontent` holds at most 131,072 KB. */
-export const BLOCK_BYTES = 4 * 1024 * 1024;
-export const FILE_MAX_BYTES = 128 * 1024 * 1024;
+const BLOCK_BYTES = 4 * 1024 * 1024;
+const FILE_MAX_BYTES = 128 * 1024 * 1024;
 
-const NAME = /^[A-Za-z_][A-Za-z0-9_]*$/u;
 const GUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/iu;
 const BASE64 = /^[A-Za-z0-9+/]*={0,2}$/u;
 

@@ -1,8 +1,8 @@
 // @vitest-environment node
-import { readFileSync } from 'node:fs';
 import { parse } from 'acorn';
 import type { Options } from 'acorn';
 import { describe, expect, it } from 'vitest';
+import { readGolden } from '@/test/readGolden';
 import { runBrowserChecks } from '@/lib/code-analysis/browserChecks';
 import { getRecipe } from '@/services/catalogue/recipes';
 import {
@@ -14,10 +14,6 @@ import {
 import { generateR2 } from '@/services/generators/handlers/r2';
 
 const ACORN_OPTIONS = { ecmaVersion: 2023, sourceType: 'script' } as const satisfies Options;
-
-function readGolden(): string {
-  return readFileSync(new URL('./__golden__/R2.js.txt', import.meta.url), 'utf8');
-}
 
 function parsesEs2023(code: string): boolean {
   try {
@@ -31,7 +27,7 @@ function parsesEs2023(code: string): boolean {
 describe('generateR2', () => {
   it('matches the golden file', () => {
     const text = generateR2().text;
-    expect(text).toBe(readGolden());
+    expect(text).toBe(readGolden(import.meta.url, 'R2.js.txt'));
     expect(text.endsWith('\n')).toBe(true);
     expect(text.endsWith('\n\n')).toBe(false);
     expect(text.includes('\r')).toBe(false);

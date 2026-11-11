@@ -1,6 +1,6 @@
 // @vitest-environment node
-import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
+import { readGolden } from '@/test/readGolden';
 import { runBrowserChecks } from '@/lib/code-analysis/browserChecks';
 import { getRecipe } from '@/services/catalogue/recipes';
 import {
@@ -11,7 +11,7 @@ import {
 } from '@/services/generators/handlers/snippets';
 import { generateR9 } from './r9';
 
-const GOLDEN = readFileSync(new URL('./__golden__/R9.js.txt', import.meta.url), 'utf8');
+const GOLDEN = readGolden(import.meta.url, 'R9.js.txt');
 
 /** A JSON string, optionally joined with StatusCode, ReasonPhrase, e.name or ActivityId. */
 const LOGGING_RULE =

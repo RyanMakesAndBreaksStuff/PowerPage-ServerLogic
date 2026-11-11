@@ -1,6 +1,6 @@
 // @vitest-environment node
-import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
+import { readGolden } from '@/test/readGolden';
 import { deriveStarter } from '@/session/deriveStarter';
 import { STARTER_DEPS } from '@/session/starterDeps';
 import { createStarterReducer, initialStarterState } from '@/session/starterReducer';
@@ -11,10 +11,6 @@ import { generateDemoPage } from '@/services/generators/handlers';
 import type { ClientLanguage } from '@/types/http';
 import type { RecipeId } from '@/types/recipe';
 import { buildPackageFiles } from './buildPackageFiles';
-
-function readGolden(name: string): string {
-  return readFileSync(new URL(`./__golden__/${name}`, import.meta.url), 'utf8');
-}
 
 function sessionFor(recipe: RecipeId): { state: StarterState; derived: StarterDerived } {
   const reduce = createStarterReducer(STARTER_DEPS);
@@ -33,7 +29,7 @@ describe('buildPackageFiles', () => {
     const { state, derived } = sessionFor('R1');
     const files = buildPackageFiles({ state, derived, clientText: 'client' });
     expect(content(files, 'permission-checklist.md')).toBe(
-      readGolden('R1.permission-checklist.md.txt'),
+      readGolden(import.meta.url, 'R1.permission-checklist.md.txt'),
     );
   });
 
@@ -41,7 +37,7 @@ describe('buildPackageFiles', () => {
     const { state, derived } = sessionFor('R4');
     const files = buildPackageFiles({ state, derived, clientText: 'client' });
     expect(content(files, 'permission-checklist.md')).toBe(
-      readGolden('R4.permission-checklist.md.txt'),
+      readGolden(import.meta.url, 'R4.permission-checklist.md.txt'),
     );
   });
 
@@ -49,7 +45,7 @@ describe('buildPackageFiles', () => {
     const { state, derived } = sessionFor('R10');
     const files = buildPackageFiles({ state, derived, clientText: 'client' });
     expect(content(files, 'permission-checklist.md')).toBe(
-      readGolden('R10.permission-checklist.md.txt'),
+      readGolden(import.meta.url, 'R10.permission-checklist.md.txt'),
     );
   });
 

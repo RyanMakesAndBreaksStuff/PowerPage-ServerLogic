@@ -6,6 +6,7 @@ import {
   headerComment,
   logLine,
   requireSettingsCode,
+  singleHighlight,
   validationFailureReturnFor,
 } from './snippets';
 
@@ -87,7 +88,5 @@ export function generateR3(): GeneratedHandler {
   ];
 
   const text = [...lines, ''].join('\n');
-  const highlight = text.split('\n').indexOf(callLine);
-  if (highlight < 0) throw new Error('R3 highlight line missing');
-  return { text, highlightLines: [highlight + 1] };
+  return singleHighlight('R3', text, callLine);
 }

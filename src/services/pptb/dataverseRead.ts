@@ -17,7 +17,8 @@ export const RETRY_DELAYS_MS = [1000, 2000, 4000] as const;
  */
 export const NEXT_LINK_UNVERIFIED = false;
 
-const NAME = /^[A-Za-z_][A-Za-z0-9_]*$/;
+/** A Dataverse logical name or entity set name. */
+export const NAME = /^[A-Za-z_][A-Za-z0-9_]*$/;
 const UNSAFE_CLAUSE = /[&#\p{Cc}]/u;
 const API_PATH = /\/api\/data\/v\d+(?:\.\d+)?\/(.+)$/;
 const MAX_PAGE_SIZE = 5000;

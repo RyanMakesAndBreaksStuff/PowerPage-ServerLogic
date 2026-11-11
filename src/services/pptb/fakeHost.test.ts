@@ -75,14 +75,6 @@ describe('notify behaviours', () => {
       name: 'HostCallError',
     });
   });
-
-  it('switches mode with setNotify', async () => {
-    const host = createFakeHost();
-    host.setNotify('reject');
-    await expect(host.notify(notice)).rejects.toBeInstanceOf(Error);
-    host.setNotify('ok');
-    await expect(host.notify(notice)).resolves.toBeUndefined();
-  });
 });
 
 describe('copy, open and save', () => {
@@ -90,12 +82,6 @@ describe('copy, open and save', () => {
     const host = createFakeHost({ copy: 'reject', openExternal: 'reject' });
     await expect(host.copyText('x')).rejects.toBeInstanceOf(Error);
     await expect(host.openExternal('https://github.com/')).rejects.toBeInstanceOf(Error);
-    host.setCopy('ok');
-    host.setOpenExternal('ok');
-    await expect(host.copyText('x')).resolves.toBeUndefined();
-    await expect(host.openExternal('https://github.com/')).resolves.toBeUndefined();
-    expect(host.callsOf('copyText')).toHaveLength(2);
-    expect(host.callsOf('openExternal')).toHaveLength(2);
   });
 
   it('keeps saved files, including bytes, and nothing for a cancel or a rejection', async () => {

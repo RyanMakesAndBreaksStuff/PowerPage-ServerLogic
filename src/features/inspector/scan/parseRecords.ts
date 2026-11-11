@@ -43,7 +43,7 @@ function optionalIds(content: JsonObject, key: string): readonly string[] | null
 }
 
 /** One `powerpagecomponent` row after its envelope is validated. `content` is the parsed JSON object, or null. */
-export type ComponentRow = {
+type ComponentRow = {
   id: string;
   name: string;
   active: boolean;
@@ -85,7 +85,7 @@ export function parseSites(rows: readonly unknown[]): readonly SiteRef[] {
 }
 
 /** A Server Logic record before its code is downloaded. */
-export type FileRecord = {
+type FileRecord = {
   id: string;
   name: string;
   active: boolean;
@@ -126,6 +126,17 @@ function skippedRow(raw: unknown, type: 11 | 18): UnreadableRow {
   return { type, id: typeof id === 'string' ? id : '', name: typeof name === 'string' ? name : '' };
 }
 
+function parseListWith<T>(rows: readonly unknown[], parse: (raw: unknown) => T | null, type: 11 | 18): ParsedList<T> {
+  const items: T[] = [];
+  const unreadable: UnreadableRow[] = [];
+  for (const raw of rows) {
+    const item = parse(raw);
+    if (item === null) unreadable.push(skippedRow(raw, type));
+    else items.push(item);
+  }
+  return { items, unreadable };
+}
+
 function parseRole(raw: unknown): WebRoleFact | null {
   const row = parseComponentRow(raw);
   const content = row?.content ?? null;
@@ -137,14 +148,7 @@ function parseRole(raw: unknown): WebRoleFact | null {
 }
 
 export function parseRoles(rows: readonly unknown[]): ParsedList<WebRoleFact> {
-  const items: WebRoleFact[] = [];
-  const unreadable: UnreadableRow[] = [];
-  for (const raw of rows) {
-    const role = parseRole(raw);
-    if (role === null) unreadable.push(skippedRow(raw, 11));
-    else items.push(role);
-  }
-  return { items, unreadable };
+  return parseListWith(rows, parseRole, 11);
 }
 
 const SCOPES = new Map<number, AccessType>([
@@ -193,14 +197,7 @@ function parsePermission(raw: unknown): TablePermissionFact | null {
 }
 
 export function parsePermissions(rows: readonly unknown[]): ParsedList<TablePermissionFact> {
-  const items: TablePermissionFact[] = [];
-  const unreadable: UnreadableRow[] = [];
-  for (const raw of rows) {
-    const permission = parsePermission(raw);
-    if (permission === null) unreadable.push(skippedRow(raw, 18));
-    else items.push(permission);
-  }
-  return { items, unreadable };
+  return parseListWith(rows, parsePermission, 18);
 }
 
 /** What a matched, active `ServerLogic/*` row says, before any environment variable is read. */
@@ -212,7 +209,7 @@ export type SettingBinding =
   /** The row is active but its content has no readable string value, which is not the same as an empty value. */
   | { kind: 'unparseable' };
 
-export type ParsedSettings = {
+type ParsedSettings = {
   bindings: Readonly<Record<SettingName, SettingBinding>>;
   inactive: readonly SettingName[];
 };
@@ -263,7 +260,7 @@ export function parseSettings(rows: readonly unknown[]): ParsedSettings | null {
   };
 }
 
-export type EnvVarDefinition = { id: string; secret: boolean; defaultValue: string | null };
+type EnvVarDefinition = { id: string; secret: boolean; defaultValue: string | null };
 
 /** Exactly one definition row is expected; zero, several or an unreadable row is null. */
 export function parseDefinition(rows: readonly unknown[]): EnvVarDefinition | null {

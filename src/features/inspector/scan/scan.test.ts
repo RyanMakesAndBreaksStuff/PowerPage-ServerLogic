@@ -4,6 +4,7 @@ import { createFakeHost } from '@/services/pptb/fakeHost';
 import type { FakeFailure, FakeResponder } from '@/services/pptb/fakeHost';
 import { HostReadError } from '@/services/pptb/host.types';
 import type { Connection, PptbHost } from '@/services/pptb/host.types';
+import { deferred } from '@/test/deferred';
 import type { ReviewKey, ScanProgress, SiteFacts, SiteRef } from '@/types/inspector';
 import { listSites, runScan, ScanAbandonedError } from './scan';
 import type { ScanOptions } from './scan';
@@ -965,8 +966,8 @@ function gated(
     stats.inFlight += 1;
     stats.peak = Math.max(stats.peak, stats.inFlight);
     if (!held) return;
-    const gate = deferred();
-    holds.push({ key, release: gate.resolve });
+    const gate = deferred<undefined>();
+    holds.push({ key, release: () => { gate.resolve(undefined); } });
     await gate.promise;
   }
   const host: PptbHost = {
@@ -1011,14 +1012,6 @@ function gated(
       for (const hold of holds.splice(0)) hold.release();
     },
   };
-}
-
-function deferred(): { promise: Promise<void>; resolve: () => void } {
-  const holder: { resolve: () => void } = { resolve: () => undefined };
-  const promise = new Promise<void>((resolve) => {
-    holder.resolve = resolve;
-  });
-  return { promise, resolve: () => { holder.resolve(); } };
 }
 
 /** Lets every pending microtask run, so a rejection has reached the reader before the next release. */

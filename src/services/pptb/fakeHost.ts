@@ -13,7 +13,7 @@ import type {
 import { HostCallError, messageForStatus, throwIfAborted } from './hostErrors';
 
 /** Rows for one entity set: a flat list, or `pages` to model paging (the fake still returns all rows, as the contract says). */
-export type FakeResult = readonly unknown[] | { pages: readonly (readonly unknown[])[] };
+type FakeResult =readonly unknown[] | { pages: readonly (readonly unknown[])[] };
 /** Return a result to answer a query, or undefined to pass it to the next responder and then to `tables`. */
 export type FakeResponder = (q: ODataQuery) => FakeResult | undefined;
 /**
@@ -33,8 +33,8 @@ export type FakeFailure = {
   times?: number;
 };
 export type NotifyBehaviour = 'ok' | 'throw' | 'reject' | 'missing';
-export type SaveBehaviour = 'save' | 'cancel' | 'reject';
-export type SimpleBehaviour = 'ok' | 'reject';
+type SaveBehaviour = 'save' | 'cancel' | 'reject';
+type SimpleBehaviour ='ok' | 'reject';
 
 export type FakeHostInit = {
   theme?: ThemeName;
@@ -49,11 +49,9 @@ export type FakeHostInit = {
   save?: SaveBehaviour;
   copy?: SimpleBehaviour;
   openExternal?: SimpleBehaviour;
-  /** Applies to both `preventClose` and `releasePreventClose`. */
-  closeGuard?: SimpleBehaviour;
 };
 
-export type FakeCall =
+type FakeCall =
   | { method: 'getTheme' }
   | { method: 'notify'; notice: Notice }
   | { method: 'copyText'; text: string }
@@ -70,7 +68,7 @@ export type FakeCall =
   | { method: 'queryAll'; query: ODataQuery; pages: number }
   | { method: 'downloadFileColumn'; ref: FileColumnRef };
 
-export type SavedFile = { path: string; defaultName: string; content: string | Uint8Array };
+type SavedFile ={ path: string; defaultName: string; content: string | Uint8Array };
 
 export type FakeHostControls = {
   /** Delivers an event to every subscribed handler, as the real adapter does for a PPTB event. */
@@ -85,10 +83,7 @@ export type FakeHostControls = {
   setTheme(theme: ThemeName): void;
   /** Changes what `getActiveConnection` returns. It does not emit; call `emit({ kind: 'connection-changed' })` too. */
   setConnection(connection: Connection | null): void;
-  setNotify(behaviour: NotifyBehaviour): void;
   setSave(behaviour: SaveBehaviour): void;
-  setCopy(behaviour: SimpleBehaviour): void;
-  setOpenExternal(behaviour: SimpleBehaviour): void;
   /** Applies to both `preventClose` and `releasePreventClose`. */
   setCloseGuard(behaviour: SimpleBehaviour): void;
 };
@@ -108,11 +103,11 @@ function pagesOf(result: FakeResult): readonly (readonly unknown[])[] {
 export function createFakeHost(init: FakeHostInit = {}): PptbHost & FakeHostControls {
   let theme: ThemeName = init.theme ?? 'light';
   let connection: Connection | null = init.connection ?? null;
-  let notify: NotifyBehaviour = init.notify ?? 'ok';
+  const notify: NotifyBehaviour = init.notify ?? 'ok';
   let save: SaveBehaviour = init.save ?? 'save';
-  let copy: SimpleBehaviour = init.copy ?? 'ok';
-  let open: SimpleBehaviour = init.openExternal ?? 'ok';
-  let closeGuard: SimpleBehaviour = init.closeGuard ?? 'ok';
+  const copy: SimpleBehaviour = init.copy ?? 'ok';
+  const open: SimpleBehaviour = init.openExternal ?? 'ok';
+  let closeGuard: SimpleBehaviour = 'ok';
   const calls: FakeCall[] = [];
   const savedFiles: SavedFile[] = [];
   const handlers = new Set<(e: HostEvent) => void>();
@@ -269,17 +264,8 @@ export function createFakeHost(init: FakeHostInit = {}): PptbHost & FakeHostCont
     setConnection: (next) => {
       connection = next;
     },
-    setNotify: (next) => {
-      notify = next;
-    },
     setSave: (next) => {
       save = next;
-    },
-    setCopy: (next) => {
-      copy = next;
-    },
-    setOpenExternal: (next) => {
-      open = next;
     },
     setCloseGuard: (next) => {
       closeGuard = next;

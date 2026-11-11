@@ -2,7 +2,7 @@ import type { TextChange } from '@/lib/code-analysis/codeAnalysis.types';
 
 /**
  * The single replacement that turns `before` into `after`, keeping their common prefix and suffix.
- * One change means one editor transaction, so an outside update is one undo step (Phase 18a Decision 1).
+ * One change means one editor transaction, so an outside update is one undo step.
  */
 export function minimalChange(before: string, after: string): TextChange | null {
   if (before === after) return null;

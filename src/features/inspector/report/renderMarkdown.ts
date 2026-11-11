@@ -1,5 +1,4 @@
-import type { ReportModel } from '@/features/inspector/report/reportModel.types';
-import type { ReportCheck, ReportSection, ReportSnapshot } from './reportModel.types';
+import type { ReportCheck, ReportModel, ReportSection, ReportSnapshot } from './reportModel.types';
 import { escapeCell, escapeInline } from './markdownEscape';
 
 function tableRow(values: readonly string[]): string {

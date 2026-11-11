@@ -21,7 +21,7 @@ const ICON = {
 } as const satisfies Record<ToastType, IconName>;
 
 // FR-1: success and info hide after 5 s with role=status; error stays until closed with role=alert.
-// Warning is not named by the spec; it behaves like error so it is never lost (Decision 4).
+// Warning is not named by the spec; it behaves like error so it is never lost.
 const autoHides = (type: ToastType): boolean => type === 'success' || type === 'info';
 const roleOf = (type: ToastType): 'status' | 'alert' => (autoHides(type) ? 'status' : 'alert');
 
@@ -89,7 +89,7 @@ function Toast({
   );
 }
 
-// Presentational only: Phase 06's useNotify decides when a toast exists. Each toast runs its own timers.
+// Presentational only: useNotify decides when a toast exists. Each toast runs its own timers.
 export function ToastStack({ toasts, onClose }: ToastStackProps): ReactElement {
   return (
     <div className="ui-toast-stack">

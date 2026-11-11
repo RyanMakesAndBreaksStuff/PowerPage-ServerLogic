@@ -1,5 +1,5 @@
 import type { Reason, SettingName, SettingValue, SiteFacts } from '@/types/inspector';
-import { ENVVAR_CACHE_NOTE, envVarFailureText, NOT_SCANNED_TEXT, TIMEOUT_NOTE } from './copy';
+import { CONFIG_READ_FAILURE, ENVVAR_CACHE_NOTE, envVarFailureText, NOT_SCANNED_TEXT, TIMEOUT_NOTE } from './copy';
 
 export const SETTING_NAMES: readonly SettingName[] = [
   'ServerLogic/Enabled',
@@ -10,13 +10,13 @@ export const SETTING_NAMES: readonly SettingName[] = [
 
 const TIMEOUT_INVALID_TEXT = "`ServerLogic/TimeoutInSeconds` isn't a positive integer up to 240";
 
-export type ParsedSetting<T> = {
+type ParsedSetting<T> = {
   value: T | null;
   reasons: readonly Reason[];
   fromEnvVar: boolean;
   notScanned: boolean;
 };
-export type DomainList = { hosts: readonly string[]; wildcards: readonly string[] };
+type DomainList = { hosts: readonly string[]; wildcards: readonly string[] };
 
 export function normalizeSettingName(raw: string): SettingName | null {
   const name = raw.trim().toLowerCase();
@@ -147,11 +147,12 @@ export function settingBanners(facts: SiteFacts): readonly string[] {
 export function settingSnapshot(facts: SiteFacts): readonly string[] {
   if (!facts.settings.ok) {
     return [
-      facts.settings.reason === 'not-scanned' ? NOT_SCANNED_TEXT : "Couldn't read configuration",
+      facts.settings.reason === 'not-scanned' ? NOT_SCANNED_TEXT : CONFIG_READ_FAILURE,
     ];
   }
+  const settings = facts.settings.value;
   const lines = SETTING_NAMES.map((name) => {
-    const setting = facts.settings.ok ? facts.settings.value[name] : { kind: 'absent' as const };
+    const setting = settings[name];
     if (setting.kind === 'value')
       return `\`${name}\` = ${setting.raw.trim()}${setting.fromEnvVar ? ' (environment variable)' : ''}`;
     if (setting.kind === 'duplicate') return `Duplicate \`${name}\``;
@@ -166,8 +167,8 @@ export function settingSnapshot(facts: SiteFacts): readonly string[] {
           : 'true';
     return `\`${name}\` = ${fallback} (default)`;
   });
-  const values = Object.values(facts.settings.value);
-  const timeout = parseTimeout(facts.settings.value['ServerLogic/TimeoutInSeconds']);
+  const values = Object.values(settings);
+  const timeout = parseTimeout(settings['ServerLogic/TimeoutInSeconds']);
   return [
     ...lines,
     ...facts.inactiveSettings.map((name) => `\`${name}\` (inactive, ignored)`),

@@ -58,7 +58,7 @@ function statusFromMessage(message: string): number | null {
 }
 
 /** A numeric `status` on the error (PPTB error-handling docs) wins; otherwise the status PPTB's message text names. */
-export function statusOf(error: unknown): number | null {
+function statusOf(error: unknown): number | null {
   if (!isRecord(error)) return null;
   const status = error.status;
   if (typeof status === 'number' && Number.isInteger(status)) return status;

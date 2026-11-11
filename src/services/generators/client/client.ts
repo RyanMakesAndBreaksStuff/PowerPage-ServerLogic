@@ -26,7 +26,7 @@ export const CLIENT_PAYLOAD_KEYS: Readonly<Record<string, readonly string[]>> = 
   'R10.patch': ['data'],
 };
 
-/** AC-4.7 server-pane note. Phase 21 renders it when Liquid is selected. */
+/** AC-4.7 server-pane note. */
 export const LIQUID_SERVER_NOTE =
   'Liquid invocation needs no token and reads Server.Context.Input rather than Body or QueryParameters. Long operations cause delayed rendering.';
 

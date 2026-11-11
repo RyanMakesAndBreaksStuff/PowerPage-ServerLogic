@@ -1,6 +1,7 @@
 import type { TextChange } from './codeAnalysis.types';
 import { nodeList } from './structureAst';
 import type { AstNode } from './structureAst';
+import { normalizeLf } from '@/lib/text';
 
 // Private to planInsertion (structure.ts): where and how the sample text goes in. The text is LF-only (normalizeLf).
 
@@ -38,7 +39,7 @@ function blockIndent(code: string, block: AstNode): string {
  * sample has one, so revisit this if one gains one.
  */
 function indentSample(sample: string, indent: string): string {
-  const lines = sample.replace(/\r\n?/g, '\n').split('\n');
+  const lines = normalizeLf(sample).split('\n');
   while (lines[0]?.trim() === '') lines.shift();
   while (lines.at(-1)?.trim() === '') lines.pop();
   const margin = Math.min(

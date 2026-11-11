@@ -6,7 +6,7 @@ import type { RecipeId } from '@/types/recipe';
 import type { StarterDeps } from '@/session/starterDeps';
 import type { StarterAction, StarterState } from '@/types/starter';
 
-export const DEFAULT_RECIPE: RecipeId = 'R1';
+const DEFAULT_RECIPE: RecipeId = 'R1';
 export const DEFAULT_NAME = 'customer-summary';
 export const LIQUID_RESET_NOTICE: Notice = {
   title: "Switched to fetch: this code can't be called from Liquid",

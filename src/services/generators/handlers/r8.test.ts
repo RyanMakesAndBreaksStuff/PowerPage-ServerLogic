@@ -1,19 +1,12 @@
-import { readFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
+import { readGolden } from '@/test/readGolden';
 import { runBrowserChecks } from '@/lib/code-analysis/browserChecks';
 import { exportedFunctionNames, readsHttpOnlyContext } from '@/lib/code-analysis/structure';
 import { getRecipe } from '@/services/catalogue/recipes';
 import { headerComment, validationFailureReturnFor } from '@/services/generators/handlers/snippets';
 import { generateR8 } from './r8';
 
-// Vite rewrites `new URL('./file', import.meta.url)` into an http URL in this client environment,
-// and a file URL whose path contains %20 is rejected by readFileSync on Windows.
-const golden = readFileSync(
-  join(dirname(fileURLToPath(import.meta.url)), '__golden__', 'R8.js.txt'),
-  'utf8',
-);
+const golden = readGolden(import.meta.url, 'R8.js.txt');
 
 describe('generateR8', () => {
   it('matches the golden file', () => {

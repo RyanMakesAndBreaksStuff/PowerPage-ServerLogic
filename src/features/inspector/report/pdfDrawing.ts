@@ -4,7 +4,6 @@ import type { RingState } from '@/lib/ringGeometry';
 
 export const PAGE_MARGIN = 36;
 
-// Original handoff report palette with the A8 adjustments: orange text #b05408, blue chip #1e6dcd.
 export const REPORT_PALETTE = {
   ink: '#14213d',
   muted: '#55607a',

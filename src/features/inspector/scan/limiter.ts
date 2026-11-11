@@ -1,4 +1,4 @@
-export type Limiter = {
+type Limiter = {
   /** Runs `task` once fewer than `limit` tasks are running; waiting tasks start in arrival order. */
   run<T>(task: () => Promise<T>): Promise<T>;
 };

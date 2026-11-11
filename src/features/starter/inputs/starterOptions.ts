@@ -27,14 +27,9 @@ export function recipeCountLabel(count: number): string {
 }
 
 /** All five HTTP methods remain selectable as recipe filters. */
-export function methodFilterOptions(): readonly PillOption<HttpMethod>[] {
-  return HTTP_METHODS.map((method) => ({ value: method, label: method, disabledReason: null }));
-}
-
-/** Whether a recipe exports the function associated with a method filter. */
-export function recipeSupportsMethod(recipe: RecipeMeta, method: HttpMethod): boolean {
-  return methodEnabled(recipe, method);
-}
+export const METHOD_FILTER_OPTIONS: readonly PillOption<HttpMethod>[] = HTTP_METHODS.map(
+  (method) => ({ value: method, label: method }),
+);
 
 /** Recipes whose name or main object contains the query, narrowed to those exporting the method filter's function. */
 export function visibleRecipes(query: string, methodFilter: HttpMethod | null): RecipeMeta[] {
@@ -44,7 +39,7 @@ export function visibleRecipes(query: string, methodFilter: HttpMethod | null): 
       (q === '' ||
         recipe.name.toLowerCase().includes(q) ||
         recipe.mainObject.toLowerCase().includes(q)) &&
-      (methodFilter === null || recipeSupportsMethod(recipe, methodFilter)),
+      (methodFilter === null || methodEnabled(recipe, methodFilter)),
   );
 }
 

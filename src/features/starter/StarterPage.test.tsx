@@ -6,7 +6,7 @@ import { recipeCountLabel } from './inputs/starterOptions';
 import { StarterPage } from './StarterPage';
 import { editorView, renderStarter } from '@/test/starterTestHarness';
 
-// Scoped to their tiles, so the code panes' own pills and text (Phase 21) never match.
+// Scoped to their tiles, so the code panes' own pills and text never match.
 const methodTile = (): HTMLElement => screen.getByRole('region', { name: 'HTTP method' });
 const radio = (name: string): HTMLElement => within(methodTile()).getByRole('radio', { name });
 const nameInput = (): HTMLElement => screen.getByRole('textbox', { name: 'Logic name' });
@@ -18,7 +18,7 @@ async function pickRecipe(user: UserEvent, name: RegExp): Promise<void> {
   await user.click(screen.getByRole('option', { name }));
 }
 
-describe('StarterPage input tiles (Phase 18)', () => {
+describe('StarterPage input tiles', () => {
   it('shows the four input tiles (AC-2.1)', () => {
     renderStarter(<StarterPage />);
     for (const name of ['Logic name', 'HTTP method', 'Recipe', 'Readiness']) {
@@ -227,7 +227,7 @@ describe('StarterPage input tiles (Phase 18)', () => {
   });
 });
 
-describe('StarterPage note and actions (Phase 18)', () => {
+describe('StarterPage note and actions', () => {
   it('shows the recipe permission note and its checklist (AC-5.5, AC-3.6, AC-5.4 label)', () => {
     renderStarter(<StarterPage />);
     const note = screen.getByRole('region', { name: 'Permissions note' });

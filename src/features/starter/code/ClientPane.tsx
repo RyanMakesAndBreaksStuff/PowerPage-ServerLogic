@@ -13,7 +13,7 @@ import './codePanes.css';
 /** The read-only client call (AC-2.4, AC-4.1, AC-4.4, AC-4.7 pill). */
 export function ClientPane(): ReactElement {
   const { state, dispatch, derived } = useStarterSession();
-  // The call shape Phase 14's download uses (its Decision 9), so the pane and the zip's client file match.
+  // The call shape the download uses, so the pane and the zip's client file match.
   const text = generateClient({
     slug: derived.slug,
     recipe: state.recipe,

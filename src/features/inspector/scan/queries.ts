@@ -1,7 +1,7 @@
 import type { ODataQuery } from '@/services/pptb/host.types';
 
 /** Largest page Dataverse returns for one request; the adapter rejects anything bigger. */
-export const PAGE_SIZE = 5000;
+const PAGE_SIZE = 5000;
 
 /** `powerpagecomponenttype` values Inspector reads. */
 export const COMPONENT_TYPE = {
@@ -10,7 +10,7 @@ export const COMPONENT_TYPE = {
   tablePermission: 18,
   serverLogic: 35,
 } as const;
-export type ComponentType = (typeof COMPONENT_TYPE)[keyof typeof COMPONENT_TYPE];
+type ComponentType = (typeof COMPONENT_TYPE)[keyof typeof COMPONENT_TYPE];
 
 /** `environmentvariabledefinition.type` of a Secret variable; its value is never requested. */
 export const SECRET_ENVVAR_TYPE = 100000005;

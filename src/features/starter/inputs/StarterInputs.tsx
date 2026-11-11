@@ -19,7 +19,7 @@ import {
   COLLISION_NOTE_BEFORE,
   collisionNote,
   EDITED_VALIDATION_NOTE,
-  methodFilterOptions,
+  METHOD_FILTER_OPTIONS,
   recipeCountLabel,
   visibleRecipes,
 } from './starterOptions';
@@ -78,7 +78,7 @@ function MethodTile({ methodFilter, onMethodFilterChange }: MethodFilterProps): 
     <Tile heading="HTTP method">
       <PillGroup
         label="HTTP method"
-        options={methodFilterOptions()}
+        options={METHOD_FILTER_OPTIONS}
         value={methodFilter}
         onChange={onMethodFilterChange}
       />

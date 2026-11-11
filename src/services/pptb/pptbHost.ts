@@ -128,17 +128,12 @@ function createEventHub(): PptbHost['onEvent'] {
 /** The two retrieval actions the adapter may execute (spec FR-7 4.1.0, rule file). Anything else is refused. */
 const FILE_ACTIONS: ReadonlySet<string> = new Set(['InitializeFileBlocksDownload', 'DownloadBlock']);
 
-/** True for the two retrieval actions the adapter may execute; exported so the refusal rule is testable. */
-export function isFileAction(name: string): boolean {
-  return FILE_ACTIONS.has(name);
-}
-
 /** FR-7: an unbound `action` request for one of the two file-download actions, with no `entityName` or `entityId`. */
 export function isAllowedFileRequest(request: unknown): boolean {
   return (
     isRecord(request) &&
     typeof request.operationName === 'string' &&
-    isFileAction(request.operationName) &&
+    FILE_ACTIONS.has(request.operationName) &&
     request.operationType === 'action' &&
     !('entityName' in request) &&
     !('entityId' in request)

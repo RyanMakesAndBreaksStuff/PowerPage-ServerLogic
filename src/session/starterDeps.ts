@@ -7,5 +7,5 @@ export type StarterDeps = {
   isLiquidAllowed: (recipe: RecipeMeta, serverText: string) => boolean;
 };
 
-// The real Part B generators. Tests pass FAKE_STARTER_DEPS instead.
+// The real generators; tests pass FAKE_STARTER_DEPS.
 export const STARTER_DEPS: StarterDeps = { generateHandler, isLiquidAllowed };

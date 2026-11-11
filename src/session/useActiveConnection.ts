@@ -24,7 +24,7 @@ export type ConnectionRefresh = {
   readonly pending: boolean;
 };
 
-export const INITIAL_CONNECTION_REFRESH: ConnectionRefresh = {
+const INITIAL_CONNECTION_REFRESH: ConnectionRefresh = {
   refresh: () => undefined,
   pending: false,
 };

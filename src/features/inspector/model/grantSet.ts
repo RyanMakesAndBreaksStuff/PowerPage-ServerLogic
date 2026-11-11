@@ -4,9 +4,11 @@ import type {
   SiteFacts,
   TablePermissionFact,
 } from '@/types/inspector';
+import type { Privilege } from '@/types/recipe';
+import { CONFIG_READ_FAILURE } from './copy';
 
 export type Grant = { permission: TablePermissionFact; roleNames: readonly string[] };
-export type IgnoredGrant = Grant & { reason: 'inactive, ignored' | 'parent inactive, ignored' };
+type IgnoredGrant = Grant & { reason: 'inactive, ignored' | 'parent inactive, ignored' };
 export type GrantSet = {
   grants: readonly Grant[];
   ignored: readonly IgnoredGrant[];
@@ -63,17 +65,18 @@ export function buildGrantSet(facts: SiteFacts, file: ServerLogicFileFacts): Gra
     notScanned: evidence.some((item) => !item.ok && item.reason === 'not-scanned'),
   };
   if (evidence.some((item) => !item.ok && item.reason === 'read-failed')) {
-    return { ...base, reasons: [{ text: "Couldn't read configuration", readFailure: true }] };
+    return { ...base, reasons: [{ text: CONFIG_READ_FAILURE, readFailure: true }] };
   }
   if (!facts.roles.ok || !file.roleIds.ok) return base;
   const roles = facts.roles.value;
+  const roleIds = file.roleIds.value;
   const byRoleId = new Map(roles.map((role) => [role.id, role]));
-  if (file.roleIds.value.some((id) => !byRoleId.has(id))) {
-    return { ...base, reasons: [{ text: "Couldn't read configuration", readFailure: true }] };
+  if (roleIds.some((id) => !byRoleId.has(id))) {
+    return { ...base, reasons: [{ text: CONFIG_READ_FAILURE, readFailure: true }] };
   }
   if (!facts.permissions.ok) return base;
-  const assigned = roles.filter((role) => file.roleIds.ok && file.roleIds.value.includes(role.id));
-  const ids = new Set(file.roleIds.value);
+  const assigned = roles.filter((role) => roleIds.includes(role.id));
+  const ids = new Set(roleIds);
   if (assigned.some((role) => !role.anonymous)) {
     roles.filter((role) => role.authenticated).forEach((role) => ids.add(role.id));
   }
@@ -109,11 +112,15 @@ export function buildGrantSet(facts: SiteFacts, file: ServerLogicFileFacts): Gra
   return { grants, ignored, reasons, roleIds: [...ids], notScanned: false };
 }
 
+export function privilegeLabel(privilege: Privilege): string {
+  return privilege === 'AppendTo' ? 'Append To' : privilege;
+}
+
 export function permissionSnapshot(grants: GrantSet): readonly string[] {
   const describe = ({ permission, roleNames }: Grant): string => {
     const privileges =
       permission.privileges
-        .map((privilege) => (privilege === 'AppendTo' ? 'Append To' : privilege))
+        .map(privilegeLabel)
         .join(', ') || 'No privileges';
     return `${permission.table} · ${permission.scope ?? 'Unknown scope'} · ${privileges} · role ${roleNames.join(', ')}`;
   };

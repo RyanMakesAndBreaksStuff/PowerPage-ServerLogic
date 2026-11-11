@@ -3,14 +3,17 @@ import { getRecipe } from '@/services/catalogue/recipes';
 import {
   TO_RESULT,
   failureReturn,
+  fieldErrorLiteral,
   headerComment,
+  lineNumbersMatching,
   logLine,
   validationFailureReturn,
   validationFailureReturnFor,
 } from './snippets';
+import type { LearnDifference } from './snippets';
 
 /** AC-3.7 differences from the Learn external-services tutorial (Decision 16). */
-export const R5_DIFFERENCES: readonly { change: string; reason: string }[] = [
+export const R5_DIFFERENCES: readonly LearnDifference[] = [
   {
     change:
       "Single-record paths use People('<encoded username>') instead of appending the id before /People.",
@@ -67,7 +70,7 @@ function q(value: string): string {
 }
 
 function pushError(field: string, message: string, indent: string): string {
-  return `${indent}errors.push({ field: ${q(field)}, message: ${q(message)} });`;
+  return `${indent}errors.push(${fieldErrorLiteral(field, message)});`;
 }
 
 /** `baseUrl`, then `"/" + session` when the session is non-empty, then `tail`. */
@@ -210,8 +213,6 @@ export function generateR5(): GeneratedHandler {
     ...handler('del', delInner),
   ].join('\n');
   const withLf = `${text}\n`;
-  const highlightLines = withLf
-    .split('\n')
-    .flatMap((line, index) => (line.includes('Server.Connector.') ? [index + 1] : []));
+  const highlightLines = lineNumbersMatching(withLf, (line) => line.includes('Server.Connector.'));
   return { text: withLf, highlightLines };
 }

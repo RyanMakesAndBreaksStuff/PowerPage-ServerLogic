@@ -4,7 +4,9 @@ import {
   IS_GUID,
   TO_RESULT,
   failureReturn,
+  fieldErrorLiteral,
   headerComment,
+  lineNumbersMatching,
   logLine,
   validationFailureReturnFor,
 } from './snippets';
@@ -29,10 +31,6 @@ function placeholder(name: string): string {
   return `const ${name} = ${JSON.stringify(name)};`;
 }
 
-function errorObject(field: string, message: string): string {
-  return `{ field: ${JSON.stringify(field)}, message: ${JSON.stringify(message)} }`;
-}
-
 function successReturn(dataExpr: string): string {
   const data = dataExpr === 'data' ? 'data' : `data: ${dataExpr}`;
   return `JSON.stringify({ status: ${JSON.stringify('success')}, ${data} })`;
@@ -41,8 +39,8 @@ function successReturn(dataExpr: string): string {
 function idLines(): string[] {
   return [
     '  const id = Server.Context.QueryParameters["id"];',
-    `  if (!id) errors.push(${errorObject('id', 'id is required.')});`,
-    `  else if (!isGuid(id)) errors.push(${errorObject('id', 'id must be a GUID.')});`,
+    `  if (!id) errors.push(${fieldErrorLiteral('id', 'id is required.')});`,
+    `  else if (!isGuid(id)) errors.push(${fieldErrorLiteral('id', 'id must be a GUID.')});`,
   ];
 }
 
@@ -132,7 +130,7 @@ function postFunction(): string[] {
     'function post() {',
     '  const errors = [];',
     '  const body = parseJsonObject();',
-    `  if (body === null) errors.push(${errorObject('body', 'Body must be a JSON object.')});`,
+    `  if (body === null) errors.push(${fieldErrorLiteral('body', 'Body must be a JSON object.')});`,
     ...validationReturn(),
     '  try {',
     invokeLine('R10 post', [JSON.stringify('post'), UNBOUND_ACTION, 'JSON.stringify(body)']),
@@ -147,7 +145,7 @@ function patchFunction(entitySet: string): string[] {
     '  const errors = [];',
     ...idLines(),
     '  const body = parseJsonObject();',
-    `  if (body === null) errors.push(${errorObject('body', 'Body must be a JSON object.')});`,
+    `  if (body === null) errors.push(${fieldErrorLiteral('body', 'Body must be a JSON object.')});`,
     ...validationReturn(),
     '  try {',
     boundUrl(entitySet, BOUND_ACTION),
@@ -182,9 +180,10 @@ export function generateR10(): GeneratedHandler {
     '',
     ...patchFunction(table.entitySetName),
   ];
-  const highlightLines = lines.flatMap((line, index) =>
-    line.includes('Server.Connector.Dataverse.InvokeCustomApi(') ? [index + 1] : [],
+  const text = `${lines.join('\n')}\n`;
+  const highlightLines = lineNumbersMatching(text, (line) =>
+    line.includes('Server.Connector.Dataverse.InvokeCustomApi('),
   );
   if (highlightLines.length !== 3) throw new Error('R10 highlight lines');
-  return { text: `${lines.join('\n')}\n`, highlightLines };
+  return { text, highlightLines };
 }

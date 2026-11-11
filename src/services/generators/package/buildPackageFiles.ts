@@ -5,26 +5,11 @@ import type {
 import { normalizeLf } from '@/lib/text';
 import { checklistLines, getRecipe } from '@/services/catalogue/recipes';
 import { generateDemoPage } from '@/services/generators/handlers';
-import type { ClientLanguage } from '@/types/http';
 import type { RecipeMeta } from '@/types/recipe';
-import { buildReadme, readinessBlock } from './readme';
+import { buildReadme, clientSuffix, readinessBlock } from './readme';
 
 function withFinalNewline(text: string): string {
   return text.endsWith('\n') ? text : `${text}\n`;
-}
-
-function clientSuffix(language: ClientLanguage): string {
-  switch (language) {
-    case 'liquid':
-      return '.client.liquid';
-    case 'fetch':
-    case 'jquery':
-      return '.client.js';
-    default: {
-      const unreachable: never = language;
-      return unreachable;
-    }
-  }
 }
 
 function buildChecklist(slug: string, recipe: RecipeMeta, derived: StarterDerived): string {

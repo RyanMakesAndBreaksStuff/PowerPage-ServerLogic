@@ -1,4 +1,4 @@
-import type { RecipeMeta } from '@/types/recipe';
+import type { GeneratedHandler, RecipeMeta } from '@/types/recipe';
 
 /** Learn correction 11: normalise every connector result with this exact line. */
 export const TO_RESULT = 'const toResult = r => typeof r === "string" ? JSON.parse(r) : r;';
@@ -12,9 +12,12 @@ export const IS_GUID = `const isGuid = s => typeof s === "string" && /${GUID_PAT
 /** Top-level `message` of every validation failure; the spec fixes only the `errors` array. */
 export const VALIDATION_MESSAGE = "The request isn't valid.";
 
-export type FieldError = { field: string; message: string };
+type FieldError = { field: string; message: string };
 
-export type LogLevel = 'Log' | 'Warn' | 'Error';
+/** One AC-3.7 difference from the Learn tutorial a recipe adapts. */
+export type LearnDifference = { readonly change: string; readonly reason: string };
+
+type LogLevel = 'Log' | 'Warn' | 'Error';
 
 /**
  * The only values the FR-3 logging rule lets generated code log, besides a fixed operation name
@@ -23,15 +26,13 @@ export type LogLevel = 'Log' | 'Warn' | 'Error';
  */
 export type LogField = 'status' | 'reason' | 'exception' | 'activity';
 
-export type LogLineInput = {
+type LogLineInput = {
   level: LogLevel;
   /** A fixed operation name, emitted as a JSON string literal. */
   operation: string;
   fields?: readonly LogField[];
   /** Name of the connector-result variable in the emitted code. Default `r`. */
   result?: string;
-  /** Name of the caught-exception variable in the emitted code. Default `e`. */
-  error?: string;
   indent?: string;
 };
 
@@ -72,11 +73,14 @@ export function failureReturn(message: string, indent = ''): string {
   return `${indent}return JSON.stringify({ status: "error", message: ${JSON.stringify(message)} });`;
 }
 
+/** `{ field, message }` with both strings passed through JSON.stringify. */
+export function fieldErrorLiteral(field: string, message: string): string {
+  return `{ field: ${JSON.stringify(field)}, message: ${JSON.stringify(message)} }`;
+}
+
 /** Failure object plus `errors: [{ field, message }]`, for errors known when the code is generated. */
 export function validationFailureReturn(errors: readonly FieldError[], indent = ''): string {
-  const list = errors
-    .map((e) => `{ field: ${JSON.stringify(e.field)}, message: ${JSON.stringify(e.message)} }`)
-    .join(', ');
+  const list = errors.map((e) => fieldErrorLiteral(e.field, e.message)).join(', ');
   return `${indent}return JSON.stringify({ status: "error", message: ${JSON.stringify(VALIDATION_MESSAGE)}, errors: [${list}] });`;
 }
 
@@ -89,11 +93,10 @@ export function validationFailureReturnFor(errorsVar: string, indent = ''): stri
 /** One `Server.Logger.<level>(...)` call that logs only what the FR-3 logging rule allows. */
 export function logLine(i: LogLineInput): string {
   const result = identifier(i.result ?? 'r', 'result variable');
-  const error = identifier(i.error ?? 'e', 'error variable');
   const expression: Record<LogField, string> = {
     status: `${result}.StatusCode`,
     reason: `${result}.ReasonPhrase`,
-    exception: `${error}.name`,
+    exception: 'e.name',
     activity: 'Server.Context.ActivityId',
   };
   const parts = [JSON.stringify(i.operation), ...(i.fields ?? []).map((f) => expression[f])];
@@ -120,4 +123,16 @@ export function requireSettingsCode(names: readonly string[], indent: string): s
       ].join('\n');
     })
     .join('\n');
+}
+
+/** 1-based numbers of every line in `text` that passes `test`. */
+export function lineNumbersMatching(text: string, test: (line: string) => boolean): number[] {
+  return text.split('\n').flatMap((line, index) => (test(line) ? [index + 1] : []));
+}
+
+/** The handler with its first line equal to `line` highlighted; throws when there is none. */
+export function singleHighlight(id: string, text: string, line: string): GeneratedHandler {
+  const [first] = lineNumbersMatching(text, (row) => row === line);
+  if (first === undefined) throw new Error(`${id} highlight line missing`);
+  return { text, highlightLines: [first] };
 }

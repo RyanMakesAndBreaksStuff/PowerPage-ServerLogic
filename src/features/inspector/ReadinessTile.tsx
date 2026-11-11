@@ -1,17 +1,8 @@
 import type { ReactElement } from 'react';
 import { Ring } from '@/components/Ring';
 import { Tile } from '@/components/Tile';
-import type { RingState } from '@/lib/ringGeometry';
-import type { CheckStatus, FileResult } from '@/types/inspector';
-import { countChecks, ringLegend } from './model/rules';
-
-// Configured and Reviewed both count toward K (AC-8.1); Not scanned is its own grey segment.
-const RING_STATE = {
-  configured: 'done',
-  reviewed: 'done',
-  'needs-review': 'review',
-  'not-scanned': 'not-scanned',
-} as const satisfies Record<CheckStatus, RingState>;
+import type { FileResult } from '@/types/inspector';
+import { countChecks, RING_STATE, ringLegend } from './model/rules';
 
 /** The readiness ring: "K/3 addressed" with the legend "C configured · V reviewed · M review" (AC-8.1). */
 export function ReadinessTile({ file }: { file: FileResult }): ReactElement {

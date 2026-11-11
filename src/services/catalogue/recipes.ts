@@ -22,7 +22,7 @@ const withUpstreamLine = (note: string): string => `${note} ${UPSTREAM_CREDENTIA
 
 /**
  * Ten recipes, literal from spec FR-3. `functions` lists handler entry points only: R7's
- * getAccessToken and escapeHtml are file-private helpers (see the phase 05 Decisions).
+ * getAccessToken and escapeHtml are file-private helpers.
  * `examples` is keyed by function name; queries keep their leading "?".
  */
 export const RECIPES: readonly RecipeMeta[] = [
@@ -446,7 +446,7 @@ export function methodEnabled(recipe: RecipeMeta, method: HttpMethod): boolean {
 /**
  * Source lines for permission-checklist.md (AC-5.6): web role, tables, Account relationship,
  * allowed domains, site settings, then prerequisites (which hold the Account test-user line).
- * Plain text; Phase 14 adds the "- [ ] " prefix.
+ * Plain text; buildPackageFiles adds the checkbox prefix.
  */
 export function checklistLines(recipe: RecipeMeta): readonly string[] {
   const lines: string[] = [`Web role: ${recipe.webRole}`];

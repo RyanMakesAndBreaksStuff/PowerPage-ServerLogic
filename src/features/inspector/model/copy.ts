@@ -1,6 +1,6 @@
 import type { CheckId, EnvVarCause, UnreadableRow } from '@/types/inspector';
 
-export type CheckCopy = {
+type CheckCopy = {
   title: string;
   category: string;
   guidance: string;
@@ -50,6 +50,7 @@ export const TIMEOUT_NOTE =
 export const TENANT_POLICY_NOTE =
   "Tenant outbound policy: not verified. This tool doesn't read tenant network policy.";
 export const NOT_SCANNED_TEXT = 'Not read before the connection was lost';
+export const CONFIG_READ_FAILURE = "Couldn't read configuration";
 export const CODE_READ_FAILURE = "Couldn't read handler code";
 export const CODE_ANALYSIS_LIMIT = "Couldn't analyse handler code";
 export const CONNECTORS_UNKNOWN = "Couldn't determine which connectors the code uses.";

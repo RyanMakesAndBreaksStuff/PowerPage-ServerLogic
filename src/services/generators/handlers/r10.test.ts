@@ -1,21 +1,16 @@
 // @vitest-environment node
-import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
+import { readGolden } from '@/test/readGolden';
 import { runBrowserChecks } from '@/lib/code-analysis/browserChecks';
 import { exportedFunctionNames } from '@/lib/code-analysis/structure';
 import { getRecipe } from '@/services/catalogue/recipes';
 import { IS_GUID, TO_RESULT, headerComment } from '@/services/generators/handlers/snippets';
 import { generateR10 } from './r10';
 
-const GOLDEN = new URL('./__golden__/R10.js.txt', import.meta.url);
 const INVOKE = 'Server.Connector.Dataverse.InvokeCustomApi(';
 const VALIDATION_RETURN =
   'return JSON.stringify({ status: "error", message: "The request isn\'t valid.", errors: errors });';
 const PLACEHOLDERS = ['new_CustomBoundFunction', 'new_Action', 'new_CustomBoundAction'] as const;
-
-function goldenText(): string {
-  return readFileSync(GOLDEN, 'utf8');
-}
 
 function sliceFunction(text: string, name: string): string {
   const marker = `function ${name}() {`;
@@ -33,7 +28,7 @@ function lineAt(text: string, line: number): string {
 
 describe('R10 handler', () => {
   it('matches the golden file exactly', () => {
-    expect(generateR10().text).toBe(goldenText());
+    expect(generateR10().text).toBe(readGolden(import.meta.url, 'R10.js.txt'));
   });
 
   it('highlights exactly the three InvokeCustomApi call lines', () => {

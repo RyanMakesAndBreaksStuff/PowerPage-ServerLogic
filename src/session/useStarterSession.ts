@@ -13,11 +13,7 @@ type StarterSession = {
 
 export const StarterSessionContext = createContext<StarterSession | null>(null);
 
-export function useStarterSession(): {
-  state: StarterState;
-  dispatch: (a: StarterAction) => void;
-  derived: StarterDerived;
-} {
+export function useStarterSession(): StarterSession {
   const session = use(StarterSessionContext);
   if (session === null)
     throw new Error('useStarterSession must be used inside StarterSessionProvider');

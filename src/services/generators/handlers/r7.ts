@@ -3,15 +3,16 @@ import { getRecipe } from '@/services/catalogue/recipes';
 import {
   TO_RESULT,
   failureReturn,
+  fieldErrorLiteral,
   headerComment,
   logLine,
   requireSettingsCode,
   validationFailureReturnFor,
 } from './snippets';
-import type { LogField } from './snippets';
+import type { LearnDifference, LogField } from './snippets';
 
 /** Differences from the Learn Graph and SharePoint tutorial (AC-3.7, Decision 16). */
-export const R7_DIFFERENCES: readonly { change: string; reason: string }[] = [
+export const R7_DIFFERENCES: readonly LearnDifference[] = [
   {
     change: 'Site settings are read inside post with fail-closed checks, not at top level.',
     reason: 'A missing site setting fails closed before any outbound call (F57).',
@@ -89,10 +90,6 @@ const BLOCK = '      ';
 
 function q(value: string): string {
   return JSON.stringify(value);
-}
-
-function fieldError(field: string, message: string): string {
-  return `{ field: ${q(field)}, message: ${q(message)} }`;
 }
 
 function stageReturn(
@@ -181,7 +178,7 @@ function validateLines(): string[] {
   return [
     '  const parsed = parseJsonObject();',
     '  if (parsed === null) {',
-    `    const errors = [${fieldError('body', BODY)}];`,
+    `    const errors = [${fieldErrorLiteral('body', BODY)}];`,
     validationFailureReturnFor('errors', TRY),
     '  }',
     `  const fullname = typeof parsed.fullname === ${q('string')} ? parsed.fullname.trim() : parsed.fullname;`,
@@ -192,7 +189,7 @@ function validateLines(): string[] {
     '  const date = parsed.date;',
     '  const errors = [];',
     `  if (typeof fullname !== ${q('string')} || fullname.length === 0 || fullname.length > 200) {`,
-    `    errors.push(${fieldError('fullname', FULLNAME)});`,
+    `    errors.push(${fieldErrorLiteral('fullname', FULLNAME)});`,
     '  }',
     '  let emailOk = false;',
     `  if (typeof email === ${q('string')} && email.length > 0 && email.length <= 100) {`,
@@ -200,19 +197,19 @@ function validateLines(): string[] {
     `    emailOk = parts.length === 2 && parts[1].indexOf(${q('.')}) !== -1;`,
     '  }',
     '  if (!emailOk) {',
-    `    errors.push(${fieldError('email', EMAIL)});`,
+    `    errors.push(${fieldErrorLiteral('email', EMAIL)});`,
     '  }',
     `  if (typeof phone !== ${q('string')} || phone.length === 0 || phone.length > 100) {`,
-    `    errors.push(${fieldError('phone', PHONE)});`,
+    `    errors.push(${fieldErrorLiteral('phone', PHONE)});`,
     '  }',
     '  if (!Number.isInteger(event)) {',
-    `    errors.push(${fieldError('event', EVENT)});`,
+    `    errors.push(${fieldErrorLiteral('event', EVENT)});`,
     '  }',
     `  if (typeof eventText !== ${q('string')} || eventText.length === 0 || eventText.length > 200) {`,
-    `    errors.push(${fieldError('eventText', EVENT_TEXT)});`,
+    `    errors.push(${fieldErrorLiteral('eventText', EVENT_TEXT)});`,
     '  }',
     `  if (typeof date !== ${q('string')} || !/^\\d{4}-\\d{2}-\\d{2}$/.test(date)) {`,
-    `    errors.push(${fieldError('date', DATE)});`,
+    `    errors.push(${fieldErrorLiteral('date', DATE)});`,
     '  }',
     '  if (errors.length > 0) {',
     validationFailureReturnFor('errors', TRY),

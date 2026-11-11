@@ -1,5 +1,5 @@
 import { useTransition } from 'react';
-import type { ReactNode } from 'react';
+import type { ReactElement } from 'react';
 import { useHost } from '@/session/HostContext';
 import { useNotify } from '@/session/useNotify';
 import { useStarterSession } from '@/session/useStarterSession';
@@ -12,7 +12,7 @@ import { errorName } from '@/services/pptb/hostErrors';
 
 const STARTER_SAVE_FAILED_BODY = 'The file could not be written. Check the folder and try again.';
 
-export function DownloadStarterButton(): ReactNode {
+export function DownloadStarterButton(): ReactElement {
   const { state, derived } = useStarterSession();
   const host = useHost();
   const notify = useNotify();
@@ -20,16 +20,17 @@ export function DownloadStarterButton(): ReactNode {
 
   function onClick(): void {
     const slug = derived.slug;
-    const recipe = state.recipe;
-    const fn = derived.fn;
-    const method = state.method;
-    const language = state.language;
-    const packaged = { state, derived };
     startTransition(async () => {
       let bytes: Uint8Array;
       try {
-        const clientText = generateClient({ slug, recipe, fn, method, language });
-        bytes = buildZip(buildPackageFiles({ ...packaged, clientText }));
+        const clientText = generateClient({
+          slug,
+          recipe: state.recipe,
+          fn: derived.fn,
+          method: state.method,
+          language: state.language,
+        });
+        bytes = buildZip(buildPackageFiles({ state, derived, clientText }));
       } catch (error: unknown) {
         console.error(errorName(error));
         const reason = error instanceof Error ? error.message : 'Unknown error';

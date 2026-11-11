@@ -13,13 +13,14 @@ import {
   CHECK_COPY,
   CODE_ANALYSIS_LIMIT,
   CODE_READ_FAILURE,
+  CONFIG_READ_FAILURE,
   CONNECTORS_UNKNOWN,
   ENVVAR_CACHE_NOTE,
   FLOW_NOTE,
   NOT_SCANNED_TEXT,
   OTHER_ROLES_NOTE,
 } from './copy';
-import { buildGrantSet, permissionSnapshot } from './grantSet';
+import { buildGrantSet, permissionSnapshot, privilegeLabel } from './grantSet';
 import type { GrantSet } from './grantSet';
 import { parseAllowedDomains, parseBooleanSetting, settingSnapshot } from './settings';
 
@@ -101,7 +102,7 @@ function webRole(facts: SiteFacts, file: ServerLogicFileFacts): Finding {
     failed ||
     (facts.roles.ok && file.roleIds.ok && ids.some((id) => !roles.some((role) => role.id === id)))
   ) {
-    reasons.push({ text: "Couldn't read configuration", readFailure: true });
+    reasons.push({ text: CONFIG_READ_FAILURE, readFailure: true });
   }
   // Assigned role names are snapshot rows (FileResult.snapshot.roles), not explanation.
   return makeFinding('webRole', 'Web role assigned.', reasons, [], notScanned);
@@ -135,7 +136,7 @@ function tablePermissions(grants: GrantSet, analysis: Analysis): Finding {
       readFailure: false,
     });
     detail.push(
-      `Change privileges found: ${changes.map((privilege) => (privilege === 'AppendTo' ? 'Append To' : privilege)).join(', ')}.`,
+      `Change privileges found: ${changes.map(privilegeLabel).join(', ')}.`,
       'Based on exported function names, not on what the code does.',
     );
   }
@@ -190,7 +191,7 @@ function outbound(facts: SiteFacts, analysis: Analysis): Finding {
   const reasons: Reason[] = codeReason === null ? [] : [codeReason];
   if (!facts.settings.ok) {
     if (facts.settings.reason === 'read-failed') {
-      reasons.push({ text: "Couldn't read configuration", readFailure: true });
+      reasons.push({ text: CONFIG_READ_FAILURE, readFailure: true });
     }
     return makeFinding(
       'outbound',
@@ -243,10 +244,11 @@ export function evaluateFileChecks(facts: SiteFacts, file: ServerLogicFileFacts)
   const web = webRole(facts, file);
   const tables = tablePermissions(grants, analysis);
   const network = outbound(facts, analysis);
+  const roleIds = file.roleIds.ok ? file.roleIds.value : null;
   const roles =
-    facts.roles.ok && file.roleIds.ok
+    facts.roles.ok && roleIds !== null
       ? facts.roles.value
-          .filter((role) => file.roleIds.ok && file.roleIds.value.includes(role.id))
+          .filter((role) => roleIds.includes(role.id))
           .map(
             (role) =>
               `${role.name}${role.anonymous ? ' (Anonymous Users Role)' : role.authenticated ? ' (Authenticated Users Role)' : ''}`,

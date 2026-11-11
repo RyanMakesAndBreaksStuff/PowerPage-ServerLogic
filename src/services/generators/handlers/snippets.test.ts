@@ -206,7 +206,6 @@ describe('logLine (FR-3 logging rule, F09)', () => {
         operation: 'R9 trigger',
         fields: ['status'],
         result: 'flow',
-        error: 'err',
       }),
     ).toBe('Server.Logger.Warn("R9 trigger" + " " + flow.StatusCode);');
   });
@@ -236,12 +235,9 @@ describe('logLine (FR-3 logging rule, F09)', () => {
     expect(all).not.toMatch(/\.Body|\.message|\.Headers|Url|Token/);
   });
 
-  it('rejects a result or error name that is not an identifier', () => {
+  it('rejects a result name that is not an identifier', () => {
     expect(() =>
       logLine({ level: 'Error', operation: 'x', fields: ['status'], result: 'r; evil()' }),
-    ).toThrow();
-    expect(() =>
-      logLine({ level: 'Error', operation: 'x', fields: ['exception'], error: 'e.x' }),
     ).toThrow();
   });
 });

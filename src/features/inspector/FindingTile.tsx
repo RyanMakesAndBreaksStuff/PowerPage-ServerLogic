@@ -16,7 +16,7 @@ const GLYPH = {
   'not-scanned': 'subtract',
 } as const satisfies Record<CheckStatus, IconName>;
 
-export type FindingTileProps = {
+type FindingTileProps = {
   finding: Finding;
   /** Which of the three grid cells the tile takes (layout 10a): 0, 1 or 2. */
   slot: number;

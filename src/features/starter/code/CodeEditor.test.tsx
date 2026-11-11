@@ -64,7 +64,7 @@ describe('CodeEditor', () => {
     expect(onEdit).toHaveBeenLastCalledWith(`a\nb\nc\n${TEXT}`, 6);
   });
 
-  it('takes an outside change as one undo step and does not report it back (Phase 18a Decision 1)', () => {
+  it('takes an outside change as one undo step and does not report it back', () => {
     const { view, onEdit, update } = mount();
     update({ value: `// inserted\n${TEXT}`, cursor: 12 });
     expect(view.state.doc.toString()).toBe(`// inserted\n${TEXT}`);

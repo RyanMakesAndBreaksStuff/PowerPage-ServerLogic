@@ -25,7 +25,7 @@ function utcOffset(date: Date): string {
 }
 
 // A host alias counts only when it isn't part of a longer name; the configured strings themselves
-// stay exact, case-sensitive substrings, as before.
+// stay exact, case-sensitive substrings.
 const NAME_CHARACTER = /[A-Za-z0-9_-]/;
 
 type Identifier = {
@@ -118,10 +118,7 @@ function rowModel(
   redact: (text: string) => string,
 ): ReportRow {
   return {
-    fileId: file.fileId,
     name: displayName(file),
-    active: file.active,
-    counts: countChecks(file.findings),
     summary: fileSummary(file),
     result: filePill(file),
     checks: CHECK_ORDER.flatMap((check) =>
@@ -142,7 +139,6 @@ function sections(rows: readonly ReportRow[], status: CheckStatus): readonly Rep
           check,
           title: finding.title,
           summary: finding.finding,
-          reasons: finding.reasons,
           guidance: finding.guidance,
           questions: finding.questions,
           detail: finding.detail,

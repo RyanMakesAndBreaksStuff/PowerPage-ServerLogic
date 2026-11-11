@@ -3,16 +3,17 @@ import { detectConnectorUse, exportedFunctionNames } from '@/lib/code-analysis/s
 import { getRecipe } from '@/services/catalogue/recipes';
 import { createContext, runInContext } from 'node:vm';
 import { describe, expect, it } from 'vitest';
+import { readGolden } from '@/test/readGolden';
 import { R4_DIFFERENCES, generateR4 } from './r4';
 import { headerComment } from './snippets';
-import { assertZeroHits, loggingGuardViolations, readGolden } from './tutorial.testkit';
+import { assertZeroHits, loggingGuardViolations } from './tutorial.testkit';
 
 /** 1-based lines in R4.js.txt that call Server.Connector.Dataverse. */
 const HIGHLIGHTS: readonly number[] = [91, 105, 134, 164, 187];
 
 describe('R4 handler', () => {
   it('matches the golden file', () => {
-    expect(generateR4().text).toBe(readGolden('R4.js.txt'));
+    expect(generateR4().text).toBe(readGolden(import.meta.url, 'R4.js.txt'));
   });
 
   it('highlights every Server.Connector call and no other line', () => {
