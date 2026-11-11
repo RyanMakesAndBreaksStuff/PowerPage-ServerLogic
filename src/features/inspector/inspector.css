@@ -11,18 +11,6 @@
   color: var(--text);
 }
 
-.inspector-sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  margin: -1px;
-  padding: 0;
-  overflow: hidden;
-  border: 0;
-  clip-path: inset(50%);
-  white-space: nowrap;
-}
-
 /* Notices: neutral, with a glyph and words, so a warning is never colour alone. */
 .inspector-banners {
   flex: none;

@@ -1,5 +1,5 @@
 import type { CheckId, CheckStatus, Counts } from '@/types/inspector';
-import type { ReportFormat, ReportScope } from '@/types/report';
+import type { ReportScope } from '@/types/report';
 
 type ReportLine = { readonly label: string; readonly text: string };
 export type ReportCheck = {
@@ -38,8 +38,6 @@ export type ReportSnapshot = {
 // Contains display-ready, redacted text; renderers alone own format-specific escaping.
 export type ReportModel = {
   readonly scope: ReportScope;
-  readonly format: ReportFormat;
-  readonly stem: string;
   readonly title: string;
   readonly header: { readonly brand: string; readonly label: string; readonly exportedAt: string };
   readonly lines: readonly ReportLine[];

@@ -270,7 +270,7 @@ export function InspectorPage(): ReactElement {
   }, [staleCloses]);
   return (
     <section className="inspector" aria-label="Logic Inspector">
-      <div role="status" aria-label="Inspector status" className="inspector-sr-only">
+      <div role="status" aria-label="Inspector status" className="ui-visually-hidden">
         {announcementFor(state)}
       </div>
       <PageNotices connection={connection} onRetry={focus.request} />

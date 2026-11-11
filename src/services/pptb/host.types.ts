@@ -1,5 +1,5 @@
 export type ThemeName = 'light' | 'dark';
-type NoticeType ='success' | 'info' | 'warning' | 'error';
+type NoticeType = 'success' | 'info' | 'warning' | 'error';
 export type Notice = { title: string; body: string; type: NoticeType };
 export type EnvironmentLabel = 'Dev' | 'Test' | 'UAT' | 'Production' | 'Unknown';
 export type Connection = { id: string; name: string; url: string; environment: EnvironmentLabel };

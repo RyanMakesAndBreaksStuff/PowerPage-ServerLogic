@@ -1,9 +1,8 @@
 // @vitest-environment jsdom
 import { act, screen, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { renderInspector } from '@/test/inspectorTestHarness';
-import type { InspectorHarnessOptions } from '@/test/inspectorTestHarness';
-import { fixedDeps } from '@/test/fixedDeps';
+import { renderScannedInspector } from '@/test/inspectorTestHarness';
+import type { ScannedInspectorOptions } from '@/test/inspectorTestHarness';
 import { CONNECTION, createInspectorHost, OTHER_CONNECTION, SITE_ALPHA } from '@/test/inspectorWorld';
 import type { SiteFacts } from '@/types/inspector';
 import { CHECK_COPY, NOT_SCANNED_TEXT } from './model/copy';
@@ -15,7 +14,6 @@ import {
   NO_FILES_TEXT,
   NOTHING_READ_TEXT,
 } from './pageCopy';
-import { InspectorPage } from './InspectorPage';
 
 beforeEach(() => {
   vi.spyOn(console, 'error').mockImplementation(() => undefined);
@@ -49,21 +47,11 @@ const rail = () => screen.getByRole('region', { name: /^Server logic \(/ });
 const fileButton = (name: RegExp) => within(rail()).getByRole('button', { name });
 
 /** Scans Alpha portal and stops on the finished page with no file selected (D-03). */
-async function scanned(data: SiteFacts = facts(), options: InspectorHarnessOptions = {}) {
-  const view = renderInspector(<InspectorPage />, {
-    deps: fixedDeps(data),
-    ...options,
-    sitePill: true,
-  });
-  await screen.findByRole('heading', { name: 'Select a site' });
-  await view.user.click(screen.getByRole('combobox', { name: 'Power Pages site' }));
-  await view.user.click(screen.getByRole('option', { name: /Alpha portal/ }));
-  await screen.findByRole('heading', { name: 'Review server logic readiness' });
-  return view;
-}
+const scanned = (data: SiteFacts = facts(), options: ScannedInspectorOptions = {}) =>
+  renderScannedInspector(data, options);
 
 /** The finished page with the first file, customer-summary, chosen in the rail. */
-async function open(data: SiteFacts = facts(), options: InspectorHarnessOptions = {}) {
+async function open(data: SiteFacts = facts(), options: ScannedInspectorOptions = {}) {
   const view = await scanned(data, options);
   await view.user.click(fileButton(/customer-summary/));
   return view;

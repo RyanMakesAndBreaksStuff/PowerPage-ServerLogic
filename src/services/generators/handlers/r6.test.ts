@@ -1,7 +1,6 @@
 // @vitest-environment node
 import { describe, expect, it } from 'vitest';
 import { readGolden } from '@/test/readGolden';
-import { runBrowserChecks } from '@/lib/code-analysis/browserChecks';
 import { detectConnectorUse, exportedFunctionNames } from '@/lib/code-analysis/structure';
 import { getRecipe } from '@/services/catalogue/recipes';
 import { R6_DIFFERENCES, generateR6 } from '@/services/generators/handlers/r6';
@@ -10,6 +9,7 @@ import {
   requireSettingsCode,
   validationFailureReturn,
 } from '@/services/generators/handlers/snippets';
+import { assertZeroHits } from './tutorial.testkit';
 
 const GOLDEN = readGolden(import.meta.url, 'R6.js.txt');
 const MISSING_SETTING = "Server logic isn't configured: missing site setting AZURE_FUNCTION_URL";
@@ -122,10 +122,7 @@ describe('generateR6', () => {
   });
 
   it('has zero FR-4 hits', () => {
-    const { text } = generateR6();
-    const result = runBrowserChecks(text);
-    expect(result.hits).toEqual([]);
-    expect(result.parseFailed).toBe(false);
+    assertZeroHits(generateR6().text);
   });
 
   it('header links the Learn tutorial', () => {

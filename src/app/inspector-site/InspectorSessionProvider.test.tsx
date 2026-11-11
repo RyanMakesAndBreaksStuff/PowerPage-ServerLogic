@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { act, cleanup, screen, waitFor } from '@testing-library/react';
+import { act, screen, waitFor } from '@testing-library/react';
 import { useEffect } from 'react';
 import type { ReactElement } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -11,7 +11,6 @@ import type { InspectorDeps } from '@/features/inspector/inspectorDeps';
 import { renderInspector } from '@/test/inspectorTestHarness';
 import { useInspector } from '@/session/useInspector';
 
-afterEach(cleanup);
 beforeEach(() => {
   vi.spyOn(console, 'error').mockImplementation(() => undefined);
 });

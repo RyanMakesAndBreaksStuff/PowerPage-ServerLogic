@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
-import { act, cleanup, render } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { act, render } from '@testing-library/react';
+import { beforeEach, describe, expect, it } from 'vitest';
 import type { ReactElement } from 'react';
 import { applyTheme, useHostTheme } from '@/app/useHostTheme';
 import { createFakeHost } from '@/services/pptb/fakeHost';
@@ -19,7 +19,6 @@ const flush = () =>
 beforeEach(() => {
   applyTheme('light');
 });
-afterEach(cleanup);
 
 describe('useHostTheme (AC-1.6)', () => {
   it('re-reads the theme on settings-updated', async () => {

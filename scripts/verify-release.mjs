@@ -79,17 +79,14 @@ function checkTarball() {
   const { main } = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8'));
   const stray = paths.filter((path) => !path.startsWith('dist/') && !NPM_DEFAULT_FILE.test(path) && path !== main);
   if (stray.length > 0) console.error(`Outside dist/ and npm's default files: ${stray.join(', ')}`);
-  const named = paths.filter((path) => /inspector/i.test(path));
-  if (named.length > 0) console.error(`Inspector files in the tarball: ${named.join(', ')}`);
   if (!paths.includes('dist/index.html')) console.error('dist/index.html is missing from the tarball.');
-  const leaks = paths
-    .filter((path) => path.startsWith('dist/') && /\.(js|html|css)$/.test(path))
-    .flatMap((path) => {
-      const text = readFileSync(join(ROOT, path), 'utf8');
-      return INSPECTOR_MARKERS.filter((marker) => text.includes(marker)).map((marker) => `${path}: "${marker}"`);
-    });
-  if (leaks.length > 0) console.error(`Inspector page content in the tarball:\n  ${leaks.join('\n  ')}`);
-  return stray.length === 0 && named.length === 0 && leaks.length === 0 && paths.includes('dist/index.html');
+  // v1.0.0 is the full build (spec 4.5.0): a tarball without the Inspector page is a partial build.
+  const scripts = paths
+    .filter((path) => path.startsWith('dist/') && path.endsWith('.js'))
+    .map((path) => readFileSync(join(ROOT, path), 'utf8'));
+  const missing = INSPECTOR_MARKERS.filter((marker) => !scripts.some((text) => text.includes(marker)));
+  if (missing.length > 0) console.error(`Inspector page text missing from the tarball: ${missing.join(', ')}`);
+  return stray.length === 0 && missing.length === 0 && paths.includes('dist/index.html');
 }
 
 function checkSize() {
@@ -105,7 +102,7 @@ function checkSize() {
 await step('typecheck', npmRun('typecheck'));
 await step('lint', npmRun('lint'));
 await step('test', npmRun('test'));
-await step('build:beta', npmRun('build:beta'));
+await step('build', npmRun('build'));
 await step('validate', validateManifest);
 await step('size budget', checkSize);
 await step('tarball contents', checkTarball);

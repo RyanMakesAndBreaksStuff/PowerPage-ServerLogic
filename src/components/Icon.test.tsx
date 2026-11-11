@@ -1,11 +1,9 @@
 // @vitest-environment jsdom
-import { cleanup, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it } from 'vitest';
+import { render, screen } from '@testing-library/react';
+import { describe, expect, it } from 'vitest';
 import { Icon } from './Icon';
 import { ICONS } from './icons';
 import type { IconName } from './icons';
-
-afterEach(cleanup);
 
 describe('Icon', () => {
   it('renders path data for every mapped Fluent icon', () => {

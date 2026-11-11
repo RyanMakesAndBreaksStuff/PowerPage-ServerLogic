@@ -4,16 +4,14 @@ import type { UserEvent } from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { INSPECTOR_DEPS } from '@/features/inspector/inspectorDeps';
 import type { InspectorDeps } from '@/features/inspector/inspectorDeps';
-import { renderInspector } from '@/test/inspectorTestHarness';
+import { renderScannedInspector } from '@/test/inspectorTestHarness';
 import { deferred } from '@/test/deferred';
-import { fixedDeps } from '@/test/fixedDeps';
 import type { GatedHost } from '@/test/gatedHost';
 import { SITE_ALPHA } from '@/test/inspectorWorld';
 import type { SiteFacts } from '@/types/inspector';
 import type { ReportOptions } from '@/types/report';
-import { file, read, role, siteFacts } from '../model/fixtures';
+import { file, graded } from '../model/fixtures';
 import { EXPORT_IN_PROGRESS_REASON } from '../pageCopy';
-import { InspectorPage } from '../InspectorPage';
 import { EXPORT_BUSY_REASON, SAVE_FAILED_BODY } from './exportCopy';
 
 beforeEach(() => {
@@ -22,17 +20,6 @@ beforeEach(() => {
 afterEach(() => {
   vi.restoreAllMocks();
 });
-
-function graded(patch: Partial<SiteFacts> = {}): SiteFacts {
-  return siteFacts({
-    roles: read([role('staff')]),
-    files: [
-      file({ id: 'file-1', name: 'customer-summary' }),
-      file({ id: 'file-2', name: 'order-sync', active: false, roleIds: read([]) }),
-    ],
-    ...patch,
-  });
-}
 
 const DEFAULTS: ReportOptions = {
   scope: 'file',
@@ -50,18 +37,12 @@ type Scan = {
 };
 
 /** Scans Alpha portal and stops on the finished page with no file selected. */
-async function scanned({ facts = graded(), deps = {}, siteName }: Scan = {}) {
-  const sites = [siteName === undefined ? SITE_ALPHA : { ...SITE_ALPHA, name: siteName }];
-  const view = renderInspector(<InspectorPage />, {
-    deps: { ...fixedDeps(facts, sites), ...deps },
-    sitePill: true,
+const scanned = ({ facts = graded(), deps = {}, siteName }: Scan = {}) =>
+  renderScannedInspector(facts, {
+    sites: [siteName === undefined ? SITE_ALPHA : { ...SITE_ALPHA, name: siteName }],
+    deps,
+    site: /portal/,
   });
-  await screen.findByRole('heading', { name: 'Select a site' });
-  await view.user.click(screen.getByRole('combobox', { name: 'Power Pages site' }));
-  await view.user.click(screen.getByRole('option', { name: /portal/ }));
-  await screen.findByRole('heading', { name: 'Review server logic readiness' });
-  return view;
-}
 
 type View = Awaited<ReturnType<typeof scanned>>;
 

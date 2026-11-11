@@ -179,8 +179,10 @@ export function buildReportModel(
   const environmentName = options.redact ? '[environment]' : result.facts.connection.name;
   const summary = `${String(counts.K)}/${String(counts.T)} checks addressed (${String(counts.C)} configured, ${String(counts.V)} reviewed)`;
   const review = sections(rows, 'needs-review');
+  const { scope, title } = reportIdentity(result, options);
   return {
-    ...reportIdentity(result, options),
+    scope,
+    title,
     header: {
       brand: 'Logic Inspector',
       label: `${options.scope === 'site' ? 'Site' : 'File'} readiness report · ${stamp(exportedAt).slice(0, 10)}`,

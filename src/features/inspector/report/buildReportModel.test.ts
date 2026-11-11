@@ -2,16 +2,18 @@ import { describe, expect, it, vi } from 'vitest';
 import type { CheckStatus, SiteResult } from '@/types/inspector';
 import { buildReportModel } from './buildReportModel';
 import { EXPORTED_AT, REPORT_OPTIONS, reportFile, reportResult } from './reportFixtures';
-import { reportFileName, reportFileNameBeforeBuild } from './reportFileName';
+import { reportFileNameBeforeBuild } from './reportFileName';
 
 describe('buildReportModel', () => {
   it('retains the stored file name and creates the sanitised filename with its format', () => {
     const model = buildReportModel(reportResult(), REPORT_OPTIONS, EXPORTED_AT);
     expect(model.title).toBe('Server logic readiness: customer-summary.js');
-    expect(model.stem).toBe('customer-summary');
-    expect(reportFileName(model)).toBe('customer-summary-readiness.md');
-    expect(reportFileNameBeforeBuild(reportResult(), REPORT_OPTIONS)).toBe(reportFileName(model));
-    expect(reportFileName({ ...model, format: 'pdf' })).toBe('customer-summary-readiness.pdf');
+    expect(reportFileNameBeforeBuild(reportResult(), REPORT_OPTIONS)).toBe(
+      'customer-summary-readiness.md',
+    );
+    expect(reportFileNameBeforeBuild(reportResult(), { ...REPORT_OPTIONS, format: 'pdf' })).toBe(
+      'customer-summary-readiness.pdf',
+    );
     expect(model.counts).toEqual({ C: 2, V: 0, M: 1, U: 0, T: 3, K: 2 });
     expect(model.rows).toHaveLength(1);
   });
@@ -96,10 +98,9 @@ describe('buildReportModel', () => {
     expect(serialised).toContain('[environment]');
     expect(serialised).toContain('[site]');
     expect(serialised).toContain('customer-summary.js');
-    expect(reportFileName(model)).toBe('site-site-readiness.md');
     expect(
       reportFileNameBeforeBuild(result, { ...REPORT_OPTIONS, scope: 'site', redact: true }),
-    ).toBe(reportFileName(model));
+    ).toBe('site-site-readiness.md');
     expect(result.banners).toEqual([text]);
   });
 
@@ -133,7 +134,7 @@ describe('buildReportModel', () => {
   ])('sanitises %s after trimming a trailing .js', (name, stem) => {
     const result = reportResult();
     result.files = [reportFile('customer', name, ['configured', 'configured', 'configured'])];
-    expect(buildReportModel(result, REPORT_OPTIONS, EXPORTED_AT).stem).toBe(stem);
+    expect(reportFileNameBeforeBuild(result, REPORT_OPTIONS)).toBe(`${stem}-readiness.md`);
   });
 
   it('uses Date offset without mutating the worker timezone', () => {
@@ -310,7 +311,13 @@ describe('redaction aliases (WR-002)', () => {
       EXPORTED_AT,
     );
     expect(site.title).toBe('Site readiness report: [site]');
-    expect(site.stem).toBe('site');
+    expect(
+      reportFileNameBeforeBuild(hostResult('https://dev.example.com'), {
+        ...REPORT_OPTIONS,
+        scope: 'site',
+        redact: true,
+      }),
+    ).toBe('site-site-readiness.md');
     const file = buildReportModel(
       hostResult('https://dev.example.com'),
       { ...REPORT_OPTIONS, redact: true },
@@ -457,8 +464,6 @@ describe('inactive files', () => {
       EXPORTED_AT,
     );
     expect(model.title).toBe('Server logic readiness: old-handler');
-    expect(model.stem).toBe('old-handler');
-    expect(reportFileName(model)).toBe('old-handler-readiness.md');
     expect(reportFileNameBeforeBuild(inactiveResult(), { ...REPORT_OPTIONS, fileId: 'old' })).toBe(
       'old-handler-readiness.md',
     );

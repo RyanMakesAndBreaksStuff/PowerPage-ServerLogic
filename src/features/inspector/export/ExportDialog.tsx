@@ -34,7 +34,6 @@ export function ExportDialog({ job }: { job: ExportJob }): ReactElement {
     <Modal
       open
       title="Export report"
-      width={520}
       onClose={session.closeExport}
       footer={
         <>

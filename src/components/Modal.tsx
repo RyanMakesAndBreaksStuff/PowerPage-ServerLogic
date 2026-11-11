@@ -8,10 +8,11 @@ export type ModalProps = {
   open: boolean;
   title: string;
   onClose: () => void;
-  width?: number;
   footer?: ReactNode;
   children: ReactNode;
 };
+
+const MODAL_WIDTH = 520;
 
 const FOCUSABLE = [
   'a[href]',
@@ -30,7 +31,6 @@ function focusableIn(root: HTMLElement): HTMLElement[] {
 
 function ModalDialog({
   title,
-  width = 520,
   onClose,
   footer,
   children,
@@ -92,7 +92,7 @@ function ModalDialog({
         aria-labelledby={titleId}
         tabIndex={-1}
         className="ui-modal"
-        style={{ width }}
+        style={{ width: MODAL_WIDTH }}
       >
         <div className="ui-modal__head">
           <h2 id={titleId} className="ui-modal__title">

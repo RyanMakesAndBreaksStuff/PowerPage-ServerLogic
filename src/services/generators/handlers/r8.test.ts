@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { readGolden } from '@/test/readGolden';
-import { runBrowserChecks } from '@/lib/code-analysis/browserChecks';
 import { exportedFunctionNames, readsHttpOnlyContext } from '@/lib/code-analysis/structure';
 import { getRecipe } from '@/services/catalogue/recipes';
 import { headerComment, validationFailureReturnFor } from '@/services/generators/handlers/snippets';
 import { generateR8 } from './r8';
+import { assertZeroHits } from './tutorial.testkit';
 
 const golden = readGolden(import.meta.url, 'R8.js.txt');
 
@@ -25,9 +25,7 @@ describe('generateR8', () => {
   });
 
   it('has zero FR-4 hits', () => {
-    const { hits, parseFailed } = runBrowserChecks(generateR8().text);
-    expect(hits).toEqual([]);
-    expect(parseFailed).toBe(false);
+    assertZeroHits(generateR8().text);
   });
 
   it('exports only getSummary', () => {

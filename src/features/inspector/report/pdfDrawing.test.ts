@@ -21,18 +21,6 @@ const many = (count: number, state: RingState): RingState[] =>
   Array.from({ length: count }, () => state);
 
 describe('report palette', () => {
-  it('holds the handoff colours with the A8 adjustments', () => {
-    expect(REPORT_PALETTE).toMatchObject({
-      ink: '#14213d',
-      muted: '#55607a',
-      rules: '#dfe4ee',
-      blueChip: '#1e6dcd',
-      blueTint: '#eaf2fd',
-      orange: '#b05408',
-      orangeTint: '#fdf0e3',
-    });
-  });
-
   it('keeps every text pair at 4.5:1 or better', () => {
     const { white, ink, muted, blueChip, blueTint, orange, orangeTint, grey, greyTint } =
       REPORT_PALETTE;

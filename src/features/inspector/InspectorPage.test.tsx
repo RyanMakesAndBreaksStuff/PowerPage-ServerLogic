@@ -3,11 +3,10 @@ import { act, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { INSPECTOR_DEPS } from '@/features/inspector/inspectorDeps';
 import type { InspectorDeps } from '@/features/inspector/inspectorDeps';
-import { renderInspector } from '@/test/inspectorTestHarness';
-import type { InspectorHarnessOptions } from '@/test/inspectorTestHarness';
+import { renderInspector, renderScannedInspector } from '@/test/inspectorTestHarness';
+import type { InspectorHarnessOptions, ScannedInspectorOptions } from '@/test/inspectorTestHarness';
 import { ScanAbandonedError } from '@/features/inspector/scan/scan';
 import { deferred } from '@/test/deferred';
-import { fixedDeps } from '@/test/fixedDeps';
 import {
   CONNECTION,
   createInspectorHost,
@@ -16,7 +15,7 @@ import {
   SITE_BETA,
 } from '@/test/inspectorWorld';
 import type { ScanProgress, SiteFacts } from '@/types/inspector';
-import { file, read, role, settings, siteFacts, value } from './model/fixtures';
+import { graded, read, role, settings, value } from './model/fixtures';
 import { TENANT_POLICY_NOTE } from './model/copy';
 import {
   CONNECTION_CHANGED_TITLE,
@@ -72,18 +71,6 @@ async function expectDisabledExport(user: Mounted['user'], reason: string) {
   expect(screen.getByText(reason)).toBeTruthy();
   await user.click(button);
   expect(button.getAttribute('aria-disabled')).toBe('true');
-}
-
-/** Two files: one fully configured, one inactive with no web role (Needs review). */
-function graded(patch: Partial<SiteFacts> = {}): SiteFacts {
-  return siteFacts({
-    roles: read([role('staff')]),
-    files: [
-      file({ id: 'file-1', name: 'customer-summary' }),
-      file({ id: 'file-2', name: 'order-sync', active: false, roleIds: read([]) }),
-    ],
-    ...patch,
-  });
 }
 
 describe('InspectorPage: connection and site list states', () => {
@@ -315,13 +302,8 @@ describe('InspectorPage: scanning', () => {
 });
 
 describe('InspectorPage: results', () => {
-  async function finished(facts: SiteFacts = graded(), options: InspectorHarnessOptions = {}) {
-    const view = mount({ deps: fixedDeps(facts), ...options });
-    await heading('Select a site');
-    await pick(view, /Alpha portal/);
-    await heading('Review server logic readiness');
-    return view;
-  }
+  const finished = (facts: SiteFacts = graded(), options: ScannedInspectorOptions = {}) =>
+    renderScannedInspector(facts, options);
 
   it('lists every file with its status, selects none until the user does, and shows the tenant-policy note (AC-7.3, AC-8.6, AC-8.7, D-03)', async () => {
     const { user } = await finished();

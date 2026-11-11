@@ -16,7 +16,6 @@ import { evaluateSite, countChecks, fileSummary, filePill } from '@/features/ins
 import { buildReportModel } from '@/features/inspector/report/buildReportModel';
 import { renderMarkdown } from '@/features/inspector/report/renderMarkdown';
 import { renderPdf } from '@/features/inspector/report/renderPdf';
-import { reportFileName } from '@/features/inspector/report/reportFileName';
 import type { ReportModel } from '@/features/inspector/report/reportModel.types';
 import { listSites, runScan } from '@/features/inspector/scan/scan';
 import { runBrowserChecks } from '@/lib/code-analysis/browserChecks';
@@ -145,7 +144,6 @@ describe('skeleton: every pinned function exists with its contract signature', (
     >();
     expectTypeOf(renderMarkdown).toEqualTypeOf<(m: ReportModel) => string>();
     expectTypeOf(renderPdf).toEqualTypeOf<(m: ReportModel) => Uint8Array>();
-    expectTypeOf(reportFileName).toEqualTypeOf<(m: ReportModel) => string>();
   });
 
   it('app hooks and context (phases 06, 18a)', () => {

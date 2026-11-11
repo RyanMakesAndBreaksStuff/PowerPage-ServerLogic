@@ -1,10 +1,8 @@
 // @vitest-environment jsdom
-import { cleanup, render, screen, within } from '@testing-library/react';
-import { afterEach, describe, expect, it } from 'vitest';
+import { render, screen, within } from '@testing-library/react';
+import { describe, expect, it } from 'vitest';
 import type { RingState } from '@/lib/ringGeometry';
 import { Ring } from './Ring';
-
-afterEach(cleanup);
 
 const many = (n: number, state: RingState): RingState[] => Array.from({ length: n }, () => state);
 const states = (ring: HTMLElement): (string | null)[] =>

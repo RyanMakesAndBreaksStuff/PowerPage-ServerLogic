@@ -10,7 +10,7 @@ const TABS = [
   { view: 'inspector', label: 'Logic Inspector', icon: 'target' },
 ] as const satisfies readonly { view: View; label: string; icon: IconName }[];
 
-type TopTabsProps ={
+type TopTabsProps = {
   view: View;
   released: readonly View[];
   onSelect: (view: View) => void;

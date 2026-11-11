@@ -10,10 +10,10 @@ import type {
   SaveResult,
   ThemeName,
 } from './host.types';
-import { HostCallError, messageForStatus, throwIfAborted } from './hostErrors';
+import { errorName, HostCallError, messageForStatus, throwIfAborted } from './hostErrors';
 
 /** Rows for one entity set: a flat list, or `pages` to model paging (the fake still returns all rows, as the contract says). */
-type FakeResult =readonly unknown[] | { pages: readonly (readonly unknown[])[] };
+type FakeResult = readonly unknown[] | { pages: readonly (readonly unknown[])[] };
 /** Return a result to answer a query, or undefined to pass it to the next responder and then to `tables`. */
 export type FakeResponder = (q: ODataQuery) => FakeResult | undefined;
 /**
@@ -34,7 +34,7 @@ export type FakeFailure = {
 };
 export type NotifyBehaviour = 'ok' | 'throw' | 'reject' | 'missing';
 type SaveBehaviour = 'save' | 'cancel' | 'reject';
-type SimpleBehaviour ='ok' | 'reject';
+type SimpleBehaviour = 'ok' | 'reject';
 
 export type FakeHostInit = {
   theme?: ThemeName;
@@ -68,7 +68,7 @@ type FakeCall =
   | { method: 'queryAll'; query: ODataQuery; pages: number }
   | { method: 'downloadFileColumn'; ref: FileColumnRef };
 
-type SavedFile ={ path: string; defaultName: string; content: string | Uint8Array };
+type SavedFile = { path: string; defaultName: string; content: string | Uint8Array };
 
 export type FakeHostControls = {
   /** Delivers an event to every subscribed handler, as the real adapter does for a PPTB event. */
@@ -241,7 +241,7 @@ export function createFakeHost(init: FakeHostInit = {}): PptbHost & FakeHostCont
         } catch (error) {
           console.error(
             'PPTB fake host: an event handler threw',
-            error instanceof Error ? error.name : 'NonError',
+            errorName(error),
           );
         }
       }

@@ -1,8 +1,11 @@
 import type { ReportModel } from '@/features/inspector/report/reportModel.types';
 import type { SiteResult } from '@/types/inspector';
-import type { ReportOptions } from '@/types/report';
+import type { ReportFormat, ReportOptions } from '@/types/report';
 
-type ReportIdentity = Pick<ReportModel, 'scope' | 'format' | 'stem' | 'title'>;
+type ReportIdentity = Pick<ReportModel, 'scope' | 'title'> & {
+  readonly format: ReportFormat;
+  readonly stem: string;
+};
 
 /** The name shown where a file is a label in a list or table. Titles, stems and file names keep the stored name. */
 export function displayName(file: { readonly name: string; readonly active: boolean }): string {
@@ -33,10 +36,6 @@ function filenameOf(model: Pick<ReportIdentity, 'scope' | 'format' | 'stem'>): s
   const suffix = model.scope === 'file' ? 'readiness' : 'site-readiness';
   const extension = model.format === 'markdown' ? 'md' : 'pdf';
   return `${model.stem}-${suffix}.${extension}`;
-}
-
-export function reportFileName(model: ReportModel): string {
-  return filenameOf(model);
 }
 
 export function reportFileNameBeforeBuild(result: SiteResult, options: ReportOptions): string {

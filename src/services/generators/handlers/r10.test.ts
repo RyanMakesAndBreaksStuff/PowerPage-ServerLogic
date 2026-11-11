@@ -1,11 +1,11 @@
 // @vitest-environment node
 import { describe, expect, it } from 'vitest';
 import { readGolden } from '@/test/readGolden';
-import { runBrowserChecks } from '@/lib/code-analysis/browserChecks';
 import { exportedFunctionNames } from '@/lib/code-analysis/structure';
 import { getRecipe } from '@/services/catalogue/recipes';
 import { IS_GUID, TO_RESULT, headerComment } from '@/services/generators/handlers/snippets';
 import { generateR10 } from './r10';
+import { assertZeroHits } from './tutorial.testkit';
 
 const INVOKE = 'Server.Connector.Dataverse.InvokeCustomApi(';
 const VALIDATION_RETURN =
@@ -42,10 +42,7 @@ describe('R10 handler', () => {
   });
 
   it('has no restricted pattern or browser API and parses', () => {
-    const { text } = generateR10();
-    const result = runBrowserChecks(text);
-    expect(result.hits).toEqual([]);
-    expect(result.parseFailed).toBe(false);
+    assertZeroHits(generateR10().text);
   });
 
   it('is deterministic and LF only', () => {

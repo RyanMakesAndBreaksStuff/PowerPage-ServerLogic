@@ -12,7 +12,7 @@ import { file, siteFacts } from '@/features/inspector/model/fixtures';
 import { evaluateSite } from '@/features/inspector/model/rules';
 import { buildReportModel } from '@/features/inspector/report/buildReportModel';
 import { EXPORTED_AT } from '@/features/inspector/report/reportFixtures';
-import { reportFileName, reportFileNameBeforeBuild } from '@/features/inspector/report/reportFileName';
+import { reportFileNameBeforeBuild } from '@/features/inspector/report/reportFileName';
 import { renderMarkdown } from '@/features/inspector/report/renderMarkdown';
 import { renderPdf } from '@/features/inspector/report/renderPdf';
 import { ScanAbandonedError } from '@/features/inspector/scan/scan';
@@ -757,7 +757,14 @@ describe('export job (P5.7)', () => {
       expect(build).toHaveBeenCalledWith(captured.result, options, EXPORTED_AT);
       const model = buildReportModel(captured.result, options, EXPORTED_AT);
       const name = reportFileNameBeforeBuild(captured.result, options);
-      expect(name).toBe(reportFileName(model));
+      const extension = combination.format === 'markdown' ? 'md' : 'pdf';
+      expect(name).toBe(
+        combination.scope === 'file'
+          ? `customer-summary-readiness.${extension}`
+          : combination.redact
+            ? `site-site-readiness.${extension}`
+            : `Alpha-portal-site-readiness.${extension}`,
+      );
       const saves = host.callsOf('saveFile');
       expect(saves).toHaveLength(1);
       const save = saves[0];

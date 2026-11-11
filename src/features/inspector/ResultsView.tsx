@@ -154,7 +154,7 @@ export function ResultsView({ result, headingRef, onRescan }: ResultsViewProps):
           </>
         )}
       </div>
-      <div role="status" aria-label="Review updates" className="inspector-sr-only">
+      <div role="status" aria-label="Review updates" className="ui-visually-hidden">
         {announcement}
       </div>
     </div>

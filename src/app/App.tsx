@@ -20,7 +20,7 @@ import { StarterPage } from '@/features/starter/StarterPage';
 import type { PptbHost } from '@/services/pptb/host.types';
 import type { View } from '@/types/http';
 
-type AppProps ={ host: PptbHost; starterDeps?: StarterDeps; inspectorDeps?: InspectorDeps };
+type AppProps = { host: PptbHost; starterDeps?: StarterDeps; inspectorDeps?: InspectorDeps };
 
 /**
  * The Inspector session wraps the title bar and every page, so it keeps following connection changes while

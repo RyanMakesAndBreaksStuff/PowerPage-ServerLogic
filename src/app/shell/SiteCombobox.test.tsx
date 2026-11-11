@@ -1,11 +1,9 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { SiteCombobox } from './SiteCombobox';
 import type { SiteComboboxProps, SiteOption } from './SiteCombobox';
-
-afterEach(cleanup);
 
 const OPTIONS: readonly SiteOption[] = [
   { id: 'a', label: 'Alpha portal', detail: 'alpha.example.com', disabled: false },

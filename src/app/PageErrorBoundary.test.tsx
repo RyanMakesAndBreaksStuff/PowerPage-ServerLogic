@@ -1,9 +1,7 @@
 // @vitest-environment jsdom
-import { cleanup, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { render, screen } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
 import { PageErrorBoundary } from '@/app/PageErrorBoundary';
-
-afterEach(cleanup);
 
 function Broken(): never {
   throw new Error('not implemented: phase 07');

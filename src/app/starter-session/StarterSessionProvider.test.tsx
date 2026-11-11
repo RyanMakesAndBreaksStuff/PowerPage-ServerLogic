@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
-import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { act, fireEvent, render, screen } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
 import type { ReactElement } from 'react';
 import { HostContext } from '@/session/HostContext';
 import { NotifyProvider } from '@/app/NotifyProvider';
@@ -9,8 +9,6 @@ import { FAKE_STARTER_DEPS } from '@/session/fakeStarterDeps';
 import { LIQUID_RESET_NOTICE } from '@/session/starterReducer';
 import { StarterSessionProvider } from './StarterSessionProvider';
 import { useStarterSession } from '@/session/useStarterSession';
-
-afterEach(cleanup);
 
 function Probe(): ReactElement {
   const { state, dispatch, derived } = useStarterSession();

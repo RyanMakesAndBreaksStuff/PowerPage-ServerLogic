@@ -2,10 +2,10 @@
 import { parse } from 'acorn';
 import { describe, expect, it } from 'vitest';
 import { readGolden } from '@/test/readGolden';
-import { runBrowserChecks } from '@/lib/code-analysis/browserChecks';
 import { getRecipe } from '@/services/catalogue/recipes';
 import { generateR1 } from './r1';
 import { headerComment } from './snippets';
+import { assertZeroHits } from './tutorial.testkit';
 
 const golden = readGolden(import.meta.url, 'R1.js.txt');
 
@@ -41,9 +41,7 @@ describe('generateR1', () => {
 
   it('has zero FR-4 hits', () => {
     const { text } = generateR1();
-    const result = runBrowserChecks(text);
-    expect(result.hits).toEqual([]);
-    expect(result.parseFailed).toBe(false);
+    assertZeroHits(text);
     parseEs2023(text);
   });
 

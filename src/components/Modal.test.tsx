@@ -1,12 +1,10 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { useState } from 'react';
-import { afterEach, describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { Modal } from './Modal';
 
-afterEach(cleanup);
-
-function Harness({ width, skipFirst = false }: { width?: number; skipFirst?: boolean }) {
+function Harness({ skipFirst = false }: { skipFirst?: boolean }) {
   const [open, setOpen] = useState(false);
   return (
     <>
@@ -21,7 +19,6 @@ function Harness({ width, skipFirst = false }: { width?: number; skipFirst?: boo
       <Modal
         open={open}
         title="Export report"
-        {...(width === undefined ? {} : { width })}
         onClose={() => {
           setOpen(false);
         }}
@@ -55,16 +52,12 @@ describe('Modal, APG modal dialog', () => {
     expect(screen.queryByRole('dialog')).toBeNull();
   });
 
-  it('is a labelled modal dialog, 520px wide by default and any width on request', () => {
-    const first = render(<Harness />);
+  it('is a labelled modal dialog, 520px wide', () => {
+    render(<Harness />);
     openModal();
     const dialog = screen.getByRole('dialog', { name: 'Export report' });
     expect(dialog.getAttribute('aria-modal')).toBe('true');
     expect(dialog.style.width).toBe('520px');
-    first.unmount();
-    render(<Harness width={640} />);
-    openModal();
-    expect(screen.getByRole('dialog').style.width).toBe('640px');
   });
 
   it('renders into document.body on a scrim', () => {

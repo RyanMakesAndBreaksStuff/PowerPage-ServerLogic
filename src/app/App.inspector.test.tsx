@@ -1,12 +1,11 @@
 // @vitest-environment jsdom
-import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { App } from '@/app/App';
 import { FAKE_STARTER_DEPS } from '@/session/fakeStarterDeps';
 import { createInspectorHost, OTHER_CONNECTION } from '@/test/inspectorWorld';
 
-afterEach(cleanup);
 beforeEach(() => {
   vi.spyOn(console, 'error').mockImplementation(() => undefined);
 });

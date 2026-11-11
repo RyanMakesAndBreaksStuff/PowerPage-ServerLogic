@@ -1,9 +1,7 @@
 // @vitest-environment jsdom
-import { cleanup, render, screen, within } from '@testing-library/react';
-import { afterEach, describe, expect, it } from 'vitest';
+import { render, screen, within } from '@testing-library/react';
+import { describe, expect, it } from 'vitest';
 import { Tile } from './Tile';
-
-afterEach(cleanup);
 
 describe('Tile', () => {
   it('is a plain container without a heading', () => {

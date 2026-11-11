@@ -3,7 +3,6 @@ import { parse } from 'acorn';
 import type { Options } from 'acorn';
 import { describe, expect, it } from 'vitest';
 import { readGolden } from '@/test/readGolden';
-import { runBrowserChecks } from '@/lib/code-analysis/browserChecks';
 import { getRecipe } from '@/services/catalogue/recipes';
 import {
   VALIDATION_MESSAGE,
@@ -12,6 +11,7 @@ import {
   validationFailureReturnFor,
 } from '@/services/generators/handlers/snippets';
 import { generateR2 } from '@/services/generators/handlers/r2';
+import { assertZeroHits } from './tutorial.testkit';
 
 const ACORN_OPTIONS = { ecmaVersion: 2023, sourceType: 'script' } as const satisfies Options;
 
@@ -44,10 +44,8 @@ describe('generateR2', () => {
 
   it('has zero FR-4 hits', () => {
     const text = generateR2().text;
-    const result = runBrowserChecks(text);
     expect(parsesEs2023(text)).toBe(true);
-    expect(result.hits).toEqual([]);
-    expect(result.parseFailed).toBe(false);
+    assertZeroHits(text);
   });
 
   it('validates the contract row', () => {

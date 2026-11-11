@@ -3,12 +3,12 @@ import { parse } from 'acorn';
 import type { Options } from 'acorn';
 import { describe, expect, it } from 'vitest';
 import { readGolden } from '@/test/readGolden';
-import { runBrowserChecks } from '@/lib/code-analysis/browserChecks';
 import { detectConnectorUse, exportedFunctionNames } from '@/lib/code-analysis/structure';
 import { getRecipe } from '@/services/catalogue/recipes';
 import { generateHandler } from '@/services/generators/handlers';
 import { R7_DIFFERENCES, generateR7 } from '@/services/generators/handlers/r7';
 import { headerComment, requireSettingsCode } from '@/services/generators/handlers/snippets';
+import { assertZeroHits } from './tutorial.testkit';
 
 const ACORN_OPTIONS = { ecmaVersion: 2023, sourceType: 'script' } as const satisfies Options;
 const GOLDEN = readGolden(import.meta.url, 'R7.js.txt');
@@ -81,9 +81,7 @@ describe('generateR7', () => {
 
   it('has zero FR-4 hits', () => {
     const { text } = generateR7();
-    const result = runBrowserChecks(text);
-    expect(result.hits).toEqual([]);
-    expect(result.parseFailed).toBe(false);
+    assertZeroHits(text);
     expect(() => parse(text, ACORN_OPTIONS)).not.toThrow();
   });
 

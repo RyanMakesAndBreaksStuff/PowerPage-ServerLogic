@@ -1,11 +1,11 @@
 import { parse } from 'acorn';
 import { describe, expect, it } from 'vitest';
 import { readGolden } from '@/test/readGolden';
-import { runBrowserChecks } from '@/lib/code-analysis/browserChecks';
 import { detectConnectorUse, exportedFunctionNames } from '@/lib/code-analysis/structure';
 import { getRecipe } from '@/services/catalogue/recipes';
 import { headerComment } from './snippets';
 import { R5_DIFFERENCES, generateR5 } from './r5';
+import { assertZeroHits } from './tutorial.testkit';
 
 /** Counted in the committed golden: the four `Server.Connector.` call lines (Decision 6). */
 const CONNECTOR_LINES = [42, 68, 94, 122] as const;
@@ -149,7 +149,7 @@ describe('generateR5', () => {
   });
 
   it('has zero FR-4 hits', () => {
-    expect(runBrowserChecks(generateR5().text)).toEqual({ hits: [], parseFailed: false });
+    assertZeroHits(generateR5().text);
   });
 
   it('parses as an ES2023 script and is not evaluated', () => {

@@ -1,7 +1,6 @@
 // @vitest-environment node
 import { describe, expect, it } from 'vitest';
 import { readGolden } from '@/test/readGolden';
-import { runBrowserChecks } from '@/lib/code-analysis/browserChecks';
 import { getRecipe } from '@/services/catalogue/recipes';
 import {
   TO_RESULT,
@@ -10,6 +9,7 @@ import {
   validationFailureReturn,
 } from '@/services/generators/handlers/snippets';
 import { generateR9 } from './r9';
+import { assertZeroHits } from './tutorial.testkit';
 
 const GOLDEN = readGolden(import.meta.url, 'R9.js.txt');
 
@@ -39,9 +39,7 @@ describe('generateR9', () => {
   });
 
   it('has no restricted pattern or browser API and parses', () => {
-    const result = runBrowserChecks(generateR9().text);
-    expect(result.hits).toEqual([]);
-    expect(result.parseFailed).toBe(false);
+    assertZeroHits(generateR9().text);
   });
 
   it('is deterministic and LF only', () => {

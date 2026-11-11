@@ -80,3 +80,15 @@ export const siteFacts = (patch: Partial<SiteFacts> = {}): SiteFacts => ({
   stopped: null,
   ...patch,
 });
+
+/** Two files: one fully configured, one inactive with no web role (Needs review). */
+export function graded(patch: Partial<SiteFacts> = {}): SiteFacts {
+  return siteFacts({
+    roles: read([role('staff')]),
+    files: [
+      file({ id: 'file-1', name: 'customer-summary' }),
+      file({ id: 'file-2', name: 'order-sync', active: false, roleIds: read([]) }),
+    ],
+    ...patch,
+  });
+}

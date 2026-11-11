@@ -159,7 +159,6 @@ describe('renderPdf', () => {
     expect(
       texts.some((text) => text.startsWith('Server logic readiness') && text.includes('Inactive')),
     ).toBe(false);
-    expect(draw(result, pdfOptions('file', 'old')).model.stem).toBe('old-handler');
   });
 
   it('lists Review first and Not scanned in the model order', () => {

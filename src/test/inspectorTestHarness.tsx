@@ -1,4 +1,4 @@
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { StrictMode } from 'react';
 import type { ReactElement } from 'react';
@@ -7,9 +7,12 @@ import { HostContext } from '@/session/HostContext';
 import { NotifyProvider } from '@/app/NotifyProvider';
 import { ViewContext } from '@/session/useView';
 import { createInspectorHost } from '@/test/inspectorWorld';
+import { fixedDeps } from '@/test/fixedDeps';
 import type { GatedHost } from '@/test/gatedHost';
 import { INSPECTOR_DEPS } from '@/features/inspector/inspectorDeps';
 import type { InspectorDeps } from '@/features/inspector/inspectorDeps';
+import { InspectorPage } from '@/features/inspector/InspectorPage';
+import type { SiteFacts, SiteRef } from '@/types/inspector';
 import { InspectorSessionProvider } from '@/app/inspector-site/InspectorSessionProvider';
 import { SitePill } from '@/app/shell/SitePill';
 
@@ -45,4 +48,28 @@ export function renderInspector(ui: ReactElement, options: InspectorHarnessOptio
   );
   const view = render(options.strict === true ? <StrictMode>{tree}</StrictMode> : tree);
   return { host, user, ...view };
+}
+
+export type ScannedInspectorOptions = Omit<InspectorHarnessOptions, 'deps' | 'sitePill'> & {
+  /** The sites the picker lists; Alpha portal alone unless set. */
+  sites?: readonly SiteRef[];
+  /** Deps laid over `fixedDeps(facts, sites)`. */
+  deps?: Partial<InspectorDeps>;
+  /** The picker option to choose; Alpha portal unless set. */
+  site?: RegExp;
+};
+
+/** Renders InspectorPage, picks a site and stops on the finished page with no file selected (D-03). */
+export async function renderScannedInspector(facts: SiteFacts, options: ScannedInspectorOptions = {}) {
+  const { sites, deps, site = /Alpha portal/, ...harness } = options;
+  const view = renderInspector(<InspectorPage />, {
+    ...harness,
+    deps: { ...fixedDeps(facts, sites), ...deps },
+    sitePill: true,
+  });
+  await screen.findByRole('heading', { name: 'Select a site' });
+  await view.user.click(screen.getByRole('combobox', { name: 'Power Pages site' }));
+  await view.user.click(screen.getByRole('option', { name: site }));
+  await screen.findByRole('heading', { name: 'Review server logic readiness' });
+  return view;
 }

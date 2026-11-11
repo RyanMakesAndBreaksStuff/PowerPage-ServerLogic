@@ -1,10 +1,8 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
 import type { View } from '@/types/http';
 import { TopTabs } from './TopTabs';
-
-afterEach(cleanup);
 
 function mount(view: View, released: readonly View[] = ['starter', 'objects', 'inspector']) {
   const onSelect = vi.fn<(v: View) => void>();

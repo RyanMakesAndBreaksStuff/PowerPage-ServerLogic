@@ -1,9 +1,7 @@
 // @vitest-environment jsdom
-import { cleanup, render } from '@testing-library/react';
-import { afterEach, describe, expect, it } from 'vitest';
+import { render } from '@testing-library/react';
+import { describe, expect, it } from 'vitest';
 import { StatusBadge } from './StatusBadge';
-
-afterEach(cleanup);
 
 // The CheckStatus mapping and its rendered badges are tested with checkStatusBadge in features/inspector.
 describe('StatusBadge', () => {

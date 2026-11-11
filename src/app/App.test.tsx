@@ -1,13 +1,11 @@
 // @vitest-environment jsdom
-import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
 import { App } from '@/app/App';
 import { FAKE_STARTER_DEPS } from '@/session/fakeStarterDeps';
 import { createFakeHost } from '@/services/pptb/fakeHost';
 import type { Connection } from '@/services/pptb/host.types';
 import { gateHost } from '@/test/gatedHost';
-
-afterEach(cleanup);
 
 const CONTOSO: Connection = {
   id: 'c1',
