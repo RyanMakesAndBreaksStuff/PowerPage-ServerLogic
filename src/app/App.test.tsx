@@ -2,7 +2,7 @@
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { App } from '@/app/App';
-import { FAKE_STARTER_DEPS } from '@/app/starter-session/fakeStarterDeps';
+import { FAKE_STARTER_DEPS } from '@/session/fakeStarterDeps';
 import { createFakeHost } from '@/services/pptb/fakeHost';
 import type { Connection } from '@/services/pptb/host.types';
 import { gateHost } from '@/test/gatedHost';

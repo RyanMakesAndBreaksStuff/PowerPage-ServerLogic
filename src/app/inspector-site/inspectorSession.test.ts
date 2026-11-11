@@ -32,8 +32,8 @@ import {
 } from '@/test/inspectorWorld';
 import type { ReviewKey, SiteFacts, SiteRef } from '@/types/inspector';
 import type { ReportFormat, ReportOptions, ReportScope } from '@/types/report';
-import { INSPECTOR_DEPS } from './inspectorDeps';
-import type { InspectorDeps } from './inspectorDeps';
+import { INSPECTOR_DEPS } from '@/features/inspector/inspectorDeps';
+import type { InspectorDeps } from '@/features/inspector/inspectorDeps';
 import { createInspectorStore } from './inspectorSession';
 import type { InspectorStore } from './inspectorSession';
 import type { ExportJob, InspectorSnapshot } from '@/types/inspectorSession';

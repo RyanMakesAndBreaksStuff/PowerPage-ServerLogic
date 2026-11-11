@@ -1,7 +1,7 @@
 import { undo } from '@codemirror/commands';
 import { act, screen, within } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-import { STARTER_DEPS } from '@/app/starter-session/starterDeps';
+import { STARTER_DEPS } from '@/session/starterDeps';
 import { generateHandler } from '@/services/generators/handlers';
 import { editorView, renderStarter } from '../starterTestHarness';
 import { ServerPane } from './ServerPane';

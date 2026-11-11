@@ -5,9 +5,9 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { ReactElement } from 'react';
 import { HostContext } from '@/session/HostContext';
 import { NotifyProvider } from '@/app/NotifyProvider';
-import { deriveStarter } from '@/app/starter-session/deriveStarter';
-import { STARTER_DEPS } from '@/app/starter-session/starterDeps';
-import { initialStarterState } from '@/app/starter-session/starterReducer';
+import { deriveStarter } from '@/session/deriveStarter';
+import { STARTER_DEPS } from '@/session/starterDeps';
+import { initialStarterState } from '@/session/starterReducer';
 import { StarterSessionProvider } from '@/app/starter-session/StarterSessionProvider';
 import type {
   StarterAction,

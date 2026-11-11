@@ -1,5 +1,5 @@
-import { INSPECTOR_DEPS } from '@/app/inspector-site/inspectorDeps';
-import type { InspectorDeps } from '@/app/inspector-site/inspectorDeps';
+import { INSPECTOR_DEPS } from '@/features/inspector/inspectorDeps';
+import type { InspectorDeps } from '@/features/inspector/inspectorDeps';
 import type { SiteFacts, SiteRef } from '@/types/inspector';
 import { SITE_ALPHA } from './inspectorWorld';
 

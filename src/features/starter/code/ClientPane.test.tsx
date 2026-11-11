@@ -1,6 +1,6 @@
 import { act, fireEvent, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-import { STARTER_DEPS } from '@/app/starter-session/starterDeps';
+import { STARTER_DEPS } from '@/session/starterDeps';
 import { generateClient } from '@/services/generators/client/client';
 import { StarterPage } from '../StarterPage';
 import { editorView, renderStarter } from '../starterTestHarness';

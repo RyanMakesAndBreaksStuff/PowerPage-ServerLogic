@@ -5,8 +5,8 @@ import type { ReactElement } from 'react';
 import { HostContext } from '@/session/HostContext';
 import { NotifyProvider } from '@/app/NotifyProvider';
 import { createFakeHost } from '@/services/pptb/fakeHost';
-import { FAKE_STARTER_DEPS } from './fakeStarterDeps';
-import { LIQUID_RESET_NOTICE } from './starterReducer';
+import { FAKE_STARTER_DEPS } from '@/session/fakeStarterDeps';
+import { LIQUID_RESET_NOTICE } from '@/session/starterReducer';
 import { StarterSessionProvider } from './StarterSessionProvider';
 import { useStarterSession } from '@/session/useStarterSession';
 

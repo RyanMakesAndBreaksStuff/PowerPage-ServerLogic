@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import type { StarterState } from '@/types/starter';
-import { deriveStarter } from './deriveStarter';
-import { FAKE_STARTER_DEPS } from './fakeStarterDeps';
-import { createStarterReducer, initialStarterState } from './starterReducer';
+import { deriveStarter } from '@/session/deriveStarter';
+import { FAKE_STARTER_DEPS } from '@/session/fakeStarterDeps';
+import { createStarterReducer, initialStarterState } from '@/session/starterReducer';
 
 const reduce = createStarterReducer(FAKE_STARTER_DEPS);
 const start = (): StarterState => initialStarterState(FAKE_STARTER_DEPS);

@@ -6,8 +6,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { EXPORT_CANCELLED_BODY, EXPORT_CANCELLED_TITLE } from '@/features/inspector/export/exportCopy';
 import type { SiteRef } from '@/types/inspector';
 import { CONNECTION, createInspectorHost, OTHER_CONNECTION, SITE_ALPHA, SITE_BETA } from '@/test/inspectorWorld';
-import { INSPECTOR_DEPS } from './inspectorDeps';
-import type { InspectorDeps } from './inspectorDeps';
+import { INSPECTOR_DEPS } from '@/features/inspector/inspectorDeps';
+import type { InspectorDeps } from '@/features/inspector/inspectorDeps';
 import { renderInspector } from './inspectorTestHarness';
 import { useInspector } from '@/session/useInspector';
 

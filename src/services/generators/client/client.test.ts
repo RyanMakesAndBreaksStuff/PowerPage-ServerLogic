@@ -1,6 +1,6 @@
 import { parse } from 'acorn';
 import { describe, expect, it } from 'vitest';
-import { STARTER_DEPS } from '@/app/starter-session/starterDeps';
+import { STARTER_DEPS } from '@/session/starterDeps';
 import { EXAMPLE_GUID, RECIPES, getRecipe } from '@/services/catalogue/recipes';
 import type { ClientLanguage, HttpMethod } from '@/types/http';
 import type { RecipeId } from '@/types/recipe';

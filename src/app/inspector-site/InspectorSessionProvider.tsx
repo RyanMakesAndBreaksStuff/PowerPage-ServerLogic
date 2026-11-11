@@ -5,7 +5,7 @@ import { connectionKey, useConnectionState } from '@/session/useActiveConnection
 import { useNotify } from '@/session/useNotify';
 import { evaluateSite } from '@/features/inspector/model/rules';
 import type { Connection } from '@/services/pptb/host.types';
-import type { InspectorDeps } from './inspectorDeps';
+import type { InspectorDeps } from '@/features/inspector/inspectorDeps';
 import { createInspectorStore, EMPTY_MARKS, INITIAL_SNAPSHOT } from './inspectorSession';
 import type { InspectorSnapshot, InspectorSession } from '@/types/inspectorSession';
 import { InspectorSessionContext } from '@/session/useInspector';

@@ -3,7 +3,7 @@ import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-libra
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { App } from '@/app/App';
-import { FAKE_STARTER_DEPS } from '@/app/starter-session/fakeStarterDeps';
+import { FAKE_STARTER_DEPS } from '@/session/fakeStarterDeps';
 import { createInspectorHost, OTHER_CONNECTION } from '@/test/inspectorWorld';
 
 afterEach(cleanup);

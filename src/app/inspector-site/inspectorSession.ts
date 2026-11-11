@@ -14,7 +14,7 @@ import type { Connection, FileFilter, Notice, PptbHost } from '@/services/pptb/h
 import { errorName } from '@/services/pptb/hostErrors';
 import type { ReviewKey, SiteRef } from '@/types/inspector';
 import type { ReportFormat, ReportOptions } from '@/types/report';
-import type { InspectorDeps } from './inspectorDeps';
+import type { InspectorDeps } from '@/features/inspector/inspectorDeps';
 import type { ExportJob, InspectorActions, InspectorSnapshot } from '@/types/inspectorSession';
 
 export const EMPTY_MARKS: ReadonlySet<ReviewKey> = new Set<ReviewKey>();

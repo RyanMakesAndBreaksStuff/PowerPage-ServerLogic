@@ -8,8 +8,8 @@ import { NotifyProvider } from '@/app/NotifyProvider';
 import { ViewContext } from '@/session/useView';
 import { createInspectorHost } from '@/test/inspectorWorld';
 import type { GatedHost } from '@/test/gatedHost';
-import { INSPECTOR_DEPS } from './inspectorDeps';
-import type { InspectorDeps } from './inspectorDeps';
+import { INSPECTOR_DEPS } from '@/features/inspector/inspectorDeps';
+import type { InspectorDeps } from '@/features/inspector/inspectorDeps';
 import { InspectorSessionProvider } from './InspectorSessionProvider';
 
 export type InspectorHarnessOptions = {

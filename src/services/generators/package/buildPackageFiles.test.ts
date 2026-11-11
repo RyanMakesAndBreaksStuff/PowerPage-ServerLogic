@@ -1,9 +1,9 @@
 // @vitest-environment node
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { deriveStarter } from '@/app/starter-session/deriveStarter';
-import { STARTER_DEPS } from '@/app/starter-session/starterDeps';
-import { createStarterReducer, initialStarterState } from '@/app/starter-session/starterReducer';
+import { deriveStarter } from '@/session/deriveStarter';
+import { STARTER_DEPS } from '@/session/starterDeps';
+import { createStarterReducer, initialStarterState } from '@/session/starterReducer';
 import type { StarterDerived, StarterState } from '@/types/starter';
 import { RESTRICTED_PATTERNS } from '@/lib/code-analysis/browserChecks';
 import { checklistLines, getRecipe } from '@/services/catalogue/recipes';

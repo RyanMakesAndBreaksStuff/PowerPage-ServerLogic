@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import type { StarterAction, StarterState } from '@/types/starter';
-import { FAKE_STARTER_DEPS } from './fakeStarterDeps';
+import { FAKE_STARTER_DEPS } from '@/session/fakeStarterDeps';
 import {
   DEFAULT_NAME,
   LIQUID_RESET_NOTICE,
   createStarterReducer,
   initialStarterState,
-} from './starterReducer';
+} from '@/session/starterReducer';
 
 const reduce = createStarterReducer(FAKE_STARTER_DEPS);
 const run = (...actions: StarterAction[]): StarterState =>

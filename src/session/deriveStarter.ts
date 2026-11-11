@@ -3,7 +3,7 @@ import { usedServerMembers } from '@/lib/code-analysis/structure';
 import { slugify } from '@/lib/slug';
 import { getRecipe } from '@/services/catalogue/recipes';
 import { METHOD_FUNCTION } from '@/types/http';
-import type { StarterDeps } from './starterDeps';
+import type { StarterDeps } from '@/session/starterDeps';
 import type { StarterDerived, StarterState } from '@/types/starter';
 
 // Validation is always complete (AC-5.3), so K is at least 1.

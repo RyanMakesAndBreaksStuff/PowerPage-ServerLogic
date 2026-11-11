@@ -3,7 +3,7 @@ import type { Notice } from '@/services/pptb/host.types';
 import { applyChanges } from '@/lib/code-analysis/structureInsert';
 import { normalizeLf } from '@/lib/text';
 import type { RecipeId } from '@/types/recipe';
-import type { StarterDeps } from './starterDeps';
+import type { StarterDeps } from '@/session/starterDeps';
 import type { StarterAction, StarterState } from '@/types/starter';
 
 export const DEFAULT_RECIPE: RecipeId = 'R1';

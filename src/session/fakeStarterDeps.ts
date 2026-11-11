@@ -1,4 +1,4 @@
-import type { StarterDeps } from './starterDeps';
+import type { StarterDeps } from '@/session/starterDeps';
 
 // Test helper. CRLF on purpose, so tests prove the reducer normalises generated text (AC-4.10).
 export const FAKE_STARTER_DEPS: StarterDeps = {

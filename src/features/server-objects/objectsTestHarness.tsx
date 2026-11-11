@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event';
 import type { ReactElement } from 'react';
 import { HostContext } from '@/session/HostContext';
 import { NotifyProvider } from '@/app/NotifyProvider';
-import { FAKE_STARTER_DEPS } from '@/app/starter-session/fakeStarterDeps';
+import { FAKE_STARTER_DEPS } from '@/session/fakeStarterDeps';
 import type { StarterAction } from '@/types/starter';
 import { StarterSessionProvider } from '@/app/starter-session/StarterSessionProvider';
 import { StarterSessionContext } from '@/session/useStarterSession';
