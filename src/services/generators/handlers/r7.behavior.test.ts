@@ -15,6 +15,7 @@ type Run = { reply: unknown; calls: Call[]; logs: string[] };
 type Options = {
   body?: unknown;
   settings?: Record<string, string>;
+  getSetting?: (name: string) => string | undefined;
   http?: Reply[];
   create?: Reply;
 };
@@ -74,6 +75,7 @@ async function runR7(options: Options = {}): Promise<Run> {
     settings = SETTINGS,
     http = connected(ok({ webUrl: TICKET_URL })),
     create = CREATED,
+    getSetting = (name: string) => settings[name],
   } = options;
   const calls: Call[] = [];
   const logs: string[] = [];
@@ -92,7 +94,7 @@ async function runR7(options: Options = {}): Promise<Run> {
   const sandbox = {
     Server: {
       Context: { ActivityId: ACTIVITY_ID, Body: JSON.stringify(body) },
-      SiteSetting: { Get: (name: string) => settings[name] },
+      SiteSetting: { Get: getSetting },
       Logger: { Log: log, Warn: log, Error: log },
       Connector: {
         HttpClient: {
@@ -167,6 +169,17 @@ describe('generated R7 handler, run in node:vm (AC-3.7, FR-3 R7)', () => {
     });
     expect(run.calls).toEqual([]);
     expect(run.logs).toEqual(['Missing site setting HOSTNAME']);
+  });
+
+  it('fails closed when reading a site setting throws, before any outbound call', async () => {
+    const run = await runR7({
+      getSetting: () => {
+        throw new TypeError('setting store unavailable');
+      },
+    });
+    expect(run.reply).toEqual({ status: 'error', message: "Couldn't connect to SharePoint." });
+    expect(run.calls).toEqual([]);
+    expect(run.logs).toEqual(['R7 connect TypeError']);
   });
 
   it('stops at the first failing connect call', async () => {

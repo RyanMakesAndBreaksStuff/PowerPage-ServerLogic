@@ -91,35 +91,35 @@ async function post() {
   if (errors.length > 0) {
     return JSON.stringify({ status: "error", message: "The request isn't valid.", errors: errors });
   }
-  const clientId = Server.SiteSetting.Get("CLIENT_ID");
-  if (!clientId) {
-    Server.Logger.Error("Missing site setting CLIENT_ID");
-    return JSON.stringify({ status: "error", message: "Server logic isn't configured: missing site setting CLIENT_ID" });
-  }
-  const clientSecret = Server.SiteSetting.Get("CLIENT_SECRET");
-  if (!clientSecret) {
-    Server.Logger.Error("Missing site setting CLIENT_SECRET");
-    return JSON.stringify({ status: "error", message: "Server logic isn't configured: missing site setting CLIENT_SECRET" });
-  }
-  const tenantId = Server.SiteSetting.Get("TENANT_ID");
-  if (!tenantId) {
-    Server.Logger.Error("Missing site setting TENANT_ID");
-    return JSON.stringify({ status: "error", message: "Server logic isn't configured: missing site setting TENANT_ID" });
-  }
-  const hostname = Server.SiteSetting.Get("HOSTNAME");
-  if (!hostname) {
-    Server.Logger.Error("Missing site setting HOSTNAME");
-    return JSON.stringify({ status: "error", message: "Server logic isn't configured: missing site setting HOSTNAME" });
-  }
-  const sitePath = Server.SiteSetting.Get("SITE_PATH");
-  if (!sitePath) {
-    Server.Logger.Error("Missing site setting SITE_PATH");
-    return JSON.stringify({ status: "error", message: "Server logic isn't configured: missing site setting SITE_PATH" });
-  }
   let token = "";
   let siteId = "";
   let driveId = "";
   try {
+    const clientId = Server.SiteSetting.Get("CLIENT_ID");
+    if (!clientId) {
+      Server.Logger.Error("Missing site setting CLIENT_ID");
+      return JSON.stringify({ status: "error", message: "Server logic isn't configured: missing site setting CLIENT_ID" });
+    }
+    const clientSecret = Server.SiteSetting.Get("CLIENT_SECRET");
+    if (!clientSecret) {
+      Server.Logger.Error("Missing site setting CLIENT_SECRET");
+      return JSON.stringify({ status: "error", message: "Server logic isn't configured: missing site setting CLIENT_SECRET" });
+    }
+    const tenantId = Server.SiteSetting.Get("TENANT_ID");
+    if (!tenantId) {
+      Server.Logger.Error("Missing site setting TENANT_ID");
+      return JSON.stringify({ status: "error", message: "Server logic isn't configured: missing site setting TENANT_ID" });
+    }
+    const hostname = Server.SiteSetting.Get("HOSTNAME");
+    if (!hostname) {
+      Server.Logger.Error("Missing site setting HOSTNAME");
+      return JSON.stringify({ status: "error", message: "Server logic isn't configured: missing site setting HOSTNAME" });
+    }
+    const sitePath = Server.SiteSetting.Get("SITE_PATH");
+    if (!sitePath) {
+      Server.Logger.Error("Missing site setting SITE_PATH");
+      return JSON.stringify({ status: "error", message: "Server logic isn't configured: missing site setting SITE_PATH" });
+    }
     const auth = await getAccessToken(tenantId, clientId, clientSecret);
     if (!auth.IsSuccessStatusCode) {
       Server.Logger.Error("R7 connect" + " " + auth.StatusCode + " " + auth.ReasonPhrase);

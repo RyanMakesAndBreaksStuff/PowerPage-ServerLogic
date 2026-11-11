@@ -13,7 +13,6 @@ const OPERATION = 'R9 trigger';
 const FAILURE = "Couldn't trigger the flow.";
 const BODY_MESSAGE = 'Body must be a JSON object.';
 const BODY_INDENT = '    ';
-const TRY_INDENT = '  ';
 const FAIL_INDENT = '      ';
 
 export function generateR9(): GeneratedHandler {
@@ -52,8 +51,8 @@ export function generateR9(): GeneratedHandler {
     '  if (!payload) {',
     validationFailureReturn([{ field: 'body', message: BODY_MESSAGE }], BODY_INDENT),
     '  }',
-    requireSettingsCode(['CLOUD_FLOW_ID'], TRY_INDENT),
     '  try {',
+    requireSettingsCode(['CLOUD_FLOW_ID'], BODY_INDENT),
     callLine,
     '    if (!r.IsSuccessStatusCode) {',
     logLine({
