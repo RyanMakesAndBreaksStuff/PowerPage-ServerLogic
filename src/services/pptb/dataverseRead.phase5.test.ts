@@ -50,8 +50,8 @@ describe('read provenance and partial evidence', () => {
     const read = vi.fn<RawRead>()
       .mockResolvedValueOnce({ value: [1, 2], '@odata.nextLink': NEXT })
       .mockResolvedValueOnce({ value: [3, 4] });
-    await expect(queryAllRows(Q, { read, sleep: noSleep })).rejects.toMatchObject({ partialRows: [1, 2, 3, 4], transport: false });
-    expect(NEXT_LINK_UNVERIFIED).toBe(true);
+    await expect(queryAllRows(Q, { read, sleep: noSleep }, true)).rejects.toMatchObject({ partialRows: [1, 2, 3, 4], transport: false });
+    expect(NEXT_LINK_UNVERIFIED).toBe(false);
   });
 
   it('retains received rows when a nextLink is malformed', async () => {

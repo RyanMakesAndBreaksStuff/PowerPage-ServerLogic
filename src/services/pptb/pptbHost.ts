@@ -67,7 +67,7 @@ function unexpected(label: string): HostCallError {
 
 /**
  * `toolboxAPI.events.on` is registered once per host, on the first handler, and routes on `payload.event`.
- * The last unsubscribe, or the page's pagehide, disposes the host subscription with events.off as a fallback.
+ * The last unsubscribe, the page's pagehide, or the host's `tool:unloaded` event disposes the host subscription with events.off as a fallback.
  */
 function createEventHub(): PptbHost['onEvent'] {
   const handlers = new Set<(e: HostEvent) => void>();
@@ -76,6 +76,10 @@ function createEventHub(): PptbHost['onEvent'] {
   const hub = (_event: unknown, payload: unknown): void => {
     const event = toHostEvent(payload);
     if (event === null) return;
+    if (event.kind === 'other' && event.name === 'tool:unloaded') {
+      detach();
+      return;
+    }
     for (const handler of [...handlers]) {
       try {
         handler(event);
@@ -108,7 +112,7 @@ function createEventHub(): PptbHost['onEvent'] {
         disposeHost =
           typeof result === 'function'
             ? () => {
-                (result as () => void)();
+                Reflect.apply(result, undefined, []);
               }
             : null;
         registered = true;
@@ -132,6 +136,18 @@ export function isFileAction(name: string): boolean {
   return FILE_ACTIONS.has(name);
 }
 
+/** FR-7: an unbound `action` request for one of the two file-download actions, with no `entityName` or `entityId`. */
+export function isAllowedFileRequest(request: unknown): boolean {
+  return (
+    isRecord(request) &&
+    typeof request.operationName === 'string' &&
+    isFileAction(request.operationName) &&
+    request.operationType === 'action' &&
+    !('entityName' in request) &&
+    !('entityId' in request)
+  );
+}
+
 /**
  * The only module that touches `window.toolboxAPI` and `window.dataverseAPI`. Dataverse access is retrieval only:
  * `queryData` for lists and the two file-download actions through `execute`. Every host response is `unknown`
@@ -144,7 +160,7 @@ export function createPptbHost(options: PptbHostOptions = {}): PptbHost {
   };
   const files: FileDeps = {
     execute: (request) => {
-      if (!isFileAction(request.operationName)) {
+      if (!isAllowedFileRequest(request)) {
         return Promise.reject(new HostReadError('Refused host operation.', null));
       }
       return window.dataverseAPI.execute(request satisfies DataverseAPI.ExecuteRequest);

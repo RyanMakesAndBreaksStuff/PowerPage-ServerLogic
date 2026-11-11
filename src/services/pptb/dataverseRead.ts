@@ -11,11 +11,10 @@ export type ReadDeps = { read: RawRead; sleep: Sleep };
 export const RETRY_DELAYS_MS = [1000, 2000, 4000] as const;
 
 /**
- * Spike S2 gate (RG-001). `@odata.nextLink` was observed on 2026-10-22, but the wire token has not been compared
- * with the issued link, so a full page with no link is reported as possibly incomplete instead of being accepted
- * as the last page. Set to false only with the Network-panel evidence from `s2VerifyWire('nextLink', …)`.
+ * Spike S2 gate (RG-001). Off: the live `@odata.nextLink` wire check passed on 2026-11-10, so a full page with no link is the
+ * last page. Passing `strict: true` still reports such a page as possibly incomplete instead of accepting it.
  */
-export const NEXT_LINK_UNVERIFIED = true;
+export const NEXT_LINK_UNVERIFIED = false;
 
 const NAME = /^[A-Za-z_][A-Za-z0-9_]*$/;
 const UNSAFE_CLAUSE = /[&#\p{Cc}]/u;
