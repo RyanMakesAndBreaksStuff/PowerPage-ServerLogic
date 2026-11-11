@@ -32,10 +32,13 @@ function localVarArgs() {
   });
 }
 
-/** RG-006: load what npm would publish, not the working tree. */
+/**
+ * RG-006: load what npm would publish, not the working tree. `--ignore-scripts` skips `prepack`
+ * (verify:release), which would rebuild dist/ as the beta build and replace the full build probed here.
+ */
 function packedToolPath() {
   const out = mkdtempSync(join(tmpdir(), 'sl-probe-pack-'));
-  if (npm(['pack', '--pack-destination', out]) !== 0) throw new Error('npm pack failed.');
+  if (npm(['pack', '--ignore-scripts', '--pack-destination', out]) !== 0) throw new Error('npm pack failed.');
   const tarball = readdirSync(out).find((name) => name.endsWith('.tgz'));
   if (tarball === undefined) throw new Error('npm pack wrote no tarball.');
   if (spawnSync('tar', ['-xzf', tarball], { cwd: out, stdio: 'inherit' }).status !== 0) throw new Error('tar failed.');

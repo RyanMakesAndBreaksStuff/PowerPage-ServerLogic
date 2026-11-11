@@ -79,7 +79,6 @@ describe('PPTB manifest (FR-12)', () => {
       'react',
       'react-dom',
       'acorn',
-      'acorn-walk',
       'fflate',
       'jspdf',
       'jspdf-autotable',
