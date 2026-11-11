@@ -29,3 +29,9 @@ coverage/
 /probes/reports/
 /probes/**/shots/
 /probes/.local.json
+
+# Dev-org captures and local agent state
+/.omc/
+docs/specs/**/spikes/s1/*.json
+docs/specs/**/spikes/s4/envvar.json
+docs/specs/**/spikes/s4/page.json
