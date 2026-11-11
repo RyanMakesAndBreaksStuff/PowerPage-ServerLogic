@@ -3,7 +3,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { LIQUID_SERVER_NOTE, generateClient } from './client';
-import { checkLiquidSyntax } from './liquidCheck';
+import { checkLiquidSyntax } from './liquidCheck.testkit';
 
 // fileURLToPath: a `new URL('./x', import.meta.url)` whose path contains %20 fails readFileSync here.
 const golden = (name: string): string =>

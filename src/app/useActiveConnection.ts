@@ -43,9 +43,3 @@ export function useConnectionState(): ConnectionState {
 export function useRefreshConnection(): ConnectionRefresh {
   return use(ConnectionRefreshContext);
 }
-
-/** The confirmed active connection, or null when none is confirmed (disconnected or still unknown). */
-export function useActiveConnection(): Connection | null {
-  const state = use(ConnectionContext);
-  return state.status === 'connected' ? state.connection : null;
-}
