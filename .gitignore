@@ -35,3 +35,4 @@ coverage/
 docs/specs/**/spikes/s1/*.json
 docs/specs/**/spikes/s4/envvar.json
 docs/specs/**/spikes/s4/page.json
+/full-review/
