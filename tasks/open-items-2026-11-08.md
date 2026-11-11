@@ -6,7 +6,7 @@ Baseline at HEAD `d87d09e`:
 - Passing: `typecheck`, `lint` (0 warnings), `npm test` (115 files, 2,029 tests, 37 s) and `build`.
 - Failing: `npx pptb-validate --skip-url-checks` exits 1.
 - There is no CI.
-- Fixed: the code findings from the 2026-11-04 supervised review and `fix-7.md` #1–11.
+- Fixed: the code findings from the 2026-11-04 supervised review and `docs/archive/fix-7.md` #1–11.
 
 Legend:
 - **Host**: needs the PPTB Desktop host (debug fork + `pptb_debug_*` MCP).

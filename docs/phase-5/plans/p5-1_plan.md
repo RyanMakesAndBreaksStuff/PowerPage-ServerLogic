@@ -5,7 +5,7 @@
 **Spec:** `docs/specs/001-server-logic-starter-inspector/spec.md` v4.0.1 (Approved).
 **Brief:** `phasse5plan.md` §3 and §5 P5.1.
 **Status:** Executed 2026-11-01; commits `7e8b97d`, `1669c7c`, `478898c`, `f8eeb31`. The C1 test block was adjusted during execution so `install` is synchronous (ESLint `require-await`).
-**Supersedes:** `docs/plans/11-01-2026-phase-5-policy.md` (Task 1) and Task 2 of `docs/plans/11-01-2026-phase-5-transport-reader.md`. Those drafts are not trusted; every anchor below was re-read from the checkout on 2026-11-01, and the corrections from `docs/phase-5/review/inspector-plan-review.md` (X-01…X-04, T1-01…T1-12, T2-01…T2-09) are applied.
+**Supersedes:** `docs/archive/11-01-2026-phase-5-policy.md` (Task 1) and Task 2 of `docs/archive/11-01-2026-phase-5-transport-reader.md`. Those drafts are not trusted; every anchor below was re-read from the checkout on 2026-11-01, and the corrections from `docs/phase-5/review/inspector-plan-review.md` (X-01…X-04, T1-01…T1-12, T2-01…T2-09) are applied.
 
 ## Goal
 

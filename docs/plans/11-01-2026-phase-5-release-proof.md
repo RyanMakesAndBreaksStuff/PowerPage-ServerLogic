@@ -6,7 +6,7 @@
 
 **Tech stack:** Existing npm scripts, installed PPTB validator API, PowerShell, Markdown and PPTB Desktop.
 
-**Scope:** Task 10 in the [Phase 5 plan](11-01-2026-phase-5-logic-inspector.md).
+**Scope:** Task 10 in the [Phase 5 plan](../archive/11-01-2026-phase-5-logic-inspector.md).
 
 **Out of scope:** Publishing, unrelated source fixes and assuming live acceptance from browser fakes.
 
@@ -25,7 +25,7 @@
 - Modify: `README.md` — product entry point and Inspector journey.
 - Modify: `docs/usage-manual.md` — scan/review/export instructions and troubleshooting.
 - Modify: `docs/build-manual.md` — explicit included/excluded build commands and validation.
-- Modify: `docs/specs/001-server-logic-starter-inspector/status-2026-10-23.md` — append current status/evidence link, preserving historical observations.
+- Modify: `docs/archive/status-2026-10-23.md` — append current status/evidence link, preserving historical observations.
 - Signal: `findings/logic/phase5-release-evidence.md` — every gate is explicitly Pending until observed.
 
 - [ ] **Step 1: Establish the observable pre-change signal**
@@ -37,10 +37,10 @@ Create `findings/logic/phase5-release-evidence.md` with these complete initial c
 
 Status: Pending — implementation and release checks must be executed.
 
-Planning baseline: `docs/plans/11-01-2026-phase-5-baseline.md`.
-Implementation plan: `docs/plans/11-01-2026-phase-5-logic-inspector.md`.
+Planning baseline: `docs/archive/11-01-2026-phase-5-baseline.md`.
+Implementation plan: `docs/archive/11-01-2026-phase-5-logic-inspector.md`.
 S2 wire evidence owner: `docs/specs/001-server-logic-starter-inspector/plans/phase-12-spike-s2.md`.
-Generator release dependency: `docs/plans/10-24-2026-generator-behavior-harness.md`.
+Generator release dependency: `docs/plans/10-24-2026-generator-behavior-harness.md` (removed in `820d7b8`; see `git show 820d7b8^:docs/plans/10-24-2026-generator-behavior-harness.md`).
 
 ## Build identity
 
@@ -278,7 +278,7 @@ Get-ChildItem -Path dist/assets -File | Get-FileHash -Algorithm SHA256
 
 Expected: offline `valid:true`/zero errors; online validator zero errors; audit zero advisories; package listing contains current `dist/index.html`, one IIFE, bundled styles/fonts/icon and the release's dependency artifact; hashes recorded against that same build. Run the repository's existing finalize-package step only as part of release preparation, with its lockfile changes reviewed by the release owner. This planning task does not authorize a publish.
 
-For a release later than the FR-12 v1.0.0 exception, require completion evidence from `docs/plans/10-24-2026-generator-behavior-harness.md` for the full AC-4.12 matrix. Inspector tests do not satisfy that dependency. Record the release version and referenced evidence; if absent, leave that row open.
+For a release later than the FR-12 v1.0.0 exception, require completion evidence from `docs/plans/10-24-2026-generator-behavior-harness.md` (removed in `820d7b8`; see `git show 820d7b8^:docs/plans/10-24-2026-generator-behavior-harness.md`) for the full AC-4.12 matrix. Inspector tests do not satisfy that dependency. Record the release version and referenced evidence; if absent, leave that row open.
 
 Execute these rendered/live checks and record separate observations:
 
@@ -299,15 +299,15 @@ Run: `Select-String -Path 'findings/logic/phase5-release-evidence.md' -Pattern '
 
 Expected at completion: no Pending/Failed/Blocked gate rows, every required row has a passing recorded observation, and the Completion paragraph links the final artifact and acceptance coverage.
 
-Run: `git diff --check -- README.md docs/usage-manual.md docs/build-manual.md docs/specs/001-server-logic-starter-inspector/status-2026-10-23.md scripts/validate-manifest.mjs findings/logic/phase5-release-evidence.md`
+Run: `git diff --check -- README.md docs/usage-manual.md docs/build-manual.md docs/archive/status-2026-10-23.md scripts/validate-manifest.mjs findings/logic/phase5-release-evidence.md`
 
 Expected: exit 0. Confirm all eight delivery outcomes and every audit closure against the plan's coverage map. Stop feature work once they and the live gates pass; otherwise state the exact remaining blocker.
 
 - [ ] **Step 5: Commit the coherent change**
 
 ```bash
-git add -- README.md docs/usage-manual.md docs/build-manual.md docs/images/usage-inspector-review.png docs/images/usage-inspector-export.png scripts/validate-manifest.mjs findings/logic/phase5-release-evidence.md docs/specs/001-server-logic-starter-inspector/status-2026-10-23.md
-git commit --only -m "docs(inspector): document scan review exports and release evidence" -- README.md docs/usage-manual.md docs/build-manual.md docs/images/usage-inspector-review.png docs/images/usage-inspector-export.png scripts/validate-manifest.mjs findings/logic/phase5-release-evidence.md docs/specs/001-server-logic-starter-inspector/status-2026-10-23.md
+git add -- README.md docs/usage-manual.md docs/build-manual.md docs/images/usage-inspector-review.png docs/images/usage-inspector-export.png scripts/validate-manifest.mjs findings/logic/phase5-release-evidence.md docs/archive/status-2026-10-23.md
+git commit --only -m "docs(inspector): document scan review exports and release evidence" -- README.md docs/usage-manual.md docs/build-manual.md docs/images/usage-inspector-review.png docs/images/usage-inspector-export.png scripts/validate-manifest.mjs findings/logic/phase5-release-evidence.md docs/archive/status-2026-10-23.md
 ```
 
 Commit completed documentation/evidence only after reconciling pre-existing staged changes. A checkpoint with open gates may be committed as evidence, but must continue to say Pending and must not make release-ready product claims.
