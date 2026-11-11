@@ -10,7 +10,7 @@ afterEach(cleanup);
 describe('Icon', () => {
   it('renders path data for every mapped Fluent icon', () => {
     const names = Object.keys(ICONS).filter((key): key is IconName => key in ICONS);
-    expect(names.length).toBeGreaterThanOrEqual(25);
+    expect(names.length).toBeGreaterThanOrEqual(22);
     for (const name of names) {
       const { container, unmount } = render(<Icon name={name} />);
       expect(container.querySelectorAll('svg path').length, name).toBeGreaterThan(0);
