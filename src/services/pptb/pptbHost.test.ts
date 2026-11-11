@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { HostReadError } from './host.types';
 import type { HostEvent, ODataQuery, PptbHost } from './host.types';
 import { HostCallError, isRecord } from './hostErrors';
-import { createPptbHost, isFileAction } from './pptbHost';
+import { createPptbHost, isAllowedFileRequest, isFileAction } from './pptbHost';
 
 const BASE = 'https://org.crm.dynamics.com/api/data/v9.2';
 const GUID = '0f8fad5b-d9cb-469f-a165-70867728950e';
@@ -405,6 +405,17 @@ describe('onEvent', () => {
     expect(stubs.off).not.toHaveBeenCalled();
   });
 
+  it('disposes the wrapper on tool:unloaded and remains idempotent', () => {
+    const handler = vi.fn();
+    host.onEvent(handler);
+    stubs.emit(payload('tool:unloaded'));
+    window.dispatchEvent(new Event('pagehide'));
+    stubs.emit(payload('settings:updated'));
+    expect(stubs.registrations.size).toBe(0);
+    expect(handler).not.toHaveBeenCalled();
+    expect(stubs.off).not.toHaveBeenCalled();
+  });
+
   it('uses events.off(hub) only when on returns no disposer', () => {
     stubs.on.mockImplementation((callback) => {
       stubs.registrations.add(callback);
@@ -595,9 +606,10 @@ describe('queryAll', () => {
     });
   });
 
-  it('fails closed on a full page that has no paging link (Spike S2 gate)', async () => {
+  it('accepts a full page that has no paging link as the last page (Spike S2 gate off)', async () => {
     stubs.queryData.mockResolvedValue({ value: [1, 2] });
-    await expect(host.queryAll(QUERY)).rejects.toThrow(/may be incomplete/);
+    await expect(host.queryAll(QUERY)).resolves.toEqual([1, 2]);
+    expect(stubs.queryData).toHaveBeenCalledTimes(1);
   });
 
   it('rejects an invalid query before calling the host', async () => {
@@ -731,5 +743,21 @@ describe('retrieval-only guarantee', () => {
     ['', false],
   ])('isFileAction(%j) is %s', (name, expected) => {
     expect(isFileAction(name)).toBe(expected);
+  });
+
+  const download = { operationName: 'DownloadBlock', operationType: 'action', parameters: {} };
+
+  it.each([
+    ['an unbound DownloadBlock action', download, true],
+    ['an unbound InitializeFileBlocksDownload action', { ...download, operationName: 'InitializeFileBlocksDownload' }, true],
+    ['another action name', { ...download, operationName: 'CreateRecord' }, false],
+    ['a function', { ...download, operationType: 'function' }, false],
+    ['a request bound by entityName', { ...download, entityName: 'account' }, false],
+    ['a request bound by entityId', { ...download, entityId: GUID }, false],
+    ['a request with no operation name', { operationType: 'action' }, false],
+    ['a non-object', 'DownloadBlock', false],
+    ['null', null, false],
+  ])('isAllowedFileRequest refuses all but the unbound file actions: %s', (_label, request, expected) => {
+    expect(isAllowedFileRequest(request)).toBe(expected);
   });
 });

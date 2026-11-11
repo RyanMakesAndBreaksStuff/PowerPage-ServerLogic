@@ -48,8 +48,10 @@ function messageOf(error: unknown): string {
 }
 
 function statusFromMessage(message: string): number | null {
+  // A mapped code wins; an unmapped one falls through to the HTTP status and sign-in checks.
   const code = DATAVERSE_CODE.exec(message)?.[1];
-  if (code !== undefined) return DATAVERSE_CODE_STATUS[code.toLowerCase()] ?? null;
+  const mapped = code === undefined ? undefined : DATAVERSE_CODE_STATUS[code.toLowerCase()];
+  if (mapped !== undefined) return mapped;
   const http = HTTP_STATUS.exec(message)?.[1];
   if (http !== undefined) return Number(http);
   return SIGN_IN.test(message) ? 401 : null;

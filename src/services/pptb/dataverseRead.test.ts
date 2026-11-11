@@ -52,6 +52,10 @@ describe('hostErrors', () => {
     ['0x80040217: The specified object was not found.', 404],
     ["0x80060888: Resource not found for the segment 'powerpagesites'.", 404],
     ['0x80072322: Number of requests exceeded the limit of 6000 over time window of 300 seconds.', 429],
+    ['0x80072321: Combined execution time of incoming requests exceeded limit of 1,200,000 milliseconds.', 429],
+    ['0x80072326: Number of concurrent requests exceeded the limit of 52.', 429],
+    ['0x8005F103: Throttling.', 429],
+    ['0x80040265: x: HTTP 503', 503],
     ["Authentication expired for connection 'Dev'. Please reconnect to continue.", 401],
     ["No access token found for 'Dev'. Please reconnect to the environment.", 401],
     ["Token refresh failed for 'Dev'. Please sign in again.", 401],
@@ -205,8 +209,14 @@ describe('fetchAllPages', () => {
     expect(readPage).toHaveBeenCalledTimes(2);
   });
 
-  it('ships with the strict gate on until Spike S2 confirms @odata.nextLink', () => {
-    expect(NEXT_LINK_UNVERIFIED).toBe(true);
+  it('ships with the strict gate off now that Spike S2 confirmed @odata.nextLink', () => {
+    expect(NEXT_LINK_UNVERIFIED).toBe(false);
+  });
+
+  it('accepts a full page with no link as the last page by default, and fails closed with strict: true', async () => {
+    const read = vi.fn<RawRead>().mockResolvedValue({ value: [1, 2] });
+    await expect(queryAllRows(QUERY, { read, sleep: noSleep })).resolves.toEqual([1, 2]);
+    await expect(queryAllRows(QUERY, { read, sleep: noSleep }, true)).rejects.toThrow(/may be incomplete/);
   });
 });
 
