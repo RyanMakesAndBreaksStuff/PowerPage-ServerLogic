@@ -10,6 +10,8 @@ import { buildPackageFiles } from '@/services/generators/package/buildPackageFil
 import { buildZip } from '@/services/generators/package/buildZip';
 import { errorName } from '@/services/pptb/hostErrors';
 
+const SAVE_FAILED_BODY = 'The file could not be written. Check the folder and try again.';
+
 export function DownloadStarterButton(): ReactNode {
   const { state, derived } = useStarterSession();
   const host = useHost();
@@ -24,9 +26,17 @@ export function DownloadStarterButton(): ReactNode {
     const language = state.language;
     const packaged = { state, derived };
     startTransition(async () => {
+      let bytes: Uint8Array;
       try {
         const clientText = generateClient({ slug, recipe, fn, method, language });
-        const bytes = buildZip(buildPackageFiles({ ...packaged, clientText }));
+        bytes = buildZip(buildPackageFiles({ ...packaged, clientText }));
+      } catch (error: unknown) {
+        console.error(errorName(error));
+        const reason = error instanceof Error ? error.message : 'Unknown error';
+        notify({ title: `Couldn't save ${slug}.zip`, body: reason, type: 'error' });
+        return;
+      }
+      try {
         const result = await host.saveFile(`${slug}.zip`, bytes, [
           { name: 'Zip archive', extensions: ['zip'] },
         ]);
@@ -35,8 +45,7 @@ export function DownloadStarterButton(): ReactNode {
         }
       } catch (error: unknown) {
         console.error(errorName(error));
-        const reason = error instanceof Error ? error.message : 'Unknown error';
-        notify({ title: `Couldn't save ${slug}.zip`, body: reason, type: 'error' });
+        notify({ title: `Couldn't save ${slug}.zip`, body: SAVE_FAILED_BODY, type: 'error' });
       }
     });
   }
