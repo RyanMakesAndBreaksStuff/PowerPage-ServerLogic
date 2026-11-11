@@ -97,14 +97,16 @@ describe('file action protocol through createPptbHost', () => {
     await expect(h.host.downloadFileColumn(REF)).resolves.toBe(code);
   });
 
+  const INVALID = 'Unexpected file response from Dataverse.';
   it.each([
-    { FileContinuationToken: '' }, { FileContinuationToken: 7 }, { FileSizeInBytes: -1 }, { FileSizeInBytes: 0.5 },
-    { FileSizeInBytes: Number.MAX_SAFE_INTEGER + 1 }, { FileSizeInBytes: 128 * 1024 * 1024 + 1 },
-    { FileName: null }, { IsChunkingSupported: 'true' },
-  ])('rejects malformed initialization %j locally without a block request', async (change) => {
+    [{ FileContinuationToken: '' }, INVALID], [{ FileContinuationToken: 7 }, INVALID], [{ FileSizeInBytes: -1 }, INVALID],
+    [{ FileSizeInBytes: 0.5 }, INVALID], [{ FileSizeInBytes: Number.MAX_SAFE_INTEGER + 1 }, INVALID],
+    [{ FileSizeInBytes: 128 * 1024 * 1024 + 1 }, 'This file is larger than the 128 MiB limit and cannot be read.'],
+    [{ FileName: null }, INVALID], [{ IsChunkingSupported: 'true' }, INVALID],
+  ])('rejects malformed initialization %j locally without a block request', async (change, message) => {
     const h = harness();
     h.execute.mockResolvedValueOnce({ ...h.initial, ...change });
-    await expect(h.host.downloadFileColumn(REF)).rejects.toMatchObject({ name: 'HostReadError', status: null, transport: false });
+    await expect(h.host.downloadFileColumn(REF)).rejects.toMatchObject({ name: 'HostReadError', message, status: null, transport: false });
     expect(h.execute).toHaveBeenCalledTimes(1);
     expect(h.sleep).not.toHaveBeenCalled();
   });
