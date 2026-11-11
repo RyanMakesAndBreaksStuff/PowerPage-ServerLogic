@@ -9,20 +9,3 @@ In repositories indexed by CodeGraph (a `.codegraph/` directory exists at the re
 
 If there is no `.codegraph/` directory, skip CodeGraph entirely — indexing is the user's decision.
 <!-- CODEGRAPH_END -->
-<!-- lean-ctx -->
-
-## lean-ctx
-
-lean-ctx is active — the MCP tools replace native equivalents.
-Full rules: LEAN-CTX.md (open on demand — do not auto-load).
-<!-- /lean-ctx -->
-<!-- lean-ctx-compression -->
-
-### Output style
-
-- Bullet points over paragraphs
-- Skip filler words and hedging ("I think", "probably", "it seems")
-- 1-sentence explanations max, then code/action
-- No repeating what the user said
-
-<!-- /lean-ctx-compression -->
