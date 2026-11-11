@@ -636,16 +636,14 @@ describe('export job (P5.7)', () => {
       .filter((call) => call.method === 'preventClose' || call.method === 'releasePreventClose')
       .map((call) => call.method);
 
-  it('opens a job for a finished scan with files: a frozen evaluated clone, the selected file, the generation and the spec defaults', async () => {
+  it('opens a job for a finished scan with files: a frozen evaluated clone, the selected file and the spec defaults', async () => {
     const { store, snap, job } = await finishedStore();
     store.openExport();
     const opened = job();
-    const { scan, marks, generation } = snap();
+    const { scan, marks } = snap();
     if (scan.status !== 'done') throw new Error('expected a finished scan');
     expect(opened).toEqual({
       result: evaluateSite(scan.facts, marks),
-      selectedFileId: CUSTOMER,
-      generation,
       options: { scope: 'file', fileId: CUSTOMER, ...DEFAULTS },
       phase: 'idle',
       open: true,
@@ -662,23 +660,17 @@ describe('export job (P5.7)', () => {
   it('defaults to This file when the selected id is in the result, else Site summary; scope cannot become file without a selection', async () => {
     const none = await finishedStore({}, { fileId: null });
     none.store.openExport();
-    expect(none.job()).toMatchObject({ selectedFileId: null, options: { scope: 'site', fileId: null } });
+    expect(none.job()).toMatchObject({ options: { scope: 'site', fileId: null } });
     none.store.setExportOptions({ scope: 'file' });
     expect(none.job().options.scope).toBe('site');
 
     const missing = await finishedStore({}, { fileId: 'not-in-the-result' });
     missing.store.openExport();
-    expect(missing.job()).toMatchObject({
-      selectedFileId: null,
-      options: { scope: 'site', fileId: null },
-    });
+    expect(missing.job()).toMatchObject({ options: { scope: 'site', fileId: null } });
 
     const chosen = await finishedStore({}, { fileId: 'order-sync' });
     chosen.store.openExport();
-    expect(chosen.job()).toMatchObject({
-      selectedFileId: 'order-sync',
-      options: { scope: 'file', fileId: 'order-sync' },
-    });
+    expect(chosen.job()).toMatchObject({ options: { scope: 'file', fileId: 'order-sync' } });
     chosen.store.setExportOptions({ scope: 'site' });
     expect(chosen.job().options).toEqual({ scope: 'site', fileId: 'order-sync', ...DEFAULTS });
     chosen.store.setExportOptions({ scope: 'file' });
@@ -916,7 +908,7 @@ describe('export job (P5.7)', () => {
   });
 
   it.each(['save', 'cancel', 'reject'] as const)(
-    'keeps a saving job through a results change, closes its dialog once, and settles a %s',
+    'keeps a saving job through a results change, closes its dialog once without a cancelled toast, and settles a %s',
     async (outcome) => {
       const { host, store, snap, notify, job, settled, toasts } = await finishedStore();
       host.holdSaves(true);
@@ -929,7 +921,7 @@ describe('export job (P5.7)', () => {
       expect(job()).toMatchObject({ phase: 'saving', open: false });
       expect(job().result).toBe(captured.result);
       expect(snap().exportStaleCloses).toBe(1);
-      expect(toasts('info')).toEqual([cancelled]);
+      expect(notify).not.toHaveBeenCalled();
       host.setSave(outcome);
       host.releaseHeldSaves(1);
       await settled();
@@ -937,15 +929,15 @@ describe('export job (P5.7)', () => {
       const name = reportFileNameBeforeBuild(captured.result, captured.options);
       const model = buildReportModel(captured.result, captured.options, EXPORTED_AT);
       expect(host.callsOf('saveFile')[0]?.content).toBe(renderMarkdown(model));
-      expect(toasts('info')).toHaveLength(1);
+      expect(toasts('info')).toEqual([]);
       if (outcome === 'save') {
         expect(host.savedFiles[0]?.content).toBe(renderMarkdown(model));
         expect(toasts('success')).toEqual([{ title: `${name} exported`, body: '', type: 'success' }]);
       } else if (outcome === 'cancel') {
-        expect(notify).toHaveBeenCalledTimes(1);
+        expect(notify).not.toHaveBeenCalled();
       } else {
         expect(toasts('error')).toEqual([
-          { title: `Couldn't save ${name}`, body: 'Host call failed: saveFile.', type: 'error' },
+          { title: `Couldn't save ${name}`, body: SAVE_FAILED_BODY, type: 'error' },
         ]);
       }
       expect(snap().exportStaleCloses).toBe(1);
@@ -956,7 +948,7 @@ describe('export job (P5.7)', () => {
     ['the model build', 'markdown', BUILD_FAILED_BODY, 'RangeError'],
     ['the Markdown render', 'markdown', BUILD_FAILED_BODY, 'RangeError'],
     ['the PDF render', 'pdf', BUILD_FAILED_BODY, 'RangeError'],
-    ['a host save rejection', 'pdf', 'Host call failed: saveFile.', 'HostCallError'],
+    ['a host save rejection', 'pdf', SAVE_FAILED_BODY, 'HostCallError'],
     ['a save that throws something else', 'markdown', SAVE_FAILED_BODY, 'TypeError'],
   ] as const;
 
@@ -1000,6 +992,7 @@ describe('export job (P5.7)', () => {
       const errors = vi.mocked(console.error).mock.calls;
       expect(errors).toContainEqual([logged]);
       expect(JSON.stringify(errors)).not.toContain('internal detail');
+      expect(JSON.stringify(notify.mock.calls)).not.toContain('Host call failed');
       expect(base.savedFiles).toHaveLength(0);
 
       failing.on = false;
@@ -1014,7 +1007,7 @@ describe('export job (P5.7)', () => {
     },
   );
 
-  it('passes a HostCallError message through even when it is thrown while building', async () => {
+  it('shows the build reason, never the HostCallError message, for a host error thrown while building', async () => {
     const { store, notify, job, settled } = await finishedStore({
       renderMarkdown: () => {
         throw new HostCallError('Host call failed: saveFile.');
@@ -1024,11 +1017,10 @@ describe('export job (P5.7)', () => {
     const name = reportFileNameBeforeBuild(job().result, job().options);
     store.submitExport();
     await settled();
-    expect(notify).toHaveBeenCalledWith({
-      title: `Couldn't save ${name}`,
-      body: 'Host call failed: saveFile.',
-      type: 'error',
-    });
+    expect(notify.mock.calls).toEqual([
+      [{ title: `Couldn't save ${name}`, body: BUILD_FAILED_BODY, type: 'error' }],
+    ]);
+    expect(vi.mocked(console.error).mock.calls).toContainEqual(['HostCallError']);
   });
 
   it('settles a job whose filename cannot be built: closes it, reports one error, releases the guard and saves nothing', async () => {
@@ -1103,7 +1095,7 @@ describe('export job (P5.7)', () => {
     expect(host.savedFiles).toHaveLength(0);
   });
 
-  describe('build watchdog (E-11 B)', () => {
+  describe('slow build notice (E-11 B, N4)', () => {
     afterEach(() => {
       vi.useRealTimers();
     });
@@ -1112,26 +1104,65 @@ describe('export job (P5.7)', () => {
       for (let step = 0; step < 50 && !done(); step += 1) await vi.advanceTimersByTimeAsync(1);
     };
 
-    it('warns once when the build runs past the watchdog, then saves', async () => {
-      const { host, store, snap, notify, settled, toasts } = await finishedStore({
+    /**
+     * The build is synchronous, so no timer can fire during it. This clock reads `elapsed` ms past
+     * EXPORTED_AT once the PDF render has returned: the build took that long.
+     */
+    const timedBuild = (elapsed: number, during?: () => void): Partial<InspectorDeps> => {
+      const clock = { rendered: false };
+      return {
+        now: () => (clock.rendered ? new Date(EXPORTED_AT.getTime() + elapsed) : EXPORTED_AT),
         renderPdf: (...args) => {
-          vi.advanceTimersByTime(6_000);
+          during?.();
+          clock.rendered = true;
           return renderPdf(...args);
         },
-      });
-      vi.useFakeTimers();
+      };
+    };
+
+    it('warns once, after a build that took longer than the threshold and before the save dialog opens, then saves', async () => {
+      const { host, store, snap, notify, settled, toasts } = await finishedStore(timedBuild(6_000));
+      host.holdSaves(true);
       store.openExport();
       store.setExportOptions({ format: 'pdf' });
       store.submitExport();
-      await flush(() => host.callsOf('releasePreventClose').length === 1);
-      vi.useRealTimers();
-      await settled();
+      await until(() => host.pendingSaves === 1);
       expect(toasts('warning')).toEqual([
         { title: EXPORT_SLOW_TITLE, body: EXPORT_SLOW_BODY, type: 'warning' },
       ]);
+      host.releaseHeldSaves(1);
+      await settled();
       expect(toasts('success')).toHaveLength(1);
       expect(notify).toHaveBeenCalledTimes(2);
       expect(host.savedFiles).toHaveLength(1);
+      expect(snap().exportJob).toBeNull();
+    });
+
+    it.each([0, 5_000])('does not warn after a build that took %i ms', async (elapsed) => {
+      const { store, notify, settled, toasts } = await finishedStore(timedBuild(elapsed));
+      store.openExport();
+      store.setExportOptions({ format: 'pdf' });
+      store.submitExport();
+      await settled();
+      expect(toasts('warning')).toEqual([]);
+      expect(notify).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not warn when the results changed during a slow build', async () => {
+      const holder: { store: InspectorStore | null } = { store: null };
+      const { host, store, snap, settled, toasts } = await finishedStore(
+        timedBuild(6_000, () => {
+          holder.store?.rescan();
+        }),
+      );
+      holder.store = store;
+      store.openExport();
+      store.setExportOptions({ format: 'pdf' });
+      store.submitExport();
+      await settled();
+      expect(toasts('warning')).toEqual([]);
+      expect(toasts('info')).toEqual([cancelled]);
+      expect(host.callsOf('saveFile')).toHaveLength(0);
       expect(snap().exportJob).toBeNull();
     });
 

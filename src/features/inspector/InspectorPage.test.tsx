@@ -589,7 +589,7 @@ describe('InspectorPage: results', () => {
       expect(notices(host).map((notice) => notice.type)).toEqual(['success']);
     });
 
-    it('closes the dialog when the connection changes during a pending save, finishes the save, and moves focus to the heading', async () => {
+    it('closes the dialog without a cancelled toast when the connection changes during a pending save, finishes the save, and moves focus to the heading (AC-9.8)', async () => {
       const { host, user } = await finished();
       await user.click(exportReport());
       host.holdSaves(true);
@@ -600,12 +600,10 @@ describe('InspectorPage: results', () => {
       host.setConnection(OTHER_CONNECTION);
       await connectionEvent(host);
       await gone();
-      expect(notices(host)).toEqual([
-        { title: 'Results changed, so the export was cancelled.', body: '', type: 'info' },
-      ]);
+      expect(notices(host)).toEqual([]);
       host.releaseHeldSaves(1);
       await waitFor(() => {
-        expect(notices(host).map((notice) => notice.type)).toEqual(['info', 'success']);
+        expect(notices(host).map((notice) => notice.type)).toEqual(['success']);
       });
       expect(host.savedFiles).toHaveLength(1);
       const next = await heading('Select a site');

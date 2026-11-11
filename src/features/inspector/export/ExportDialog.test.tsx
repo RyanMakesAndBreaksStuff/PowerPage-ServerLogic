@@ -14,7 +14,7 @@ import type { ReportOptions } from '@/types/report';
 import { file, read, role, siteFacts } from '../model/fixtures';
 import { EXPORT_IN_PROGRESS_REASON } from '../pageCopy';
 import { InspectorPage } from '../InspectorPage';
-import { EXPORT_BUSY_REASON } from './exportCopy';
+import { EXPORT_BUSY_REASON, SAVE_FAILED_BODY } from './exportCopy';
 
 afterEach(cleanup);
 beforeEach(() => {
@@ -340,7 +340,7 @@ describe('Export dialog: outcomes', () => {
     expect(notices(view.host)).toEqual([
       {
         title: "Couldn't save customer-summary-readiness.pdf",
-        body: 'Host call failed: saveFile.',
+        body: SAVE_FAILED_BODY,
         type: 'error',
       },
     ]);
