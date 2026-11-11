@@ -31,13 +31,16 @@ function parseInitializer(raw: unknown): Initializer {
   const { FileContinuationToken, FileSizeInBytes, FileName, IsChunkingSupported } = raw;
   if (typeof FileContinuationToken !== 'string' || FileContinuationToken === '') throw invalidFile();
   if (typeof FileSizeInBytes !== 'number' || !Number.isSafeInteger(FileSizeInBytes)) throw invalidFile();
-  if (FileSizeInBytes < 0 || FileSizeInBytes > FILE_MAX_BYTES) throw invalidFile();
+  if (FileSizeInBytes < 0) throw invalidFile();
+  if (FileSizeInBytes > FILE_MAX_BYTES) {
+    throw new HostReadError('This file is larger than the 128 MiB limit and cannot be read.', null);
+  }
   if (FileName !== undefined && typeof FileName !== 'string') throw invalidFile();
   if (typeof IsChunkingSupported !== 'boolean') throw invalidFile();
   return { token: FileContinuationToken, size: FileSizeInBytes, chunked: IsChunkingSupported };
 }
 
-/** `DownloadBlockResponse.Data` is binary serialised as base64 (Learn). Length and round-trip are both checked. */
+/** `DownloadBlockResponse.Data` is binary serialised as base64 (Learn). Length and alphabet are checked before decoding. */
 function blockBytes(raw: unknown, expected: number): Uint8Array {
   if (!isRecord(raw) || typeof raw.Data !== 'string') throw invalidFile();
   const data = raw.Data;
@@ -48,8 +51,10 @@ function blockBytes(raw: unknown, expected: number): Uint8Array {
   } catch {
     throw invalidFile();
   }
-  if (binary.length !== expected || btoa(binary) !== data) throw invalidFile();
-  return Uint8Array.from(binary, (character) => character.charCodeAt(0));
+  if (binary.length !== expected) throw invalidFile();
+  const bytes = new Uint8Array(expected);
+  for (let index = 0; index < expected; index += 1) bytes[index] = binary.charCodeAt(index);
+  return bytes;
 }
 
 /**
