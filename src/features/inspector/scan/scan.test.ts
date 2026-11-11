@@ -779,6 +779,31 @@ describe('runScan progress, time and identity', () => {
     },
   );
 
+  it('abandons the scan when the connection switches away and back while it runs', async () => {
+    const fake = createWorld(HAPPY);
+    const listenersBefore = fake.listenerCount();
+    let switched = false;
+    const host: PptbHost = {
+      ...fake,
+      queryAll: (q, signal) => {
+        if (!switched) {
+          switched = true;
+          fake.setConnection({ ...CONNECTION, id: 'connection-2', url: 'https://other.crm.dynamics.com' });
+          fake.emit({ kind: 'connection-changed' });
+          fake.setConnection(CONNECTION);
+          fake.emit({ kind: 'connection-changed' });
+        }
+        return fake.queryAll(q, signal);
+      },
+    };
+    const failure = await scan(host).then(
+      () => null,
+      (error: unknown) => error,
+    );
+    expect(failure).toBeInstanceOf(ScanAbandonedError);
+    expect(fake.listenerCount()).toBe(listenersBefore);
+  });
+
   it('accepts the finished scan when the identity refresh rejects', async () => {
     const fake = createWorld(HAPPY);
     const host: PptbHost = {

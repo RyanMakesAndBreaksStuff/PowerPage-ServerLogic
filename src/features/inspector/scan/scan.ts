@@ -298,6 +298,11 @@ export async function runScan(
   const now = options.now ?? (() => new Date());
   throwIfAborted(signal);
   const startedAt = now().toISOString();
+  // Any connection change during the scan abandons it, even one that switches back (N3).
+  const connectionEvents = { changed: false };
+  const unsubscribe = host.onEvent((event) => {
+    if (event.kind === 'connection-changed') connectionEvents.changed = true;
+  });
   const reader = createReader(host, signal);
   try {
     const inventory = reader.query(componentQuery(site.id, COMPONENT_TYPE.serverLogic));
@@ -317,6 +322,7 @@ export async function runScan(
     throwIfAborted(signal);
     await confirmIdentity(host, connection);
     throwIfAborted(signal);
+    if (connectionEvents.changed) throw new ScanAbandonedError();
     return {
       scanId,
       site,
@@ -333,6 +339,7 @@ export async function runScan(
       stopped: reader.lost() ? 'connection-lost' : null,
     };
   } finally {
+    unsubscribe();
     reader.close();
   }
 }
