@@ -1,6 +1,7 @@
 import { screen, within } from '@testing-library/react';
 import type { UserEvent } from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
+import { recipeCountLabel } from './inputs/starterOptions';
 import { StarterPage } from './StarterPage';
 import { editorView, renderStarter } from './starterTestHarness';
 
@@ -192,7 +193,7 @@ describe('StarterPage input tiles (Phase 18)', () => {
     const filteredCount = screen.queryAllByRole('option').length;
     expect(filteredCount).toBeGreaterThan(0);
     expect(screen.getByRole('region', { name: 'Recipe' })).toHaveTextContent(
-      `${String(filteredCount)} recipes`,
+      recipeCountLabel(filteredCount),
     );
     await h.user.clear(input);
     await h.user.click(screen.getByRole('button', { name: 'Clear method filter' }));

@@ -58,9 +58,14 @@ function Panel({
   );
 }
 
+/** Rendered inside the app boundary so a host that throws while subscribing shows the alert, not a blank window. */
+function HostThemeSync({ host }: { host: PptbHost }): null {
+  useHostTheme(host);
+  return null;
+}
+
 export function App({ host, starterDeps = STARTER_DEPS, inspectorDeps }: AppProps): ReactElement {
   const [view, setViewState] = useState<View>(RELEASED_PAGES[0] ?? 'starter');
-  useHostTheme(host);
 
   const setView = (next: View): void => {
     if (RELEASED_PAGES.includes(next)) setViewState(next);
@@ -68,6 +73,7 @@ export function App({ host, starterDeps = STARTER_DEPS, inspectorDeps }: AppProp
 
   return (
     <PageErrorBoundary label="Server Logic Tools">
+      <HostThemeSync host={host} />
       <HostContext value={host}>
         <NotifyProvider>
           <ConnectionProvider>
