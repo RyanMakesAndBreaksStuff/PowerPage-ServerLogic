@@ -129,4 +129,24 @@ describe('App shell', () => {
     unmount();
     expect(host.listenerCount()).toBe(0);
   });
+
+  it('shows a recoverable alert instead of a blank window when the host throws during mount', async () => {
+    const base = createFakeHost();
+    const host = {
+      ...base,
+      onEvent: (): (() => void) => {
+        throw new Error('host exploded');
+      },
+    };
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    try {
+      render(<App host={host} starterDeps={FAKE_STARTER_DEPS} />);
+      await act(async () => {
+        await Promise.resolve();
+      });
+      expect(screen.getByRole('alert').textContent).toContain('Server Logic Tools');
+    } finally {
+      spy.mockRestore();
+    }
+  });
 });

@@ -67,38 +67,40 @@ export function App({ host, starterDeps = STARTER_DEPS, inspectorDeps }: AppProp
   };
 
   return (
-    <HostContext value={host}>
-      <NotifyProvider>
-        <ConnectionProvider>
-          <ViewContext value={[view, setView]}>
-            <InspectorScope deps={inspectorDeps}>
-              <div className="shell">
-                <TitleBar />
-                <main className="shell__content">
-                  {/* Constant conditions: unreleased pages are dropped from the bundle (FR-1, Phase 00). */}
-                  {__PAGE_STARTER__ ? (
-                    <StarterSessionProvider deps={starterDeps}>
-                      <Panel id="starter" label="Logic Starter" view={view}>
-                        <StarterPage />
-                      </Panel>
-                      {__PAGE_OBJECTS__ ? (
-                        <Panel id="objects" label="Server Objects" view={view}>
-                          <ServerObjectsPage />
+    <PageErrorBoundary label="Server Logic Tools">
+      <HostContext value={host}>
+        <NotifyProvider>
+          <ConnectionProvider>
+            <ViewContext value={[view, setView]}>
+              <InspectorScope deps={inspectorDeps}>
+                <div className="shell">
+                  <TitleBar />
+                  <main className="shell__content">
+                    {/* Constant conditions: unreleased pages are dropped from the bundle (FR-1, Phase 00). */}
+                    {__PAGE_STARTER__ ? (
+                      <StarterSessionProvider deps={starterDeps}>
+                        <Panel id="starter" label="Logic Starter" view={view}>
+                          <StarterPage />
                         </Panel>
-                      ) : null}
-                    </StarterSessionProvider>
-                  ) : null}
-                  {__PAGE_INSPECTOR__ ? (
-                    <Panel id="inspector" label="Logic Inspector" view={view}>
-                      <InspectorPage />
-                    </Panel>
-                  ) : null}
-                </main>
-              </div>
-            </InspectorScope>
-          </ViewContext>
-        </ConnectionProvider>
-      </NotifyProvider>
-    </HostContext>
+                        {__PAGE_OBJECTS__ ? (
+                          <Panel id="objects" label="Server Objects" view={view}>
+                            <ServerObjectsPage />
+                          </Panel>
+                        ) : null}
+                      </StarterSessionProvider>
+                    ) : null}
+                    {__PAGE_INSPECTOR__ ? (
+                      <Panel id="inspector" label="Logic Inspector" view={view}>
+                        <InspectorPage />
+                      </Panel>
+                    ) : null}
+                  </main>
+                </div>
+              </InspectorScope>
+            </ViewContext>
+          </ConnectionProvider>
+        </NotifyProvider>
+      </HostContext>
+    </PageErrorBoundary>
   );
 }
