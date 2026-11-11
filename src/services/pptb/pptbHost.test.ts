@@ -405,15 +405,19 @@ describe('onEvent', () => {
     expect(stubs.off).not.toHaveBeenCalled();
   });
 
-  it('disposes the wrapper on tool:unloaded and remains idempotent', () => {
+  it('keeps subscribers after a tool:unloaded broadcast for another tool', () => {
     const handler = vi.fn();
     host.onEvent(handler);
-    stubs.emit(payload('tool:unloaded'));
-    window.dispatchEvent(new Event('pagehide'));
+    stubs.emit({ event: 'tool:unloaded', data: { id: 'another-tool' }, timestamp: '2026-10-16T00:00:00Z' });
+    stubs.emit(payload('connection:updated'));
     stubs.emit(payload('settings:updated'));
-    expect(stubs.registrations.size).toBe(0);
-    expect(handler).not.toHaveBeenCalled();
+    expect(stubs.registrations.size).toBe(1);
     expect(stubs.off).not.toHaveBeenCalled();
+    expect(handler.mock.calls).toEqual([
+      [{ kind: 'other', name: 'tool:unloaded' }],
+      [{ kind: 'connection-changed' }],
+      [{ kind: 'settings-updated' }],
+    ]);
   });
 
   it('uses events.off(hub) only when on returns no disposer', () => {

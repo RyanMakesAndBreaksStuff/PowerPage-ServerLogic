@@ -339,8 +339,11 @@ export async function runScan(
       stopped: reader.lost() ? 'connection-lost' : null,
     };
   } finally {
-    unsubscribe();
-    reader.close();
+    try {
+      unsubscribe();
+    } finally {
+      reader.close();
+    }
   }
 }
 

@@ -67,7 +67,8 @@ function unexpected(label: string): HostCallError {
 
 /**
  * `toolboxAPI.events.on` is registered once per host, on the first handler, and routes on `payload.event`.
- * The last unsubscribe, the page's pagehide, or the host's `tool:unloaded` event disposes the host subscription with events.off as a fallback.
+ * The last unsubscribe or the page's pagehide disposes the host subscription with events.off as a fallback.
+ * `tool:unloaded` is not a teardown signal: the host broadcasts it to every open tool view when any tool unloads.
  */
 function createEventHub(): PptbHost['onEvent'] {
   const handlers = new Set<(e: HostEvent) => void>();
@@ -76,10 +77,6 @@ function createEventHub(): PptbHost['onEvent'] {
   const hub = (_event: unknown, payload: unknown): void => {
     const event = toHostEvent(payload);
     if (event === null) return;
-    if (event.kind === 'other' && event.name === 'tool:unloaded') {
-      detach();
-      return;
-    }
     for (const handler of [...handlers]) {
       try {
         handler(event);
@@ -88,7 +85,7 @@ function createEventHub(): PptbHost['onEvent'] {
       }
     }
   };
-  // FR-12: the host handler also goes when the tool unloads. A later subscribe registers it again.
+  // FR-12: the host handler also goes when this page unloads. A later subscribe registers it again.
   const detach = (): void => {
     if (!registered) return;
     registered = false;

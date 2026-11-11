@@ -10,7 +10,7 @@ import { buildPackageFiles } from '@/services/generators/package/buildPackageFil
 import { buildZip } from '@/services/generators/package/buildZip';
 import { errorName } from '@/services/pptb/hostErrors';
 
-const SAVE_FAILED_BODY = 'The file could not be written. Check the folder and try again.';
+const STARTER_SAVE_FAILED_BODY = 'The file could not be written. Check the folder and try again.';
 
 export function DownloadStarterButton(): ReactNode {
   const { state, derived } = useStarterSession();
@@ -45,7 +45,7 @@ export function DownloadStarterButton(): ReactNode {
         }
       } catch (error: unknown) {
         console.error(errorName(error));
-        notify({ title: `Couldn't save ${slug}.zip`, body: SAVE_FAILED_BODY, type: 'error' });
+        notify({ title: `Couldn't save ${slug}.zip`, body: STARTER_SAVE_FAILED_BODY, type: 'error' });
       }
     });
   }

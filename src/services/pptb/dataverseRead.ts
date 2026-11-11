@@ -12,7 +12,8 @@ export const RETRY_DELAYS_MS = [1000, 2000, 4000] as const;
 
 /**
  * Spike S2 gate (RG-001). Off: the live `@odata.nextLink` wire check passed on 2026-11-10, so a full page with no link is the
- * last page. Passing `strict: true` still reports such a page as possibly incomplete instead of accepting it.
+ * last page. Passing `true` as the positional `strict` argument of `queryAllRows` or `fetchAllPages` still reports such a
+ * page as possibly incomplete instead of accepting it.
  */
 export const NEXT_LINK_UNVERIFIED = false;
 

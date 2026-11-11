@@ -825,6 +825,20 @@ describe('runScan cancellation and concurrency', () => {
     expect(fake.calls).toEqual([]);
   });
 
+  it('still closes the reader when the event unsubscribe throws, and surfaces that error', async () => {
+    const controller = new AbortController();
+    const removed = vi.spyOn(controller.signal, 'removeEventListener');
+    const failure = new Error('unsubscribe failed');
+    const host: PptbHost = {
+      ...createWorld(HAPPY),
+      onEvent: () => () => {
+        throw failure;
+      },
+    };
+    await expect(scan(host, { signal: controller.signal })).rejects.toBe(failure);
+    expect(removed).toHaveBeenCalledWith('abort', expect.any(Function));
+  });
+
   it('rejects with AbortError during downloads and starts no further request', async () => {
     const controller = new AbortController();
     const fake = createWorld({ ...HAPPY, logic: specs(6) });

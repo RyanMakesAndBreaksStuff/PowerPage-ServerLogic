@@ -10,9 +10,8 @@ export const BUILD_FAILED_BODY = "The report couldn't be built.";
 export const SAVE_FAILED_BODY = "The file couldn't be written.";
 
 /** Warning toast, shown once the build returns, when it took longer than the threshold (E-11 B, N4). */
-export const EXPORT_SLOW_TITLE = 'The report is taking longer than expected.';
-export const EXPORT_SLOW_BODY =
-  'Building has run for more than 5 seconds. It will finish and the save dialog will open.';
+export const EXPORT_SLOW_TITLE = 'The report took longer than expected to build.';
+export const EXPORT_SLOW_BODY = 'It has finished building. The save dialog opens next.';
 
 /** Reason on every dialog control while a job is building or saving (Sub-slice D). */
 export const EXPORT_BUSY_REASON = 'Wait for the export to finish, or close this dialog.';
