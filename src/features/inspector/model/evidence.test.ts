@@ -139,6 +139,14 @@ describe('FR-8 precedence: mixed failed, unscanned and adverse evidence', () => 
     expect(canReviewFinding(complete)).toBe(true);
     expect(canReviewFinding({ ...complete, hasUnscannedEvidence: true })).toBe(false);
   });
+
+  it('refuses to review a missing parent that is an unreadable permission row', () => {
+    const facts = siteFacts({
+      permissions: read([permission('child', { scope: 'Parent', parentId: 'gone', roleIds: ['staff'] })]),
+      unreadableRows: [{ type: 18, id: 'gone', name: 'broken' }],
+    });
+    expect(canReviewFinding(finding(facts, 'tablePermissions'))).toBe(false);
+  });
 });
 
 describe('FR-9 outbound intersections (WR-006)', () => {

@@ -137,6 +137,36 @@ describe('FR-7 grant set', () => {
     },
   );
 
+  it.each([
+    ['its id', 'gone'],
+    ['an empty id', ''],
+  ])('marks a missing parent as a read failure when an unreadable permission row has %s', (_name, rowId) => {
+    const grants = buildGrantSet(
+      siteFacts({
+        permissions: read([permission('child', { scope: 'Parent', parentId: 'gone', roleIds: [] })]),
+        unreadableRows: [{ type: 18, id: rowId, name: 'broken' }],
+      }),
+      file(),
+    );
+    expect(grants.reasons).toEqual([
+      { text: "Couldn't evaluate parent permission `child`", readFailure: true },
+    ]);
+  });
+
+  it('does not treat unreadable role rows or other ids as an unreadable parent', () => {
+    const grants = buildGrantSet(
+      siteFacts({
+        permissions: read([permission('child', { scope: 'Parent', parentId: 'gone', roleIds: [] })]),
+        unreadableRows: [
+          { type: 11, id: 'gone', name: 'role' },
+          { type: 18, id: 'other', name: 'other' },
+        ],
+      }),
+      file(),
+    );
+    expect(grants.reasons[0]?.readFailure).toBe(false);
+  });
+
   it('keeps unknown scopes in the grant set for the check to flag', () => {
     const grants = buildGrantSet(
       siteFacts({ permissions: read([permission('unknown', { scope: null })]) }),
