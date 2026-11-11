@@ -1,6 +1,6 @@
 # Server Logic Tools usage manual
 
-This manual is for Power Pages makers and developers using **Logic Starter** and **Server Objects** in Power Platform ToolBox (PPTB). It walks through creating a starter, adapting it, exporting it, and using reference samples in the handler.
+This manual is for Power Pages makers and developers using **Logic Starter**, **Server Objects**, and **Logic Inspector** in Power Platform ToolBox (PPTB). It walks through creating a starter, adapting it, exporting it, using reference samples in the handler, and scanning a site's existing server logic.
 
 [README](../README.md) · [How to build](build-manual.md)
 
@@ -12,12 +12,13 @@ This manual is for Power Pages makers and developers using **Logic Starter** and
 - [Review readiness and permissions](#review-readiness-and-permissions)
 - [Download and use a starter](#download-and-use-a-starter)
 - [Use Server Objects](#use-server-objects)
+- [Use Logic Inspector](#use-logic-inspector)
 - [Manage your session](#manage-your-session)
 - [Troubleshooting](#troubleshooting)
 
 ## Before you begin
 
-Open the tool in PPTB Desktop with host API 1.2.7 or later. An active environment connection is not required to generate a starter or browse the catalogue. Clipboard actions, saving the ZIP, and opening reference links use PPTB services.
+Open the tool in PPTB Desktop with host API 1.2.7 or later. An active environment connection is not required to generate a starter or browse the catalogue. Logic Inspector does need one active connection to read a site. Clipboard actions and saving files use PPTB services.
 
 To run an exported starter, you need a Power Pages site with server logic authoring available and access to configure the selected recipe's roles, permissions, and settings. External-service recipes also require the corresponding service and credentials. The tool supplies code and setup guidance; you perform deployment and configuration in your site.
 
@@ -175,8 +176,7 @@ The package documents generated setup guidance; successful execution depends on 
 2. Enter an object path or member name in **Search objects and methods**. Matching is case-insensitive and uses substrings.
 3. Select a filter to show all objects, objects used in the current handler, or connectors.
 4. Select an object and a member to see its signature, return information, execution context or timing, and samples where supplied.
-5. Use the sample selector when a member offers multiple examples. The Learn link opens its reference through PPTB.
-
+5. Use the sample selector when a member offers multiple examples.
 The context column shows **Used in {slug}**, **Permissions needed**, and **Another sample** where available. Used marks come from analysis of the current Starter handler. They are a navigation aid rather than a record of deployed code or runtime calls.
 
 The catalogue is curated data shipped with the tool. It does not discover the APIs available in your connected environment. Some return information is explicitly marked **Not documented on Learn**.
@@ -195,6 +195,52 @@ The catalogue is curated data shipped with the tool. It does not discover the AP
 When no cursor is available, insertion targets the selected handler function before its last top-level return, or at the end of its body. Insertion can add `async` when a sample needs `await`. It does not configure the environment or reconcile sample variable names with your business logic.
 
 If the tool cannot find a safe insertion location, the control shows a reason. Copying the sample remains available so you can adapt it manually. **Back to Create Logic** returns to Starter without inserting a sample.
+
+## Use Logic Inspector
+
+> **Beta note:** Logic Inspector is not part of the current beta build, which has Logic Starter and Server Objects only. This section applies to a full build from source (`npm run build`) and to the release that will include the Inspector.
+
+Logic Inspector reads the server logic files on a Power Pages site and shows, for each one, whether its web role, table permissions, and outbound networking look configured. It only reads. It does not change your site or environment.
+
+### Connect and choose a site
+
+1. In PPTB, select one active connection. Until you do, the page reads **No active connection**.
+2. Open **Logic Inspector**. It loads the Power Pages sites in the environment. If loading fails, choose **Retry**.
+3. Open the site picker in the title bar, which shows **No site selected**, and choose a site. No site is chosen for you, even when the environment has only one. Inactive sites are listed but cannot be chosen.
+
+The Inspector works with enhanced data model sites. If the environment has none, the page says so. If the connection is not a development environment, a notice warns that the Inspector is designed for dev sites; you can still scan.
+
+### Run a scan
+
+Choosing an active site starts its scan. The page shows **Scanning {site}** with a count such as "Scanned 3 of 12" while it reads the server logic records. **Scan again** in the results re-reads the same site.
+
+If the scan fails with an unexpected error, nothing is kept. Choose **Scan again**.
+
+### Read the results
+
+- **Server logic** lists every file with its Active or Inactive state, a short summary, and a status of **Ready**, **Needs review**, or **Incomplete**.
+- Select a file to see its **Readiness** ring, which counts how many of its three checks are addressed. Configured and reviewed checks both count.
+- Each file has three findings: **Web role assigned**, **Table permissions**, and **Outbound networking**. Select one to read its reasons, details, guidance, and questions to consider.
+- A finding that needs review can be marked as reviewed with a button in the detail, and the mark can be undone. A review mark applies to your current results only. Scanning again clears it.
+- Notices above the results explain gaps, such as an incomplete record list, rows the tool could not read, or a lost connection. Some checks show **Not read before the connection was lost**.
+
+The Inspector does not read tenant outbound network policy, does not assess other roles a user may hold, and does not check cloud flows. The page says so where it applies. A **Ready** file means the configuration the tool can see looks complete; it does not prove the handler works or that access is correct. Confirm access with a real site user.
+
+### Export a report
+
+1. Choose **Export report**. It is disabled when no files were found or read, and the button says why.
+2. Choose **This file** (select a file first) or **Site summary**.
+3. Choose **Markdown** or **PDF**.
+4. Optionally include **Questions to consider** and **Configuration snapshot**, or turn on **Redact environment and site names**.
+5. Choose **Export Markdown** or **Export PDF** and pick a location in the PPTB save dialog. Cancelling the dialog saves nothing.
+
+File names follow the pattern `{name}-readiness` for a file report and `{site}-site-readiness` for a site summary, with an `.md` or `.pdf` extension. If the results change while a report is still being built, the export is cancelled and you can start it again.
+
+### If the connection changes mid-scan
+
+If you switch the PPTB connection while a scan is running, the scan is abandoned and its results are discarded. The page shows **The connection changed while scanning**. Choose a site in the title bar to scan again; the earlier scan is not resumed. If the connection is lost during a scan, you get the results read so far, with a **Connection lost. Reconnect and rescan.** notice, and you can rescan once the connection is back.
+
+Results are held in memory only. Closing or reloading the tool discards them; export a report to keep them.
 
 ## Manage your session
 
@@ -215,7 +261,7 @@ Starter state is held in memory. Closing or reloading the tool starts a new sess
 | Permission review needs attention again | Review applies to the exact handler text you acknowledged. Recheck requirements after changing the code. |
 | Insert into handler is unavailable | Read the displayed reason. Restore a parseable handler, choose a valid target function and statement boundary, or copy the sample for manual insertion. |
 | Search returns no objects | Clear the search and choose the all-objects filter. The used filter only lists objects recognized in the current handler. |
-| Copy, download, or a Learn link fails in a browser preview | Open the tool in PPTB Desktop; those actions use host APIs. |
+| Copy or download fails in a browser preview | Open the tool in PPTB Desktop; those actions use host APIs. |
 | A downloaded handler fails on the site | Confirm the exact slug, selected method, request contract, caller role, and all recipe-specific configuration in the exported README and checklist. Local readiness does not test the site. |
 | An external call fails | Review outbound domains, the service configuration and credentials, and tenant restrictions on external server-logic calls. Use the package's troubleshooting guidance for the selected recipe. |
 
