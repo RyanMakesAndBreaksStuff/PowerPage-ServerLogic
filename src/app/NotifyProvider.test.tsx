@@ -2,9 +2,9 @@
 import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { ReactElement } from 'react';
-import { HostContext, useHost } from '@/app/HostContext';
+import { HostContext, useHost } from '@/session/HostContext';
 import { NotifyProvider } from '@/app/NotifyProvider';
-import { useNotify } from '@/app/useNotify';
+import { useNotify } from '@/session/useNotify';
 import { createFakeHost } from '@/services/pptb/fakeHost';
 import type { NotifyBehaviour } from '@/services/pptb/fakeHost';
 import type { Notice } from '@/services/pptb/host.types';

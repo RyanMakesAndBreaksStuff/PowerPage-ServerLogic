@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react';
-import { useStarterSession } from '@/app/starter-session/useStarterSession';
+import { useStarterSession } from '@/session/useStarterSession';
 import { Icon } from '@/components/Icon';
 import { Pill } from '@/components/Pill';
 import { Tile } from '@/components/Tile';

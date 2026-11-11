@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import type { ReactElement, ReactNode } from 'react';
-import { useHost } from '@/app/HostContext';
-import { NotifyContext } from '@/app/useNotify';
+import { useHost } from '@/session/HostContext';
+import { NotifyContext } from '@/session/useNotify';
 import { ToastStack } from '@/components/ToastStack';
 import type { ToastItem } from '@/components/ToastStack';
 import type { Notice } from '@/services/pptb/host.types';

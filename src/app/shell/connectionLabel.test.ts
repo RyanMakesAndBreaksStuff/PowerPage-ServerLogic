@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Connection, EnvironmentLabel } from '@/services/pptb/host.types';
-import type { ConnectionState } from '@/app/useActiveConnection';
+import type { ConnectionState } from '@/session/useActiveConnection';
 import { connectionLabel, connectionStateLabel } from './connectionLabel';
 
 const at = (environment: EnvironmentLabel): Connection => ({

@@ -1,8 +1,8 @@
 import { useTransition } from 'react';
 import type { ReactNode } from 'react';
-import { useHost } from '@/app/HostContext';
-import { useNotify } from '@/app/useNotify';
-import { useStarterSession } from '@/app/starter-session/useStarterSession';
+import { useHost } from '@/session/HostContext';
+import { useNotify } from '@/session/useNotify';
+import { useStarterSession } from '@/session/useStarterSession';
 import { Button } from '@/components/Button';
 import { Icon } from '@/components/Icon';
 import { generateClient } from '@/services/generators/client/client';

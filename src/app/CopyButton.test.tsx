@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
-import { HostContext } from '@/app/HostContext';
+import { HostContext } from '@/session/HostContext';
 import { NotifyProvider } from '@/app/NotifyProvider';
 import { createFakeHost } from '@/services/pptb/fakeHost';
 import type { FakeHostInit } from '@/services/pptb/fakeHost';

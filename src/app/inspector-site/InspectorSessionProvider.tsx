@@ -1,14 +1,14 @@
 import { useEffect, useState, useSyncExternalStore } from 'react';
 import type { ReactElement, ReactNode } from 'react';
-import { useHost } from '@/app/HostContext';
-import { connectionKey, useConnectionState } from '@/app/useActiveConnection';
-import { useNotify } from '@/app/useNotify';
+import { useHost } from '@/session/HostContext';
+import { connectionKey, useConnectionState } from '@/session/useActiveConnection';
+import { useNotify } from '@/session/useNotify';
 import { evaluateSite } from '@/features/inspector/model/rules';
 import type { Connection } from '@/services/pptb/host.types';
 import type { InspectorDeps } from './inspectorDeps';
 import { createInspectorStore, EMPTY_MARKS, INITIAL_SNAPSHOT } from './inspectorSession';
-import type { InspectorSnapshot, InspectorSession } from './inspectorSession.types';
-import { InspectorSessionContext } from './useInspector';
+import type { InspectorSnapshot, InspectorSession } from '@/types/inspectorSession';
+import { InspectorSessionContext } from '@/session/useInspector';
 
 /** The snapshot as it must read for a connection the store has not adopted yet: nothing carries over (AC-7.6). */
 function blankFor(connection: Connection | null, snapshot: InspectorSnapshot): InspectorSnapshot {

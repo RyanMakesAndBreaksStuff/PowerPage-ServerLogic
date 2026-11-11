@@ -1,5 +1,5 @@
 import { describe, expect, expectTypeOf, it } from 'vitest';
-import { HostContext, useHost } from '@/app/HostContext';
+import { HostContext, useHost } from '@/session/HostContext';
 import { RELEASED_PAGES } from '@/app/releasedPages';
 import { StarterSessionProvider } from '@/app/starter-session/StarterSessionProvider';
 import type {
@@ -8,9 +8,9 @@ import type {
   StarterPackageInput,
   StarterState,
 } from '@/types/starter';
-import { useStarterSession } from '@/app/starter-session/useStarterSession';
-import { useNotify } from '@/app/useNotify';
-import { useView } from '@/app/useView';
+import { useStarterSession } from '@/session/useStarterSession';
+import { useNotify } from '@/session/useNotify';
+import { useView } from '@/session/useView';
 import { DownloadStarterButton } from '@/features/starter/download/DownloadStarterButton';
 import { evaluateSite, countChecks, fileSummary, filePill } from '@/features/inspector/model/rules';
 import { buildReportModel } from '@/features/inspector/report/buildReportModel';

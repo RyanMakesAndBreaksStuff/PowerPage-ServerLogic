@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { connectionKey } from '@/app/useActiveConnection';
+import { connectionKey } from '@/session/useActiveConnection';
 import {
   BUILD_FAILED_BODY,
   EXPORT_CANCELLED_BODY,
@@ -36,7 +36,7 @@ import { INSPECTOR_DEPS } from './inspectorDeps';
 import type { InspectorDeps } from './inspectorDeps';
 import { createInspectorStore } from './inspectorSession';
 import type { InspectorStore } from './inspectorSession';
-import type { ExportJob, InspectorSnapshot } from './inspectorSession.types';
+import type { ExportJob, InspectorSnapshot } from '@/types/inspectorSession';
 
 beforeEach(() => {
   vi.spyOn(console, 'error').mockImplementation(() => undefined);

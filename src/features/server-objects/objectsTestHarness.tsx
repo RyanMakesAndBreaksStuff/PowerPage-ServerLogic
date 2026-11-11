@@ -2,14 +2,14 @@
 import { act, render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { ReactElement } from 'react';
-import { HostContext } from '@/app/HostContext';
+import { HostContext } from '@/session/HostContext';
 import { NotifyProvider } from '@/app/NotifyProvider';
 import { FAKE_STARTER_DEPS } from '@/app/starter-session/fakeStarterDeps';
 import type { StarterAction } from '@/types/starter';
 import { StarterSessionProvider } from '@/app/starter-session/StarterSessionProvider';
-import { StarterSessionContext } from '@/app/starter-session/useStarterSession';
-import type { useStarterSession } from '@/app/starter-session/useStarterSession';
-import { ViewContext } from '@/app/useView';
+import { StarterSessionContext } from '@/session/useStarterSession';
+import type { useStarterSession } from '@/session/useStarterSession';
+import { ViewContext } from '@/session/useView';
 import { createFakeHost } from '@/services/pptb/fakeHost';
 import type { FakeHostInit } from '@/services/pptb/fakeHost';
 import type { View } from '@/types/http';

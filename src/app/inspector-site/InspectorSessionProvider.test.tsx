@@ -9,7 +9,7 @@ import { CONNECTION, createInspectorHost, OTHER_CONNECTION, SITE_ALPHA, SITE_BET
 import { INSPECTOR_DEPS } from './inspectorDeps';
 import type { InspectorDeps } from './inspectorDeps';
 import { renderInspector } from './inspectorTestHarness';
-import { useInspector } from './useInspector';
+import { useInspector } from '@/session/useInspector';
 
 afterEach(cleanup);
 beforeEach(() => {

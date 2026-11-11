@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react';
-import { useStarterSession } from '@/app/starter-session/useStarterSession';
-import { useView } from '@/app/useView';
+import { useStarterSession } from '@/session/useStarterSession';
+import { useView } from '@/session/useView';
 import { Button } from '@/components/Button';
 import { Icon } from '@/components/Icon';
 import { ClientPane } from './code/ClientPane';

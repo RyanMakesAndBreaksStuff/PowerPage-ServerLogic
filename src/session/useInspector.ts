@@ -1,5 +1,5 @@
 import { createContext, use } from 'react';
-import type { InspectorSession } from './inspectorSession.types';
+import type { InspectorSession } from '@/types/inspectorSession';
 
 export const InspectorSessionContext = createContext<InspectorSession | null>(null);
 

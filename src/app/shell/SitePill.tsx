@@ -1,8 +1,8 @@
 import type { ReactElement } from 'react';
-import type { SiteListState } from '@/app/inspector-site/inspectorSession.types';
-import { useInspector } from '@/app/inspector-site/useInspector';
-import { useConnectionState } from '@/app/useActiveConnection';
-import type { ConnectionState } from '@/app/useActiveConnection';
+import type { SiteListState } from '@/types/inspectorSession';
+import { useInspector } from '@/session/useInspector';
+import { useConnectionState } from '@/session/useActiveConnection';
+import type { ConnectionState } from '@/session/useActiveConnection';
 import { SiteCombobox } from './SiteCombobox';
 
 function unavailableReason(connection: ConnectionState, sites: SiteListState): string | null {

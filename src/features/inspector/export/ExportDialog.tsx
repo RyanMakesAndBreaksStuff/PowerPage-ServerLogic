@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react';
-import type { ExportJob } from '@/app/inspector-site/inspectorSession.types';
-import { useInspector } from '@/app/inspector-site/useInspector';
+import type { ExportJob } from '@/types/inspectorSession';
+import { useInspector } from '@/session/useInspector';
 import { Button } from '@/components/Button';
 import { Checkbox } from '@/components/Checkbox';
 import { Modal } from '@/components/Modal';

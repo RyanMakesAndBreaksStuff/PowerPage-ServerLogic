@@ -8,14 +8,14 @@ import {
 } from '@/features/inspector/export/exportCopy';
 import { evaluateSite } from '@/features/inspector/model/rules';
 import { ScanAbandonedError } from '@/features/inspector/scan/scan';
-import { connectionKey } from '@/app/useActiveConnection';
+import { connectionKey } from '@/session/useActiveConnection';
 import { HostReadError } from '@/services/pptb/host.types';
 import type { Connection, FileFilter, Notice, PptbHost } from '@/services/pptb/host.types';
 import { errorName } from '@/services/pptb/hostErrors';
 import type { ReviewKey, SiteRef } from '@/types/inspector';
 import type { ReportFormat, ReportOptions } from '@/types/report';
 import type { InspectorDeps } from './inspectorDeps';
-import type { ExportJob, InspectorActions, InspectorSnapshot } from './inspectorSession.types';
+import type { ExportJob, InspectorActions, InspectorSnapshot } from '@/types/inspectorSession';
 
 export const EMPTY_MARKS: ReadonlySet<ReviewKey> = new Set<ReviewKey>();
 

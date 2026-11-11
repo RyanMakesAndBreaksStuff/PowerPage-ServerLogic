@@ -1,8 +1,8 @@
 import { useEffect, useEffectEvent, useRef, useState } from 'react';
 import type { ReactElement, RefObject } from 'react';
-import { useInspector } from '@/app/inspector-site/useInspector';
-import { useConnectionState, useRefreshConnection } from '@/app/useActiveConnection';
-import type { ConnectionState } from '@/app/useActiveConnection';
+import { useInspector } from '@/session/useInspector';
+import { useConnectionState, useRefreshConnection } from '@/session/useActiveConnection';
+import type { ConnectionState } from '@/session/useActiveConnection';
 import { Button } from '@/components/Button';
 import { Icon } from '@/components/Icon';
 import {

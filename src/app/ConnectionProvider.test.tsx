@@ -3,11 +3,11 @@ import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import type { ReactElement } from 'react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { ConnectionProvider } from '@/app/ConnectionProvider';
-import { HostContext } from '@/app/HostContext';
+import { HostContext } from '@/session/HostContext';
 import {
   useConnectionState,
   useRefreshConnection,
-} from '@/app/useActiveConnection';
+} from '@/session/useActiveConnection';
 import { createFakeHost } from '@/services/pptb/fakeHost';
 import type { Connection } from '@/services/pptb/host.types';
 import { gateHost } from '@/test/gatedHost';

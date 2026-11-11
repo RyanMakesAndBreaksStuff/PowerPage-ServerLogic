@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react';
 import { CopyButton } from '@/app/CopyButton';
-import { useStarterSession } from '@/app/starter-session/useStarterSession';
+import { useStarterSession } from '@/session/useStarterSession';
 import { Icon } from '@/components/Icon';
 import { PillGroup } from '@/components/PillGroup';
 import { Tile } from '@/components/Tile';

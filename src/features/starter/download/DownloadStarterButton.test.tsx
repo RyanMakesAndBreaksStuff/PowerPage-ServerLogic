@@ -3,7 +3,7 @@ import { act, fireEvent, render, screen } from '@testing-library/react';
 import { unzipSync } from 'fflate';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { ReactElement } from 'react';
-import { HostContext } from '@/app/HostContext';
+import { HostContext } from '@/session/HostContext';
 import { NotifyProvider } from '@/app/NotifyProvider';
 import { deriveStarter } from '@/app/starter-session/deriveStarter';
 import { STARTER_DEPS } from '@/app/starter-session/starterDeps';
@@ -14,7 +14,7 @@ import type {
   StarterDerived,
   StarterState,
 } from '@/types/starter';
-import { StarterSessionContext, useStarterSession } from '@/app/starter-session/useStarterSession';
+import { StarterSessionContext, useStarterSession } from '@/session/useStarterSession';
 import { createFakeHost } from '@/services/pptb/fakeHost';
 import type { FakeHostControls } from '@/services/pptb/fakeHost';
 import type { PptbHost, SaveResult } from '@/services/pptb/host.types';

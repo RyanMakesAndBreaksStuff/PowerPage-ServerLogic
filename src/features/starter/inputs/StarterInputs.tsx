@@ -1,6 +1,6 @@
 import { Fragment, useId, useState } from 'react';
 import type { ReactElement } from 'react';
-import { useStarterSession } from '@/app/starter-session/useStarterSession';
+import { useStarterSession } from '@/session/useStarterSession';
 import { Button } from '@/components/Button';
 import { Icon } from '@/components/Icon';
 import { Modal } from '@/components/Modal';

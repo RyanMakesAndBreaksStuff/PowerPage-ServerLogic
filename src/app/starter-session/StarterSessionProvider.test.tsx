@@ -2,13 +2,13 @@
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { ReactElement } from 'react';
-import { HostContext } from '@/app/HostContext';
+import { HostContext } from '@/session/HostContext';
 import { NotifyProvider } from '@/app/NotifyProvider';
 import { createFakeHost } from '@/services/pptb/fakeHost';
 import { FAKE_STARTER_DEPS } from './fakeStarterDeps';
 import { LIQUID_RESET_NOTICE } from './starterReducer';
 import { StarterSessionProvider } from './StarterSessionProvider';
-import { useStarterSession } from './useStarterSession';
+import { useStarterSession } from '@/session/useStarterSession';
 
 afterEach(cleanup);
 

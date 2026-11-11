@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { ReactElement, Ref } from 'react';
-import { useInspector } from '@/app/inspector-site/useInspector';
+import { useInspector } from '@/session/useInspector';
 import { Button } from '@/components/Button';
 import { Icon } from '@/components/Icon';
 import { Tile } from '@/components/Tile';

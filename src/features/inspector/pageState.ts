@@ -1,5 +1,5 @@
-import type { InspectorSession } from '@/app/inspector-site/inspectorSession.types';
-import type { ConnectionState } from '@/app/useActiveConnection';
+import type { InspectorSession } from '@/types/inspectorSession';
+import type { ConnectionState } from '@/session/useActiveConnection';
 import type { ScanProgress, SiteRef, SiteResult } from '@/types/inspector';
 
 /** Everything the Inspector page can be showing, as one union so every state is handled and exhausted. */

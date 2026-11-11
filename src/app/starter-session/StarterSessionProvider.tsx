@@ -1,11 +1,11 @@
 import { useEffect, useReducer } from 'react';
 import type { ReactNode } from 'react';
-import { useNotify } from '@/app/useNotify';
+import { useNotify } from '@/session/useNotify';
 import { deriveStarter } from './deriveStarter';
 import { STARTER_DEPS } from './starterDeps';
 import type { StarterDeps } from './starterDeps';
 import { createStarterReducer, initialStarterState } from './starterReducer';
-import { StarterSessionContext } from './useStarterSession';
+import { StarterSessionContext } from '@/session/useStarterSession';
 
 export function StarterSessionProvider({
   children,

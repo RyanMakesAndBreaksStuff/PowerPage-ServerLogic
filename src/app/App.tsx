@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { ReactElement, ReactNode } from 'react';
 import { ConnectionProvider } from '@/app/ConnectionProvider';
-import { HostContext } from '@/app/HostContext';
+import { HostContext } from '@/session/HostContext';
 import { INSPECTOR_DEPS } from '@/app/inspector-site/inspectorDeps';
 import type { InspectorDeps } from '@/app/inspector-site/inspectorDeps';
 import { InspectorSessionProvider } from '@/app/inspector-site/InspectorSessionProvider';
@@ -13,7 +13,7 @@ import { StarterSessionProvider } from '@/app/starter-session/StarterSessionProv
 import { STARTER_DEPS } from '@/app/starter-session/starterDeps';
 import type { StarterDeps } from '@/app/starter-session/starterDeps';
 import { useHostTheme } from '@/app/useHostTheme';
-import { ViewContext } from '@/app/useView';
+import { ViewContext } from '@/session/useView';
 import { InspectorPage } from '@/features/inspector/InspectorPage';
 import { ServerObjectsPage } from '@/features/server-objects/ServerObjectsPage';
 import { StarterPage } from '@/features/starter/StarterPage';

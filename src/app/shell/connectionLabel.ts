@@ -1,4 +1,4 @@
-import type { ConnectionState } from '@/app/useActiveConnection';
+import type { ConnectionState } from '@/session/useActiveConnection';
 import type { Connection, EnvironmentLabel } from '@/services/pptb/host.types';
 
 const ENVIRONMENT_TEXT = {

@@ -1,13 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import type { ReactElement, ReactNode } from 'react';
 import { flushSync } from 'react-dom';
-import { useHost } from '@/app/HostContext';
+import { useHost } from '@/session/HostContext';
 import {
   ConnectionContext,
   ConnectionRefreshContext,
   INITIAL_CONNECTION_STATE,
-} from '@/app/useActiveConnection';
-import type { ConnectionRefresh, ConnectionState } from '@/app/useActiveConnection';
+} from '@/session/useActiveConnection';
+import type { ConnectionRefresh, ConnectionState } from '@/session/useActiveConnection';
 
 /**
  * Owns the last confirmed active connection (AC-7.6, WR-005). A successful read, including a successful
