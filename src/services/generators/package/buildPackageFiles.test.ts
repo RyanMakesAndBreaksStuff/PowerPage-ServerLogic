@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 import { deriveStarter } from '@/app/starter-session/deriveStarter';
 import { STARTER_DEPS } from '@/app/starter-session/starterDeps';
 import { createStarterReducer, initialStarterState } from '@/app/starter-session/starterReducer';
-import type { StarterDerived, StarterState } from '@/app/starter-session/starterSession.types';
+import type { StarterDerived, StarterState } from '@/types/starter';
 import { RESTRICTED_PATTERNS } from '@/lib/code-analysis/browserChecks';
 import { checklistLines, getRecipe } from '@/services/catalogue/recipes';
 import { generateDemoPage } from '@/services/generators/handlers';

@@ -1,7 +1,7 @@
 import type {
   StarterDerived,
   StarterPackageInput,
-} from '@/app/starter-session/starterSession.types';
+} from '@/types/starter';
 import { normalizeLf } from '@/lib/text';
 import { checklistLines, getRecipe } from '@/services/catalogue/recipes';
 import { generateDemoPage } from '@/services/generators/handlers';

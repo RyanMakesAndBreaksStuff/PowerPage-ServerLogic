@@ -4,7 +4,7 @@ import { slugify } from '@/lib/slug';
 import { getRecipe } from '@/services/catalogue/recipes';
 import { METHOD_FUNCTION } from '@/types/http';
 import type { StarterDeps } from './starterDeps';
-import type { StarterDerived, StarterState } from './starterSession.types';
+import type { StarterDerived, StarterState } from '@/types/starter';
 
 // Validation is always complete (AC-5.3), so K is at least 1.
 function readyCount(browser: boolean, permissions: boolean): 1 | 2 | 3 {

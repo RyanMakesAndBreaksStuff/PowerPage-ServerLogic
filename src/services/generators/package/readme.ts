@@ -1,7 +1,7 @@
 import type {
   StarterDerived,
   StarterPackageInput,
-} from '@/app/starter-session/starterSession.types';
+} from '@/types/starter';
 import type { BrowserCheckResult, CheckSeverity } from '@/lib/code-analysis/codeAnalysis.types';
 import { getRecipe, UPSTREAM_CREDENTIALS_LINE } from '@/services/catalogue/recipes';
 import { LIQUID_SERVER_NOTE, requestPathSteps } from '@/services/generators/client/client';

@@ -4,7 +4,7 @@ import { applyChanges } from '@/lib/code-analysis/structureInsert';
 import { normalizeLf } from '@/lib/text';
 import type { RecipeId } from '@/types/recipe';
 import type { StarterDeps } from './starterDeps';
-import type { StarterAction, StarterState } from './starterSession.types';
+import type { StarterAction, StarterState } from '@/types/starter';
 
 export const DEFAULT_RECIPE: RecipeId = 'R1';
 export const DEFAULT_NAME = 'customer-summary';

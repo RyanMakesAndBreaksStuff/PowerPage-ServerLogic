@@ -7,7 +7,7 @@ import type {
   StarterDerived,
   StarterPackageInput,
   StarterState,
-} from '@/app/starter-session/starterSession.types';
+} from '@/types/starter';
 import { useStarterSession } from '@/app/starter-session/useStarterSession';
 import { useNotify } from '@/app/useNotify';
 import { useView } from '@/app/useView';

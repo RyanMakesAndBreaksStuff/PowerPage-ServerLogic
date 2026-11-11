@@ -18,7 +18,7 @@ import type {
   StarterAction,
   StarterPackageInput,
   StarterState,
-} from '@/app/starter-session/starterSession.types';
+} from '@/types/starter';
 import { HTTP_METHODS, METHOD_FUNCTION } from '@/types/http';
 import type { ClientLanguage, HandlerFunction, HttpMethod, View } from '@/types/http';
 import type {

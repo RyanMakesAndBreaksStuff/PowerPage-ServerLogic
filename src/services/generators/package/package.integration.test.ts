@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 import { deriveStarter } from '@/app/starter-session/deriveStarter';
 import { STARTER_DEPS } from '@/app/starter-session/starterDeps';
 import { createStarterReducer, initialStarterState } from '@/app/starter-session/starterReducer';
-import type { StarterDerived, StarterState } from '@/app/starter-session/starterSession.types';
+import type { StarterDerived, StarterState } from '@/types/starter';
 import { RECIPES } from '@/services/catalogue/recipes';
 import { generateClient, isLiquidAllowed } from '@/services/generators/client/client';
 import { generateHandler } from '@/services/generators/handlers';

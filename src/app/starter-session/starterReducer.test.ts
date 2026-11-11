@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { StarterAction, StarterState } from './starterSession.types';
+import type { StarterAction, StarterState } from '@/types/starter';
 import { FAKE_STARTER_DEPS } from './fakeStarterDeps';
 import {
   DEFAULT_NAME,

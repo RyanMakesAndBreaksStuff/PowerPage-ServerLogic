@@ -8,7 +8,7 @@ import type {
   StarterDerived,
   StarterPackageInput,
   StarterState,
-} from '@/app/starter-session/starterSession.types';
+} from '@/types/starter';
 import { getRecipe, RECIPES, UPSTREAM_CREDENTIALS_LINE } from '@/services/catalogue/recipes';
 import { LIQUID_SERVER_NOTE, requestPathSteps } from '@/services/generators/client/client';
 import { R4_DIFFERENCES } from '@/services/generators/handlers/r4';

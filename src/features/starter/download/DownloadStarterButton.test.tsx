@@ -13,7 +13,7 @@ import type {
   StarterAction,
   StarterDerived,
   StarterState,
-} from '@/app/starter-session/starterSession.types';
+} from '@/types/starter';
 import { StarterSessionContext, useStarterSession } from '@/app/starter-session/useStarterSession';
 import { createFakeHost } from '@/services/pptb/fakeHost';
 import type { FakeHostControls } from '@/services/pptb/fakeHost';

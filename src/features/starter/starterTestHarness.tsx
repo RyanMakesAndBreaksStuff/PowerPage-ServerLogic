@@ -7,7 +7,7 @@ import { HostContext } from '@/app/HostContext';
 import { NotifyProvider } from '@/app/NotifyProvider';
 import { FAKE_STARTER_DEPS } from '@/app/starter-session/fakeStarterDeps';
 import type { StarterDeps } from '@/app/starter-session/starterDeps';
-import type { StarterAction } from '@/app/starter-session/starterSession.types';
+import type { StarterAction } from '@/types/starter';
 import { StarterSessionProvider } from '@/app/starter-session/StarterSessionProvider';
 import { StarterSessionContext } from '@/app/starter-session/useStarterSession';
 import type { useStarterSession } from '@/app/starter-session/useStarterSession';

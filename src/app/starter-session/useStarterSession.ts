@@ -3,7 +3,7 @@ import type {
   StarterAction,
   StarterDerived,
   StarterState,
-} from '@/app/starter-session/starterSession.types';
+} from '@/types/starter';
 
 type StarterSession = {
   state: StarterState;
