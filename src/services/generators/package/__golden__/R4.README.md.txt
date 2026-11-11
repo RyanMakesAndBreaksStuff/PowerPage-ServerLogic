@@ -31,7 +31,7 @@ https://learn.microsoft.com/en-us/power-pages/configure/author-server-logic
 
 ## Browser checks
 
-Line 190: `debugger` (Blocked)
+Line 200: `debugger` (Blocked)
 
 This is a text-pattern check, not a compile or a runtime test.
 

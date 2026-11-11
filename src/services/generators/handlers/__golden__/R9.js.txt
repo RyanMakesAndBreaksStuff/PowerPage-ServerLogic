@@ -18,12 +18,12 @@ async function post() {
   if (!payload) {
     return JSON.stringify({ status: "error", message: "The request isn't valid.", errors: [{ field: "body", message: "Body must be a JSON object." }] });
   }
-  const cloudFlowId = Server.SiteSetting.Get("CLOUD_FLOW_ID");
-  if (!cloudFlowId) {
-    Server.Logger.Error("Missing site setting CLOUD_FLOW_ID");
-    return JSON.stringify({ status: "error", message: "Server logic isn't configured: missing site setting CLOUD_FLOW_ID" });
-  }
   try {
+    const cloudFlowId = Server.SiteSetting.Get("CLOUD_FLOW_ID");
+    if (!cloudFlowId) {
+      Server.Logger.Error("Missing site setting CLOUD_FLOW_ID");
+      return JSON.stringify({ status: "error", message: "Server logic isn't configured: missing site setting CLOUD_FLOW_ID" });
+    }
     const r = toResult(await Server.Connector.CloudFlow.TriggerAsync(cloudFlowId, JSON.stringify(payload)));
     if (!r.IsSuccessStatusCode) {
       Server.Logger.Error("R9 trigger" + " " + r.StatusCode + " " + r.ReasonPhrase);

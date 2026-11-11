@@ -84,7 +84,6 @@ const PHONE = 'phone is required and must be 100 characters or fewer.';
 const EVENT = 'event must be a whole number.';
 const EVENT_TEXT = 'eventText is required and must be 200 characters or fewer.';
 const DATE = 'date must look like 2026-11-05.';
-const IN = '  ';
 const TRY = '    ';
 const BLOCK = '      ';
 
@@ -228,6 +227,7 @@ function connectLines(): string[] {
     `  let siteId = ${q('')};`,
     `  let driveId = ${q('')};`,
     '  try {',
+    ...requireSettingsCode(SETTINGS, TRY).split('\n'),
     '    const auth = await getAccessToken(tenantId, clientId, clientSecret);',
     '    if (!auth.IsSuccessStatusCode) {',
     ...stageReturn(CONNECT_OP, CONNECT, BLOCK, status, 'auth'),
@@ -332,7 +332,6 @@ export function generateR7(): GeneratedHandler {
     '',
     'async function post() {',
     ...validateLines(),
-    ...requireSettingsCode(SETTINGS, IN).split('\n'),
     ...connectLines(),
     ...uploadLines(),
     ...createLines(),
