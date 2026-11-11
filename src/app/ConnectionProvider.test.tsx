@@ -5,7 +5,6 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { ConnectionProvider } from '@/app/ConnectionProvider';
 import { HostContext } from '@/app/HostContext';
 import {
-  useActiveConnection,
   useConnectionState,
   useRefreshConnection,
 } from '@/app/useActiveConnection';
@@ -33,11 +32,6 @@ function Show(): ReactElement {
   const state = useConnectionState();
   const text = state.status === 'connected' ? `connected ${state.connection.name}` : state.status;
   return <p>{state.refreshFailed ? `${text} (refresh failed)` : text}</p>;
-}
-
-function ShowLegacy(): ReactElement {
-  const connection = useActiveConnection();
-  return <p>{connection === null ? 'none' : connection.name}</p>;
 }
 
 /** The state, whether a read is in flight and a Retry, as the page uses them (D-05). */
@@ -103,23 +97,6 @@ describe('ConnectionProvider', () => {
     host.settleConnectionRead(0, CONTOSO);
     await flush();
     expect(screen.getByText('connected Contoso')).toBeTruthy();
-  });
-
-  it('keeps the legacy hook null until a connection is confirmed', async () => {
-    const host = gateHost(createFakeHost({ connection: CONTOSO }));
-    host.setConnectionRead('hold');
-    render(
-      <HostContext value={host}>
-        <ConnectionProvider>
-          <ShowLegacy />
-        </ConnectionProvider>
-      </HostContext>,
-    );
-    await flush();
-    expect(screen.getByText('none')).toBeTruthy();
-    host.settleConnectionRead(0, CONTOSO);
-    await flush();
-    expect(screen.getByText('Contoso')).toBeTruthy();
   });
 
   it('re-reads on connection-changed and subscribes once', async () => {

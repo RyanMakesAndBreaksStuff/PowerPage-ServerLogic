@@ -5,7 +5,7 @@ import { HTTP_METHODS, METHOD_FUNCTION } from '@/types/http';
 import type { ClientLanguage, HttpMethod } from '@/types/http';
 import type { RecipeId } from '@/types/recipe';
 import { generateClient } from './client';
-import { checkLiquidSyntax } from './liquidCheck';
+import { checkLiquidSyntax } from './liquidCheck.testkit';
 
 type Config = {
   slug: string;
