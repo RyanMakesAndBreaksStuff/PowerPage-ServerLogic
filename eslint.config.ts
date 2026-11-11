@@ -12,7 +12,6 @@ export default defineConfig([
     'dist-probe',
     'coverage',
     'node_modules',
-    'scripts',
     '.claude',
     '.agents',
     '.codex',
@@ -59,5 +58,10 @@ export default defineConfig([
   {
     files: ['tests/**/*.ts', 'vite.config.ts', 'eslint.config.ts'],
     languageOptions: { globals: globals.node },
+  },
+  {
+    files: ['scripts/**/*.{js,mjs}'],
+    extends: [js.configs.recommended],
+    languageOptions: { ecmaVersion: 2024, globals: globals.node },
   },
 ]);

@@ -1,6 +1,7 @@
 // Paste this entire script into Tool DevTools in PPTB. Installing it makes NO host calls.
 // Run the named operations manually. Export only `s2Evidence`: it holds types, counts, booleans,
 // error names and statuses. No source text, filename, path, ID, URL, token or setting value is recorded.
+/* global window -- runs in the PPTB tool's DevTools console, not in Node */
 (() => {
   const evidence = [];
   const record = (item, result) => {
