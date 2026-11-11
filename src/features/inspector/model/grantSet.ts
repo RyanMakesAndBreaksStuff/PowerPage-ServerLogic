@@ -20,11 +20,14 @@ type ParentChain = {
   inactive: boolean;
   /** The chain could not be followed, or (PB-002) a Parent chain ends at a readable ancestor whose scope is unknown. */
   unresolved: boolean;
+  /** The chain broke at a parent that is missing because its row was unreadable. */
+  unread: boolean;
 };
 
 function parentChain(
   permission: TablePermissionFact,
   byId: ReadonlyMap<string, TablePermissionFact>,
+  unreadIds: ReadonlySet<string>,
 ): ParentChain {
   let current = permission;
   let inactive = !current.active;
@@ -33,7 +36,10 @@ function parentChain(
     visited.add(current.id);
     const parent = current.parentId === null ? undefined : byId.get(current.parentId);
     if (parent === undefined || visited.has(parent.id)) {
-      return { top: current, inactive, unresolved: true };
+      const unread =
+        parent === undefined &&
+        (unreadIds.has('') || (current.parentId !== null && unreadIds.has(current.parentId)));
+      return { top: current, inactive, unresolved: true, unread };
     }
     current = parent;
     inactive ||= !current.active;
@@ -42,6 +48,7 @@ function parentChain(
     top: current,
     inactive,
     unresolved: permission.scope === 'Parent' && current.scope === null,
+    unread: false,
   };
 }
 
@@ -74,11 +81,12 @@ export function buildGrantSet(facts: SiteFacts, file: ServerLogicFileFacts): Gra
     roles.filter((role) => role.anonymous).forEach((role) => ids.add(role.id));
   }
   const byId = new Map(facts.permissions.value.map((permission) => [permission.id, permission]));
+  const unreadIds = new Set(facts.unreadableRows.filter((row) => row.type === 18).map((row) => row.id));
   const grants: Grant[] = [];
   const ignored: IgnoredGrant[] = [];
   const reasons: Reason[] = [];
   for (const permission of facts.permissions.value) {
-    const chain = parentChain(permission, byId);
+    const chain = parentChain(permission, byId, unreadIds);
     const linked = [...new Set([...permission.roleIds, ...chain.top.roleIds])].filter((id) =>
       ids.has(id),
     );
@@ -92,7 +100,7 @@ export function buildGrantSet(facts: SiteFacts, file: ServerLogicFileFacts): Gra
       // A missing/looping chain is always reported; an unknown-scope terminal only when this file is linked to it.
       reasons.push({
         text: `Couldn't evaluate parent permission \`${permission.name}\``,
-        readFailure: false,
+        readFailure: chain.unread,
       });
     } else if (linked.length > 0) {
       grants.push({ permission, roleNames });
