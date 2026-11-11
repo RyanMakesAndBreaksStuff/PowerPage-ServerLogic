@@ -1,5 +1,5 @@
 import type { PillOption } from '@/components/PillGroup';
-import { methodEnabled } from '@/services/catalogue/recipes';
+import { methodEnabled, RECIPES } from '@/services/catalogue/recipes';
 import { HTTP_METHODS } from '@/types/http';
 import type { ClientLanguage, HttpMethod } from '@/types/http';
 import type { RecipeMeta } from '@/types/recipe';
@@ -9,9 +9,21 @@ export const LIQUID_BLOCKED_REASON =
   "Liquid can't call this handler: it reads HTTP-only request properties";
 export const EDITED_VALIDATION_NOTE = "Generated validation; edits aren't rechecked.";
 
-/** AC-2.11: shown when the slug differs from the typed name. Starter is offline, so it can't check the site. */
+export const COLLISION_NOTE_BEFORE =
+  'Different names can produce the same slug, and so the same endpoint. Check that';
+export const COLLISION_NOTE_AFTER = "isn't already used on your site.";
+
+/**
+ * AC-2.11: shown when the slug differs from the typed name. Starter is offline, so it can't check the site.
+ * Plain text for the title attribute; the visible note renders the slug in <code>.
+ */
 export function collisionNote(slug: string): string {
-  return `Different names can produce the same slug, and so the same endpoint. Check that ${slug} isn't already used on your site.`;
+  return `${COLLISION_NOTE_BEFORE} ${slug} ${COLLISION_NOTE_AFTER}`;
+}
+
+/** AC-3.1: the count beside the recipe picker. */
+export function recipeCountLabel(count: number): string {
+  return count === 1 ? '1 recipe' : `${String(count)} recipes`;
 }
 
 /** All five HTTP methods remain selectable as recipe filters. */
@@ -22,6 +34,18 @@ export function methodFilterOptions(): readonly PillOption<HttpMethod>[] {
 /** Whether a recipe exports the function associated with a method filter. */
 export function recipeSupportsMethod(recipe: RecipeMeta, method: HttpMethod): boolean {
   return methodEnabled(recipe, method);
+}
+
+/** Recipes whose name or main object contains the query, narrowed to those exporting the method filter's function. */
+export function visibleRecipes(query: string, methodFilter: HttpMethod | null): RecipeMeta[] {
+  const q = query.trim().toLowerCase();
+  return RECIPES.filter(
+    (recipe) =>
+      (q === '' ||
+        recipe.name.toLowerCase().includes(q) ||
+        recipe.mainObject.toLowerCase().includes(q)) &&
+      (methodFilter === null || recipeSupportsMethod(recipe, methodFilter)),
+  );
 }
 
 /** AC-4.4, AC-4.7, AC-3.8: fetch, jQuery and Liquid. R8 is fixed to Liquid. */

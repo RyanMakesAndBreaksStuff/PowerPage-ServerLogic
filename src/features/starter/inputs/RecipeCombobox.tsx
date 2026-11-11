@@ -1,17 +1,18 @@
-import { useCallback, useEffect, useId, useRef, useState } from 'react';
+import { useEffect, useEffectEvent, useId, useRef, useState } from 'react';
 import type { KeyboardEvent, ReactElement } from 'react';
 import { Icon } from '@/components/Icon';
 import { classNames } from '@/lib/classNames';
-import { getRecipe, RECIPES } from '@/services/catalogue/recipes';
+import { getRecipe } from '@/services/catalogue/recipes';
 import type { HttpMethod } from '@/types/http';
-import type { RecipeGroup, RecipeId, RecipeMeta } from '@/types/recipe';
-import { recipeSupportsMethod } from './starterOptions';
+import type { RecipeGroup, RecipeId } from '@/types/recipe';
+import { visibleRecipes } from './starterOptions';
 
 export type RecipeComboboxProps = {
   value: RecipeId;
   onSelect: (id: RecipeId) => void;
   methodFilter: HttpMethod | null;
-  onVisibleCountChange: (count: number) => void;
+  query: string | null; // null shows the selected name, unfiltered
+  onQueryChange: (query: string | null) => void;
 };
 
 const GROUPS = [
@@ -20,65 +21,49 @@ const GROUPS = [
   { group: 'reference', label: 'Learn reference samples' },
 ] as const satisfies readonly { group: RecipeGroup; label: string }[];
 
-function matches(recipe: RecipeMeta, query: string): boolean {
-  const q = query.trim().toLowerCase();
-  return (
-    q === '' || recipe.name.toLowerCase().includes(q) || recipe.mainObject.toLowerCase().includes(q)
-  );
-}
-
 // APG editable combobox with list autocomplete (AC-3.1, F48): focus stays in the input and
 // aria-activedescendant names the active option.
 export function RecipeCombobox({
   value,
   onSelect,
   methodFilter,
-  onVisibleCountChange,
+  query,
+  onQueryChange,
 }: RecipeComboboxProps): ReactElement {
   const id = useId();
   const listId = `${id}-list`;
   const rootRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const [open, setOpen] = useState(false);
-  const [query, setQuery] = useState<string | null>(null); // null shows the selected name, unfiltered
   const [active, setActive] = useState<RecipeId | null>(null);
 
-  const visible = RECIPES.filter(
-    (recipe) =>
-      matches(recipe, query ?? '') &&
-      (methodFilter === null || recipeSupportsMethod(recipe, methodFilter)),
-  );
+  const visible = visibleRecipes(query ?? '', methodFilter);
   const activeId = open ? (visible.find((r) => r.id === active) ?? visible[0])?.id : undefined;
 
-  const close = useCallback(() => {
+  const close = (): void => {
     setOpen(false);
-    setQuery(null);
+    onQueryChange(null);
     setActive(null);
-  }, []);
-
-  useEffect(() => {
-    onVisibleCountChange(visible.length);
-  }, [onVisibleCountChange, visible.length]);
+  };
 
   useEffect(() => {
     if (!open || activeId === undefined) return;
-    const activeOption = document.getElementById(`${id}-${activeId}`) as unknown as {
-      scrollIntoView?: (options: ScrollIntoViewOptions) => void;
-    } | null;
-    if (typeof activeOption?.scrollIntoView === 'function') {
+    const activeOption = document.getElementById(`${id}-${activeId}`);
+    // jsdom omits scrollIntoView, so guard before calling it.
+    if (activeOption !== null && 'scrollIntoView' in activeOption) {
       activeOption.scrollIntoView({ block: 'nearest' });
     }
   }, [activeId, id, open]);
 
+  const dismissOutside = useEffectEvent((event: PointerEvent): void => {
+    if (event.target instanceof Node && !rootRef.current?.contains(event.target)) close();
+  });
   useEffect(() => {
-    const dismissOutside = (event: PointerEvent): void => {
-      if (event.target instanceof Node && !rootRef.current?.contains(event.target)) close();
-    };
     document.addEventListener('pointerdown', dismissOutside);
     return () => {
       document.removeEventListener('pointerdown', dismissOutside);
     };
-  }, [close]);
+  }, []);
 
   const openList = (): void => {
     setOpen(true);
@@ -137,7 +122,7 @@ export function RecipeCombobox({
           spellCheck={false}
           autoComplete="off"
           onChange={(event) => {
-            setQuery(event.target.value);
+            onQueryChange(event.target.value);
             setOpen(true);
             setActive(null);
           }}

@@ -1,4 +1,4 @@
-import { Fragment, useCallback, useId, useState } from 'react';
+import { Fragment, useId, useState } from 'react';
 import type { ReactElement } from 'react';
 import { useStarterSession } from '@/app/starter-session/useStarterSession';
 import { Button } from '@/components/Button';
@@ -11,10 +11,18 @@ import { Tile } from '@/components/Tile';
 import { useDisabledReason } from '@/components/useDisabledReason';
 import { classNames } from '@/lib/classNames';
 import type { HttpMethod } from '@/types/http';
-import { getRecipe, RECIPES } from '@/services/catalogue/recipes';
+import { getRecipe } from '@/services/catalogue/recipes';
 import type { RecipeId } from '@/types/recipe';
 import { RecipeCombobox } from './RecipeCombobox';
-import { collisionNote, EDITED_VALIDATION_NOTE, methodFilterOptions } from './starterOptions';
+import {
+  COLLISION_NOTE_AFTER,
+  COLLISION_NOTE_BEFORE,
+  collisionNote,
+  EDITED_VALIDATION_NOTE,
+  methodFilterOptions,
+  recipeCountLabel,
+  visibleRecipes,
+} from './starterOptions';
 
 function LogicNameTile(): ReactElement {
   const { state, dispatch, derived } = useStarterSession();
@@ -36,7 +44,13 @@ function LogicNameTile(): ReactElement {
       {/* Clamped to two lines; the full text stays in the title and the input's description. */}
       <p id={helpId} className="starter-help starter-help--clamp" title={note ?? undefined}>
         File <span className="ui-mono">{derived.slug}.js</span>
-        {note === null ? null : ` ${note}`}
+        {note === null ? null : (
+          <>
+            {' '}
+            {COLLISION_NOTE_BEFORE} <code className="ui-mono">{derived.slug}</code>{' '}
+            {COLLISION_NOTE_AFTER}
+          </>
+        )}
       </p>
     </Tile>
   );
@@ -51,8 +65,8 @@ type PendingRecipeSelection = { recipe: RecipeId; preferredMethod: HttpMethod | 
 
 type RecipeFilterProps = {
   methodFilter: HttpMethod | null;
-  visibleCount: number;
-  onVisibleCountChange: (count: number) => void;
+  query: string | null;
+  onQueryChange: (query: string | null) => void;
   onClearMethodFilter: () => void;
 };
 
@@ -90,8 +104,8 @@ function MethodTile({ methodFilter, onMethodFilterChange }: MethodFilterProps): 
 
 function RecipeTile({
   methodFilter,
-  visibleCount,
-  onVisibleCountChange,
+  query,
+  onQueryChange,
   onClearMethodFilter,
 }: RecipeFilterProps): ReactElement {
   const { state, dispatch, derived } = useStarterSession();
@@ -133,7 +147,7 @@ function RecipeTile({
       heading="Recipe"
       aside={
         <div className="starter-recipe__aside">
-          <span className="starter-count">{visibleCount} recipes</span>
+          <span className="starter-count">{recipeCountLabel(visibleRecipes(query ?? '', methodFilter).length)}</span>
           <Button
             aria-label="Clear method filter"
             className="starter-recipe__clear"
@@ -148,7 +162,8 @@ function RecipeTile({
       <RecipeCombobox
         value={state.recipe}
         methodFilter={methodFilter}
-        onVisibleCountChange={onVisibleCountChange}
+        query={query}
+        onQueryChange={onQueryChange}
         onSelect={select}
       />
       <p className="starter-help starter-help--truncate" title={recipe.mainObject}>
@@ -220,10 +235,7 @@ function ReadinessTile(): ReactElement {
 /** The four input tiles of layout 10a's top row (AC-2.1). */
 export function StarterInputs(): ReactElement {
   const { state, dispatch } = useStarterSession();
-  const [visibleCount, setVisibleCount] = useState(RECIPES.length);
-  const reportVisibleCount = useCallback((count: number) => {
-    setVisibleCount(count);
-  }, []);
+  const [query, setQuery] = useState<string | null>(null);
   return (
     <>
       <LogicNameTile />
@@ -235,8 +247,8 @@ export function StarterInputs(): ReactElement {
       />
       <RecipeTile
         methodFilter={state.recipeMethodFilter}
-        visibleCount={visibleCount}
-        onVisibleCountChange={reportVisibleCount}
+        query={query}
+        onQueryChange={setQuery}
         onClearMethodFilter={() => {
           dispatch({ type: 'setRecipeMethodFilter', method: null });
         }}

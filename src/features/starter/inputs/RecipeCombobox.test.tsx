@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { HttpMethod } from '@/types/http';
@@ -6,20 +7,31 @@ import { RecipeCombobox } from './RecipeCombobox';
 
 type MountOptions = {
   methodFilter?: HttpMethod | null;
-  onVisibleCountChange?: (count: number) => void;
 };
 
-function mount({ methodFilter = null, onVisibleCountChange = () => undefined }: MountOptions = {}) {
-  const onSelect = vi.fn();
-  const user = userEvent.setup();
-  render(
+function Harness({
+  methodFilter,
+  onSelect,
+}: {
+  methodFilter: HttpMethod | null;
+  onSelect: () => void;
+}) {
+  const [query, setQuery] = useState<string | null>(null);
+  return (
     <RecipeCombobox
       value="R1"
       methodFilter={methodFilter}
-      onVisibleCountChange={onVisibleCountChange}
+      query={query}
+      onQueryChange={setQuery}
       onSelect={onSelect}
-    />,
+    />
   );
+}
+
+function mount({ methodFilter = null }: MountOptions = {}) {
+  const onSelect = vi.fn();
+  const user = userEvent.setup();
+  render(<Harness methodFilter={methodFilter} onSelect={onSelect} />);
   return { user, onSelect, input: screen.getByRole('combobox', { name: 'Recipe' }) };
 }
 
@@ -135,17 +147,14 @@ describe('RecipeCombobox (AC-3.1, APG combobox)', () => {
     }
   });
 
-  it('combines method and text filters and reports the resulting count', async () => {
-    const onCount = vi.fn();
-    const { user, input } = mount({ methodFilter: 'PATCH', onVisibleCountChange: onCount });
+  it('combines method and text filters', async () => {
+    const { user, input } = mount({ methodFilter: 'PATCH' });
     await user.click(input);
     expect(optionNames()).toEqual(['Call a Dataverse custom API']);
-    expect(onCount).toHaveBeenLastCalledWith(1);
     await user.clear(input);
     await user.type(input, 'cloudflow');
     expect(optionNames()).toEqual([]);
     expect(screen.getByText('No recipes match')).toBeInTheDocument();
-    expect(onCount).toHaveBeenLastCalledWith(0);
   });
 
   it('opens and closes through an accessible real chevron toggle', async () => {

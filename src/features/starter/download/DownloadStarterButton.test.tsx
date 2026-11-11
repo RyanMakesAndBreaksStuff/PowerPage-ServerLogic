@@ -139,7 +139,7 @@ describe('DownloadStarterButton', () => {
     expect(host.savedFiles).toEqual([]);
   });
 
-  it('a rejected save shows the error toast with the reason', async () => {
+  it('a rejected save shows the error toast with a plain-language reason', async () => {
     const host = createFakeHost({ save: 'reject' });
     renderReal(host);
     await clickDownload();
@@ -147,7 +147,7 @@ describe('DownloadStarterButton', () => {
     const notice = host.callsOf('notify')[0]?.notice;
     expect(notice).toEqual({
       title: "Couldn't save customer-summary.zip",
-      body: 'Host call failed: saveFile.',
+      body: 'The file could not be written. Check the folder and try again.',
       type: 'error',
     });
     expect(notice?.body.includes('\n')).toBe(false);
@@ -166,7 +166,7 @@ describe('DownloadStarterButton', () => {
     });
   });
 
-  it('a non-Error throw gives the reason Unknown error', async () => {
+  it('a non-Error host throw gives the plain-language reason and leaks nothing', async () => {
     const host = createFakeHost();
     host.saveFile = () => rejectNonError('boom-secret');
     const spy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
@@ -174,7 +174,7 @@ describe('DownloadStarterButton', () => {
     await clickDownload();
     expect(host.callsOf('notify')[0]?.notice).toEqual({
       title: "Couldn't save customer-summary.zip",
-      body: 'Unknown error',
+      body: 'The file could not be written. Check the folder and try again.',
       type: 'error',
     });
     expect(spy.mock.calls.flat().map(String).join(' ')).not.toContain('boom-secret');
