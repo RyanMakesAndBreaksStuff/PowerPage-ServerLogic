@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 import { cleanup, screen, waitFor, within } from '@testing-library/react';
 import type { UserEvent } from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';

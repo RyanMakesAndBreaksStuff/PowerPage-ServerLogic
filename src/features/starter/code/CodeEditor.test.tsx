@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 import { undo } from '@codemirror/commands';
 import { EditorView } from '@codemirror/view';
 import { fireEvent, render, screen } from '@testing-library/react';

@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 import { screen, within } from '@testing-library/react';
 import type { UserEvent } from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';

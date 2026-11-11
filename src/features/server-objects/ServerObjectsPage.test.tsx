@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { ServerObjectsPage } from './ServerObjectsPage';

@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 import { act, fireEvent, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { STARTER_DEPS } from '@/session/starterDeps';

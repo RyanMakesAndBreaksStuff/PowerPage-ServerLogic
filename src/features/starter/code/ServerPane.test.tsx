@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 import { undo } from '@codemirror/commands';
 import { act, screen, within } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
