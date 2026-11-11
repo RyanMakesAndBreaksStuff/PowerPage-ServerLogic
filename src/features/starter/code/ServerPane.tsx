@@ -7,7 +7,7 @@ import type { CheckSeverity } from '@/lib/code-analysis/codeAnalysis.types';
 import { LIQUID_SERVER_NOTE } from '@/services/generators/client/client';
 import { generateHandler } from '@/services/generators/handlers';
 import { CodeEditor } from './CodeEditor';
-import { CopyButton } from '@/app/CopyButton';
+import { CopyButton } from '@/components/CopyButton';
 import './codePanes.css';
 
 const SEVERITY = {

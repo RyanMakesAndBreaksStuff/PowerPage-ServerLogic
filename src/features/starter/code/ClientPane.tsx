@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react';
-import { CopyButton } from '@/app/CopyButton';
+import { CopyButton } from '@/components/CopyButton';
 import { useStarterSession } from '@/session/useStarterSession';
 import { Icon } from '@/components/Icon';
 import { PillGroup } from '@/components/PillGroup';

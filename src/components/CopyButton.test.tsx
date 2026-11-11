@@ -1,21 +1,14 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
-import { HostContext } from '@/session/HostContext';
-import { NotifyProvider } from '@/app/NotifyProvider';
 import { createFakeHost } from '@/services/pptb/fakeHost';
 import type { FakeHostInit } from '@/services/pptb/fakeHost';
-import { CopyButton } from '@/app/CopyButton';
+import { CopyButton } from '@/components/CopyButton';
+import { renderWithHost } from '@/test/renderWithHost';
 
 function mount(init: FakeHostInit = {}) {
   const host = createFakeHost(init);
-  render(
-    <HostContext value={host}>
-      <NotifyProvider>
-        <CopyButton text={'a\nb'} label="Copy sample" />
-      </NotifyProvider>
-    </HostContext>,
-  );
+  renderWithHost(host, <CopyButton text={'a\nb'} label="Copy sample" />);
   return { host, user: userEvent.setup() };
 }
 
