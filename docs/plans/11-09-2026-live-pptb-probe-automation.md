@@ -42,6 +42,8 @@
 
 ### Task 1: Fork test proves `queryData` sends tool paths to the wire unchanged (F3)
 
+> Status 2026-11-11: left unticked. This task lands in the PPTB fork or the user skill, outside this repo, so no commit here confirms it.
+
 **Owns:** RG-001/RG-002 host half. The `options.path` the host sends for a tool-relative nextLink, and for an OData string literal.
 
 **Files:**
@@ -140,6 +142,8 @@ git commit -m "test(dataverse): pin the queryData wire path for nextLinks and st
 ---
 
 ### Task 2: Fork `safeSerialize` summarises binary values (F1)
+
+> Status 2026-11-11: left unticked. This task lands in the PPTB fork or the user skill, outside this repo, so no commit here confirms it.
 
 **Owns:** the recorded shape of binary values:
 
@@ -244,6 +248,8 @@ git commit -m "feat(debug-tools): summarise binary values in safeSerialize inste
 
 ### Task 3: The fork interception plan defines the action, precedence, cap and scenario-step contract
 
+> Status 2026-11-11: left unticked. This task lands in the PPTB fork or the user skill, outside this repo, so no commit here confirms it.
+
 **Owns:**
 - the `delay-then-respond` action (F4);
 - rule precedence;
@@ -336,6 +342,8 @@ There is no commit: `.omc/` is untracked in the fork by the owner's choice. Hand
 ---
 
 ### Task 4: The probe skill runs a script file inside a target (`evalFile`)
+
+> Status 2026-11-11: left unticked. This task lands in the PPTB fork or the user skill, outside this repo, so no commit here confirms it. `probes/live/s2-dev.json` and `s2-restricted.json` use `evalFile`, which suggests the skill supports it, but that is not a check of this task.
 
 **Owns:**
 - the `evalFile` scenario step, which injects `scripts/s2-probe.js` without pasting it into DevTools;
@@ -447,6 +455,8 @@ There is no commit: `~/.claude/skills/pptb-live-probe` is not a git repository. 
 
 ### Task 5: `scripts/probe-live.mjs` builds the tool and runs probe groups
 
+> Status 2026-11-11: all steps ticked on the evidence of commit 6e7abdf.
+
 **Owns:**
 - the probe directory layout;
 - the group list and gating;
@@ -462,19 +472,19 @@ There is no commit: `~/.claude/skills/pptb-live-probe` is not a git repository. 
 - Modify: `package.json` `scripts`: adds `probe:live`, `probe:live:connected` and `probe:live:pack`.
 - Signal: `npm run probe:live -- nope`
 
-- [ ] **Step 1: Establish the observable pre-change signal**
+- [x] **Step 1: Establish the observable pre-change signal**
 
 ```bash
 npm run probe:live -- nope
 ```
 
-- [ ] **Step 2: Capture the current signal**
+- [x] **Step 2: Capture the current signal**
 
 Run: `npm run probe:live -- nope`
 
 Expected: `npm error Missing script: "probe:live"`
 
-- [ ] **Step 3: Implement the minimum fix**
+- [x] **Step 3: Implement the minimum fix**
 
 `scripts/probe-live.mjs`:
 
@@ -617,7 +627,7 @@ Add to `package.json` `scripts`, after `"size": "node scripts/bundle-size.mjs di
     "probe:live:pack": "node scripts/probe-live.mjs --pack basic"
 ```
 
-- [ ] **Step 4: Confirm the signal changed, and nothing else did**
+- [x] **Step 4: Confirm the signal changed, and nothing else did**
 
 Run: `npm run probe:live -- nope`
 
@@ -631,7 +641,7 @@ Run: `git check-ignore -v probes/.local.json probes/reports/basic/x.json probes/
 
 Expected: three `.gitignore:` lines, then Vitest `Test Files  115 passed`.
 
-- [ ] **Step 5: Commit the coherent change**
+- [x] **Step 5: Commit the coherent change**
 
 ```bash
 git add scripts/probe-live.mjs probes/README.md .gitignore package.json
@@ -641,6 +651,8 @@ git commit -m "chore(probes): add the live PPTB probe runner, group layout and l
 ---
 
 ### Task 6: The basic smoke proves pages, themes, events, reload and theme latency in the real host
+
+> Status 2026-11-11: all steps ticked on the evidence of commit 663966f.
 
 **Owns:**
 - the `sl:theme-applied` performance mark (A9 budget: under 1000 ms from navigation start; supervised review host U2);
@@ -659,7 +671,7 @@ It covers:
 - Modify: `src/main.tsx:25`: marks the moment the host theme is applied.
 - Signal: `npm run probe:live`
 
-- [ ] **Step 1: Establish the observable pre-change signal**
+- [x] **Step 1: Establish the observable pre-change signal**
 
 `probes/smoke.json`:
 
@@ -706,7 +718,7 @@ It covers:
 
 The `updateUserSettings` calls write only the throwaway probe profile that `pptb.mjs start` creates. They don't touch the user's PPTB settings or any tool settings.
 
-- [ ] **Step 2: Capture the current signal**
+- [x] **Step 2: Capture the current signal**
 
 Run: `npm run probe:live`
 
@@ -719,7 +731,7 @@ FAIL  theme applied before first render within 1 s
 
 The run then ends with `FAIL  basic/smoke.json` and exit code 1. There is no mark yet, so A9 can't be measured.
 
-- [ ] **Step 3: Implement the minimum fix**
+- [x] **Step 3: Implement the minimum fix**
 
 In `src/main.tsx`, inside `.then((theme) => {`:
 
@@ -731,7 +743,7 @@ In `src/main.tsx`, inside `.then((theme) => {`:
     createRoot(root, {
 ```
 
-- [ ] **Step 4: Confirm the signal changed, and nothing else did**
+- [x] **Step 4: Confirm the signal changed, and nothing else did**
 
 Run: `npm run probe:live`
 
@@ -745,7 +757,7 @@ Run: `npm run typecheck && npm run lint && npm test`
 
 Expected: all three exit 0, and Vitest reports `115 passed`.
 
-- [ ] **Step 5: Commit the coherent change**
+- [x] **Step 5: Commit the coherent change**
 
 ```bash
 git add src/main.tsx probes/smoke.json
@@ -755,6 +767,8 @@ git commit -m "test(probes): basic live smoke with page, theme, event and reload
 ---
 
 ### Task 7: The page journeys run Starter and Server Objects in the real host (A11)
+
+> Status 2026-11-11: all steps ticked on the evidence of commit 1a5a77d.
 
 **Owns:** `probes/journeys.json`:
 - Starter name hostility;
@@ -770,19 +784,19 @@ git commit -m "test(probes): basic live smoke with page, theme, event and reload
 - Create: `probes/journeys.json`: the two page walk-throughs.
 - Signal: `npm run probe:live`
 
-- [ ] **Step 1: Establish the observable pre-change signal**
+- [x] **Step 1: Establish the observable pre-change signal**
 
 ```bash
 npm run probe:live
 ```
 
-- [ ] **Step 2: Capture the current signal**
+- [x] **Step 2: Capture the current signal**
 
 Run: `npm run probe:live`
 
 Expected: the summary lists only `PASS  basic/smoke.json`. No journey is exercised in the host.
 
-- [ ] **Step 3: Implement the minimum fix**
+- [x] **Step 3: Implement the minimum fix**
 
 `probes/journeys.json`:
 
@@ -827,7 +841,7 @@ Expected: the summary lists only `PASS  basic/smoke.json`. No journey is exercis
 
 Host notifications draw in a separate notification window, never in the ToolBox `document.body`. The step therefore reads the ToolBox event history (`preload.ts:310`), where every `notification:shown` is recorded.
 
-- [ ] **Step 4: Confirm the signal changed, and nothing else did**
+- [x] **Step 4: Confirm the signal changed, and nothing else did**
 
 Run: `npm run probe:live`
 
@@ -835,7 +849,7 @@ Expected: `PASS  basic/journeys.json` and `PASS  basic/smoke.json`, exit code 0.
 
 CodeMirror renders only the visible lines. If "the handler changed" or "one undo restores the handler" fails, open `probes/shots/journeys-starter.png` before you call it a defect. Either way, record the outcome in `findings/logic/probe_findings.md`.
 
-- [ ] **Step 5: Commit the coherent change**
+- [x] **Step 5: Commit the coherent change**
 
 ```bash
 git add probes/journeys.json
@@ -845,6 +859,8 @@ git commit -m "test(probes): live Starter and Server Objects journeys"
 ---
 
 ### Task 8: Generated host-call scenarios cover event subscriptions, Starter save paths and the retrieval-only guard
+
+> Status 2026-11-11: all steps ticked on the evidence of commit 2f04107.
 
 **Owns:**
 - `tests/probeScenarios.test.ts`: the scenario generator, the retrieval-only guard and `WRITE_CHANNELS`;
@@ -859,19 +875,19 @@ It covers A13 (fix-7 #7) and AC-5.11 on the tool side. It requires gate G1 and T
 - Modify: `package.json` `scripts.probe:live`, to `node scripts/probe-live.mjs basic host`.
 - Signal: `npx vitest run tests/probeScenarios.test.ts`, then `npm run probe:live`.
 
-- [ ] **Step 1: Establish the observable pre-change signal**
+- [x] **Step 1: Establish the observable pre-change signal**
 
 ```bash
 node scripts/probe-live.mjs basic host
 ```
 
-- [ ] **Step 2: Capture the current signal**
+- [x] **Step 2: Capture the current signal**
 
 Run: `node scripts/probe-live.mjs basic host`
 
 Expected: `EMPTY host` and exit code 1. No host-call scenario exists.
 
-- [ ] **Step 3: Implement the minimum fix**
+- [x] **Step 3: Implement the minimum fix**
 
 `tests/probeScenarios.test.ts`:
 
@@ -1062,7 +1078,7 @@ npx vitest run tests/probeScenarios.test.ts -u
     "probe:live": "node scripts/probe-live.mjs basic host",
 ```
 
-- [ ] **Step 4: Confirm the signal changed, and nothing else did**
+- [x] **Step 4: Confirm the signal changed, and nothing else did**
 
 Run: `npx vitest run tests/probeScenarios.test.ts`
 
@@ -1076,7 +1092,7 @@ Run: `npm run typecheck && npm run lint && npm test`
 
 Expected: all exit 0, and Vitest reports `116 passed`.
 
-- [ ] **Step 5: Commit the coherent change**
+- [x] **Step 5: Commit the coherent change**
 
 ```bash
 git add tests/probeScenarios.test.ts probes/generated/host/host-calls.json package.json
@@ -1086,6 +1102,8 @@ git commit -m "test(probes): generated host-call scenario with save paths, event
 ---
 
 ### Task 9: Generated connected scenarios cover site-list paging, host failures, the canned scan, export and 50-handler scale
+
+> Status 2026-11-11: all steps ticked on the evidence of commit c35eb78 and 1312ab8.
 
 **Owns:**
 - `worldSiteRows` and `worldComponentRows`: the canned rows, shared by the fake host and the probes;
@@ -1113,19 +1131,19 @@ It requires G1, G2 and Task 8.
   - `probes/generated/pending/site-list-failures.json`
 - Signal: `npm run probe:live:connected`
 
-- [ ] **Step 1: Establish the observable pre-change signal**
+- [x] **Step 1: Establish the observable pre-change signal**
 
 ```bash
 node scripts/probe-live.mjs connected
 ```
 
-- [ ] **Step 2: Capture the current signal**
+- [x] **Step 2: Capture the current signal**
 
 Run: `node scripts/probe-live.mjs connected`
 
 Expected: `EMPTY connected` and exit code 1.
 
-- [ ] **Step 3: Implement the minimum fix**
+- [x] **Step 3: Implement the minimum fix**
 
 In `src/test/inspectorWorld.ts`, add after `const COMPONENT_FILTER = …` (line 125):
 
@@ -1470,7 +1488,7 @@ Generate:
 npx vitest run tests/probeScenarios.test.ts -u
 ```
 
-- [ ] **Step 4: Confirm the signal changed, and nothing else did**
+- [x] **Step 4: Confirm the signal changed, and nothing else did**
 
 Run: `npx vitest run tests/probeScenarios.test.ts src/features/inspector`
 
@@ -1489,7 +1507,7 @@ Run: `npm run typecheck && npm run lint && npm test`
 
 Expected: all exit 0.
 
-- [ ] **Step 5: Commit the coherent change**
+- [x] **Step 5: Commit the coherent change**
 
 ```bash
 git add src/test/inspectorWorld.ts tests/probeScenarios.test.ts probes/generated/connected probes/generated/pending
@@ -1499,6 +1517,8 @@ git commit -m "test(probes): generated connected scenarios for paging, host fail
 ---
 
 ### Task 10: Live S2 scenarios close the pending rows of `probe_findings.md`
+
+> Status 2026-11-11: all steps ticked on the evidence of commit 71d3cf9.
 
 **Owns:**
 - `probes/live/s2-dev.json`: versions, inventory, connection shape, events and unsubscribe, paging and nextLink wire, literal wire, environment variables, populated download;
@@ -1514,19 +1534,19 @@ The step names here are the contract Task 11 reads. It requires G1, G2 and Task 
 - Create: `probes/live/scan-real.json`
 - Signal: `node scripts/probe-live.mjs live`
 
-- [ ] **Step 1: Establish the observable pre-change signal**
+- [x] **Step 1: Establish the observable pre-change signal**
 
 ```bash
 node scripts/probe-live.mjs live
 ```
 
-- [ ] **Step 2: Capture the current signal**
+- [x] **Step 2: Capture the current signal**
 
 Run: `node scripts/probe-live.mjs live`
 
 Expected: `EMPTY live` and exit code 1. Every row of the 2026-11-01 table in `findings/logic/probe_findings.md` still reads "Pending".
 
-- [ ] **Step 3: Implement the minimum fix**
+- [x] **Step 3: Implement the minimum fix**
 
 `probes/live/s2-dev.json`:
 
@@ -1619,7 +1639,7 @@ The two `connections.update` pairs change only connection names in the isolated 
 }
 ```
 
-- [ ] **Step 4: Confirm the signal changed, and nothing else did**
+- [x] **Step 4: Confirm the signal changed, and nothing else did**
 
 Run: `npm run probe:live:connected`
 
@@ -1634,7 +1654,7 @@ Treat failures as follows:
 - **`nextLink wire passed` or `literal wire passed`:** a possible RG-001 defect. Record the outcome; `NEXT_LINK_UNVERIFIED` stays `true`. Check the nextLink failure first: the step rebuilds the wire URL with `new URL`, as the host does. If Dataverse issued a link holding a raw space, `'`, `"`, `<` or `>`, the parser re-encodes it and the comparison fails with nothing actually wrong. Compare the issued link in the local report before calling it a defect.
 - **`populated handler download matches`:** a protocol mismatch, per the rule at the end of `probe_findings.md`.
 
-- [ ] **Step 5: Commit the coherent change**
+- [x] **Step 5: Commit the coherent change**
 
 ```bash
 git add probes/live/s2-dev.json probes/live/s2-restricted.json probes/live/scan-real.json
@@ -1645,6 +1665,8 @@ git commit -m "test(probes): live S2 scenarios for versions, events, paging and 
 
 ### Task 11: `scripts/probe-evidence.mjs` writes redacted status rows into `probe_findings.md`
 
+> Status 2026-11-11: all steps ticked on the evidence of commit 738c86e and 686103c.
+
 **Owns:** the mapping from report steps to `probe_findings.md` observations. It also owns the redaction rule: only pass/fail, version strings, whole-number counts and a latency median leave a report.
 
 **Files:**
@@ -1653,19 +1675,19 @@ git commit -m "test(probes): live S2 scenarios for versions, events, paging and 
 - Modify: `findings/logic/probe_findings.md` (end of file): the generated block.
 - Signal: `node scripts/probe-evidence.mjs`
 
-- [ ] **Step 1: Establish the observable pre-change signal**
+- [x] **Step 1: Establish the observable pre-change signal**
 
 ```bash
 node scripts/probe-evidence.mjs
 ```
 
-- [ ] **Step 2: Capture the current signal**
+- [x] **Step 2: Capture the current signal**
 
 Run: `node scripts/probe-evidence.mjs`
 
 Expected: `Error: Cannot find module '…/scripts/probe-evidence.mjs'`. The live results stay in gitignored reports, and `probe_findings.md` still says "Pending".
 
-- [ ] **Step 3: Implement the minimum fix**
+- [x] **Step 3: Implement the minimum fix**
 
 `scripts/probe-evidence.mjs`:
 
@@ -1762,7 +1784,7 @@ console.log(`Updated ${FINDINGS}`);
 if (median !== null) console.log(`Median download call latency: ${median} ms. Set "latencyMs": "${median}" in probes/.local.json.`);
 ```
 
-- [ ] **Step 4: Confirm the signal changed, and nothing else did**
+- [x] **Step 4: Confirm the signal changed, and nothing else did**
 
 Run: `node scripts/probe-evidence.mjs && git diff --stat findings/logic/probe_findings.md`
 
@@ -1777,7 +1799,7 @@ Expected: no output, so no GUID, URL or path leaked.
 
 Then run `npm run probe:live:connected` again with the printed `latencyMs` in `probes/.local.json`. Expected: `PASS  connected/scan-scale.json`, with `scan wall time under 30 s (RG-004)` now measured at the real latency.
 
-- [ ] **Step 5: Commit the coherent change**
+- [x] **Step 5: Commit the coherent change**
 
 ```bash
 git add scripts/probe-evidence.mjs findings/logic/probe_findings.md

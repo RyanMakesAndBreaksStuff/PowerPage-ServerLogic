@@ -1,6 +1,6 @@
 # Complete Logic Inspector Implementation Plan
 
-> **Review copy, 2026-11-01.** This is a verbatim copy of [`11-01-2026-phase-5-logic-inspector.md`](11-01-2026-phase-5-logic-inspector.md). Review callouts (`> **Review:**`) are inserted in place, and the findings are in [Plan review: baseline and Tasks 1–3](#plan-review-baseline-and-tasks-13) at the end. **Scope:** baseline prerequisites and Tasks 1–3 only; Tasks 4–10 were not reviewed. **Verdict:** not ready to execute as written. There is 1 blocker and 6 high findings. Two owner decisions are needed first: X-01 (the deleted `findings/logic/probe_findings.md`) and X-02 (the red lint gate).
+> **Review copy, 2026-11-01.** This is a verbatim copy of [`11-01-2026-phase-5-logic-inspector.md`](../../archive/11-01-2026-phase-5-logic-inspector.md). Review callouts (`> **Review:**`) are inserted in place, and the findings are in [Plan review: baseline and Tasks 1–3](#plan-review-baseline-and-tasks-13) at the end. **Scope:** baseline prerequisites and Tasks 1–3 only; Tasks 4–10 were not reviewed. **Verdict:** not ready to execute as written. There is 1 blocker and 6 high findings. Two owner decisions are needed first: X-01 (the deleted `findings/logic/probe_findings.md`) and X-02 (the red lint gate).
 
 **Goal:** Connect in PPTB, select an enhanced-model site, scan actual configuration and handler text, review eligible findings, and export the captured review as Markdown or PDF.
 
@@ -8,7 +8,7 @@
 
 **Tech stack:** Existing React 19, strict TypeScript, Vite 8, Vitest/Testing Library, PPTB adapter and `@pptb/types`, shared Graphite components, Acorn analysis, jsPDF 4.2.1 and jspdf-autotable 5.0.8, locally bundled fonts and PowerShell.
 
-**Scope:** The eight outcomes and P5.1–P5.8 requirements in the owner's [delivery brief](../../phasse5plan.md). Task 1 reconciles its policy decisions with [spec 4.0.1](../specs/001-server-logic-starter-inspector/spec.md); subsequent tasks implement the amended spec. Historical Phase 05 still means Starter domain.
+**Scope:** The eight outcomes and P5.1–P5.8 requirements in the owner's delivery brief (`phasse5plan.md`, deleted from the tree; see `git show 686103c:phasse5plan.md`). Task 1 reconciles its policy decisions with [spec 4.0.1](../specs/001-server-logic-starter-inspector/spec.md); subsequent tasks implement the amended spec. Historical Phase 05 still means Starter domain.
 
 **Out of scope:** Inline editing, handler upload/deployment, bulk remediation, runtime execution/debugging, standard-model sites, tenant-policy evaluation, persisted scan history and publication.
 
@@ -20,12 +20,12 @@
 
 This entry point and its linked task documents form one plan. The task documents contain the required five-step execution sequence, complete new-file contents, anchored existing-file edits, exact commands/expected results and scoped commits. Read the owning task rather than copying its contracts into another document.
 
-**Final planning review — 2026-11-01:** eight documents, ten owning tasks and sixteen five-step execution slices. Coverage, ownership, dependencies, destination-relative documentation snippets and plan links were reconciled. The [baseline evidence](11-01-2026-phase-5-baseline.md#final-planning-handoff) records structural checks and the final combined source-overlay verification.
+**Final planning review — 2026-11-01:** eight documents, ten owning tasks and sixteen five-step execution slices. Coverage, ownership, dependencies, destination-relative documentation snippets and plan links were reconciled. The [baseline evidence](../../archive/11-01-2026-phase-5-baseline.md#final-planning-handoff) records structural checks and the final combined source-overlay verification.
 
 ## Grounded baseline and prerequisites
 
 - Branch: `starter-objexts-prep`; HEAD at planning start: `6c0bdd5afbcf80a7c09ace02a1fd3132e2842169`.
-- [Fresh baseline evidence](11-01-2026-phase-5-baseline.md) records commands, failures, later passing builds, documentation sources and model authorization. Its observations supersede the delivery brief's statement that no planning checks ran.
+- [Fresh baseline evidence](../../archive/11-01-2026-phase-5-baseline.md) records commands, failures, later passing builds, documentation sources and model authorization. Its observations supersede the delivery brief's statement that no planning checks ran.
 - The repository contains existing staged/unstaged work, and Starter edits changed during planning. Before execution, establish an agreed committed baseline containing intended owner changes. Preserve and reconcile existing work; do not apply these plan edits blindly over it. Commit commands assume that reconciliation is complete and contain no authorization to publish.
 - Current icon ownership is resolved by spec **4.0.1**: `public/icons/logo.svg` → packaged `icons/logo.svg`. Do not repeat the obsolete rename task.
 - At the later planning checkpoint, typecheck and both builds pass. Lint is blocked by the external `.scratch/fix7-host-probe-entry.ts` project-service error; the full audit reports two moderate package entries; online validator URL checks fail. Their current outcomes must be re-established before integration. No Inspector assertion is weakened to accommodate a baseline failure.
@@ -44,16 +44,16 @@ This entry point and its linked task documents form one plan. The task documents
 
 | Task | Owning plan section | Delivery brief | Depends on | Exclusive responsibility |
 |---|---|---|---|---|
-| 1 | [Requirements](11-01-2026-phase-5-policy.md#task-1-replace-the-blanket-api-restriction-with-the-phase-5-evidence-contract) | P5.1 | Baseline | Amend spec/rules and supersede conflicting execution instructions. |
-| 2 | [S2 continuation](11-01-2026-phase-5-transport-reader.md) | P5.1 | 1 | Executable populated-file and host-evidence probe; Phase 12 evidence. |
-| 3 | [Host transport](11-01-2026-phase-5-transport-reader.md) | P5.2 | 1 | File actions, retry/cancellation, sanitized provenance, partial rows and adapter/fake contracts. |
-| 4 | [Evidence rules](11-01-2026-phase-5-rules.md) | P5.3 | 1 | Finding evidence contract, grant traversal, reason precedence, review rules and snapshot ownership. |
-| 5 | [Site reader](11-01-2026-phase-5-transport-reader.md) | P5.4 | 3, 4 | Query/parse/envvar/download orchestration, bounded work, progress and scan identity. |
-| 6 | [Session and page](11-01-2026-phase-5-session-export.md) | P5.5 | 5 | Confirmed connection lifecycle, app session, picker and finished Graphite inspection/review UI. |
-| 7 | [Reports and PDF](11-01-2026-phase-5-reports-build.md) | P5.6 | 4 | Shared report inclusion/redaction, fonts and real vector PDF. |
-| 8 | [Export lifecycle](11-01-2026-phase-5-session-export.md) | P5.7 | 6, 7 | Dialog-open capture, options, handoff validity, save outcomes and retry. |
-| 9 | [Build completion gates](11-01-2026-phase-5-reports-build.md) | P5.8 | 8 | Behavioral completion and explicit inclusion/exclusion/package checks. |
-| 10 | [Documentation and release proof](11-01-2026-phase-5-release-proof.md) | P5.8 | 2, 9 | Manuals/screenshots, final artifacts and required local/rendered/live evidence. |
+| 1 | [Requirements](../../archive/11-01-2026-phase-5-policy.md#task-1-replace-the-blanket-api-restriction-with-the-phase-5-evidence-contract) | P5.1 | Baseline | Amend spec/rules and supersede conflicting execution instructions. |
+| 2 | [S2 continuation](../../archive/11-01-2026-phase-5-transport-reader.md) | P5.1 | 1 | Executable populated-file and host-evidence probe; Phase 12 evidence. |
+| 3 | [Host transport](../../archive/11-01-2026-phase-5-transport-reader.md) | P5.2 | 1 | File actions, retry/cancellation, sanitized provenance, partial rows and adapter/fake contracts. |
+| 4 | [Evidence rules](../../archive/11-01-2026-phase-5-rules.md) | P5.3 | 1 | Finding evidence contract, grant traversal, reason precedence, review rules and snapshot ownership. |
+| 5 | [Site reader](../../archive/11-01-2026-phase-5-transport-reader.md) | P5.4 | 3, 4 | Query/parse/envvar/download orchestration, bounded work, progress and scan identity. |
+| 6 | [Session and page](../../archive/11-01-2026-phase-5-session-export.md) | P5.5 | 5 | Confirmed connection lifecycle, app session, picker and finished Graphite inspection/review UI. |
+| 7 | [Reports and PDF](../../plans/11-01-2026-phase-5-reports-build.md) | P5.6 | 4 | Shared report inclusion/redaction, fonts and real vector PDF. |
+| 8 | [Export lifecycle](../../archive/11-01-2026-phase-5-session-export.md) | P5.7 | 6, 7 | Dialog-open capture, options, handoff validity, save outcomes and retry. |
+| 9 | [Build completion gates](../../plans/11-01-2026-phase-5-reports-build.md) | P5.8 | 8 | Behavioral completion and explicit inclusion/exclusion/package checks. |
+| 10 | [Documentation and release proof](../../plans/11-01-2026-phase-5-release-proof.md) | P5.8 | 2, 9 | Manuals/screenshots, final artifacts and required local/rendered/live evidence. |
 
 ```text
 1 → 2 (live observations may remain pending during local implementation)

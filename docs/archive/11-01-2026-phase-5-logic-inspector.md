@@ -6,7 +6,7 @@
 
 **Tech stack:** Existing React 19, strict TypeScript, Vite 8, Vitest/Testing Library, PPTB adapter and `@pptb/types`, shared Graphite components, Acorn analysis, jsPDF 4.2.1 and jspdf-autotable 5.0.8, locally bundled fonts and PowerShell.
 
-**Scope:** The eight outcomes and P5.1–P5.8 requirements in the owner's [delivery brief](../../phasse5plan.md). Task 1 reconciles its policy decisions with [spec 4.0.1](../specs/001-server-logic-starter-inspector/spec.md); subsequent tasks implement the amended spec. Historical Phase 05 still means Starter domain.
+**Scope:** The eight outcomes and P5.1–P5.8 requirements in the owner's delivery brief (`phasse5plan.md`, deleted from the tree; see `git show 686103c:phasse5plan.md`). Task 1 reconciles its policy decisions with [spec 4.0.1](../specs/001-server-logic-starter-inspector/spec.md); subsequent tasks implement the amended spec. Historical Phase 05 still means Starter domain.
 
 **Out of scope:** Inline editing, handler upload/deployment, bulk remediation, runtime execution/debugging, standard-model sites, tenant-policy evaluation, persisted scan history and publication.
 
@@ -39,10 +39,10 @@ This entry point and its linked task documents form one plan. The task documents
 | 4 | [Evidence rules](11-01-2026-phase-5-rules.md) | P5.3 | 1 | Finding evidence contract, grant traversal, reason precedence, review rules and snapshot ownership. |
 | 5 | [Site reader](11-01-2026-phase-5-transport-reader.md) | P5.4 | 3, 4 | Query/parse/envvar/download orchestration, bounded work, progress and scan identity. |
 | 6 | [Session and page](11-01-2026-phase-5-session-export.md) | P5.5 | 5 | Confirmed connection lifecycle, app session, picker and finished Graphite inspection/review UI. |
-| 7 | [Reports and PDF](11-01-2026-phase-5-reports-build.md) | P5.6 | 4 | Shared report inclusion/redaction, fonts and real vector PDF. |
+| 7 | [Reports and PDF](../plans/11-01-2026-phase-5-reports-build.md) | P5.6 | 4 | Shared report inclusion/redaction, fonts and real vector PDF. |
 | 8 | [Export lifecycle](11-01-2026-phase-5-session-export.md) | P5.7 | 6, 7 | Dialog-open capture, options, handoff validity, save outcomes and retry. |
-| 9 | [Build completion gates](11-01-2026-phase-5-reports-build.md) | P5.8 | 8 | Behavioral completion and explicit inclusion/exclusion/package checks. |
-| 10 | [Documentation and release proof](11-01-2026-phase-5-release-proof.md) | P5.8 | 2, 9 | Manuals/screenshots, final artifacts and required local/rendered/live evidence. |
+| 9 | [Build completion gates](../plans/11-01-2026-phase-5-reports-build.md) | P5.8 | 8 | Behavioral completion and explicit inclusion/exclusion/package checks. |
+| 10 | [Documentation and release proof](../plans/11-01-2026-phase-5-release-proof.md) | P5.8 | 2, 9 | Manuals/screenshots, final artifacts and required local/rendered/live evidence. |
 
 ```text
 1 → 2 (live observations may remain pending during local implementation)
@@ -94,7 +94,7 @@ Every row below identifies implementation ownership and the final observable clo
 | RG-004 | 5, 7, 8, 10 | Real 50-handler timing, request budget, two export timing budgets and captured-output parity. |
 | RG-006 publication half | 9, 10 | Final IIFE/assets/icon/package inspection, Desktop local load, offline and online validation. |
 | Continuation F05/F07/F08 | 3, 5, 6, 8 | Failed code affects Table permissions and Outbound only; dependency-ordered page/export wiring; every save outcome settles. |
-| FR-12 later-release dependency | 10 | Existing generator-behavior-harness plan closes AC-4.12 when the v1.0.0-only exception no longer applies. |
+| FR-12 later-release dependency | 10 | Generator-behavior-harness plan (file removed in `820d7b8`; see `git show 820d7b8^:docs/plans/10-24-2026-generator-behavior-harness.md`) closes AC-4.12 when the v1.0.0-only exception no longer applies. |
 
 ## Completion and stop condition
 

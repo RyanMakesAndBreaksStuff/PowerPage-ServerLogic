@@ -10,7 +10,7 @@
 
 **Out of scope:** Production implementation during this planning session; Task 4 rule/fixture edits; Tasks 6/8 page/export wiring; Task 10 documentation/live acceptance; unrelated Starter type, lint, URL and audit failures.
 
-**Parent plan:** [Complete Logic Inspector](11-01-2026-phase-5-logic-inspector.md).
+**Parent plan:** [Complete Logic Inspector](../archive/11-01-2026-phase-5-logic-inspector.md).
 
 ---
 
@@ -21,12 +21,12 @@
 - Keep `renderPdf(model: ReportModel): Uint8Array`, `renderMarkdown(model): string` and `reportFileName(model): string`. Export remains synchronous until Task 8 invokes the host. A PDF error is propagated before native save; Task 8 retains Markdown/retry.
 - `ReportModel.metadataTitle` separately owns PDF title metadata; the renderer consumes it rather than the display title. With redaction enabled, file metadata is `[site] · <original server-logic filename>-readiness`; only the source filename is retained as an identifying value. Site metadata uses the redacted site title. The shared `reportGroups` selector exposes preserved Reviewed/Configured guidance/detail/questions and full Not-scanned explanations in both formats.
 - Preserve source server-logic names in `row.name`, section/snapshot filenames, the file-report **display** title and filename stem. PDF metadata follows the separate contract above. Add explicit Active/Inactive display labels. URL aliases replace complete hostname tokens, including HTTP(S) forms, without replacing a prefix/suffix of an unrelated host. URL parsing never performs I/O.
-- Task 6's marker handoff in [the session/export plan](11-01-2026-phase-5-session-export.md) is **`Review server logic readiness`**. Task 9 additionally asserts the real empty-state copy **`No server logic found on this site`**, **`Export report`** after Task 8 and rendered module paths. The provider is `src/app/inspector-site/InspectorProvider.tsx`, picker `src/app/shell/SitePill.tsx`, export `src/features/inspector/ExportDialog.tsx`.
+- Task 6's marker handoff in [the session/export plan](../archive/11-01-2026-phase-5-session-export.md) is **`Review server logic readiness`**. Task 9 additionally asserts the real empty-state copy **`No server logic found on this site`**, **`Export report`** after Task 8 and rendered module paths. The provider is `src/app/inspector-site/InspectorProvider.tsx`, picker `src/app/shell/SitePill.tsx`, export `src/features/inspector/ExportDialog.tsx`.
 - Task 1 pins the **Task 7c `REPORT_PALETTE`** values, white landscape A4, 36pt margins, DM Sans 400 body, Space Grotesk 700 headings, JetBrains Mono 400 paths, vector checks/rings, 10pt minimum table text and labelled continuation rows. These are grounded in `plans/phase-20-report-pdf.md` and A8, not the current handoff README §5 (Accessibility). UI Graphite tokens do not replace report tokens.
 - Task 1's FR-10 contract also adopts the exact PDF repertoire/unsupported-character behavior in Task 7b's `PDF-FONTS.md`. Non-Latin scripts, combining marks, emoji and shaping are not universally supported. If required release data lies outside the accepted repertoire, RG-005/CR-003 remains open until the owner explicitly accepts that limitation or funds a separately specified renderer/font expansion.
 - Current icon work is already resolved: `public/icons/logo.svg`, manifest `icons/logo.svg`, spec 4.0.1 and existing tests agree. No icon rename or package edit is planned here.
-- `docs/plans/11-01-2026-phase-5-baseline.md` owns baseline evidence; its later checkpoint supersedes the initial failures: **1,402 full-suite tests and typecheck/build/build:beta pass**. Scratch-probe lint, online URL checks and the two moderate audit entries remain separate gates. This task's virtual overlays are not integrated release proof.
-- Task 4 is complete in `docs/plans/11-01-2026-phase-5-rules.md`: 49 regression/468 focused overlay tests plus scoped typecheck/lint passed. Its `reportFinding` initialization is `hasUnscannedEvidence: status === 'not-scanned'`; `Finding.detail` retains original reasons, `OTHER_ROLES_NOTE` and `ENVVAR_CACHE_NOTE`, with raw configuration confined to the unchanged `FileResult.snapshot` shape. Consume that verified overlay; do not duplicate its constructor change.
+- `docs/archive/11-01-2026-phase-5-baseline.md` owns baseline evidence; its later checkpoint supersedes the initial failures: **1,402 full-suite tests and typecheck/build/build:beta pass**. Scratch-probe lint, online URL checks and the two moderate audit entries remain separate gates. This task's virtual overlays are not integrated release proof.
+- Task 4 is complete in `docs/archive/11-01-2026-phase-5-rules.md`: 49 regression/468 focused overlay tests plus scoped typecheck/lint passed. Its `reportFinding` initialization is `hasUnscannedEvidence: status === 'not-scanned'`; `Finding.detail` retains original reasons, `OTHER_ROLES_NOTE` and `ENVVAR_CACHE_NOTE`, with raw configuration confined to the unchanged `FileResult.snapshot` shape. Consume that verified overlay; do not duplicate its constructor change.
 - Documentation checked: Context7 jsPDF `/parallax/jspdf/v4.2.1` (TTF/VFS, Identity-H/ToUnicode), AutoTable `/simonbengtsson/jspdf-autotable` (row-height exception to `rowPageBreak: 'avoid'`, repeated heads), Vite `/vitejs/vite/v8.0.10` (programmatic builds/output hooks). Installed AutoTable declarations and Rolldown's `RenderedModule.renderedLength` were inspected directly.
 
 ## Plan-code verification — 2026-11-01
@@ -57,6 +57,8 @@ Verification corrected two concrete draft issues: Markdown sentinel assertions m
 **Remaining gates:** Task 9's final Inspector-included/excluded artifact proof is **unexecuted** pending Tasks 5/6/8 integration; its proposed code is typechecked. An initial inherited Vitest include list accidentally reached baseline build tests and failed on scaffolding/missing production licences; it is not release evidence, and the corrected scoped run above excludes builds. Actual PDF-reader selection/copying, live PPTB timings and required-data glyph acceptance remain Task 10 gates. The explicitly bounded repertoire in `PDF-FONTS.md` is not universal Unicode support. Baseline lint/audit/online-URL status remains owned by the canonical baseline document.
 
 ### Task 7a: Make report options, redaction and complete section content faithful
+
+> **Superseded (2026-11-11)** by `docs/phase-5/plans/p5-6_plan.md`, executed in commit `7a1a336`. Kept for reference only; do not execute.
 
 **Owns:** Shared report presentation, alias redaction, snapshot-on/off consumption and full explanatory-content parity. Raw-snapshot construction and `hasUnscannedEvidence` remain Task 4's prerequisites.
 
@@ -661,6 +663,8 @@ git commit --only -m "fix(inspector): preserve report evidence and redact hostna
 
 ### Task 7b: Bundle licensed static fonts and reject unsupported PDF text explicitly
 
+> **Superseded (2026-11-11)** by `docs/phase-5/plans/p5-6_plan.md`, executed in commit `7a1a336`. Kept for reference only; do not execute.
+
 **Owns:** Pinned font acquisition/provenance, packaged licences and runtime glyph/repertoire validation. This task adds no npm dependency and does not change the existing UI woff2 fonts.
 
 **Files:**
@@ -1056,6 +1060,8 @@ git commit --only -m "feat(inspector): bundle verified PDF fonts and validate te
 ```
 
 ### Task 7c: Serialize complete vector PDFs with provable text and pagination
+
+> **Superseded (2026-11-11)** by `docs/phase-5/plans/p5-6_plan.md`, executed in commit `7a1a336`. Kept for reference only; do not execute.
 
 **Owns:** Both PDF scopes, Phase 20/A8 drawing, continuation rows, actual embedded text and renderer evidence. Depends on 7a/7b.
 

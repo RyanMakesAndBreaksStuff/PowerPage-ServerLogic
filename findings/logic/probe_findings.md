@@ -110,6 +110,8 @@ Spec 4.1.0 permits `InitializeFileBlocksDownload` and `DownloadBlock` through `d
 
 `scripts/s2-probe.js` now installs manual operations and makes no host call on paste. `s2DownloadKnown(recordId)` requires the owner's populated type-35 record ID, validates `filecontent_name` and a `regardingfieldname = filecontent` FileAttachment row *before* opening the native file picker, performs the two actions, and records shape, byte-count and byte/text comparison facts only. `s2Environment(scenario, schema)`, `s2Paging(siteId)` and `s2VerifyWire(kind, actualUrl)` also require explicit DevTools arguments. `readBinary` is declared as `Promise<Buffer>` in `@pptb/types` 1.2.7; the probe records the returned shape first, then copies the exact byte view. No source, filename, path, connection/site/record identifier, request URL, continuation token or setting value belongs in committed evidence.
 
+**Superseded (2026-11-11).** The Status column below records the state on 2026-11-01. Every row except the secret environment variable was later closed by the live runs under "Automated live evidence" at the end of this file; read that section for current status.
+
 | Observation | Manual operation | Status on 2026-11-01 |
 | --- | --- | --- |
 | Host and runtime versions | `s2Versions(host, runtime)` from the PPTB About dialog | Pending |

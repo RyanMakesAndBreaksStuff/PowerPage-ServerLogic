@@ -5,7 +5,7 @@
 **Spec:** `docs/specs/001-server-logic-starter-inspector/spec.md` v4.1.0, FR-7 (L623–L682), AC-7.2, AC-7.3, AC-7.4, AC-7.7, AC-7.8, AC-7.10, AC-7.12, FR-8 "Not scanned", Error Scenarios L926–L928, and the 4.2.0 amendments this plan makes (R-14 option B, R-15 option B).
 **Audit items:** CR-002 (reader half), WR-003 (reader half), RG-001/RG-003/RG-004 evidence producer (the live runs stay open).
 **Status:** Executed 2026-11-02; commit 137720e. Evidence: docs/phase-5/evidence/p5-4/execution.md.
-**Supersedes:** Task 5 of `docs/plans/11-01-2026-phase-5-transport-reader.md` (L1462–L2495). That draft is reference only; its defects (a non-existent `isAbortError`, a pre-flight identity throw and `ScanConfirmationError`, `localeCompare` re-sorting, `%27` pre-encoding, one bad setting row failing every setting, serial config reads) are not repeated.
+**Supersedes:** Task 5 of `docs/archive/11-01-2026-phase-5-transport-reader.md` (L1462–L2495). That draft is reference only; its defects (a non-existent `isAbortError`, a pre-flight identity throw and `ScanConfirmationError`, `localeCompare` re-sorting, `%27` pre-encoding, one bad setting row failing every setting, serial config reads) are not repeated.
 
 ## Goal
 

@@ -5,7 +5,7 @@
 **Spec:** FR-7 (4.1.0 host-operation bullet, paging, retry), AC-7.7, AC-7.10, Error Scenarios "A record's code can't be downloaded" / "downloads as an empty file", Security.
 **Audit items:** CR-002 (transport half), WR-003, WR-004, RG-001/002/003 evidence consumers.
 **Status:** Executed 2026-11-01; commit `bae8611`. The A2 test block was adjusted during execution so the pending-resolve capture uses an object holder (TypeScript narrowed the `let` to `null`).
-**Supersedes:** Task 3 of `docs/plans/11-01-2026-phase-5-transport-reader.md`. Every file below was re-read from the checkout on 2026-11-01; review findings T3-01…T3-13 are applied as noted.
+**Supersedes:** Task 3 of `docs/archive/11-01-2026-phase-5-transport-reader.md`. Every file below was re-read from the checkout on 2026-11-01; review findings T3-01…T3-13 are applied as noted.
 
 ## Goal
 

@@ -140,7 +140,7 @@ In `plan-starter.md`:
 Replace the `**Open risk (Inspector, not Starter):**` bullet with:
 
 ```markdown
-- **Inspector transport (superseded 2026-11-01):** handler code is read through the typed action-based file download owned by [Task 3](../../plans/11-01-2026-phase-5-transport-reader.md#task-3-make-host-reads-complete-cancellable-and-byte-correct). The historical `$value` probe and its failed-read fallback remain Phase 12 evidence, not current execution instructions.
+- **Inspector transport (superseded 2026-11-01):** handler code is read through the typed action-based file download owned by [Task 3](11-01-2026-phase-5-transport-reader.md#task-3-make-host-reads-complete-cancellable-and-byte-correct). The historical `$value` probe and its failed-read fallback remain Phase 12 evidence, not current execution instructions.
 ```
 
 In Global Constraints, replace the bullet beginning `Host globals are touched only in` with:
@@ -159,9 +159,9 @@ Change the contract heading:
 Inside that section's TypeScript fence, remove the contiguous range from `// src/services/pptb/host.types.ts` through the closing `SiteResult` declaration immediately before `// src/types/report.ts`. Preserve the fence and its remaining declarations. Immediately after the closing fence, before `**Pinned function signatures**`, insert these Markdown bullets:
 
 ```markdown
-- Host errors, paging, file target and cancellation: [Task 3](../../plans/11-01-2026-phase-5-transport-reader.md#task-3-make-host-reads-complete-cancellable-and-byte-correct), owned by `src/services/pptb/host.types.ts`.
-- Inspector facts, findings, evidence and review contracts: [Task 4](../../plans/11-01-2026-phase-5-rules.md#task-4-preserve-partial-rule-evidence-enforce-review-eligibility-and-isolate-raw-snapshots) and [Task 5](../../plans/11-01-2026-phase-5-transport-reader.md#task-5-read-actual-enhanced-model-site-facts-and-retain-partial-work), owned by `src/types/inspector.ts`.
-- Inspector session: [Task 6](../../plans/11-01-2026-phase-5-session-export.md#task-6b-own-one-inspector-session-and-serialize-superseding-reads), owned by `src/app/inspector-site/inspectorSession.ts`.
+- Host errors, paging, file target and cancellation: [Task 3](11-01-2026-phase-5-transport-reader.md#task-3-make-host-reads-complete-cancellable-and-byte-correct), owned by `src/services/pptb/host.types.ts`.
+- Inspector facts, findings, evidence and review contracts: [Task 4](11-01-2026-phase-5-rules.md#task-4-preserve-partial-rule-evidence-enforce-review-eligibility-and-isolate-raw-snapshots) and [Task 5](11-01-2026-phase-5-transport-reader.md#task-5-read-actual-enhanced-model-site-facts-and-retain-partial-work), owned by `src/types/inspector.ts`.
+- Inspector session: [Task 6](11-01-2026-phase-5-session-export.md#task-6b-own-one-inspector-session-and-serialize-superseding-reads), owned by `src/app/inspector-site/inspectorSession.ts`.
 ```
 
 No active mandatory Prettier gate remains in `plan-starter.md`. The line-1 supersession note on each phase file replaces its historical Prettier, `$value`-fallback and provisional no-status instructions; preserve historical observations and result records.
@@ -169,7 +169,7 @@ No active mandatory Prettier gate remains in `plan-starter.md`. The line-1 super
 At line 1 of `plan-inspector.md` and each phase file listed in Files, insert the following note (adjust only the relative link: `../../plans/11-01-2026-phase-5-logic-inspector.md` from `plan-inspector.md`, `../../../plans/11-01-2026-phase-5-logic-inspector.md` from a phase file):
 
 ```markdown
-> **Execution superseded — 2026-11-01.** [Phase 5](../../plans/11-01-2026-phase-5-logic-inspector.md) owns the remaining Inspector implementation, contracts and current check commands. This file preserves historical phase IDs, design choices and probe outcomes; its old code blocks, `$value` fallback, blanket API prohibition, formatter commands and sequencing are not current execution instructions. New S2 observations are appended to Phase 12 without rewriting historical observations.
+> **Execution superseded — 2026-11-01.** [Phase 5](11-01-2026-phase-5-logic-inspector.md) owns the remaining Inspector implementation, contracts and current check commands. This file preserves historical phase IDs, design choices and probe outcomes; its old code blocks, `$value` fallback, blanket API prohibition, formatter commands and sequencing are not current execution instructions. New S2 observations are appended to Phase 12 without rewriting historical observations.
 ```
 
 In `plan-inspector.md`, also replace its “Resolved risk (2026-10-23)” paragraph with: “The historical JSON-only `$value` path returned `{}`. Phase 5 replaces that path with typed action-based file download; a populated-handler wire comparison remains a release gate.” The preceding note makes remaining historical copies explicitly non-authoritative.

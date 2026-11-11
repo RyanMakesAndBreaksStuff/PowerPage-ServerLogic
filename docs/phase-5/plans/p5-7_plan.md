@@ -6,7 +6,7 @@
 **Spec:** `docs/specs/001-server-logic-starter-inspector/spec.md` 4.2.1: Story 9 (AC-9.1 to AC-9.10), FR-10, FR-1 (notifications), Error Scenarios L917 to L921 and L935 to L936, AC-7.4, AC-7.6 and AC-7.8, AC-7.10, accessibility L886 to L896. No spec delta is needed. Two readings are recorded: AC-9.1's "disabled while a scan runs" is met by having no Export report control in the scanning state (D-02 placement; owner sign-off under O-6); AC-9.9's "retry" after a failure is a re-open of the dialog (E-08 B), which Error Scenario L921 ("PDF fails, Markdown still available") still satisfies.
 **Host API:** `toolboxAPI.preventClose()` and `toolboxAPI.releasePreventClose()`, both `Promise<boolean>`, require PPTB 1.2.6 (docs: tool-development/api-reference/toolbox-api, "Tool Lifecycle"; `node_modules/@pptb/types/toolboxAPI.d.ts` L499 to L513, top-level members, not under `utils`). The manifest `features.minAPI` is `1.2.7` (`package.json` L98), so no manifest change. While the guard is set, closing the tool tab or quitting PPTB shows a host warning with an "Ignore & Close" override; there is no close event the tool can observe.
 **Brief:** `phasse5plan.md` §P5.7 (owns CR-004 and the Phase 24 save-failure gap) and §6 rows CR-004, RG-004, RG-005.
-**Supersedes:** Tasks 8a and 8b of `docs/plans/11-01-2026-phase-5-session-export.md` and `docs/specs/001-server-logic-starter-inspector/plans/phase-24-export-dialog.md`, as reference only.
+**Supersedes:** Tasks 8a and 8b of `docs/archive/11-01-2026-phase-5-session-export.md` and `docs/specs/001-server-logic-starter-inspector/plans/phase-24-export-dialog.md`, as reference only.
 
 ## Goal
 
