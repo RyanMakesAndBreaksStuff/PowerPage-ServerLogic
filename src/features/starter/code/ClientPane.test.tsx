@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { STARTER_DEPS } from '@/session/starterDeps';
 import { generateClient } from '@/services/generators/client/client';
 import { StarterPage } from '../StarterPage';
-import { editorView, renderStarter } from '../starterTestHarness';
+import { editorView, renderStarter } from '@/test/starterTestHarness';
 import { ClientPane } from './ClientPane';
 
 const clientText = (): string => editorView('Client call code').state.doc.toString();

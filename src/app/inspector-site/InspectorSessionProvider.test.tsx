@@ -8,7 +8,7 @@ import type { SiteRef } from '@/types/inspector';
 import { CONNECTION, createInspectorHost, OTHER_CONNECTION, SITE_ALPHA, SITE_BETA } from '@/test/inspectorWorld';
 import { INSPECTOR_DEPS } from '@/features/inspector/inspectorDeps';
 import type { InspectorDeps } from '@/features/inspector/inspectorDeps';
-import { renderInspector } from './inspectorTestHarness';
+import { renderInspector } from '@/test/inspectorTestHarness';
 import { useInspector } from '@/session/useInspector';
 
 afterEach(cleanup);

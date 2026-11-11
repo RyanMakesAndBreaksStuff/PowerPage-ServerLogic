@@ -3,7 +3,7 @@ import { act, screen, within } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { STARTER_DEPS } from '@/session/starterDeps';
 import { generateHandler } from '@/services/generators/handlers';
-import { editorView, renderStarter } from '../starterTestHarness';
+import { editorView, renderStarter } from '@/test/starterTestHarness';
 import { ServerPane } from './ServerPane';
 
 const serverText = (): string => editorView('Server code').state.doc.toString();

@@ -3,9 +3,8 @@ import { act, cleanup, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { INSPECTOR_DEPS } from '@/features/inspector/inspectorDeps';
 import type { InspectorDeps } from '@/features/inspector/inspectorDeps';
-import { renderInspector } from '@/app/inspector-site/inspectorTestHarness';
-import type { InspectorHarnessOptions } from '@/app/inspector-site/inspectorTestHarness';
-import { SitePill } from '@/app/shell/SitePill';
+import { renderInspector } from '@/test/inspectorTestHarness';
+import type { InspectorHarnessOptions } from '@/test/inspectorTestHarness';
 import { ScanAbandonedError } from '@/features/inspector/scan/scan';
 import { deferred } from '@/test/deferred';
 import { fixedDeps } from '@/test/fixedDeps';
@@ -43,13 +42,7 @@ afterEach(() => {
 });
 
 function mount(options: InspectorHarnessOptions = {}) {
-  return renderInspector(
-    <>
-      <SitePill />
-      <InspectorPage />
-    </>,
-    options,
-  );
+  return renderInspector(<InspectorPage />, { ...options, sitePill: true });
 }
 
 type Mounted = ReturnType<typeof mount>;

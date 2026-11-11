@@ -1,6 +1,7 @@
 // Test helper, never imported by the app: mounts Starter UI inside the providers App gives it, on a fake host.
 import { EditorView } from '@codemirror/view';
 import { act, render, screen } from '@testing-library/react';
+import type { RenderResult } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { ReactElement } from 'react';
 import { HostContext } from '@/session/HostContext';
@@ -14,6 +15,7 @@ import type { useStarterSession } from '@/session/useStarterSession';
 import { ViewContext } from '@/session/useView';
 import { createFakeHost } from '@/services/pptb/fakeHost';
 import type { FakeHostInit } from '@/services/pptb/fakeHost';
+import type { PptbHost } from '@/services/pptb/host.types';
 import type { View } from '@/types/http';
 
 type Session = ReturnType<typeof useStarterSession>;
@@ -57,6 +59,35 @@ export function renderStarter(
     });
   };
   return { host, user, views, session, dispatch };
+}
+
+/**
+ * Mounts `ui` under the host and notification providers and a real Starter session (the provider's default
+ * deps, the real generators), with no view context. For tests that build their own host.
+ */
+export function renderInStarterSession(host: PptbHost, ui: ReactElement): RenderResult {
+  return render(
+    <HostContext value={host}>
+      <NotifyProvider>
+        <StarterSessionProvider>{ui}</StarterSessionProvider>
+      </NotifyProvider>
+    </HostContext>,
+  );
+}
+
+/** Mounts `ui` under the host and notification providers with a fixed Starter session value. */
+export function renderWithStarterSession(
+  host: PptbHost,
+  session: Session,
+  ui: ReactElement,
+): RenderResult {
+  return render(
+    <HostContext value={host}>
+      <NotifyProvider>
+        <StarterSessionContext value={session}>{ui}</StarterSessionContext>
+      </NotifyProvider>
+    </HostContext>,
+  );
 }
 
 /** The CodeMirror view behind a code pane, found by its textbox name. */

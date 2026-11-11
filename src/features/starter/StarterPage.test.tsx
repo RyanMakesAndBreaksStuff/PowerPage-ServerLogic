@@ -3,7 +3,7 @@ import type { UserEvent } from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 import { recipeCountLabel } from './inputs/starterOptions';
 import { StarterPage } from './StarterPage';
-import { editorView, renderStarter } from './starterTestHarness';
+import { editorView, renderStarter } from '@/test/starterTestHarness';
 
 // Scoped to their tiles, so the code panes' own pills and text (Phase 21) never match.
 const methodTile = (): HTMLElement => screen.getByRole('region', { name: 'HTTP method' });

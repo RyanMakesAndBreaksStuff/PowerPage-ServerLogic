@@ -1,23 +1,21 @@
 // @vitest-environment jsdom
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, screen } from '@testing-library/react';
 import { unzipSync } from 'fflate';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { ReactElement } from 'react';
-import { HostContext } from '@/session/HostContext';
-import { NotifyProvider } from '@/app/NotifyProvider';
 import { deriveStarter } from '@/session/deriveStarter';
 import { STARTER_DEPS } from '@/session/starterDeps';
 import { initialStarterState } from '@/session/starterReducer';
-import { StarterSessionProvider } from '@/app/starter-session/StarterSessionProvider';
 import type {
   StarterAction,
   StarterDerived,
   StarterState,
 } from '@/types/starter';
-import { StarterSessionContext, useStarterSession } from '@/session/useStarterSession';
+import { useStarterSession } from '@/session/useStarterSession';
 import { createFakeHost } from '@/services/pptb/fakeHost';
 import type { FakeHostControls } from '@/services/pptb/fakeHost';
 import type { PptbHost, SaveResult } from '@/services/pptb/host.types';
+import { renderInStarterSession, renderWithStarterSession } from '@/test/starterTestHarness';
 import { DownloadStarterButton } from './DownloadStarterButton';
 
 afterEach(() => {
@@ -47,28 +45,17 @@ function SelectR4(): ReactElement {
 }
 
 function renderReal(host: Host, selectR4 = false): void {
-  render(
-    <HostContext value={host}>
-      <NotifyProvider>
-        <StarterSessionProvider>
-          {selectR4 ? <SelectR4 /> : null}
-          <DownloadStarterButton />
-        </StarterSessionProvider>
-      </NotifyProvider>
-    </HostContext>,
+  renderInStarterSession(
+    host,
+    <>
+      {selectR4 ? <SelectR4 /> : null}
+      <DownloadStarterButton />
+    </>,
   );
 }
 
 function renderSession(host: Host, session: Session): void {
-  render(
-    <HostContext value={host}>
-      <NotifyProvider>
-        <StarterSessionContext value={session}>
-          <DownloadStarterButton />
-        </StarterSessionContext>
-      </NotifyProvider>
-    </HostContext>,
-  );
+  renderWithStarterSession(host, session, <DownloadStarterButton />);
 }
 
 async function clickDownload(): Promise<void> {
@@ -183,16 +170,10 @@ describe('DownloadStarterButton', () => {
   it('state is unchanged after a failure and after a success', async () => {
     const failing = baseSession();
     const failHost = createFakeHost();
-    const { unmount } = render(
-      <HostContext value={failHost}>
-        <NotifyProvider>
-          <StarterSessionContext
-            value={{ ...failing, derived: { ...failing.derived, fn: 'post' } }}
-          >
-            <DownloadStarterButton />
-          </StarterSessionContext>
-        </NotifyProvider>
-      </HostContext>,
+    const { unmount } = renderWithStarterSession(
+      failHost,
+      { ...failing, derived: { ...failing.derived, fn: 'post' } },
+      <DownloadStarterButton />,
     );
     await clickDownload();
     expect(failing.dispatch).not.toHaveBeenCalled();

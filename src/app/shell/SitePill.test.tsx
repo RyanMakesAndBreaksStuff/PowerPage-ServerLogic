@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { cleanup, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { renderInspector } from '@/app/inspector-site/inspectorTestHarness';
+import { renderInspector } from '@/test/inspectorTestHarness';
 import {
   CONNECTION,
   createInspectorHost,

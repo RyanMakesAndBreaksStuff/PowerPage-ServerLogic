@@ -10,13 +10,16 @@ import { createInspectorHost } from '@/test/inspectorWorld';
 import type { GatedHost } from '@/test/gatedHost';
 import { INSPECTOR_DEPS } from '@/features/inspector/inspectorDeps';
 import type { InspectorDeps } from '@/features/inspector/inspectorDeps';
-import { InspectorSessionProvider } from './InspectorSessionProvider';
+import { InspectorSessionProvider } from '@/app/inspector-site/InspectorSessionProvider';
+import { SitePill } from '@/app/shell/SitePill';
 
 export type InspectorHarnessOptions = {
   host?: GatedHost;
   deps?: InspectorDeps;
   /** Render under StrictMode, as main.tsx does, to run every effect twice. */
   strict?: boolean;
+  /** Render the title bar's SitePill before `ui`, so feature tests can pick a site without importing app/. */
+  sitePill?: boolean;
 };
 
 /**
@@ -32,6 +35,7 @@ export function renderInspector(ui: ReactElement, options: InspectorHarnessOptio
         <ConnectionProvider>
           <ViewContext value={['inspector', () => undefined]}>
             <InspectorSessionProvider deps={options.deps ?? INSPECTOR_DEPS}>
+              {options.sitePill === true ? <SitePill /> : null}
               {ui}
             </InspectorSessionProvider>
           </ViewContext>

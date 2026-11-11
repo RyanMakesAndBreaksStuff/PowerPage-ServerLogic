@@ -3,8 +3,7 @@ import type { UserEvent } from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { INSPECTOR_DEPS } from '@/features/inspector/inspectorDeps';
 import type { InspectorDeps } from '@/features/inspector/inspectorDeps';
-import { renderInspector } from '@/app/inspector-site/inspectorTestHarness';
-import { SitePill } from '@/app/shell/SitePill';
+import { renderInspector } from '@/test/inspectorTestHarness';
 import { deferred } from '@/test/deferred';
 import { fixedDeps } from '@/test/fixedDeps';
 import type { GatedHost } from '@/test/gatedHost';
@@ -53,13 +52,10 @@ type Scan = {
 /** Scans Alpha portal and stops on the finished page with no file selected. */
 async function scanned({ facts = graded(), deps = {}, siteName }: Scan = {}) {
   const sites = [siteName === undefined ? SITE_ALPHA : { ...SITE_ALPHA, name: siteName }];
-  const view = renderInspector(
-    <>
-      <SitePill />
-      <InspectorPage />
-    </>,
-    { deps: { ...fixedDeps(facts, sites), ...deps } },
-  );
+  const view = renderInspector(<InspectorPage />, {
+    deps: { ...fixedDeps(facts, sites), ...deps },
+    sitePill: true,
+  });
   await screen.findByRole('heading', { name: 'Select a site' });
   await view.user.click(screen.getByRole('combobox', { name: 'Power Pages site' }));
   await view.user.click(screen.getByRole('option', { name: /portal/ }));

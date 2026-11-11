@@ -1,9 +1,8 @@
 // @vitest-environment jsdom
 import { act, cleanup, screen, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { renderInspector } from '@/app/inspector-site/inspectorTestHarness';
-import type { InspectorHarnessOptions } from '@/app/inspector-site/inspectorTestHarness';
-import { SitePill } from '@/app/shell/SitePill';
+import { renderInspector } from '@/test/inspectorTestHarness';
+import type { InspectorHarnessOptions } from '@/test/inspectorTestHarness';
 import { fixedDeps } from '@/test/fixedDeps';
 import { CONNECTION, createInspectorHost, OTHER_CONNECTION, SITE_ALPHA } from '@/test/inspectorWorld';
 import type { SiteFacts } from '@/types/inspector';
@@ -52,13 +51,11 @@ const fileButton = (name: RegExp) => within(rail()).getByRole('button', { name }
 
 /** Scans Alpha portal and stops on the finished page with no file selected (D-03). */
 async function scanned(data: SiteFacts = facts(), options: InspectorHarnessOptions = {}) {
-  const view = renderInspector(
-    <>
-      <SitePill />
-      <InspectorPage />
-    </>,
-    { deps: fixedDeps(data), ...options },
-  );
+  const view = renderInspector(<InspectorPage />, {
+    deps: fixedDeps(data),
+    ...options,
+    sitePill: true,
+  });
   await screen.findByRole('heading', { name: 'Select a site' });
   await view.user.click(screen.getByRole('combobox', { name: 'Power Pages site' }));
   await view.user.click(screen.getByRole('option', { name: /Alpha portal/ }));

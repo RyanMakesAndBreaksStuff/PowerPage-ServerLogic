@@ -1,7 +1,7 @@
 import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { ServerObjectsPage } from './ServerObjectsPage';
-import { renderObjects } from './objectsTestHarness';
+import { renderObjects } from '@/test/objectsTestHarness';
 
 const list = (): HTMLElement => screen.getByRole('region', { name: 'Server objects' });
 const detail = (): HTMLElement => screen.getByRole('region', { name: 'Object detail' });
