@@ -76,7 +76,7 @@
     "node": ">=20.19.0"
   },
   "displayName": "Server Logic Tools",
-  "description": "Generate Power Pages server logic handlers, client calls and permission checklists, and browse the Server.* object reference.",
+  "description": "Power Platform ToolBox (PPTB) tool to generate Power Pages server logic, browse the Server.* object reference, and inspect a site's server logic readiness.",
   "main": "index.html",
   "icon": "icons/logo.svg",
   "license": "BSD-3-Clause",
@@ -89,6 +89,7 @@
   ],
   "configurations": {
     "repository": "https://github.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic",
+    "website": "https://github.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/blob/main/docs/usage-manual.md",
     "readmeUrl": "https://raw.githubusercontent.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/main/README.md"
   },
   "features": {
@@ -98,16 +99,23 @@
     },
     "minAPI": "1.2.7"
   },
+  "homepage": "https://github.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic#readme",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic.git"
   },
+  "bugs": {
+    "url": "https://github.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/issues"
+  },
   "keywords": [
-    "powerplatform",
-    "dataverse",
-    "toolbox",
+    "power-platform",
     "power-pages",
-    "server-logic"
+    "power-platform-toolbox",
+    "dataverse",
+    "server-logic",
+    "pptb",
+    "microsoft",
+    "power-apps-portal"
   ],
   "overrides": {
     "eslint": {

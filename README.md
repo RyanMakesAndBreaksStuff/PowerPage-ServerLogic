@@ -1,23 +1,25 @@
 # Server Logic Tools
 
-Server Logic Tools is a Power Platform ToolBox (PPTB) tool for creating Power Pages server logic starters, looking up the `Server.*` APIs used by those handlers, and inspecting the server logic already on a site.
+Server Logic Tools is a Power Platform ToolBox (PPTB) tool for creating Power Pages server logic starters, looking up the `Server.*` APIs those handlers use, and inspecting the server logic already on a site.
 
 ## What you can do
 
 - **Logic Starter** generates a server handler, a matching client call, and a permission checklist from one of ten recipes. Edit the handler, review browser-check findings, and download the starter as a ZIP.
 - **Server Objects** provides a searchable, curated reference with member signatures, samples, and permission notes. Copy a sample or insert it into the current Starter handler.
-- **Logic Inspector** scans the server logic files on a Power Pages site and shows, for each file, whether its web role, table permissions, and outbound networking look configured. Export the results as a Markdown or PDF report. The Inspector is **not in the current beta build**; it ships only in the full build from source (see [Build from source](#build-from-source)).
+- **Logic Inspector** scans the server logic files on a Power Pages site and shows, for each file, whether its web role, table permissions, and outbound networking look configured. Export the results as a Markdown or PDF report.
 
 Starter generation and the object catalogue work without an environment connection. The Inspector needs one active PPTB connection to read a site. None of these features deploy code, configure permissions, or write to your environment. You add the exported files to your Power Pages site and test them there.
 
 ## Documentation
 
-| Document | Audience and goal |
-| --- | --- |
-| [Usage manual](docs/usage-manual.md) | Power Pages makers and developers: generate, adapt, and use a starter; browse and insert Server Objects samples; scan a site with Logic Inspector and export a report. |
-| [How to build](docs/build-manual.md) | Developers: install dependencies, build the tool (beta or full), run the release gate, and load it locally in PPTB. |
+The full user guide is organised into the four Diátaxis quadrants and indexed from [docs/usage-manual.md](docs/usage-manual.md):
 
-The usage manual includes five screenshot placeholders with capture descriptions. The build manual includes one more for loading the tool in PPTB.
+| You want to | Start here |
+| --- | --- |
+| Follow a step-by-step lesson | [Tutorial: create your first starter](docs/tutorials/create-your-first-starter.md) |
+| Accomplish a specific task | [How-to guides](docs/usage-manual.md#how-to-guides) |
+| Look up a fact or setting | [Reference](docs/usage-manual.md#reference) |
+| Understand the background | [Explanation](docs/usage-manual.md#explanation) |
 
 ## Requirements
 
@@ -36,9 +38,7 @@ Node.js is needed to build this repository; it is not required just to use the t
 4. Choose **Download starter** and save the ZIP.
 5. Extract it and follow its `README.md` to add the handler and client to your site.
 
-For reference samples, open **Server Objects**, search for an object or method, and choose **Insert into handler** to return to Starter with the sample inserted.
-
-The readiness count describes local checks and your checklist review. It does not confirm that a handler will run successfully or that site permissions have been configured.
+The [tutorial](docs/tutorials/create-your-first-starter.md) walks through this in detail.
 
 ## Build from source
 
@@ -46,11 +46,15 @@ Run these commands from the repository root:
 
 ```sh
 npm ci
-npm run build:beta
+npm run build
 npm test
 ```
 
-The beta build includes Logic Starter and Server Objects only, and writes its output to `dist/`. `npm run build` builds all three pages, including Logic Inspector. See the [build manual](docs/build-manual.md) for the required Node.js version, additional checks, packaging, and PPTB loading instructions.
+The build includes all three pages and writes its output to `dist/`. See [Build and load from source](docs/how-to/build-and-load-from-source.md) for the required Node.js version, additional checks, packaging, and PPTB loading instructions.
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md). The [changelog](CHANGELOG.md) records notable changes.
 
 ## License
 

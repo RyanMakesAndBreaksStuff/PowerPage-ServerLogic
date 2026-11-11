@@ -1,8 +1,8 @@
-# How to build Server Logic Tools
+# Build and load the tool from source
 
-This guide is for developers building the **Logic Starter**, **Server Objects**, and **Logic Inspector** pages from this repository, then loading the result in Power Platform ToolBox (PPTB). The released beta build contains only the first two pages; the Inspector is not released yet.
+This guide is for developers building the **Logic Starter**, **Server Objects**, and **Logic Inspector** pages from this repository, then loading the result in Power Platform ToolBox (PPTB). The release, v1.0.0, is the full build with all three pages.
 
-[README](../README.md) · [Usage manual](usage-manual.md)
+[Back to the user guide](../usage-manual.md) · [README](../../README.md)
 
 ## Contents
 
@@ -51,16 +51,16 @@ npm ci
 | **Server Objects** | A curated, searchable `Server.*` reference whose samples can be inserted into the Starter handler. Requires Starter. | Not needed. |
 | **Logic Inspector** | Reads the server logic files on a Power Pages site, shows whether each file's web role, table permissions, and outbound networking look configured, and exports a Markdown or PDF report. | One active PPTB connection. |
 
-The Inspector is **unreleased**. The beta build excludes it, and the release gate fails if its code reaches the package.
+All three pages ship in v1.0.0. The release gate fails if the Inspector page is missing from the package.
 
 ## Build the tool
 
 ```sh
-npm run build        # full build: Logic Starter, Server Objects, and Logic Inspector
-npm run build:beta   # released build: Logic Starter and Server Objects only
+npm run build        # released build: Logic Starter, Server Objects, and Logic Inspector
+npm run build:beta   # partial build for development: Logic Starter and Server Objects only
 ```
 
-Both commands run `tsc -b` first. `npm run build` runs `vite build` with every page on, so it includes the Inspector. `npm run build:beta` runs `vite build --mode beta`, whose default page set is **Logic Starter and Server Objects**, with the Inspector left out. Use `build:beta` for anything you plan to publish.
+Both commands run `tsc -b` first. `npm run build` runs `vite build` with every page on, so it includes the Inspector. `npm run build:beta` runs `vite build --mode beta`, whose default page set is **Logic Starter and Server Objects**, with the Inspector left out. Use `npm run build` for anything you plan to publish; `build:beta` is a partial build for development and isn't published.
 
 An existing `VITE_RELEASED_PAGES` environment setting or Vite environment file can override that default. To select these two pages explicitly in PowerShell:
 
@@ -89,7 +89,7 @@ dist/
 
 Vite produces an IIFE JavaScript bundle, a separate stylesheet, and relative asset paths for PPTB loading. Generated asset filenames can change between builds. The HTML transform removes module-loading attributes and moves script loading to the body for host compatibility.
 
-To build all three pages, use `npm run build` with no `VITE_RELEASED_PAGES` set. To reproduce the two-page released scope, use `npm run build:beta` or the explicit page selection above.
+To build all three pages, use `npm run build` with no `VITE_RELEASED_PAGES` set. To build only Logic Starter and Server Objects, use `npm run build:beta` or the explicit page selection above.
 
 The tool's `dist/` build is separate from the ZIP that an end user downloads through **Download starter**. That ZIP contains generated Power Pages source and setup documents, rather than the tool application.
 
@@ -98,7 +98,7 @@ The tool's `dist/` build is separate from the ZIP that an end user downloads thr
 ### Preview layout in a browser
 
 ```sh
-npm run dev -- --mode beta
+npm run dev
 ```
 
 Open the local URL printed by Vite. This supports frontend iteration, but the normal entry point still uses the PPTB adapter. A standalone browser does not provide `window.toolboxAPI`; theme, connection, clipboard, file-save, notification, and external-link behavior therefore cannot be fully verified there.
@@ -113,7 +113,7 @@ Preview serves the current `dist/`; it does not rebuild it or supply PPTB APIs.
 
 ### Rebuild files while using PPTB
 
-For a watched development build with source maps and the two-page released scope (leave `VITE_RELEASED_PAGES` unset to include the Inspector):
+For a watched development build with source maps and only Logic Starter and Server Objects (leave `VITE_RELEASED_PAGES` unset to include the Inspector):
 
 ```powershell
 $env:VITE_RELEASED_PAGES = 'starter,objects'
@@ -136,7 +136,7 @@ Run the checks relevant to your changes from the repository root:
 npm run typecheck
 npm run lint
 npm test
-npm run build:beta
+npm run build
 ```
 
 | Command | Purpose |
@@ -144,7 +144,7 @@ npm run build:beta
 | `npm run typecheck` | TypeScript project checking with `tsc -b`. The build already includes this step. |
 | `npm run lint` | ESLint with warnings treated as failures. |
 | `npm test` | Vitest tests, including component, catalogue, generator, and package coverage. This runs the repository-wide suite. |
-| `npm run build:beta` | Type-check and generate the two-page released output (no Inspector). |
+| `npm run build` | Type-check and generate the released output with all three pages. |
 | `npm run verify:release` | The full release gate; see [Run the release gate](#run-the-release-gate). |
 | `npm run size` | Report sizes for the current `dist/assets` output. Build first. |
 
@@ -162,17 +162,17 @@ Automated checks do not establish that the real PPTB clipboard, save dialog, ext
 
 ## Load the build in PPTB
 
-1. Run `npm run build:beta` and confirm that `dist/index.html` exists.
+1. Run `npm run build` and confirm that `dist/index.html` exists.
 2. Open PPTB Desktop.
 3. In **Settings**, enable **Show Debug Menu**.
 4. Choose **Debug → Load Local Tool**.
 5. Select the **repository root**, rather than `dist/`.
-6. Open the loaded tool and confirm which pages are available: Logic Starter and Server Objects after `build:beta`, plus Logic Inspector after `build`.
+6. Open the loaded tool and confirm which pages are available: all three after `build`, or Logic Starter and Server Objects only after `build:beta`.
 
 These steps follow the repository's existing PPTB local-load workflow. Menu wording can vary with the installed host version.
 
-> **Screenshot placeholder B1 — Loading a local build**  
-> Suggested file: `images/build-pptb-local-tool.png`  
+> **Screenshot placeholder B1 — Loading a local build**
+> Suggested file: `images/build-pptb-local-tool.png`
 > Capture PPTB Desktop with the Debug menu and Load Local Tool action visible. Include an annotation showing that the selected folder is the repository root containing package.json and dist, rather than dist itself. Use a neutral checkout path without personal information.
 
 ### Verify the two documented workflows
@@ -182,9 +182,10 @@ These steps follow the repository's existing PPTB local-load workflow. Menu word
 3. Use **Copy server code** and **Copy client call**; paste into a scratch editor to confirm the clipboard content.
 4. Use **Download starter**, save a ZIP, and inspect the handler, client, README, and checklist. Also try cancelling the save dialog.
 5. Open **Server Objects**, search for a member, switch filters, and inspect a sample and its permission notes.
-6. Choose **Insert into handler**. Confirm that Starter opens with the sample inserted and retains the same session.7. Close and reopen the tool after another build to verify that the new files are loaded.
+6. Choose **Insert into handler**. Confirm that Starter opens with the sample inserted and retains the same session.
+7. Close and reopen the tool after another build to verify that the new files are loaded.
 
-Record the host version, build command, and observed results when reporting this validation. Testing the generated code on a configured Power Pages site is a separate integration check; follow the [usage manual](usage-manual.md#download-and-use-a-starter) and the exported README for that recipe.
+Record the host version, build command, and observed results when reporting this validation. Testing the generated code on a configured Power Pages site is a separate integration check; follow the [generate-and-adapt-a-starter guide](generate-and-adapt-a-starter.md#download-and-use-the-package) and the exported README for that recipe.
 
 ## Run the release gate
 
@@ -195,12 +196,12 @@ npm run verify:release
 The script runs these steps in order and stops at the first failure:
 
 1. `typecheck`, `lint`, and `test`.
-2. `build:beta`, the released build with the Inspector excluded.
+2. `build`, the released build with all three pages.
 3. Manifest validation of `package.json` (and `pptb.config.json` if present) through the `@pptb/validate` API, with URL checks skipped.
 4. A size budget: the single JavaScript bundle in `dist/assets` must stay within **817 KiB gzip**, which is the 742.7 KiB baseline plus 10 percent.
-5. A tarball check using `npm pack --dry-run`: the archive may hold only `dist/`, `package.json`, and the files npm always adds; `dist/index.html` must be present; and no Inspector file name or Inspector page text may appear.
+5. A tarball check using `npm pack --dry-run`: the archive may hold only `dist/`, `package.json`, and the files npm always adds; `dist/index.html` must be present; and the Inspector page text must appear in the bundle, so a partial build fails.
 
-`prepack` runs the same script, so `npm pack` and `npm publish` both go through it. Because it builds `dist/` with `build:beta`, a package made this way never contains the Inspector.
+`prepack` runs the same script, so `npm pack` and `npm publish` both go through it. Because it builds `dist/` with `build`, a package made this way always contains all three pages.
 
 ## Prepare an npm package
 
@@ -227,21 +228,21 @@ Both run `prepack`, and so the release gate, first. Confirm that the archive inc
 | PPTB still shows an older build | Confirm the latest build succeeded and that you loaded the correct checkout root. Close and reopen the tool tab. |
 | `npm run validate` fails on the repository or README URL | Expected until those addresses are public: the command ignores `--skip-url-checks`. Run `npm run verify:release` to validate the manifest without URL checks. |
 | `pptb-validate` is not recognized | Run `npm ci` again; the command comes from `@pptb/types`. Do not treat a missing validator as a passed validation. |
-| `verify:release` fails at the tarball step | Look for Inspector files or text in `dist/`. Rebuild with `npm run build:beta`, because a full `npm run build` includes the Inspector. |
-| The npm archive has missing or stale application files | Run `npm run build:beta` and inspect `npm pack --dry-run` again. |
+| `verify:release` fails at the tarball step | Check the listed files for anything outside `dist/`, and check that `VITE_RELEASED_PAGES` isn't set in the shell or a Vite environment file, because a build that leaves out the Inspector fails this step. |
+| The npm archive has missing or stale application files | Run `npm run build` and inspect `npm pack --dry-run` again. |
 
 ## Source map for maintainers
 
 | Location | Responsibility |
 | --- | --- |
-| [`package.json`](../package.json) | npm commands, package files, Node.js engine, and PPTB metadata. |
-| [`vite.config.ts`](../vite.config.ts) | Page selection, host-compatible bundling, and test configuration. |
-| [`src/app/starter-session/`](../src/app/starter-session/) | Shared in-memory Starter state and derived readiness. |
-| [`src/features/starter/`](../src/features/starter/) | Starter inputs, code panes, and download action. |
-| [`src/features/server-objects/`](../src/features/server-objects/) | Object search, details, context, and sample insertion. |
-| [`src/features/inspector/`](../src/features/inspector/) | Logic Inspector page, readiness rules, and report export. |
-| [`src/app/inspector-site/`](../src/app/inspector-site/) | App-scoped Inspector session: site list, scan, review marks, and export job. |
-| [`scripts/verify-release.mjs`](../scripts/verify-release.mjs) | The release gate behind `npm run verify:release` and `prepack`. |
-| [`src/services/catalogue/`](../src/services/catalogue/) | Recipe and Server Objects reference data. |
-| [`src/services/generators/`](../src/services/generators/) | Handler/client generation and starter ZIP contents. |
-| [`src/services/pptb/`](../src/services/pptb/) | Host adapters and test doubles. |
+| [`package.json`](../../package.json) | npm commands, package files, Node.js engine, and PPTB metadata. |
+| [`vite.config.ts`](../../vite.config.ts) | Page selection, host-compatible bundling, and test configuration. |
+| [`src/app/starter-session/`](../../src/app/starter-session/) | Shared in-memory Starter state and derived readiness. |
+| [`src/features/starter/`](../../src/features/starter/) | Starter inputs, code panes, and download action. |
+| [`src/features/server-objects/`](../../src/features/server-objects/) | Object search, details, context, and sample insertion. |
+| [`src/features/inspector/`](../../src/features/inspector/) | Logic Inspector page, readiness rules, and report export. |
+| [`src/app/inspector-site/`](../../src/app/inspector-site/) | App-scoped Inspector session: site list, scan, review marks, and export job. |
+| [`scripts/verify-release.mjs`](../../scripts/verify-release.mjs) | The release gate behind `npm run verify:release` and `prepack`. |
+| [`src/services/catalogue/`](../../src/services/catalogue/) | Recipe and Server Objects reference data. |
+| [`src/services/generators/`](../../src/services/generators/) | Handler/client generation and starter ZIP contents. |
+| [`src/services/pptb/`](../../src/services/pptb/) | Host adapters and test doubles. |

@@ -57,11 +57,25 @@ describe('PPTB manifest (FR-12)', () => {
     expect(readFileSync(`${ROOT}LICENSE`, 'utf8')).toContain('BSD 3-Clause License');
   });
 
-  it('links the repository and a raw GitHub README', () => {
+  it('links the repository, the usage manual and a raw GitHub README', () => {
     expect(manifest.configurations).toEqual({
       repository: 'https://github.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic',
+      website:
+        'https://github.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/blob/main/docs/usage-manual.md',
       readmeUrl:
         'https://raw.githubusercontent.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/main/README.md',
+    });
+    expect(existsSync(`${ROOT}docs/usage-manual.md`)).toBe(true);
+  });
+
+  it('carries the npm homepage, repository and issue links', () => {
+    expect(manifest.homepage).toBe('https://github.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic#readme');
+    expect(manifest.repository).toEqual({
+      type: 'git',
+      url: 'git+https://github.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic.git',
+    });
+    expect(manifest.bugs).toEqual({
+      url: 'https://github.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/issues',
     });
   });
 
