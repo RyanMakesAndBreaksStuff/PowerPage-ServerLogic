@@ -62,3 +62,6 @@ docs/specs/**/spikes/s4/page.json
 /docs/pptb.png
 /docs/dataverseAPI-type35-query.txt
 /CLAUDE.md
+.vscode/
+/tests/probeScenarios.test.ts
+/tests/s2Probe.test.ts
