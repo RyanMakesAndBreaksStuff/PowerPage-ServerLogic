@@ -8,9 +8,9 @@ By the end you will have:
 - edited the handler and reviewed the tool's browser-check and permission findings;
 - downloaded a starter package that contains these files plus a recipe-specific README.
 
-This is the lesson path. If you already know the shape of the task and just want the steps, use the [how-to guide](../how-to/generate-and-adapt-a-starter.md) instead.
+This is the lesson path. If you already know the shape of the task and just want the steps, use the [how-to guide](https://github.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/blob/main/docs/how-to/generate-and-adapt-a-starter.md) instead.
 
-[Back to the user guide](../usage-manual.md) · [How-to: generate and adapt a starter](../how-to/generate-and-adapt-a-starter.md)
+[Back to the user guide](https://github.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/blob/main/docs/usage-manual.md) · [How-to: generate and adapt a starter](https://github.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/blob/main/docs/how-to/generate-and-adapt-a-starter.md)
 
 ## Before you begin
 
@@ -31,13 +31,13 @@ The tool opens on **Logic Starter** with a known starting state:
 
 The page shows the **Logic name**, **HTTP method**, **Recipe**, and **Readiness** controls, an editable server handler on the left, a generated client call, and a request path showing how the selected call reaches the handler. Take a moment to see how these correspond: the handler is the server-side code you will edit, the client call is produced for you, and the request path explains the route between them.
 
-![Logic Starter overview: logic name, HTTP method, recipe, readiness indicators, and the two code panes](../assets/usage-starter-overview.png)
+![Logic Starter overview: logic name, HTTP method, recipe, readiness indicators, and the two code panes](https://raw.githubusercontent.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/main/docs/assets/usage-starter-overview.png)
 
 ## Step 2 — Choose a recipe
 
 The **Recipe** selector offers ten starting points, from reading Dataverse records to calling external services to invoking from Liquid. For this tutorial keep **Read Dataverse records**: it reads contact records and is the smallest end-to-end example.
 
-Each recipe supplies a handler, the HTTP methods it supports, example requests, and setup guidance. The full catalogue is in the [recipe reference](../reference/recipes.md). If you change recipes after editing the handler, the tool prompts before discarding your edits, so copy or download any work you want to keep first.
+Each recipe supplies a handler, the HTTP methods it supports, example requests, and setup guidance. The full catalogue is in the [recipe reference](https://github.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/blob/main/docs/reference/recipes.md). If you change recipes after editing the handler, the tool prompts before discarding your edits, so copy or download any work you want to keep first.
 
 ## Step 3 — Set the logic name
 
@@ -61,7 +61,7 @@ Select an enabled HTTP method. A method is disabled when the recipe does not exp
 
 For the Read Dataverse records recipe, GET is the only HTTP method. In **Client call**, choose **fetch**, **jQuery**, or **Liquid** where enabled. HTTP clients call `/_api/serverlogics/{slug}`, and the generated code includes the request-verification-token handling and the recipe's example request.
 
-The **Invoke from Liquid** recipe uses the `serverlogic` Liquid tag instead of an HTTP endpoint, so its HTTP-method and JavaScript-client choices are disabled. Liquid availability for other handlers depends on the recipe and on whether the current code uses HTTP-only request properties; see the [recipe reference](../reference/recipes.md) for which recipes support it.
+The **Invoke from Liquid** recipe uses the `serverlogic` Liquid tag instead of an HTTP endpoint, so its HTTP-method and JavaScript-client choices are disabled. Liquid availability for other handlers depends on the recipe and on whether the current code uses HTTP-only request properties; see the [recipe reference](https://github.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/blob/main/docs/reference/recipes.md) for which recipes support it.
 
 ## Step 5 — Adapt the server handler
 
@@ -69,9 +69,9 @@ Edit the **Server** pane directly. Replace the sample identifiers, settings, and
 
 The client pane is generated and read-only. It updates from the selected name, recipe, method, and language. Recipe query parameters and request bodies are example data, not separate form fields, so use **Copy client call** and adapt those values in your page code. Starter does not infer a new client contract from arbitrary handler edits.
 
-Use **Copy server code** to copy the handler at any point. You can also pull API samples out of [Server Objects](../how-to/browse-and-insert-server-objects.md) and insert them into the handler.
+Use **Copy server code** to copy the handler at any point. You can also pull API samples out of [Server Objects](https://github.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/blob/main/docs/how-to/browse-and-insert-server-objects.md) and insert them into the handler.
 
-![An edited server handler with a browser-check finding and its line number](../assets/usage-code-review.png)
+![An edited server handler with a browser-check finding and its line number](https://raw.githubusercontent.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/main/docs/assets/usage-code-review.png)
 
 ## Step 6 — Review readiness and permissions
 
@@ -92,7 +92,7 @@ Review permissions like this:
 
 Changing the handler text makes a previous review no longer apply unless the text again matches the reviewed version. A count of **3/3 ready** does not confirm authorization, deployment, or successful execution.
 
-![The expanded permission checklist with the review marked and the Readiness count at 3/3](../assets/usage-permission-checklist.png)
+![The expanded permission checklist with the review marked and the Readiness count at 3/3](https://raw.githubusercontent.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/main/docs/assets/usage-permission-checklist.png)
 
 ## Step 7 — Download and deploy the starter
 
@@ -120,10 +120,10 @@ To use the package on your site, follow the generated README. Its setup sequence
 
 Test on your configured site using the intended caller role. For the read recipe, the caller's contacts and parent-account relationship must match the recipe's Account permission scope. The package documents generated setup guidance; successful execution depends on the site's available authoring features and configuration.
 
-![The extracted contacts-crud starter files alongside the generated README set-up steps](../assets/usage-starter-package.png)
+![The extracted contacts-crud starter files alongside the generated README set-up steps](https://raw.githubusercontent.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/main/docs/assets/usage-starter-package.png)
 
 ## Step 8 — Where to go next
 
-- To generate a specific kind of handler rather than follow the default recipe, see [Generate and adapt a starter](../how-to/generate-and-adapt-a-starter.md) and the [recipe reference](../reference/recipes.md).
-- To add API samples into a handler, see [Browse and insert Server Objects](../how-to/browse-and-insert-server-objects.md).
-- To check the server logic already on a live site, see [Inspect a site's server logic](../how-to/inspect-a-sites-server-logic.md).
+- To generate a specific kind of handler rather than follow the default recipe, see [Generate and adapt a starter](https://github.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/blob/main/docs/how-to/generate-and-adapt-a-starter.md) and the [recipe reference](https://github.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/blob/main/docs/reference/recipes.md).
+- To add API samples into a handler, see [Browse and insert Server Objects](https://github.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/blob/main/docs/how-to/browse-and-insert-server-objects.md).
+- To check the server logic already on a live site, see [Inspect a site's server logic](https://github.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/blob/main/docs/how-to/inspect-a-sites-server-logic.md).

@@ -2,7 +2,7 @@
 
 Symptoms and what to check when the tool does not behave as you expect.
 
-[Back to the user guide](../usage-manual.md)
+[Back to the user guide](https://github.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/blob/main/docs/usage-manual.md)
 
 | Symptom | What to check |
 | --- | --- |
@@ -28,4 +28,4 @@ Symptoms and what to check when the tool does not behave as you expect.
 | **Export report** is disabled with "An export is still in progress." | A report you started is still being built or waiting in the PPTB save dialog, even if you closed the export dialog. Let it finish, or cancel the save dialog, then export again. |
 | **This file** is disabled with "Select a file first" | Close the dialog, select a file in **Server logic**, and export again, or choose **Site summary**. |
 
-For developer issues such as a build that will not start, a page-selection error, or a stale build in PPTB, see the build guide's [troubleshooting table](build-and-load-from-source.md#troubleshooting).
+For developer issues such as a build that will not start, a page-selection error, or a stale build in PPTB, see the build guide's [troubleshooting table](https://github.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/blob/main/docs/how-to/build-and-load-from-source.md#troubleshooting).

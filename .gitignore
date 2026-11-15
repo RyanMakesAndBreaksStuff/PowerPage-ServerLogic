@@ -1,7 +1,7 @@
-.agents
-.claude
-.codegraph
-.codex
+.agents/
+.claude/
+.codegraph/
+.codex/
 .superpowers
 design_handoff_server_logic_tools
 docs/archive/
@@ -18,13 +18,11 @@ public/icons/*
 probes/
 findings/
 tools/
-
 node_modules/
 dist/
 dist-probe/
 dist-ssr/
 coverage/
-
 *.tsbuildinfo
 *.local
 .env
@@ -37,12 +35,8 @@ coverage/
 /Opus_debate_round1_opus_rebuttal.md
 /Opus_Sol_debate_round1_sol_response.md
 /Opus_Sol_Debate_Round2_Sol_reponse.md
-.agents/*
 .rm-frontend-review/
-
-
 /.playwright-mcp
-/.claude
 /LEAN-CTX.md.bak
 /LEAN-CTX.md.v4-migration.lock
 /AGENTS.md.v4-migration.lock
@@ -51,7 +45,6 @@ coverage/
 /probes/reports/
 /probes/**/shots/
 /probes/.local.json
-
 # Dev-org captures and local agent state
 /.omc/
 docs/specs/**/spikes/s1/*.json

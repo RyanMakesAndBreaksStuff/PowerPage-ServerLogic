@@ -14,14 +14,14 @@ Starter generation and the object catalogue work without an environment connecti
 
 ## Documentation
 
-The full user guide is organised into the four Diátaxis quadrants and indexed from [docs/usage-manual.md](docs/usage-manual.md):
+The full user guide is at [docs/usage-manual.md](https://github.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/blob/main/docs/usage-manual.md):
 
 | You want to | Start here |
 | --- | --- |
-| Follow a step-by-step lesson | [Tutorial: create your first starter](docs/tutorials/create-your-first-starter.md) |
-| Accomplish a specific task | [How-to guides](docs/usage-manual.md#how-to-guides) |
-| Look up a fact or setting | [Reference](docs/usage-manual.md#reference) |
-| Understand the background | [Explanation](docs/usage-manual.md#explanation) |
+| Follow a step-by-step lesson | [Tutorial: create your first starter](https://github.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/blob/main/docs/tutorials/create-your-first-starter.md) |
+| Accomplish a specific task | [How-to guides](https://github.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/blob/main/docs/usage-manual.md#how-to-guides) |
+| Look up a fact or setting | [Reference](https://github.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/blob/main/docs/usage-manual.md#reference) |
+| Understand the background | [Explanation](https://github.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/blob/main/docs/usage-manual.md#explanation) |
 
 ## Requirements
 
@@ -40,7 +40,7 @@ Node.js is needed to build this repository; it is not required just to use the t
 4. Choose **Download starter** and save the ZIP.
 5. Extract it and follow its `README.md` to add the handler and client to your site.
 
-The [tutorial](docs/tutorials/create-your-first-starter.md) walks through this in detail.
+The [tutorial](https://github.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/blob/main/docs/tutorials/create-your-first-starter.md) walks through this in detail.
 
 ## Build from source
 
@@ -52,12 +52,12 @@ npm run build
 npm test
 ```
 
-The build includes all three pages and writes its output to `dist/`. See [Build and load from source](docs/how-to/build-and-load-from-source.md) for the required Node.js version, additional checks, packaging, and PPTB loading instructions.
+The build includes all three pages and writes its output to `dist/`. See [Build and load from source](https://github.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/blob/main/docs/how-to/build-and-load-from-source.md) for the required Node.js version, additional checks, packaging, and PPTB loading instructions.
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md). The [changelog](CHANGELOG.md) records notable changes.
+See [CONTRIBUTING.md](https://github.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/blob/main/CONTRIBUTING.md). The [changelog](https://github.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/blob/main/CHANGELOG.md) records notable changes.
 
 ## License
 
-[BSD 3-Clause](LICENSE).
+[BSD 3-Clause](https://github.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/blob/main/LICENSE).

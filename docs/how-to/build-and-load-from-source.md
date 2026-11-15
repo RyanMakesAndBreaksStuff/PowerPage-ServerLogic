@@ -2,7 +2,7 @@
 
 This guide is for developers building the **Logic Starter**, **Server Objects**, and **Logic Inspector** pages from this repository, then loading the result in Power Platform ToolBox (PPTB). The release, v1.0.0, is the full build with all three pages.
 
-[Back to the user guide](../usage-manual.md) · [README](../../README.md)
+[Back to the user guide](https://github.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/blob/main/docs/usage-manual.md) · [README](https://github.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/blob/main/README.md)
 
 ## Contents
 
@@ -171,7 +171,7 @@ Automated checks do not establish that the real PPTB clipboard, save dialog, ext
 
 These steps follow the repository's existing PPTB local-load workflow. Menu wording can vary with the installed host version.
 
-![PPTB Desktop Debug sidebar showing the Load Local Tool path and actions](../assets/build-pptb-local-tool.png)
+![PPTB Desktop Debug sidebar showing the Load Local Tool path and actions](https://raw.githubusercontent.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/main/docs/assets/build-pptb-local-tool.png)
 
 The tool directory path must be the repository root — the folder containing `package.json` and `dist` — not `dist` itself. The folder is shown with a neutral path; choose **Browse** to pick it, then **Load Tool**.
 
@@ -191,7 +191,7 @@ The tool directory path must be the repository root — the folder containing `p
 12. If **Couldn't load sites** or **Couldn't read the active connection** appears at any point, fix the cause and confirm that **Retry** recovers the page.
 13. Close and reopen the tool after another build to verify that the new files are loaded.
 
-Record the host version, build command, and observed results when reporting this validation. Testing the generated code on a configured Power Pages site is a separate integration check; follow the [generate-and-adapt-a-starter guide](generate-and-adapt-a-starter.md#download-and-use-the-package) and the exported README for that recipe.
+Record the host version, build command, and observed results when reporting this validation. Testing the generated code on a configured Power Pages site is a separate integration check; follow the [generate-and-adapt-a-starter guide](https://github.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/blob/main/docs/how-to/generate-and-adapt-a-starter.md#download-and-use-the-package) and the exported README for that recipe.
 
 ## Run the release gate
 
@@ -241,14 +241,14 @@ Both run `prepack`, and so the release gate, first. Confirm that the archive inc
 
 | Location | Responsibility |
 | --- | --- |
-| [`package.json`](../../package.json) | npm commands, package files, Node.js engine, and PPTB metadata. |
-| [`vite.config.ts`](../../vite.config.ts) | Page selection, host-compatible bundling, and test configuration. |
-| [`src/app/starter-session/`](../../src/app/starter-session/) | Shared in-memory Starter state and derived readiness. |
-| [`src/features/starter/`](../../src/features/starter/) | Starter inputs, code panes, and download action. |
-| [`src/features/server-objects/`](../../src/features/server-objects/) | Object search, details, context, and sample insertion. |
-| [`src/features/inspector/`](../../src/features/inspector/) | Logic Inspector page, readiness rules, and report export. |
-| [`src/app/inspector-site/`](../../src/app/inspector-site/) | App-scoped Inspector session: site list, scan, review marks, and export job. |
-| [`scripts/verify-release.mjs`](../../scripts/verify-release.mjs) | The release gate behind `npm run verify:release` and `prepack`. |
-| [`src/services/catalogue/`](../../src/services/catalogue/) | Recipe and Server Objects reference data. |
-| [`src/services/generators/`](../../src/services/generators/) | Handler/client generation and starter ZIP contents. |
-| [`src/services/pptb/`](../../src/services/pptb/) | Host adapters and test doubles. |
+| [`package.json`](https://github.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/blob/main/package.json) | npm commands, package files, Node.js engine, and PPTB metadata. |
+| [`vite.config.ts`](https://github.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/blob/main/vite.config.ts) | Page selection, host-compatible bundling, and test configuration. |
+| [`src/app/starter-session/`](https://github.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/tree/main/src/app/starter-session/) | Shared in-memory Starter state and derived readiness. |
+| [`src/features/starter/`](https://github.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/tree/main/src/features/starter/) | Starter inputs, code panes, and download action. |
+| [`src/features/server-objects/`](https://github.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/tree/main/src/features/server-objects/) | Object search, details, context, and sample insertion. |
+| [`src/features/inspector/`](https://github.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/tree/main/src/features/inspector/) | Logic Inspector page, readiness rules, and report export. |
+| [`src/app/inspector-site/`](https://github.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/tree/main/src/app/inspector-site/) | App-scoped Inspector session: site list, scan, review marks, and export job. |
+| [`scripts/verify-release.mjs`](https://github.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/blob/main/scripts/verify-release.mjs) | The release gate behind `npm run verify:release` and `prepack`. |
+| [`src/services/catalogue/`](https://github.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/tree/main/src/services/catalogue/) | Recipe and Server Objects reference data. |
+| [`src/services/generators/`](https://github.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/tree/main/src/services/generators/) | Handler/client generation and starter ZIP contents. |
+| [`src/services/pptb/`](https://github.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/tree/main/src/services/pptb/) | Host adapters and test doubles. |

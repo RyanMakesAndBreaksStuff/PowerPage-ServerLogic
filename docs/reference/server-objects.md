@@ -4,7 +4,7 @@ The `Server.*` object model surfaced by Power Pages server logic. This page summ
 
 Each member's return information, execution context, and timing shown here match what the app displays. A member shows a return type only where Microsoft Learn documents one, here and in the app.
 
-[Back to the user guide](../usage-manual.md) · [Recipes reference](recipes.md)
+[Back to the user guide](https://github.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/blob/main/docs/usage-manual.md) · [Recipes reference](https://github.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/blob/main/docs/reference/recipes.md)
 
 ## Server.Logger
 
