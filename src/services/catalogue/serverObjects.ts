@@ -6,7 +6,7 @@ export type ObjectMember = {
   readonly name: string;
   readonly kind: MemberKind;
   readonly signatures: readonly [string, ...string[]]; // Learn's overloads, shortest first
-  readonly returns: string | null; // null: NOT_DOCUMENTED
+  readonly returns: string | null; // null: Learn documents none, so none is shown
   readonly timing: CallTiming | null;
   readonly context: ContextScope | null;
   readonly description: string;
@@ -17,8 +17,6 @@ export type ServerObject = {
   readonly description: string;
   readonly members: readonly [ObjectMember, ...ObjectMember[]];
 };
-
-export const NOT_DOCUMENTED = 'Not documented on Learn';
 
 // Correction 11: the connector result. CloudFlow's has no Headers.
 const RESULT =

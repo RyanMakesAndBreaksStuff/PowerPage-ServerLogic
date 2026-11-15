@@ -64,6 +64,6 @@ The Inspector's **Export report** writes either a single file or a site summary 
 | **Markdown / PDF** | Output format. |
 | **Questions to consider** | Include the reflection prompts attached to findings. |
 | **Configuration snapshot** | Include the captured configuration behind each finding. |
-| **Redact environment and site names** | Mask the environment and site names in the output. |
+| **Redact environment and site names and URLs** | Replace the environment's name, URL and host name with `[environment]` and the site's name, URL and host name with `[site]`, in any letter case, including in a Site summary's file name and the PDF title. Server logic file names are kept, and so are web role and table names, apart from any part that matches the environment or site name. |
 
 File names follow `{name}-readiness.{md,pdf}` for a file report and `{site}-site-readiness.{md,pdf}` for a site summary. If the results change while a report is being built, the export is cancelled and can be restarted.

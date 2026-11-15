@@ -3,7 +3,14 @@ import type { AccessType, Privilege } from '@/types/recipe';
 
 export type Readable<T> =
   { ok: true; value: T } | { ok: false; reason: 'read-failed' | 'not-scanned' };
-export type WebRoleFact = { id: string; name: string; anonymous: boolean; authenticated: boolean };
+export type WebRoleFact = {
+  id: string;
+  name: string;
+  anonymous: boolean;
+  authenticated: boolean;
+  /** `statecode` 0. An inactive role is labelled, not ignored: Learn does not say whether it still applies (D2). */
+  active: boolean;
+};
 export type TablePermissionFact = {
   id: string;
   name: string;

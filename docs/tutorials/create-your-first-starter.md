@@ -31,9 +31,7 @@ The tool opens on **Logic Starter** with a known starting state:
 
 The page shows the **Logic name**, **HTTP method**, **Recipe**, and **Readiness** controls, an editable server handler on the left, a generated client call, and a request path showing how the selected call reaches the handler. Take a moment to see how these correspond: the handler is the server-side code you will edit, the client call is produced for you, and the request path explains the route between them.
 
-> **Screenshot placeholder S1 — Starter overview**
-> Suggested file: `images/usage-starter-overview.png`
-> Capture the initial Logic Starter page with `customer-summary`, GET, Read Dataverse records, the readiness indicators, both code panes, and the request path visible. Keep labels readable so a new user can identify the controls described above.
+![Logic Starter overview: logic name, HTTP method, recipe, readiness indicators, and the two code panes](../assets/usage-starter-overview.png)
 
 ## Step 2 — Choose a recipe
 
@@ -67,15 +65,13 @@ The **Invoke from Liquid** recipe uses the `serverlogic` Liquid tag instead of a
 
 ## Step 5 — Adapt the server handler
 
-Edit the **Server** pane directly. Replace the sample identifiers, settings, and business rules with values appropriate to your site. As you type, browser checks run against the current text, and the generated emphasis highlighting disappears after edits because its line positions refer to the original template — that is expected.
+Edit the **Server** pane directly. Replace the sample identifiers, settings, and business rules with values appropriate to your site. As you type, browser checks run against the current text, and the generated emphasis highlighting stays on its code as lines move. A highlight goes away when you delete all of its line's text, and **Start over** restores the original highlights.
 
 The client pane is generated and read-only. It updates from the selected name, recipe, method, and language. Recipe query parameters and request bodies are example data, not separate form fields, so use **Copy client call** and adapt those values in your page code. Starter does not infer a new client contract from arbitrary handler edits.
 
 Use **Copy server code** to copy the handler at any point. You can also pull API samples out of [Server Objects](../how-to/browse-and-insert-server-objects.md) and insert them into the handler.
 
-> **Screenshot placeholder S2 — Editing and browser checks**
-> Suggested file: `images/usage-code-review.png`
-> Show an edited server handler with a browser-check finding and its line number visible. Include the Client call pane, its language selector, and both copy controls. Use a harmless example such as a browser-only API in server code to demonstrate the finding, then remove it before using the handler.
+![An edited server handler with a browser-check finding and its line number](../assets/usage-code-review.png)
 
 ## Step 6 — Review readiness and permissions
 
@@ -96,9 +92,7 @@ Review permissions like this:
 
 Changing the handler text makes a previous review no longer apply unless the text again matches the reviewed version. A count of **3/3 ready** does not confirm authorization, deployment, or successful execution.
 
-> **Screenshot placeholder S3 — Permission review**
-> Suggested file: `images/usage-permission-checklist.png`
-> Expand View checklist for a Dataverse recipe and show its table-permission and role requirements. Capture the Permissions indicator after Mark checklist reviewed, with Undo review visible. Include the Readiness count to show how the acknowledgment affects it.
+![The expanded permission checklist with the review marked and the Readiness count at 3/3](../assets/usage-permission-checklist.png)
 
 ## Step 7 — Download and deploy the starter
 
@@ -126,9 +120,7 @@ To use the package on your site, follow the generated README. Its setup sequence
 
 Test on your configured site using the intended caller role. For the read recipe, the caller's contacts and parent-account relationship must match the recipe's Account permission scope. The package documents generated setup guidance; successful execution depends on the site's available authoring features and configuration.
 
-> **Screenshot placeholder S4 — Exported starter files**
-> Suggested file: `images/usage-starter-package.png`
-> Show an extracted Dataverse CRUD starter ZIP with the matching handler, client, README, permission checklist, and demo HTML page. Keep the slug consistent across filenames and show the generated README's setup section alongside the file list if space permits.
+![The extracted contacts-crud starter files alongside the generated README set-up steps](../assets/usage-starter-package.png)
 
 ## Step 8 — Where to go next
 

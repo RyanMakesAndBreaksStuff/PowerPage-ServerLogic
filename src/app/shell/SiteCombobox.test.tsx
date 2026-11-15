@@ -68,6 +68,8 @@ describe('SiteCombobox (APG select-only combobox)', () => {
     const retired = optionNamed(/Retired portal/);
     expect(retired.getAttribute('aria-disabled')).toBe('true');
     expect(within(retired).getByText('Inactive')).toBeTruthy();
+    // B4: the label truncates, so its full text is in the title.
+    expect(within(retired).getByText('Retired portal')).toHaveAttribute('title', 'Retired portal');
     expect(optionNamed(/Alpha portal/).getAttribute('aria-disabled')).toBeNull();
     expect(active(combobox)).toBe(optionNamed(/Alpha portal/).id);
   });

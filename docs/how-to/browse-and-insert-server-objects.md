@@ -14,11 +14,9 @@ Search the curated `Server.*` reference in the **Server Objects** page, read a m
 
 The context column shows **Used in {slug}**, **Permissions needed**, and **Another sample** where available. Used marks come from analysis of the current Starter handler; they are a navigation aid rather than a record of deployed code or runtime calls.
 
-The catalogue is curated data shipped with the tool. It does not discover the APIs available in your connected environment, and some return information is explicitly marked **Not documented on Learn**. It is the authoritative source; the [reference doc](../reference/server-objects.md) summarises it and may lag behind the app.
+The catalogue is curated data shipped with the tool. It does not discover the APIs available in your connected environment, and a member's detail shows **Returns** only where Microsoft Learn documents a return type. It is the authoritative source; the [reference doc](../reference/server-objects.md) summarises it and may lag behind the app.
 
-> **Screenshot placeholder S5 — Server Objects reference and insertion**
-> Suggested file: `images/usage-server-objects.png`
-> Show a populated object/method search with a selected member, its signature and sample, the Copy and Insert into handler controls, and the right-hand Used in and Permissions needed sections. Include the filter controls so readers can locate them.
+![Server Objects search showing Server.Connector.Dataverse, the RetrieveMultipleRecords signature and sample, and the Used in / Permissions needed context](../assets/usage-server-objects.png)
 
 ## Insert a sample into the handler
 

@@ -16,6 +16,11 @@ Read as separate queries during this interval, not as one atomic snapshot.
 | Table permissions | Needs review | Global Read on account via Members. |
 | Outbound networking | Configured | No HttpClient calls in code. |
 
+### Notes
+
+- Web role: customer-summary.js — webRole detail.
+- Outbound networking: customer-summary.js — outbound detail.
+
 ### Table permissions
 
 Global Read on account via Members.

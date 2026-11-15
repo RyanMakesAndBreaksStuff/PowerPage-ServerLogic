@@ -104,11 +104,17 @@ describe('parseRoles', () => {
   it('defaults an absent flag to false', () => {
     expect(parseRoles([row('r1', 'a', { anonymoususersrole: true }), row('r2', 'b', {})])).toEqual({
       items: [
-        { id: 'r1', name: 'a', anonymous: true, authenticated: false },
-        { id: 'r2', name: 'b', anonymous: false, authenticated: false },
+        { id: 'r1', name: 'a', anonymous: true, authenticated: false, active: true },
+        { id: 'r2', name: 'b', anonymous: false, authenticated: false, active: true },
       ],
       unreadable: [],
     });
+  });
+
+  it('keeps an inactive role and marks it inactive from its statecode', () => {
+    expect(parseRoles([row('r1', 'a', { anonymoususersrole: true }, 1)]).items).toEqual([
+      { id: 'r1', name: 'a', anonymous: true, authenticated: false, active: false },
+    ]);
   });
 
   it.each([

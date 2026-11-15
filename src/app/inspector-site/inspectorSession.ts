@@ -103,8 +103,9 @@ export function createInspectorStore(
   /**
    * Publishes a patch that replaces what a report would capture (a generation bump), and is the one place that
    * cancels an export for it: an idle or building job is removed, a saving job is kept with its dialog closed
-   * (the host owns the save, AC-9.8). If the dialog was open it counts a stale close; only a job that is really
-   * cancelled toasts, so a saving job closes silently and its own outcome toast follows.
+   * (the host owns the save, AC-9.8). If the dialog was open it counts a stale close. Only a job that is really
+   * cancelled toasts, open or not, so a building job whose dialog was closed still says so; a saving job closes
+   * silently and its own outcome toast follows. A closed idle job is already gone, so it stays silent.
    */
   const invalidateExport = (patch: Partial<InspectorSnapshot>): void => {
     const job = snapshot.exportJob;
@@ -114,11 +115,8 @@ export function createInspectorStore(
     }
     const saving = job.phase === 'saving';
     const exportJob = saving ? { ...job, open: false } : null;
-    if (!job.open) {
-      publish({ ...patch, exportJob });
-      return;
-    }
-    publish({ ...patch, exportJob, exportStaleCloses: snapshot.exportStaleCloses + 1 });
+    const exportStaleCloses = snapshot.exportStaleCloses + (job.open ? 1 : 0);
+    publish({ ...patch, exportJob, exportStaleCloses });
     if (!saving) notify({ title: EXPORT_CANCELLED_TITLE, body: EXPORT_CANCELLED_BODY, type: 'info' });
   };
 

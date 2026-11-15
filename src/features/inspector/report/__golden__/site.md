@@ -22,6 +22,14 @@ Ready: 1 · Needs review: 1 · Incomplete: 1 · Not verified: Tenant outbound po
 | customer-summary.js | 2/3 · 1 to review | Configured | Needs review | Configured | Needs review |
 | z-pending | 0/3 · 0 to review | Not scanned | Not scanned | Not scanned | Incomplete |
 
+### Notes
+
+- Web role: a-reviewed — webRole detail.
+- Web role: customer-summary.js — webRole detail.
+- Table permissions: a-reviewed — tablePermissions detail.
+- Outbound networking: a-reviewed — outbound detail.
+- Outbound networking: customer-summary.js — outbound detail.
+
 ### Review first
 
 ### Table permissions: customer-summary.js

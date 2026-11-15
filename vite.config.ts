@@ -110,6 +110,11 @@ export default defineConfig((configEnv) => {
     build: {
       outDir: isProbe ? 'dist-probe' : 'dist',
       assetsDir: 'assets',
+      // PPTB needs one classic script (~2 MiB minified); keep a bounded growth warning.
+      // The release gate also enforces the tighter gzip budget in verify-release.mjs.
+      chunkSizeWarningLimit: 2300,
+      // Dynamic imports are inlined and CSS is emitted as one linked file.
+      modulePreload: false,
       // IIFE output makes Vite inject CSS into the JS; false emits one CSS file linked from index.html.
       cssCodeSplit: false,
       // Fonts and small images become data: URIs; the PPTB default CSP allows data: fonts and images.
@@ -124,10 +129,20 @@ export default defineConfig((configEnv) => {
           }
         : false,
       rolldownOptions: {
+        transform: {
+          define: {
+            // Classic scripts have no import.meta. Capture the script URL before async work
+            // (such as PDF export), when document.currentScript will no longer be set.
+            'import.meta.url': '__pptbImportMetaUrl',
+            'import.meta.resolve': 'undefined',
+          },
+        },
         output: {
           // Use IIFE format for compatibility with iframe srcdoc loading
           // ES modules can have issues when loaded via file:// URLs in iframes
           format: 'iife',
+          intro:
+            'var __pptbImportMetaUrl = document.currentScript && document.currentScript.src || document.baseURI;',
           // One file: dynamic imports are inlined (Rolldown's replacement for inlineDynamicImports)
           codeSplitting: false,
         },

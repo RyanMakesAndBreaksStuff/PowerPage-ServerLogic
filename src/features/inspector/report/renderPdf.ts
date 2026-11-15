@@ -357,6 +357,18 @@ function drawFinding(ctx: Ctx, section: ReportSection, siteScope: boolean): void
   ctx.y += 10;
 }
 
+// B1: the notes of Configured and Reviewed checks, one item per note, drawn after the checks table.
+function drawNotes(ctx: Ctx, notes: readonly ReportSection[]): void {
+  if (notes.length === 0) return;
+  heading(ctx, 'Notes', SECTION);
+  for (const section of notes) {
+    for (const detail of section.detail) {
+      bullet(ctx, `${section.title}: ${section.fileName} — ${detail}`, TEXT, 'dot');
+    }
+  }
+  ctx.y += 10;
+}
+
 function drawNotScanned(ctx: Ctx, sections: readonly ReportSection[]): void {
   if (sections.length === 0) return;
   heading(ctx, 'Not scanned', SECTION);
@@ -454,6 +466,7 @@ export function drawReport(
   drawBanners(ctx, model.banners);
   const table = model.scope === 'file' ? drawFileTable(ctx, model) : drawSiteTable(ctx, model);
   ctx.y = table.finalY + 18;
+  drawNotes(ctx, model.notes);
   if (model.scope === 'file') {
     for (const section of model.needsReview) drawFinding(ctx, section, false);
   } else {

@@ -95,8 +95,16 @@ function webRole(facts: SiteFacts, file: ServerLogicFileFacts): Finding {
       text: 'No web role assigned. No site user can call it yet.',
       readFailure: false,
     });
-  if (roles.some((role) => ids.includes(role.id) && role.anonymous)) {
-    reasons.push({ text: 'Callable by unauthenticated visitors.', readFailure: false });
+  const anonymous = roles.filter((role) => ids.includes(role.id) && role.anonymous);
+  if (anonymous.length > 0) {
+    // D2: an inactive anonymous role still flags the check, because Learn doesn't say whether it stops
+    // applying; the reason names the roles so the inactive one is visible.
+    reasons.push({
+      text: anonymous.every((role) => role.active)
+        ? 'Callable by unauthenticated visitors.'
+        : `Callable by unauthenticated visitors through ${anonymous.map((role) => `\`${role.name}\`${role.active ? '' : ' (inactive)'}`).join(', ')}.`,
+      readFailure: false,
+    });
   }
   if (
     failed ||
@@ -251,7 +259,7 @@ export function evaluateFileChecks(facts: SiteFacts, file: ServerLogicFileFacts)
           .filter((role) => roleIds.includes(role.id))
           .map(
             (role) =>
-              `${role.name}${role.anonymous ? ' (Anonymous Users Role)' : role.authenticated ? ' (Authenticated Users Role)' : ''}`,
+              `${role.name}${role.anonymous ? ' (Anonymous Users Role)' : role.authenticated ? ' (Authenticated Users Role)' : ''}${role.active ? '' : ' (inactive)'}`,
           )
       : [web.summary];
   return {

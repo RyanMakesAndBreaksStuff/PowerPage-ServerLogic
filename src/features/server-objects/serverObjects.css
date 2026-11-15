@@ -277,6 +277,11 @@
   width: 33%;
 }
 
+/* Fits "HTTP and Liquid" (FR-6); Server.Context only. */
+.objects-table th.objects-table__context {
+  width: 8.5rem;
+}
+
 .objects-table td {
   padding: 7px 12px;
   border-top: 1px solid var(--border);

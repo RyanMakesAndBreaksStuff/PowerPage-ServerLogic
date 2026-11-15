@@ -161,6 +161,42 @@ describe('renderPdf', () => {
     ).toBe(false);
   });
 
+  it.each(SCOPES)(
+    'prints the notes of Configured and Reviewed checks after the table, not of Needs review or Not scanned (%s)',
+    (scope) => {
+      const { writes } = draw(reportResult(), pdfOptions(scope, 'customer'));
+      const texts = writes.map((write) => write.text);
+      const notes = texts.indexOf('Notes');
+      expect(notes).toBeGreaterThan(-1);
+      expect(texts.indexOf('Web role: customer-summary.js — webRole detail.')).toBeGreaterThan(notes);
+      expect(texts).toContain('Outbound networking: customer-summary.js — outbound detail.');
+      expect(texts.some((text) => text.includes('— tablePermissions detail.'))).toBe(
+        scope === 'site',
+      );
+      if (scope === 'site') {
+        expect(texts).toContain('Table permissions: a-reviewed — tablePermissions detail.');
+        expect(texts.indexOf('Review first')).toBeGreaterThan(notes);
+      }
+      expect(texts.some((text) => text.includes('z-pending — webRole detail.'))).toBe(false);
+    },
+  );
+
+  it('prints no Notes heading when no Configured or Reviewed check has a note', () => {
+    const result = reportResult();
+    result.files = result.files.map((file) => ({
+      ...file,
+      findings: [
+        { ...file.findings[0], detail: [] },
+        { ...file.findings[1], detail: [] },
+        { ...file.findings[2], detail: [] },
+      ],
+    }));
+    for (const scope of SCOPES) {
+      const { writes } = draw(result, pdfOptions(scope, 'customer'));
+      expect(writes.map((write) => write.text)).not.toContain('Notes');
+    }
+  });
+
   it('lists Review first and Not scanned in the model order', () => {
     const result = reportResult();
     result.files = [

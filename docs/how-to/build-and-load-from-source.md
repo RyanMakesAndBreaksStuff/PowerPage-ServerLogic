@@ -89,7 +89,7 @@ dist/
 
 Vite produces an IIFE JavaScript bundle, a separate stylesheet, and relative asset paths for PPTB loading. Generated asset filenames can change between builds. The HTML transform removes module-loading attributes and moves script loading to the body for host compatibility.
 
-To build all three pages, use `npm run build` with no `VITE_RELEASED_PAGES` set. To build only Logic Starter and Server Objects, use `npm run build:beta` or the explicit page selection above.
+To build all three pages, use `npm run build` with no `VITE_RELEASED_PAGES` set (provided no override is set in the shell or a Vite environment file — an existing value takes priority per the page-selection rules above). To build only Logic Starter and Server Objects, use `npm run build:beta` or the explicit page selection above.
 
 The tool's `dist/` build is separate from the ZIP that an end user downloads through **Download starter**. That ZIP contains generated Power Pages source and setup documents, rather than the tool application.
 
@@ -171,11 +171,11 @@ Automated checks do not establish that the real PPTB clipboard, save dialog, ext
 
 These steps follow the repository's existing PPTB local-load workflow. Menu wording can vary with the installed host version.
 
-> **Screenshot placeholder B1 — Loading a local build**
-> Suggested file: `images/build-pptb-local-tool.png`
-> Capture PPTB Desktop with the Debug menu and Load Local Tool action visible. Include an annotation showing that the selected folder is the repository root containing package.json and dist, rather than dist itself. Use a neutral checkout path without personal information.
+![PPTB Desktop Debug sidebar showing the Load Local Tool path and actions](../assets/build-pptb-local-tool.png)
 
-### Verify the two documented workflows
+The tool directory path must be the repository root — the folder containing `package.json` and `dist` — not `dist` itself. The folder is shown with a neutral path; choose **Browse** to pick it, then **Load Tool**.
+
+### Verify the three documented workflows
 
 1. In **Logic Starter**, confirm the initial recipe, name, GET method, and fetch client. Change the name and confirm the displayed endpoint and filename change.
 2. Edit a handler and review browser-check feedback. Expand the permission checklist, mark it reviewed, then change the code and confirm the review no longer applies.
@@ -183,7 +183,13 @@ These steps follow the repository's existing PPTB local-load workflow. Menu word
 4. Use **Download starter**, save a ZIP, and inspect the handler, client, README, and checklist. Also try cancelling the save dialog.
 5. Open **Server Objects**, search for a member, switch filters, and inspect a sample and its permission notes.
 6. Choose **Insert into handler**. Confirm that Starter opens with the sample inserted and retains the same session.
-7. Close and reopen the tool after another build to verify that the new files are loaded.
+7. With no PPTB connection selected, open **Logic Inspector** and confirm it reads **No active connection**. Then select a connection to an environment with an enhanced data model site.
+8. Open the site picker in the title bar, confirm that no site is preselected, and choose an active site. Confirm the page shows **Scanning {site}** with a count, then the results.
+9. Select a file in **Server logic**, then select one of its findings and read its reasons and guidance. On a finding that needs review, mark it reviewed and confirm the **Readiness** ring counts it; undo the mark.
+10. Choose **Export report** and export **This file** and then **Site summary**, each as Markdown and as PDF. Save at least one of them and open it, and cancel the save dialog for another to confirm nothing is saved.
+11. Choose another site, and switch the PPTB connection while the scan runs. Confirm the page reads **The connection changed while scanning** and that choosing a site scans again.
+12. If **Couldn't load sites** or **Couldn't read the active connection** appears at any point, fix the cause and confirm that **Retry** recovers the page.
+13. Close and reopen the tool after another build to verify that the new files are loaded.
 
 Record the host version, build command, and observed results when reporting this validation. Testing the generated code on a configured Power Pages site is a separate integration check; follow the [generate-and-adapt-a-starter guide](generate-and-adapt-a-starter.md#download-and-use-the-package) and the exported README for that recipe.
 
@@ -196,10 +202,10 @@ npm run verify:release
 The script runs these steps in order and stops at the first failure:
 
 1. `typecheck`, `lint`, and `test`.
-2. `build`, the released build with all three pages.
+2. `build`, the released build with all three pages. The script sets `VITE_RELEASED_PAGES=starter,objects,inspector` for every step it runs, which takes priority over a value in the shell or a Vite environment file. Because the tests in step 1 also see that value, the default page list is checked by a plain `npm test` and by CI, not by this script.
 3. Manifest validation of `package.json` (and `pptb.config.json` if present) through the `@pptb/validate` API, with URL checks skipped.
 4. A size budget: the single JavaScript bundle in `dist/assets` must stay within **817 KiB gzip**, which is the 742.7 KiB baseline plus 10 percent.
-5. A tarball check using `npm pack --dry-run`: the archive may hold only `dist/`, `package.json`, and the files npm always adds; `dist/index.html` must be present; and the Inspector page text must appear in the bundle, so a partial build fails.
+5. A tarball check using `npm pack --dry-run`: the archive may hold only `dist/`, `package.json`, and the files npm always adds; `dist/index.html` must be present; and text from each of the three pages must appear in the bundle, so a partial build fails.
 
 `prepack` runs the same script, so `npm pack` and `npm publish` both go through it. Because it builds `dist/` with `build`, a package made this way always contains all three pages.
 
@@ -228,7 +234,7 @@ Both run `prepack`, and so the release gate, first. Confirm that the archive inc
 | PPTB still shows an older build | Confirm the latest build succeeded and that you loaded the correct checkout root. Close and reopen the tool tab. |
 | `npm run validate` fails on the repository or README URL | Expected until those addresses are public: the command ignores `--skip-url-checks`. Run `npm run verify:release` to validate the manifest without URL checks. |
 | `pptb-validate` is not recognized | Run `npm ci` again; the command comes from `@pptb/types`. Do not treat a missing validator as a passed validation. |
-| `verify:release` fails at the tarball step | Check the listed files for anything outside `dist/`, and check that `VITE_RELEASED_PAGES` isn't set in the shell or a Vite environment file, because a build that leaves out the Inspector fails this step. |
+| `verify:release` fails at the tarball step | Check the listed files for anything outside `dist/`. If the error names missing page text, a page's code no longer contains one of the marker strings in `scripts/verify-release.mjs`; the gate always builds all three pages, so `VITE_RELEASED_PAGES` is not the cause. Update the markers there and in `tests/buildShape.test.ts` together. |
 | The npm archive has missing or stale application files | Run `npm run build` and inspect `npm pack --dry-run` again. |
 
 ## Source map for maintainers

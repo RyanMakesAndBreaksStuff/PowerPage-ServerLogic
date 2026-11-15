@@ -53,6 +53,8 @@ export type ReportModel = {
   readonly needsReview: readonly ReportSection[];
   readonly reviewFirst: readonly ReportSection[];
   readonly notScanned: readonly ReportSection[];
+  /** Configured and Reviewed checks with a detail note, in the same order as `notScanned`. */
+  readonly notes: readonly ReportSection[];
   readonly snapshot: readonly ReportSnapshot[] | null;
   readonly footer: readonly string[];
 };

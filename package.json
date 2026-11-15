@@ -5,23 +5,15 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "build:beta": "tsc -b && vite build --mode beta",
     "lint": "eslint . --max-warnings=0",
     "preview": "vite preview",
     "watch": "vite build --watch",
     "dev-watch": "vite build --mode development --watch",
     "finalize-package": "npm shrinkwrap",
     "validate": "pptb-validate --skip-url-checks",
-    "verify:release": "node scripts/verify-release.mjs",
-    "prepack": "npm run verify:release",
     "version-stable": "npm version patch --no-git-tag-version",
     "typecheck": "tsc -b",
-    "test": "vitest run",
-    "probe:size": "vite build --mode probe && node scripts/bundle-size.mjs dist-probe",
-    "size": "node scripts/bundle-size.mjs dist/assets",
-    "probe:live": "node scripts/probe-live.mjs basic host",
-    "probe:live:connected": "node scripts/probe-live.mjs connected live pending",
-    "probe:live:pack": "node scripts/probe-live.mjs --pack basic"
+    "test": "vitest run"
   },
   "dependencies": {
     "@codemirror/commands": "^6.11.1",
@@ -80,7 +72,7 @@
   "main": "index.html",
   "icon": "icons/logo.svg",
   "license": "BSD-3-Clause",
-  "author": "Ryan Christopher",
+  "author": "Ryan Rettinger",
   "contributors": [
     {
       "name": "Ryan Christopher",

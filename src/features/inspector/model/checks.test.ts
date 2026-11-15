@@ -39,6 +39,42 @@ describe('AC-8.8 Web role', () => {
     expect(finding(siteFacts(), 'webRole').status).toBe('configured');
   });
 
+  it('labels an inactive anonymous role in the reason and snapshot without changing any status (D2)', () => {
+    const roles = read([
+      role('staff', { active: false }),
+      role('anon', { name: 'Old visitor', anonymous: true, active: false }),
+    ]);
+    const facts = siteFacts({
+      roles,
+      permissions: read([permission('p', { scope: 'Global', roleIds: ['anon'] })]),
+      files: [file({ roleIds: read(['staff', 'anon']) })],
+    });
+    const active = siteFacts({
+      roles: read([role('staff'), role('anon', { name: 'Old visitor', anonymous: true })]),
+      permissions: read([permission('p', { scope: 'Global', roleIds: ['anon'] })]),
+      files: [file({ roleIds: read(['staff', 'anon']) })],
+    });
+    const result = evaluateFileChecks(facts, facts.files[0] ?? file());
+    const before = evaluateFileChecks(active, active.files[0] ?? file());
+    expect(finding(facts, 'webRole').summary).toBe(
+      'Callable by unauthenticated visitors through `Old visitor` (inactive).',
+    );
+    expect(result.findings.map((item) => item.status)).toEqual(
+      before.findings.map((item) => item.status),
+    );
+    expect(result.findings[1].reasons).toEqual(before.findings[1].reasons);
+    expect(result.snapshot.roles).toEqual([
+      'staff (inactive)',
+      'Old visitor (Anonymous Users Role) (inactive)',
+      OTHER_ROLES_NOTE,
+    ]);
+    expect(before.snapshot.roles).toEqual([
+      'staff',
+      'Old visitor (Anonymous Users Role)',
+      OTHER_ROLES_NOTE,
+    ]);
+  });
+
   it('does not infer anonymous flags from a role name', () => {
     const facts = siteFacts({ roles: read([role('staff', { name: 'Anonymous Users' })]) });
     expect(finding(facts, 'webRole').status).toBe('configured');

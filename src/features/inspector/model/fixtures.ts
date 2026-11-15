@@ -20,6 +20,7 @@ export const role = (id: string, patch: Partial<WebRoleFact> = {}): WebRoleFact 
   name: id,
   anonymous: false,
   authenticated: false,
+  active: true,
   ...patch,
 });
 

@@ -144,7 +144,7 @@ function parseRole(raw: unknown): WebRoleFact | null {
   const anonymous = optionalBoolean(content, 'anonymoususersrole');
   const authenticated = optionalBoolean(content, 'authenticatedusersrole');
   if (anonymous === null || authenticated === null) return null;
-  return { id: row.id, name: row.name, anonymous, authenticated };
+  return { id: row.id, name: row.name, anonymous, authenticated, active: row.active };
 }
 
 export function parseRoles(rows: readonly unknown[]): ParsedList<WebRoleFact> {

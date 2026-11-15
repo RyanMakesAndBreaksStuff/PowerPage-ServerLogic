@@ -887,7 +887,7 @@ describe('export job (P5.7)', () => {
     },
   );
 
-  it('cancels silently when the results are cleared after the user already closed the dialog', async () => {
+  it('stays silent when the results are cleared after the user closed an idle dialog', async () => {
     const idle = await finishedStore();
     idle.store.openExport();
     idle.store.closeExport();
@@ -895,7 +895,9 @@ describe('export job (P5.7)', () => {
     idle.store.rescan();
     expect(idle.notify).not.toHaveBeenCalled();
     expect(idle.snap().exportStaleCloses).toBe(0);
+  });
 
+  it('cancels a building export whose dialog was closed with exactly one info toast (AC-9.8)', async () => {
     const holder: { store: InspectorStore | null } = { store: null };
     const building = await finishedStore({
       renderMarkdown: (...args) => {
@@ -909,7 +911,8 @@ describe('export job (P5.7)', () => {
     building.store.submitExport();
     await building.settled();
     expect(building.snap().exportJob).toBeNull();
-    expect(building.notify).not.toHaveBeenCalled();
+    expect(building.notify).toHaveBeenCalledTimes(1);
+    expect(building.notify).toHaveBeenCalledWith(cancelled);
     expect(building.snap().exportStaleCloses).toBe(0);
     expect(building.host.callsOf('saveFile')).toHaveLength(0);
   });

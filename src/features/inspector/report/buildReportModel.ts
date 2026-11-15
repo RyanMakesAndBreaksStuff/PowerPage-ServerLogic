@@ -24,8 +24,9 @@ function utcOffset(date: Date): string {
   return `UTC${minutes < 0 ? '-' : '+'}${String(Math.floor(magnitude / 60)).padStart(2, '0')}:${String(magnitude % 60).padStart(2, '0')}`;
 }
 
-// A host alias counts only when it isn't part of a longer name; the configured strings themselves
-// stay exact, case-sensitive substrings.
+// Every identifier matches case-insensitively. A host alias counts only when it isn't part of a longer
+// name; the configured names and URLs themselves stay unbounded substrings (D3), so a name inside a longer
+// identifier is still redacted.
 const NAME_CHARACTER = /[A-Za-z0-9_-]/;
 
 type Identifier = {
@@ -58,12 +59,9 @@ function atBoundary(text: string, index: number): boolean {
 }
 
 function matches({ value, alias }: Identifier, text: string, index: number): boolean {
-  if (!alias) return text.startsWith(value, index);
-  return (
-    text.slice(index, index + value.length).toLowerCase() === value.toLowerCase() &&
-    atBoundary(text, index - 1) &&
-    atBoundary(text, index + value.length)
-  );
+  const same = text.slice(index, index + value.length).toLowerCase() === value.toLowerCase();
+  if (!alias) return same;
+  return same && atBoundary(text, index - 1) && atBoundary(text, index + value.length);
 }
 
 function redactor(result: SiteResult, enabled: boolean): (text: string) => string {
@@ -129,11 +127,14 @@ function rowModel(
   };
 }
 
-function sections(rows: readonly ReportRow[], status: CheckStatus): readonly ReportSection[] {
+function sections(
+  rows: readonly ReportRow[],
+  ...statuses: readonly CheckStatus[]
+): readonly ReportSection[] {
   return CHECK_ORDER.flatMap((check) =>
     rows.flatMap((row) =>
       row.checks
-        .filter((finding) => finding.check === check && finding.status === status)
+        .filter((finding) => finding.check === check && statuses.includes(finding.status))
         .map((finding) => ({
           fileName: row.name,
           check,
@@ -211,6 +212,8 @@ export function buildReportModel(
     needsReview: options.scope === 'file' ? review : [],
     reviewFirst: options.scope === 'site' ? review : [],
     notScanned: sections(rows, 'not-scanned'),
+    // B1: Configured and Reviewed checks keep their notes; Needs review prints them in its own sections.
+    notes: sections(rows, 'configured', 'reviewed').filter((section) => section.detail.length > 0),
     snapshot: options.snapshot
       ? files.map((file) => ({
           fileName: file.name,

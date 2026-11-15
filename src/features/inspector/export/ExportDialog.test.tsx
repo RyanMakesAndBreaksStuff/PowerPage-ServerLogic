@@ -92,7 +92,7 @@ describe('Export dialog: open', () => {
     expect(radio('PDF').getAttribute('aria-checked')).toBe('false');
     expect(checkbox('Questions to consider')).toBeChecked();
     expect(checkbox('Configuration snapshot')).toBeChecked();
-    expect(checkbox('Redact environment and site names')).not.toBeChecked();
+    expect(checkbox('Redact environment and site names and URLs')).not.toBeChecked();
     expect(within(modal).getByRole('button', { name: 'Export Markdown' })).toBeTruthy();
     expect(within(modal).getByRole('button', { name: 'Cancel' })).toBeTruthy();
     expect(within(modal).getByRole('status').textContent).toBe('');
@@ -173,7 +173,7 @@ describe('Export dialog: controls', () => {
       label: 'ticking Redact turns redaction on and names the site summary "site"',
       act: async (user) => {
         await user.click(radio('Site summary'));
-        await user.click(checkbox('Redact environment and site names'));
+        await user.click(checkbox('Redact environment and site names and URLs'));
       },
       expected: { scope: 'site', redact: true },
       button: 'Export Markdown',
@@ -237,7 +237,7 @@ describe('Export dialog: busy phases', () => {
       radio('PDF'),
       checkbox('Questions to consider'),
       checkbox('Configuration snapshot'),
-      checkbox('Redact environment and site names'),
+      checkbox('Redact environment and site names and URLs'),
     ];
     for (const control of controls) {
       expect(control.getAttribute('aria-disabled')).toBe('true');
@@ -249,9 +249,9 @@ describe('Export dialog: busy phases', () => {
       await view.user.unhover(control);
     }
     await view.user.click(radio('Site summary'));
-    await view.user.click(checkbox('Redact environment and site names'));
+    await view.user.click(checkbox('Redact environment and site names and URLs'));
     expect(radio('This file').getAttribute('aria-checked')).toBe('true');
-    expect(checkbox('Redact environment and site names')).not.toBeChecked();
+    expect(checkbox('Redact environment and site names and URLs')).not.toBeChecked();
 
     gate.resolve(undefined);
     await saved(view.host);

@@ -28,6 +28,7 @@ describe('ServerPane', () => {
     const h = renderStarter(<ServerPane />, { deps: STARTER_DEPS });
     const pane = screen.getByRole('region', { name: 'Server handler' });
     expect(pane).toHaveTextContent('customer-summary.js');
+    expect(within(pane).getByText('customer-summary.js')).toHaveAttribute('title', 'customer-summary.js');
     expect(within(pane).getByText('Server')).toHaveClass('ui-pill--server');
     expect(pane).toHaveTextContent("Runs on Power Pages with the caller's permissions");
     expect(serverText()).toBe(h.session().state.serverText);
@@ -35,11 +36,29 @@ describe('ServerPane', () => {
     expect(pane).toHaveTextContent('orders.js');
   });
 
-  it("highlights the recipe's data-access lines while the text is unedited (AC-4.2)", () => {
-    renderStarter(<ServerPane />, { deps: STARTER_DEPS });
-    expect(linesWith('ui-code-highlight')).toEqual([...generateHandler('R1').highlightLines]);
+  it("highlights the recipe's data-access lines and keeps them on their code through edits (AC-4.2)", () => {
+    const h = renderStarter(<ServerPane />, { deps: STARTER_DEPS });
+    const r1 = [...generateHandler('R1').highlightLines];
+    expect(r1.length).toBeGreaterThan(0);
+    expect(linesWith('ui-code-highlight')).toEqual(r1);
     typeAtStart('// mine\n');
-    expect(linesWith('ui-code-highlight')).toEqual([]);
+    expect(linesWith('ui-code-highlight')).toEqual(r1.map((n) => n + 1));
+    h.dispatch({ type: 'selectRecipe', recipe: 'R2' });
+    expect(linesWith('ui-code-highlight')).toEqual([...generateHandler('R2').highlightLines]);
+
+    // Start over on the same recipe brings back a highlight whose line was deleted.
+    h.dispatch({ type: 'selectRecipe', recipe: 'R1' });
+    const doc = editorView('Server code').state.doc;
+    const first = doc.line(r1[0] ?? 1);
+    act(() => {
+      editorView('Server code').dispatch({
+        changes: { from: first.from, to: Math.min(first.to + 1, doc.length) },
+        userEvent: 'delete',
+      });
+    });
+    expect(linesWith('ui-code-highlight')).toEqual(r1.slice(1).map((n) => n - 1));
+    h.dispatch({ type: 'startOver' });
+    expect(linesWith('ui-code-highlight')).toEqual(r1);
   });
 
   it('sends edits to the session, which re-runs the browser checks and flags the line (AC-4.3, AC-5.2)', () => {
@@ -63,8 +82,10 @@ describe('ServerPane', () => {
   });
 
   it('takes a Server Objects insert as one undo step and moves the cursor (AC-6.8)', () => {
-    const h = renderStarter(<ServerPane />);
+    const h = renderStarter(<ServerPane />, { deps: STARTER_DEPS });
     const before = h.session().state.serverText;
+    const r1 = [...generateHandler('R1').highlightLines];
+    expect(linesWith('ui-code-highlight')).toEqual(r1);
     h.dispatch({
       type: 'applyChanges',
       changes: [{ from: 0, to: 0, insert: 'const x = 1;\n' }],
@@ -73,6 +94,7 @@ describe('ServerPane', () => {
     const view = editorView('Server code');
     expect(serverText()).toBe(`const x = 1;\n${before}`);
     expect(view.state.selection.main.head).toBe(13);
+    expect(linesWith('ui-code-highlight')).toEqual(r1.map((n) => n + 1));
     act(() => {
       undo(view);
     });

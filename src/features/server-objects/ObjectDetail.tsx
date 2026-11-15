@@ -4,7 +4,7 @@ import { Pill } from '@/components/Pill';
 import { PillGroup } from '@/components/PillGroup';
 import { Tile } from '@/components/Tile';
 import { classNames } from '@/lib/classNames';
-import { NOT_DOCUMENTED, isConnector } from '@/services/catalogue/serverObjects';
+import { isConnector } from '@/services/catalogue/serverObjects';
 import type { ContextScope, ObjectMember, ServerObject } from '@/services/catalogue/serverObjects';
 import { InsertButton } from './InsertButton';
 
@@ -50,6 +50,8 @@ export function ObjectDetail({
   const leaf = segments.pop() ?? object.path;
   const sample = member.samples[variant] ?? member.samples[0];
   const kind = member.kind === 'property' ? 'properties' : 'methods';
+  // Only Server.Context members carry an invocation context (FR-6).
+  const showContext = object.members.some((m) => m.context !== null);
   return (
     <Tile flush role="region" aria-label="Object detail" className="objects-detail">
       <div className="objects-detail__head">
@@ -77,13 +79,15 @@ export function ObjectDetail({
               </li>
             ))}
           </ul>
-          <p className="objects-signature__meta">
-            {member.timing === null ? null : (
-              <Pill compact>{member.timing === 'async' ? 'Async: use await' : 'Synchronous'}</Pill>
-            )}
-            {member.context === null ? null : <Pill compact>{CONTEXT_LABEL[member.context]}</Pill>}
-            <span>Returns: {member.returns ?? NOT_DOCUMENTED}</span>
-          </p>
+          {member.timing === null && member.context === null && member.returns === null ? null : (
+            <p className="objects-signature__meta">
+              {member.timing === null ? null : (
+                <Pill compact>{member.timing === 'async' ? 'Async: use await' : 'Synchronous'}</Pill>
+              )}
+              {member.context === null ? null : <Pill compact>{CONTEXT_LABEL[member.context]}</Pill>}
+              {member.returns === null ? null : <span>Returns: {member.returns}</span>}
+            </p>
+          )}
         </div>
         <section aria-label="Sample" className="objects-sample">
           <div className="objects-sample__bar">
@@ -115,6 +119,11 @@ export function ObjectDetail({
               <th scope="col">Name</th>
               <th scope="col">Signature</th>
               <th scope="col">Description</th>
+              {showContext ? (
+                <th scope="col" className="objects-table__context">
+                  Context
+                </th>
+              ) : null}
             </tr>
           </thead>
           <tbody>
@@ -127,6 +136,7 @@ export function ObjectDetail({
                   <button
                     type="button"
                     className="objects-table__name ui-mono"
+                    title={m.name}
                     aria-current={m.name === member.name ? 'true' : undefined}
                     onClick={() => {
                       onSelectMember(m.name);
@@ -139,6 +149,13 @@ export function ObjectDetail({
                   {m.signatures.at(-1)}
                 </td>
                 <td title={m.description}>{m.description}</td>
+                {showContext ? (
+                  m.context === null ? (
+                    <td />
+                  ) : (
+                    <td title={CONTEXT_LABEL[m.context]}>{CONTEXT_LABEL[m.context]}</td>
+                  )
+                ) : null}
               </tr>
             ))}
           </tbody>

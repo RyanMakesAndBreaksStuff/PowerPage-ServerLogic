@@ -5,7 +5,7 @@ import {
   readsHttpOnlyContext,
   usedServerMembers,
 } from '@/lib/code-analysis/structure';
-import { NOT_DOCUMENTED, SERVER_OBJECTS, isConnector } from './serverObjects';
+import { SERVER_OBJECTS, isConnector } from './serverObjects';
 import type { ObjectMember, ServerObject } from './serverObjects';
 
 // FR-6's table, in order.
@@ -113,7 +113,6 @@ describe('SERVER_OBJECTS (FR-6)', () => {
         }
       }
     }
-    expect(NOT_DOCUMENTED).toBe('Not documented on Learn');
   });
 
   it('marks HttpClient and CloudFlow async and Dataverse sync (corrections 7 and 19)', () => {

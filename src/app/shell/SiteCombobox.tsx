@@ -251,7 +251,9 @@ export function SiteCombobox({
               commit(index);
             }}
           >
-            <span className="site-combobox__name">{option.label}</span>
+            <span className="site-combobox__name" title={option.label}>
+              {option.label}
+            </span>
             <span className="site-combobox__detail">{option.detail}</span>
             {option.disabled ? <span className="site-combobox__tag">Inactive</span> : null}
           </li>

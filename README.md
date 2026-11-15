@@ -8,6 +8,8 @@ Server Logic Tools is a Power Platform ToolBox (PPTB) tool for creating Power Pa
 - **Server Objects** provides a searchable, curated reference with member signatures, samples, and permission notes. Copy a sample or insert it into the current Starter handler.
 - **Logic Inspector** scans the server logic files on a Power Pages site and shows, for each file, whether its web role, table permissions, and outbound networking look configured. Export the results as a Markdown or PDF report.
 
+## What this tool changes
+
 Starter generation and the object catalogue work without an environment connection. The Inspector needs one active PPTB connection to read a site. None of these features deploy code, configure permissions, or write to your environment. You add the exported files to your Power Pages site and test them there.
 
 ## Documentation

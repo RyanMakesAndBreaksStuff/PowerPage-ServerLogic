@@ -2,7 +2,7 @@
 
 The `Server.*` object model surfaced by Power Pages server logic. This page summarises the curated catalogue that ships with **Server Objects**; the catalogue in the app is authoritative and this page may lag behind it. Use the app's search to copy or insert samples.
 
-Each member's return information, execution context, and timing shown here match what the app displays. Members whose return information is **Not documented on Learn** appear here without a return type.
+Each member's return information, execution context, and timing shown here match what the app displays. A member shows a return type only where Microsoft Learn documents one, here and in the app.
 
 [Back to the user guide](../usage-manual.md) · [Recipes reference](recipes.md)
 

@@ -90,7 +90,7 @@ export function ExportDialog({ job }: { job: ExportJob }): ReactElement {
             }}
           />
           <Checkbox
-            label="Redact environment and site names"
+            label="Redact environment and site names and URLs"
             checked={options.redact}
             disabledReason={busyReason}
             onChange={(redact) => {

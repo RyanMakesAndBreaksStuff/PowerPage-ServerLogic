@@ -7,14 +7,15 @@ import { useEffect, useEffectEvent, useRef } from 'react';
 import type { ReactElement } from 'react';
 import { minimalChange } from '@/lib/minimalChange';
 import { CODE_HIGHLIGHT, CODE_THEME } from './codeTheme';
-import { lineDecorations } from './lineDecorations';
+import { HIGHLIGHT_FIELD, SET_HIGHLIGHTS, lineDecorations } from './lineDecorations';
 import './codePanes.css';
 
 export type CodeEditorProps = {
   label: string;
   value: string;
   syntax: 'javascript' | 'plain';
-  highlightLines?: readonly number[];
+  /** Lines of `value` to highlight. Null keeps the current highlights on their code through edits. */
+  highlightLines?: readonly number[] | null;
   flagLines?: readonly number[];
   cursor?: number | null;
   /** Absent means read-only. */
@@ -38,7 +39,7 @@ export function CodeEditor({
   label,
   value,
   syntax,
-  highlightLines = NO_LINES,
+  highlightLines = null,
   flagLines = NO_LINES,
   cursor = null,
   onEdit,
@@ -70,6 +71,7 @@ export function CodeEditor({
           syntaxHighlighting(CODE_HIGHLIGHT),
           SYNTAX.of([]),
           LINES.of([]),
+          HIGHLIGHT_FIELD,
           EditorView.contentAttributes.of(
             config.readOnly
               ? { 'aria-label': config.label, 'aria-readonly': 'true' }
@@ -106,8 +108,10 @@ export function CodeEditor({
       effects: [
         SYNTAX.reconfigure(syntax === 'javascript' ? javascript() : []),
         LINES.reconfigure(
-          EditorView.decorations.of((v) => lineDecorations(v.state.doc, highlightLines, flagLines)),
+          EditorView.decorations.of((v) => lineDecorations(v.state.doc, NO_LINES, flagLines)),
         ),
+        // Built against the new text, so a replaced document never inherits the old highlights.
+        ...(highlightLines === null ? [] : [SET_HIGHLIGHTS.of(highlightLines)]),
       ],
       annotations: FROM_PROPS.of(true),
     });

@@ -104,6 +104,53 @@ describe('buildReportModel', () => {
     expect(result.banners).toEqual([text]);
   });
 
+  it.each([
+    [
+      'a lower-cased site name in a reason',
+      'Customer portal',
+      'Called from the customer portal home page.',
+      'Called from the [site] home page.',
+    ],
+    [
+      'an upper-cased environment name and URL',
+      'Customer portal',
+      'CONTOSO via HTTPS://CONTOSO.CRM.DYNAMICS.COM',
+      '[environment] via [environment]',
+    ],
+    [
+      'a name inside a longer identifier',
+      'Customer portal',
+      'Global access to `contoso_order` and `devcontosoapp`.',
+      'Global access to `[environment]_order` and `dev[environment]app`.',
+    ],
+    [
+      'a name with regex metacharacters',
+      'Shop (a+b)?',
+      'Shop (A+B)? called [shop (a+b)?] not Shop (ab)',
+      '[site] called [[site]] not Shop (ab)',
+    ],
+  ])('redacts %s, ignoring case (D3)', (_label, siteName, reason, expected) => {
+    const result = reportResult();
+    result.facts = { ...result.facts, site: { ...result.facts.site, name: siteName } };
+    const file = reportFile('customer', 'customer-summary.js', [
+      'configured',
+      'needs-review',
+      'configured',
+    ]);
+    result.files = [
+      {
+        ...file,
+        findings: [
+          file.findings[0],
+          { ...file.findings[1], summary: reason, reasons: [{ text: reason, readFailure: false }] },
+          file.findings[2],
+        ],
+      },
+    ];
+    const model = buildReportModel(result, { ...REPORT_OPTIONS, redact: true }, EXPORTED_AT);
+    expect(model.rows[0]?.checks[1]?.reasons).toEqual([expected]);
+  });
+
   it('keeps stopped and inventory-incomplete notices plus all not-scanned checks', () => {
     const result = reportResult();
     result.facts.stopped = 'connection-lost';
@@ -343,7 +390,7 @@ describe('redaction aliases (WR-002)', () => {
     expect(model.banners).toEqual(['[site] [site] [environment] [environment]']);
   });
 
-  it('keeps configured strings as exact substrings and bounds only the host aliases', () => {
+  it('matches configured strings as unbounded substrings in any case and bounds only the host aliases (D3)', () => {
     const result = reportResult();
     result.banners = [
       'Contoso-Prod ContosoCRM contoso other-contoso.crm.dynamics.com CONTOSO.crm.dynamics.com',
@@ -354,11 +401,11 @@ describe('redaction aliases (WR-002)', () => {
       EXPORTED_AT,
     );
     expect(model.banners).toEqual([
-      '[environment]-Prod [environment]CRM contoso other-contoso.crm.dynamics.com [environment]',
+      '[environment]-Prod [environment]CRM [environment] other-[environment].crm.dynamics.com [environment]',
     ]);
   });
 
-  it('skips an identifier that is not a URL and matches it exactly', () => {
+  it('skips an identifier that is not a URL and matches it as plain text in any case', () => {
     const result = reportResult();
     result.facts.site = { ...result.facts.site, name: 'Portal', domain: 'not a url' };
     result.banners = ['Portal portals my-portal not a url, Not A Url.'];
@@ -367,7 +414,7 @@ describe('redaction aliases (WR-002)', () => {
       { ...REPORT_OPTIONS, scope: 'site', redact: true },
       EXPORTED_AT,
     );
-    expect(model.banners).toEqual(['[site] portals my-portal [site], Not A Url.']);
+    expect(model.banners).toEqual(['[site] [site]s my-[site] [site], [site].']);
   });
 
   it('changes nothing when redaction is off', () => {

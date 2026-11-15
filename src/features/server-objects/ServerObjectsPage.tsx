@@ -80,6 +80,7 @@ export function ServerObjectsPage(): ReactElement {
         <ul className="objects-list__items">
           {listed.map(({ object, memberMatch }) => {
             const isSelected = current?.object === object;
+            const meta = `${object.description} · ${count(object.members.length, object.members[0].kind)}`;
             return (
               <li key={object.path}>
                 <button
@@ -95,7 +96,9 @@ export function ServerObjectsPage(): ReactElement {
                   }}
                 >
                   <span className="objects-item__row">
-                    <span className="ui-mono objects-item__path">{object.path}</span>
+                    <span className="ui-mono objects-item__path" title={object.path}>
+                      {object.path}
+                    </span>
                     {derived.usedMembers.has(object.path) ? (
                       <Pill tone="server" compact>
                         used
@@ -103,8 +106,8 @@ export function ServerObjectsPage(): ReactElement {
                       </Pill>
                     ) : null}
                   </span>
-                  <span className="objects-item__meta">
-                    {object.description} · {count(object.members.length, object.members[0].kind)}
+                  <span className="objects-item__meta" title={meta}>
+                    {meta}
                   </span>
                 </button>
               </li>

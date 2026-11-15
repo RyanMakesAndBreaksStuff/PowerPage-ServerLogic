@@ -99,6 +99,75 @@ describe('CodeEditor', () => {
     expect(lines()[0]).toHaveClass('starter-code__flag');
   });
 
+  describe('highlights follow their code through edits (AC-4.2)', () => {
+    const highlighted = (): number[] =>
+      lines().flatMap((line, index) => (line.classList.contains('ui-code-highlight') ? [index + 1] : []));
+    // An edit made the way a keystroke makes it, then the session's echo with highlightLines null.
+    function edit(
+      editor: ReturnType<typeof mount>,
+      changes: { from: number; to?: number; insert?: string },
+    ): void {
+      editor.view.dispatch({ changes, userEvent: 'input' });
+      editor.update({ value: editor.view.state.doc.toString(), highlightLines: null });
+    }
+
+    it('moves a highlight down one when a line is typed above it', () => {
+      const editor = mount({ highlightLines: [2] });
+      edit(editor, { from: 0, insert: '// mine\n' });
+      expect(highlighted()).toEqual([3]);
+      expect(lines()[2]).toHaveTextContent('return 1;');
+    });
+
+    it('drops the highlight of a deleted line rather than moving it to a neighbour', () => {
+      const line2 = (e: ReturnType<typeof mount>) => e.view.state.doc.line(2);
+      // Deleted from its start through its line break (the next line moves up into its place).
+      const forward = mount({ highlightLines: [2] });
+      edit(forward, { from: line2(forward).from, to: line2(forward).to + 1 });
+      expect(forward.view.state.doc.toString()).toBe('function get() {\n}');
+      expect(highlighted()).toEqual([]);
+      forward.update({ value: TEXT, highlightLines: [2] });
+      expect(highlighted()).toEqual([2]);
+      // Deleted from the line break before it through its end.
+      edit(forward, { from: line2(forward).from - 1, to: line2(forward).to });
+      expect(highlighted()).toEqual([]);
+    });
+
+    it('keeps the highlight on the merged line when two lines are joined', () => {
+      const editor = mount({ highlightLines: [2] });
+      const line2 = editor.view.state.doc.line(2);
+      // Backspace at the start of the highlighted line joins it to the line above.
+      edit(editor, { from: line2.from - 1, to: line2.from });
+      expect(lines().map((l) => l.textContent)).toEqual(['function get() {  return 1;', '}']);
+      expect(highlighted()).toEqual([1]);
+      // Delete at its end joins the next line onto it.
+      const line1 = editor.view.state.doc.line(1);
+      edit(editor, { from: line1.to, to: line1.to + 1 });
+      expect(highlighted()).toEqual([1]);
+    });
+
+    it('does not spill onto the next line when a split line loses its second half', () => {
+      const editor = mount({ highlightLines: [2] });
+      const line2 = editor.view.state.doc.line(2);
+      // Enter inside the highlighted line: both halves carry its code.
+      edit(editor, { from: line2.from + 4, insert: '\n' });
+      expect(highlighted()).toEqual([2, 3]);
+      // Deleting the second half's text leaves an empty line that is not part of the highlighted code.
+      const line3 = editor.view.state.doc.line(3);
+      edit(editor, { from: line3.from, to: line3.to });
+      expect(lines().map((l) => l.textContent)).toEqual(['function get() {', '  re', '', '}']);
+      expect(highlighted()).toEqual([2]);
+    });
+
+    it('moves highlights with an outside insert (Server Objects) and resets them on a new text', () => {
+      const { update } = mount({ highlightLines: [2] });
+      update({ value: `const x = 1;\n${TEXT}`, cursor: 13, highlightLines: null });
+      expect(highlighted()).toEqual([3]);
+      // A replaced text with its own lines takes those lines; the old ones are not carried over.
+      update({ value: `// recipe\n${TEXT}`, cursor: null, highlightLines: [1] });
+      expect(highlighted()).toEqual([1]);
+    });
+  });
+
   it('lets Esc then Tab leave the editor; plain Tab indents (F48)', () => {
     const { content } = mount();
     content.focus();

@@ -267,8 +267,8 @@ describe('runScan facts', () => {
     expect(facts.roles).toEqual({
       ok: true,
       value: [
-        { id: R_STAFF, name: 'both', anonymous: true, authenticated: true },
-        { id: R_AUTH, name: 'neither', anonymous: false, authenticated: false },
+        { id: R_STAFF, name: 'both', anonymous: true, authenticated: true, active: true },
+        { id: R_AUTH, name: 'neither', anonymous: false, authenticated: false, active: true },
       ],
     });
   });

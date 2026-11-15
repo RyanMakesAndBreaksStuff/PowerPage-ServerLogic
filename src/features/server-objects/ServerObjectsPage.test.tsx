@@ -32,10 +32,13 @@ describe('Server Objects page (Story 6)', () => {
     expect(screen.getByRole('region', { name: 'Permissions needed' })).toBeTruthy();
   });
 
-  it('shows "Not documented on Learn" for Server.User.fullname, not an invented return type (AC-6.5)', async () => {
+  it('shows no return type for Server.User.fullname, which Learn does not document (AC-6.5, D7)', async () => {
     const { user } = renderObjects(<ServerObjectsPage />);
     await user.click(pick('Server.User'));
-    expect(detail().textContent).toContain('Returns: Not documented on Learn');
+    expect(within(detail()).getByRole('radio', { name: 'fullname' }).getAttribute('aria-checked')).toBe(
+      'true',
+    );
+    expect(detail().textContent).not.toContain('Returns');
   });
 
   it('exposes the code sample as a named group (a11y)', () => {
@@ -136,16 +139,50 @@ describe('Server Objects page (Story 6)', () => {
 
     await user.click(pick('Server.Logger'));
     expect(within(detail()).getByRole('navigation').textContent).toBe('Server›LoggerObject');
-    expect(detail().textContent).toContain('Returns: Not documented on Learn');
+    expect(detail().textContent).not.toContain('Returns');
+    expect(
+      within(detail()).queryByRole('columnheader', { name: 'Context' }),
+    ).toBeNull();
   });
 
-  it('marks Context members by invocation context (FR-6)', async () => {
+  it('marks Context members by invocation context, in the pills and in every table row (FR-6)', async () => {
     const { user } = renderObjects(<ServerObjectsPage />);
     await user.click(pick('Server.Context'));
     expect(detail().textContent).toContain('HTTP and Liquid');
     await user.click(within(detail()).getByRole('radio', { name: 'Input' }));
     expect(detail().textContent).toContain('Liquid only');
-    expect(within(detail()).getByRole('table', { name: 'All properties' })).toBeTruthy();
+    const table = within(detail()).getByRole('table', { name: 'All properties' });
+    expect(within(table).getAllByRole('columnheader').map((th) => th.textContent)).toEqual([
+      'Name',
+      'Signature',
+      'Description',
+      'Context',
+    ]);
+    const contextOf = (name: string): string | undefined => {
+      const row = within(table).getByRole('button', { name }).closest('tr');
+      return row === null ? undefined : within(row).getAllByRole('cell').at(-1)?.textContent;
+    };
+    expect(contextOf('ActivityId')).toBe('HTTP and Liquid');
+    expect(contextOf('Body')).toBe('HTTP only');
+    expect(contextOf('Input')).toBe('Liquid only');
+    for (const row of within(table).getAllByRole('row').slice(1)) {
+      const cell = within(row).getAllByRole('cell').at(-1);
+      expect(cell?.textContent).toMatch(/^(HTTP and Liquid|HTTP only|Liquid only)$/);
+      expect(cell).toHaveAttribute('title', cell?.textContent);
+    }
+  });
+
+  it('puts the full text of truncated list and table values in a title (B4)', async () => {
+    const { user } = renderObjects(<ServerObjectsPage />);
+    const logger = pick('Server.Logger');
+    const path = logger.querySelector('.objects-item__path');
+    expect(path).toHaveAttribute('title', 'Server.Logger');
+    const meta = logger.querySelector('.objects-item__meta');
+    expect(meta).toHaveAttribute('title', meta?.textContent);
+    expect(meta?.getAttribute('title')).toMatch(/ · 3 methods$/);
+    await user.click(logger);
+    const table = within(detail()).getByRole('table', { name: 'All methods' });
+    expect(within(table).getByRole('button', { name: 'Warn' })).toHaveAttribute('title', 'Warn');
   });
 
   it('updates signature and sample from a member pill or a table row (AC-6.6)', async () => {

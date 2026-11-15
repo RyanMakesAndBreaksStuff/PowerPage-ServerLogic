@@ -14,19 +14,23 @@ const SEVERITY = {
   blocked: 'Blocked',
   'may-be-rejected': 'May be rejected',
 } as const satisfies Record<CheckSeverity, string>;
-const NO_LINES: readonly number[] = [];
 
 /** The editable server handler (AC-4.2, AC-4.3, AC-4.7 note, AC-4.10, AC-5.2). */
 export function ServerPane(): ReactElement {
   const { state, dispatch, derived } = useStarterSession();
   const { hits, parseFailed } = derived.checks;
-  // Highlight lines are positions in the generated text, so they show only while it is unedited.
-  const highlightLines = derived.edited ? NO_LINES : generateHandler(state.recipe).highlightLines;
+  // Highlight lines are positions in the generated text. They are set whenever the text is the
+  // generated text (recipe change, Start over); after an edit the editor keeps them on their code.
+  // Keying on generatedText alone would miss Start over on the same recipe, whose text is unchanged.
+  const highlightLines = derived.edited ? null : generateHandler(state.recipe).highlightLines;
+  const fileName = `${derived.slug}.js`;
 
   return (
     <Tile flush role="region" aria-label="Server handler" className="starter-pane">
       <div className="starter-pane__head">
-        <span className="ui-mono starter-pane__title">{derived.slug}.js</span>
+        <span className="ui-mono starter-pane__title" title={fileName}>
+          {fileName}
+        </span>
         <Pill tone="server" compact>
           Server
         </Pill>

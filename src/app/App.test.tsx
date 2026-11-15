@@ -41,6 +41,17 @@ describe('App shell', () => {
     expect(panel('starter')?.getAttribute('aria-labelledby')).toBe('tab-starter');
   });
 
+  it('releases all three pages and the site picker by default (FR-1, AC-1.7)', async () => {
+    await mount();
+    expect(screen.getAllByRole('tab')).toEqual([
+      screen.getByRole('tab', { name: 'Logic Starter' }),
+      screen.getByRole('tab', { name: 'Server Objects' }),
+      screen.getByRole('tab', { name: 'Logic Inspector' }),
+    ]);
+    for (const tab of screen.getAllByRole('tab')) expect(tab.hasAttribute('aria-disabled')).toBe(false);
+    expect(screen.getByRole('combobox', { name: 'Power Pages site' })).toBeTruthy();
+  });
+
   it('swaps the visible page immediately and keeps the others mounted (AC-1.4)', async () => {
     await mount();
     fireEvent.click(screen.getByRole('tab', { name: 'Server Objects' }));

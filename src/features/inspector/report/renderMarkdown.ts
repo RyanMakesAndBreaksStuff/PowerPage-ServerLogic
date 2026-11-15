@@ -25,6 +25,21 @@ function findingSection(section: ReportSection, siteScope: boolean): string[] {
   ];
 }
 
+// B1: the notes of Configured and Reviewed checks, one item per note, printed after the checks table.
+function notesSection(notes: readonly ReportSection[]): string[] {
+  if (notes.length === 0) return [];
+  return [
+    '### Notes',
+    '',
+    ...notes.flatMap((section) =>
+      section.detail.map(
+        (detail) => `- ${escapeInline(`${section.title}: ${section.fileName} — ${detail}`)}`,
+      ),
+    ),
+    '',
+  ];
+}
+
 function snapshotSection(snapshot: ReportSnapshot, siteScope: boolean): string[] {
   const title = siteScope
     ? `Configuration snapshot: ${snapshot.fileName}`
@@ -80,7 +95,11 @@ export function renderMarkdown(model: ReportModel): string {
       for (const check of row.checks)
         lines.push(tableRow([check.title, check.statusText, check.finding]));
     }
-    lines.push('', ...model.needsReview.flatMap((section) => findingSection(section, false)));
+    lines.push(
+      '',
+      ...notesSection(model.notes),
+      ...model.needsReview.flatMap((section) => findingSection(section, false)),
+    );
   } else {
     lines.push(
       tableRow([
@@ -96,7 +115,7 @@ export function renderMarkdown(model: ReportModel): string {
     for (const row of model.rows) {
       lines.push(tableRow([row.name, row.summary, ...row.checks.map(statusCell), row.result]));
     }
-    lines.push('', '### Review first', '');
+    lines.push('', ...notesSection(model.notes), '### Review first', '');
     lines.push(...model.reviewFirst.flatMap((section) => findingSection(section, true)));
   }
   if (model.notScanned.length > 0) {

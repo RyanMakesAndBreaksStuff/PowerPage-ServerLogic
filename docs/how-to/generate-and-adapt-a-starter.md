@@ -25,6 +25,8 @@ Changing recipes after editing the handler prompts before discarding your edits.
 
 3. In **Client call**, choose **fetch**, **jQuery**, or **Liquid** when enabled. HTTP clients call `/_api/serverlogics/{slug}`. The generated code includes request-verification-token handling and the recipe's example request. **Invoke from Liquid** uses the `serverlogic` Liquid tag instead of an endpoint, so its HTTP-method and JavaScript-client choices are disabled.
 
+![Starter input selectors: a logic name with its derived slug, the HTTP-method selector with a disabled method, and the client-call language selector](../assets/starter-inputs-selectors.png)
+
 ## Edit and adapt the handler
 
 Edit the **Server** pane directly, replacing sample identifiers, settings, service addresses, and business rules with your own values. The client pane is generated and read-only; it updates from the name, recipe, method, and language, and does not infer a new contract from arbitrary handler edits. Use **Copy server code** for the handler and **Copy client call** for the client, then adapt the client's example values in your page code.
@@ -55,6 +57,10 @@ Changing the handler text makes a previous review no longer apply unless the tex
 
 1. Choose **Download starter**.
 2. Select a location in the PPTB save dialog and save `{slug}.zip`. Cancelling leaves the session available for further editing.
+
+![The Download starter button with the Readiness count at 3/3](../assets/starter-download-dialog.png)
+
+The save dialog itself is provided by PPTB: choose a folder to save `{slug}.zip`, or cancel to leave the session intact with nothing saved.
 
 Extract the archive and open its `README.md`:
 
