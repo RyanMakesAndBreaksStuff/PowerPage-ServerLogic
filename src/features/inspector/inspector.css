@@ -1,0 +1,380 @@
+/* Logic Inspector, layout 10a on the Graphite tokens. Colours come only from the theme tokens. */
+
+/* Fills the tool below the 42px title bar; below the 1024×700 minimum the window scrolls (NFR). */
+.inspector {
+  box-sizing: border-box;
+  height: max(calc(100vh - 42px), 658px);
+  padding: 12px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  color: var(--text);
+}
+
+/* Notices: neutral, with a glyph and words, so a warning is never colour alone. */
+.inspector-banners {
+  flex: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  list-style: none;
+}
+
+.inspector-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--ghost);
+  border: 1px solid var(--control-border);
+  border-radius: 10px;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.inspector-notice .ui-icon {
+  margin-top: 2px;
+}
+
+/* Page states */
+.inspector .inspector-state {
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  text-align: center;
+}
+
+.inspector-state__title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.inspector-state__text {
+  max-width: 56ch;
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* Results */
+.inspector-results {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.inspector-grid {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 230px repeat(3, minmax(0, 1fr));
+  grid-template-rows: auto minmax(0, 1fr) minmax(0, 1fr);
+  gap: 14px;
+}
+
+.inspector .ui-tile {
+  padding: 18px;
+  border-radius: 12px;
+}
+
+/* Files tile */
+.inspector .inspector-rail {
+  grid-column: 1;
+  grid-row: 1 / 4;
+  gap: 6px;
+}
+
+.inspector-files {
+  flex: 1;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.inspector-file {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  color: var(--muted);
+  cursor: pointer;
+  font: inherit;
+  font-size: 12.5px;
+  text-align: left;
+}
+
+/* The selected file uses the primary role (FR-11), never the needs-review colour. */
+.inspector-file--selected {
+  background: var(--ghost);
+  border-color: var(--primary);
+  color: var(--text);
+}
+
+.inspector-file__name {
+  max-width: 100%;
+  overflow: hidden;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.inspector-file__meta {
+  font-size: 11px;
+}
+
+.inspector-rail__empty {
+  flex: 1;
+  margin: 0;
+  color: var(--muted);
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+.inspector-rail__footer {
+  margin: auto 0 0;
+  color: var(--muted);
+  font-size: 11.5px;
+  line-height: 1.5;
+}
+
+/* Title tile */
+.inspector .inspector-title {
+  grid-column: 2 / 5;
+  grid-row: 1;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+/* The text column shrinks so a long site or file name ellipsizes instead of pushing the actions off the tile. */
+.inspector-title__text {
+  flex: 1;
+  min-width: 0;
+}
+
+.inspector-title__actions {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.inspector-title__file {
+  overflow: hidden;
+  color: var(--text-2);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.inspector-title__heading {
+  margin: 8px 0 0;
+  font-size: 34px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+}
+
+.inspector-title__sub {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* Readiness ring */
+.inspector .inspector-ring {
+  grid-column: 2;
+  grid-row: 2 / 4;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+}
+
+.inspector-ring__legend {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  text-align: center;
+}
+
+/* Finding tiles: the whole tile is one button. */
+.inspector .inspector-finding {
+  padding: 0;
+}
+
+.inspector-finding--slot-0 {
+  grid-column: 3;
+  grid-row: 2;
+}
+
+.inspector-finding--slot-1 {
+  grid-column: 4;
+  grid-row: 2;
+}
+
+.inspector-finding--slot-2 {
+  grid-column: 3;
+  grid-row: 3;
+}
+
+.inspector-finding__button {
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  background: transparent;
+  border: 0;
+  border-radius: inherit;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+}
+
+/* The tile clips overflow, so the focus ring is drawn inside it. */
+.inspector-finding__button:focus-visible,
+.inspector-file:focus-visible {
+  outline-offset: -3px;
+}
+
+.inspector-finding__icon {
+  width: 30px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--ok-tint);
+  border: 1px solid var(--primary);
+  border-radius: 10px;
+  color: var(--primary-text);
+}
+
+.inspector-finding__title {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.inspector-finding__summary {
+  color: var(--muted);
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+.inspector-finding .ui-pill {
+  margin-top: auto;
+}
+
+/* Needs review (D-21 B): every such tile takes the review tint and border and carries the tinted "!" icon and
+   the word. Deliberate FR-11 interpretation: --review-tint marks the role on tiles as well as pills. */
+.inspector .inspector-finding--needs-review {
+  background: var(--review-tint);
+  border-color: var(--review);
+}
+
+.inspector-finding--needs-review .inspector-finding__icon {
+  background: var(--review-tint);
+  border-color: var(--review);
+  color: var(--review);
+}
+
+.inspector-finding--not-scanned {
+  border-style: dashed;
+}
+
+.inspector-finding--not-scanned .inspector-finding__icon {
+  background: transparent;
+  border-style: dashed;
+  border-color: var(--control-border);
+  color: var(--muted);
+}
+
+/* Selection (D-21 B): the selected tile takes the primary inset ring, on top of its tint when it needs review;
+   the focus-visible outline above is unchanged. */
+.inspector .inspector-finding[data-selected='true'] {
+  box-shadow: inset 0 0 0 2px var(--primary);
+}
+
+/* Detail tile: one 10a cell, scrollable. */
+.inspector .inspector-detail {
+  grid-column: 4;
+  grid-row: 3;
+  gap: 10px;
+  overflow-y: auto;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.inspector-detail p {
+  margin: 0;
+}
+
+.inspector-detail ul {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.inspector-detail__category {
+  color: var(--muted);
+}
+
+.inspector-detail__heading {
+  margin: 0 0 4px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.inspector-snapshot {
+  margin: 0;
+}
+
+.inspector-snapshot dt {
+  font-weight: 700;
+}
+
+.inspector-snapshot dd {
+  margin: 0 0 6px;
+  overflow-wrap: anywhere;
+}
+
+/* No file selected yet (D-03, D-18): one prompt where the ring, findings and detail will go. */
+.inspector .inspector-prompt {
+  grid-column: 2 / 5;
+  grid-row: 2 / 4;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: var(--muted);
+  text-align: center;
+}
+
+.inspector-prompt__text {
+  margin: 0;
+  font-size: 14px;
+}

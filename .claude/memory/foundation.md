@@ -15,7 +15,7 @@ before release (Logic Inspector).
 2. **Learn-verified accuracy.** Generated handlers, client calls and Server.* reference
    content match current Microsoft Learn. Any deliberate deviation is recorded as a
    numbered Learn correction in the spec.
-3. **Read-only, always.** Starter only produces downloads, and Inspector only reads.
+3. **Retrieval only, always.** Starter only produces downloads, and Inspector only retrieves (reads plus the two documented file-download actions, spec FR-7 4.1.0).
    Nothing is ever written to, published to or changed in an environment or site.
 4. **Generated code is secure by default.** Handlers fail closed when settings are
    missing. They never log bodies, exception messages, URLs or tokens, and they

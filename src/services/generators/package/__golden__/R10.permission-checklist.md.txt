@@ -1,0 +1,21 @@
+# Permission checklist for customer-summary
+
+For the Call a Dataverse custom API recipe. Review anything you've added.
+
+- [ ] Web role: A web role the caller holds
+- [ ] Table permission: account (entity set accounts): Read, Write, access type Account
+- [ ] Account relationship for account: maker verifies
+- [ ] Test users' contacts must have a parent account.
+- [ ] Replace the three placeholder API names.
+- [ ] The custom API's request and response parameters must match what the handler sends and reads.
+- [ ] Review what each API changes beyond the bound record.
+- [ ] The custom API must exist in the environment.
+- [ ] Which identity Dataverse checks for the API's ExecutePrivilegeName when server logic calls it is unverified: maker verifies.
+
+## Readiness
+
+2/3 ready
+
+✓ Browser checks
+✓ Validation
+! Needs attention: Permissions: not marked reviewed in Logic Starter; not checked against any environment

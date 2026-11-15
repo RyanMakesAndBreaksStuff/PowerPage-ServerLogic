@@ -1,0 +1,358 @@
+<style>
+  #processingMsg {
+    padding: 6px 12px;
+    background: #eee;
+    border-radius: 4px;
+    position: fixed;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: none;
+    z-index: 9999;
+    text-align: center;
+    font-weight: bold;
+  }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    margin-top: 10px;
+    font-family: Arial, sans-serif;
+  }
+  th, td {
+    border: 1px solid #ccc;
+    padding: 6px;
+    text-align: left;
+  }
+  button {
+    cursor: pointer;
+    border: 1px solid #aaa;
+    padding: 4px 8px;
+    border-radius: 4px;
+    background: #fff;
+    font-size: 14px;
+    margin-right: 2px;
+  }
+  button.add { color: green; }
+  button.save { color: green; }
+  button.cancel { color: orange; }
+  button.delete { color: red; }
+  input { width: 95%; box-sizing: border-box; }
+  td.actions { white-space: nowrap; }
+</style>
+<div id="processingMsg">Processing...</div>
+<div id="dataTable" data-slug="customer-summary"></div>
+<script id="demo-page-script">
+const ENDPOINT = "/_api/serverlogics/customer-summary";
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
+function errorText(payload) {
+  var text = payload && payload.message != null ? String(payload.message) : "";
+  if (payload && Array.isArray(payload.errors)) {
+    var extra = payload.errors
+      .map((item) => (item && item.message ? String(item.message) : ""))
+      .filter((item) => item !== "")
+      .join(" ");
+    if (extra) text = text ? text + " " + extra : extra;
+  }
+  return text;
+}
+
+function handleResponse(resp, onSuccess) {
+  if (!resp || typeof resp !== "object" || Array.isArray(resp)) {
+    alert("The response could not be read.");
+    return;
+  }
+  if (resp.success === false) {
+    alert(resp.error == null || resp.error === "" ? "Server logic not available" : String(resp.error));
+    return;
+  }
+  if (resp.success !== true || typeof resp.data !== "string") {
+    alert("The response could not be read.");
+    return;
+  }
+  var payload;
+  try {
+    payload = JSON.parse(resp.data);
+  } catch (e) {
+    alert("The response could not be read.");
+    return;
+  }
+  if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
+    alert("The response could not be read.");
+    return;
+  }
+  if (payload.status === "success") {
+    onSuccess(payload);
+    return;
+  }
+  alert(errorText(payload) || "Application response failed.");
+}
+
+function installSafeAjax(webapi, $) {
+  function safeAjax(ajaxOptions) {
+    var deferred = $.Deferred();
+    shell
+      .getTokenDeferred()
+      .done((token) => {
+        ajaxOptions.headers = ajaxOptions.headers || {};
+        ajaxOptions.headers["__RequestVerificationToken"] = token;
+        $.ajax(ajaxOptions)
+          .done((data, textStatus, jqXHR) => {
+            validateLoginSession(data, textStatus, jqXHR, deferred.resolve);
+          })
+          .fail(deferred.reject);
+      })
+      .fail(function rejectToken() {
+        deferred.rejectWith(this, arguments);
+      });
+    return deferred.promise();
+  }
+  webapi.safeAjax = safeAjax;
+}
+
+jQuery(function initPage() {
+  installSafeAjax(window.webapi = window.webapi || {}, jQuery);
+  var notify = createNotify();
+  function createNotify() {
+    var message = $("#processingMsg");
+    var depth = 0;
+    var timer;
+    return {
+      show: (text) => {
+        message.text(text || "Processing...");
+        if (!depth) {
+          clearTimeout(timer);
+          message.show();
+        }
+        depth += 1;
+      },
+      hide: () => {
+        depth = Math.max(0, depth - 1);
+        if (!depth) {
+          clearTimeout(timer);
+          timer = setTimeout(() => {
+            message.hide();
+          }, 300);
+        }
+      },
+    };
+  }
+  function ajaxCall(msg, opts, onSuccess) {
+    notify.show(msg);
+    var request = Object.assign({}, opts, {
+      success: (resp) => {
+        handleResponse(resp, onSuccess);
+      },
+    });
+    return webapi
+      .safeAjax(request)
+      .fail((r) => {
+        var message = r && r.responseJSON && r.responseJSON.error && r.responseJSON.error.message;
+        alert(message || "Server logic not available");
+      })
+      .always(notify.hide);
+  }
+  var cols = [
+    { name: "firstname", label: "First Name" },
+    { name: "lastname", label: "Last Name" },
+    { name: "emailaddress1", label: "Email" },
+    { name: "telephone1", label: "Telephone" },
+  ];
+  var data = [];
+  function render() {
+    var head = cols.map((col) => "<th>" + escapeHtml(col.label) + "</th>").join("");
+    var body = data
+      .map((row) => {
+        var cells = cols
+          .map((col) => {
+            var raw = row[col.name] == null ? "" : String(row[col.name]);
+            return (
+              '<td data-attribute="' +
+              escapeHtml(col.name) +
+              '" data-value="' +
+              escapeHtml(raw) +
+              '">' +
+              escapeHtml(raw) +
+              "</td>"
+            );
+          })
+          .join("");
+        return (
+          '<tr data-id="' +
+          escapeHtml(row.id) +
+          '" data-name="' +
+          escapeHtml(row.fullname) +
+          '">' +
+          cells +
+          '<td class="actions"><button class="delete">🗑️</button></td></tr>'
+        );
+      })
+      .join("");
+    $("#dataTable").html(
+      "<table><thead><tr>" +
+        head +
+        '<th>Actions <button class="add">➕</button></th></tr></thead><tbody>' +
+        body +
+        "</tbody></table>",
+    );
+  }
+  function addRecord(row) {
+    data.unshift(row);
+    render();
+  }
+  function beginEdit() {
+    var tr = $(this);
+    if (tr.hasClass("editing")) return;
+    tr.addClass("editing");
+    tr.data(
+      "original",
+      tr
+        .find("td[data-attribute]")
+        .map(function readCell() {
+          return $(this).text();
+        })
+        .get(),
+    );
+    tr.find("td[data-attribute]").each(function editCell() {
+      var td = $(this);
+      var attr = String(td.attr("data-attribute"));
+      var col = cols.find((item) => item.name === attr);
+      if (col && col.editable === false) return;
+      var oldVal = td.text();
+      td.html(
+        '<input type="text" value="' +
+          escapeHtml(oldVal) +
+          '" data-attr="' +
+          escapeHtml(attr) +
+          '" />',
+      );
+    });
+    tr.find("td.actions").append(
+      '<button class="save">✅</button><button class="cancel">❌</button>',
+    );
+  }
+  function cancelEdit() {
+    var tr = $(this).closest("tr");
+    var original = tr.data("original") || [];
+    tr.find("td[data-attribute]").each(function restoreCell(index) {
+      $(this).text(original[index]);
+    });
+    tr.removeClass("editing");
+    tr.find("button.save, button.cancel").remove();
+  }
+  function saveClick() {
+    var tr = $(this).closest("tr");
+    var id = String(tr.attr("data-id") || "");
+    var updates = {};
+    tr.find("input").each(function readInput() {
+      var input = $(this);
+      updates[String(input.data("attr"))] = input.val();
+    });
+    function applyUpdate(payload) {
+      if (payload.status === "success") {
+        var row = data.find((item) => item.id === id);
+        if (!row) return;
+        Object.assign(row, updates);
+        row.fullname = (row.firstname || "") + " " + (row.lastname || "");
+        render();
+      }
+    }
+    ajaxCall(
+      "Updating...",
+      {
+        type: "PUT",
+        url: ENDPOINT + "?entitySetName=contacts&id=" + encodeURIComponent(id),
+        contentType: "application/json",
+        data: JSON.stringify(updates),
+      },
+      applyUpdate,
+    );
+  }
+  function removeClick() {
+    var tr = $(this).closest("tr");
+    var id = String(tr.attr("data-id") || "");
+    var name = String(tr.attr("data-name") || "");
+    if (!confirm('Delete "' + name + '"?')) return;
+    function applyDelete(payload) {
+      if (payload.status === "success") {
+        data = data.filter((item) => item.id !== id);
+        render();
+      }
+    }
+    ajaxCall(
+      "Deleting...",
+      {
+        type: "DELETE",
+        url: ENDPOINT + "?entitySetName=contacts&id=" + encodeURIComponent(id),
+        contentType: "application/json",
+      },
+      applyDelete,
+    );
+  }
+  function addClick() {
+    var row = {
+      firstname: "Alton",
+      lastname: "Stott" + Math.floor(Math.random() * 900 + 100),
+      emailaddress1: "Alton.Stott@contoso.com",
+      telephone1: "555-123-4567",
+    };
+    function applyCreate(payload) {
+      if (payload.status === "success") {
+        row.id = payload.id;
+        row.contactid = payload.id;
+        row.fullname = row.firstname + " " + row.lastname;
+        addRecord(row);
+      }
+    }
+    ajaxCall(
+      "Adding...",
+      {
+        type: "POST",
+        url: ENDPOINT + "?entitySetName=contacts",
+        contentType: "application/json",
+        data: JSON.stringify(row),
+      },
+      applyCreate,
+    );
+  }
+  function applyRows(payload) {
+    if (payload.status === "success") {
+      var rows = Array.isArray(payload.data) ? payload.data : [];
+      data = rows.map((row) => ({
+        id: row.contactid,
+        contactid: row.contactid,
+        fullname: row.fullname,
+        firstname: row.firstname,
+        lastname: row.lastname,
+        emailaddress1: row.emailaddress1,
+        telephone1: row.telephone1,
+      }));
+      render();
+    }
+  }
+  $("#dataTable").on("dblclick", "tr", beginEdit);
+  $("#dataTable").on("click", ".save", saveClick);
+  $("#dataTable").on("click", ".cancel", cancelEdit);
+  $("#dataTable").on("click", ".delete", removeClick);
+  $("#dataTable").on("click", ".add", addClick);
+  ajaxCall(
+    "Loading...",
+    {
+      type: "GET",
+      url:
+        ENDPOINT +
+        "?entitySetName=contacts&additionalParameters=$select=contactid,fullname,firstname,lastname,emailaddress1,telephone1",
+      contentType: "application/json",
+    },
+    applyRows,
+  );
+});
+</script>

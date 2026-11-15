@@ -1,0 +1,30 @@
+// R3: Call an external API
+
+const toResult = r => typeof r === "string" ? JSON.parse(r) : r;
+
+async function get() {
+  try {
+    const q = Server.Context.QueryParameters["q"] ?? "";
+    if (typeof q !== "string" || q.length > 100) {
+      const errors = [{ field: "q", message: "q must be 100 characters or fewer." }];
+      return JSON.stringify({ status: "error", message: "The request isn't valid.", errors: errors });
+    }
+    const externalApiBaseUrl = Server.SiteSetting.Get("ExternalApi/BaseUrl");
+    if (!externalApiBaseUrl) {
+      Server.Logger.Error("Missing site setting ExternalApi/BaseUrl");
+      return JSON.stringify({ status: "error", message: "Server logic isn't configured: missing site setting ExternalApi/BaseUrl" });
+    }
+    // The site setting must not contain a query string.
+    const url = q === "" ? externalApiBaseUrl : externalApiBaseUrl + "?q=" + encodeURIComponent(q);
+    const r = toResult(await Server.Connector.HttpClient.GetAsync(url, { Accept: "application/json" }));
+    if (!r.IsSuccessStatusCode) {
+      Server.Logger.Error("R3 get" + " " + r.StatusCode + " " + r.ReasonPhrase);
+      return JSON.stringify({ status: "error", message: "The external API call failed." });
+    }
+    const data = r.Body ? JSON.parse(r.Body) : null;
+    return JSON.stringify({ status: "success", data });
+  } catch (e) {
+    Server.Logger.Error("R3 get" + " " + e.name);
+    return JSON.stringify({ status: "error", message: "The external API call failed." });
+  }
+}

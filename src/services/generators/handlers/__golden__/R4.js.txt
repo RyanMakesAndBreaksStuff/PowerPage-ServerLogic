@@ -1,0 +1,199 @@
+// R4: Dataverse CRUD
+// Learn: https://learn.microsoft.com/en-us/power-pages/configure/server-logic-operations
+
+const toResult = r => typeof r === "string" ? JSON.parse(r) : r;
+const isGuid = s => typeof s === "string" && /^[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}$/.test(s);
+const ALLOWED_ENTITY_SETS = ["contacts"];
+
+const OPTION_SEGMENT = /^\$(select|filter|top|orderby|expand)=/;
+const TOP_VALUE = /^[1-9][0-9]?$/;
+
+const checkOptions = (raw) => {
+  if (raw === undefined || raw === null || raw === "") return { ok: true, value: "" };
+  if (typeof raw !== "string" || raw.length > 500) return { ok: false, value: "" };
+  const parts = raw.split("&");
+  const seen = {};
+  for (const part of parts) {
+    const matched = OPTION_SEGMENT.exec(part);
+    if (!matched) return { ok: false, value: "" };
+    const name = matched[1];
+    if (seen[name]) return { ok: false, value: "" };
+    seen[name] = true;
+    if (name === "top") {
+      const value = part.slice(matched[0].length);
+      if (!TOP_VALUE.test(value) || Number(value) > 50) return { ok: false, value: "" };
+    }
+  }
+  return { ok: true, value: raw };
+};
+
+const readObjectBody = () => {
+  try {
+    const parsed = JSON.parse(Server.Context.Body);
+    if (parsed !== null && typeof parsed === "object" && !Array.isArray(parsed)) return parsed;
+    return null;
+  } catch (parseError) {
+    return null;
+  }
+};
+
+const collectEntitySet = (errors) => {
+  const entitySetName = Server.Context.QueryParameters["entitySetName"];
+  if (ALLOWED_ENTITY_SETS.indexOf(entitySetName) === -1) {
+    errors.push({ field: "entitySetName", message: "entitySetName is not in the allowlist." });
+  }
+  return entitySetName;
+};
+
+const collectRequiredId = (errors) => {
+  const id = Server.Context.QueryParameters["id"];
+  if (!isGuid(id)) {
+    errors.push({ field: "id", message: "id must be a GUID." });
+  }
+  return id;
+};
+
+const collectBody = (errors) => {
+  const parsedBody = readObjectBody();
+  if (parsedBody === null) {
+    errors.push({ field: "body", message: "Body must be a JSON object." });
+  }
+  return parsedBody;
+};
+
+const withoutAnnotationKeys = (body) => {
+  const kept = {};
+  for (const key of Object.keys(body)) {
+    if (key.indexOf("@") === -1) kept[key] = body[key];
+  }
+  return kept;
+};
+
+function get() {
+  try {
+    Server.Logger.Log("R4 get" + " " + Server.Context.ActivityId);
+    const errors = [];
+    const entitySetName = collectEntitySet(errors);
+    const idValue = Server.Context.QueryParameters["id"];
+    const hasId = idValue !== undefined && idValue !== null && idValue !== "";
+    if (hasId && !isGuid(idValue)) {
+      errors.push({ field: "id", message: "id must be a GUID." });
+    }
+    const rawOptions = Server.Context.QueryParameters["additionalParameters"];
+    const checked = checkOptions(rawOptions);
+    if (!checked.ok) {
+      errors.push({ field: "additionalParameters", message: "additionalParameters must be allowed OData options of at most 500 characters." });
+    }
+    if (errors.length > 0) {
+      return JSON.stringify({ status: "error", message: "The request isn't valid.", errors: errors });
+    }
+    if (hasId) {
+      const r = toResult(Server.Connector.Dataverse.RetrieveRecord(entitySetName, idValue, checked.value));
+      if (!r || !r.IsSuccessStatusCode) {
+        if (r) {
+          Server.Logger.Error("R4 get" + " " + r.StatusCode + " " + r.ReasonPhrase);
+        }
+        return JSON.stringify({ status: "error", message: "The contact couldn't be read." });
+      }
+      const data = r.Body ? JSON.parse(r.Body) : null;
+      return JSON.stringify({ status: "success", data });
+    }
+    let options = checked.value;
+    if (!/(^|&)\$top=/.test(options)) {
+      options = options === "" ? "$top=10" : options + "&$top=10";
+    }
+    const r = toResult(Server.Connector.Dataverse.RetrieveMultipleRecords(entitySetName, options));
+    if (!r || !r.IsSuccessStatusCode) {
+      if (r) {
+        Server.Logger.Error("R4 get" + " " + r.StatusCode + " " + r.ReasonPhrase);
+      }
+      return JSON.stringify({ status: "error", message: "The contact couldn't be read." });
+    }
+    let data = null;
+    if (r.Body) {
+      const parsed = JSON.parse(r.Body);
+      data = parsed && Array.isArray(parsed.value) ? parsed.value : null;
+    }
+    return JSON.stringify({ status: "success", data });
+  } catch (e) {
+    Server.Logger.Error("R4 get" + " " + e.name);
+    return JSON.stringify({ status: "error", message: "The contact couldn't be read." });
+  }
+}
+
+function post() {
+  try {
+    Server.Logger.Log("R4 post" + " " + Server.Context.ActivityId);
+    const errors = [];
+    const entitySetName = collectEntitySet(errors);
+    const parsedBody = collectBody(errors);
+    if (errors.length > 0) {
+      return JSON.stringify({ status: "error", message: "The request isn't valid.", errors: errors });
+    }
+    const record = withoutAnnotationKeys(parsedBody);
+    const r = toResult(Server.Connector.Dataverse.CreateRecord(entitySetName, JSON.stringify(record)));
+    if (!r || !r.IsSuccessStatusCode) {
+      if (r) {
+        Server.Logger.Error("R4 post" + " " + r.StatusCode + " " + r.ReasonPhrase);
+      }
+      return JSON.stringify({ status: "error", message: "The contact couldn't be created." });
+    }
+    const id = r.Headers && (r.Headers.entityid ?? r.Headers.entityId);
+    if (!id) {
+      Server.Logger.Error("R4 post");
+      return JSON.stringify({ status: "error", message: "The contact couldn't be created." });
+    }
+    return JSON.stringify({ status: "success", id });
+  } catch (e) {
+    Server.Logger.Error("R4 post" + " " + e.name);
+    return JSON.stringify({ status: "error", message: "The contact couldn't be created." });
+  }
+}
+
+function put() {
+  try {
+    Server.Logger.Log("R4 put" + " " + Server.Context.ActivityId);
+    const errors = [];
+    const entitySetName = collectEntitySet(errors);
+    const id = collectRequiredId(errors);
+    const parsedBody = collectBody(errors);
+    if (errors.length > 0) {
+      return JSON.stringify({ status: "error", message: "The request isn't valid.", errors: errors });
+    }
+    const record = withoutAnnotationKeys(parsedBody);
+    const r = toResult(Server.Connector.Dataverse.UpdateRecord(entitySetName, id, JSON.stringify(record)));
+    if (!r || !r.IsSuccessStatusCode) {
+      if (r) {
+        Server.Logger.Error("R4 put" + " " + r.StatusCode + " " + r.ReasonPhrase);
+      }
+      return JSON.stringify({ status: "error", message: "The contact couldn't be updated." });
+    }
+    return JSON.stringify({ status: "success" });
+  } catch (e) {
+    Server.Logger.Error("R4 put" + " " + e.name);
+    return JSON.stringify({ status: "error", message: "The contact couldn't be updated." });
+  }
+}
+
+function del() {
+  try {
+    Server.Logger.Log("R4 del" + " " + Server.Context.ActivityId);
+    const errors = [];
+    const entitySetName = collectEntitySet(errors);
+    const id = collectRequiredId(errors);
+    if (errors.length > 0) {
+      return JSON.stringify({ status: "error", message: "The request isn't valid.", errors: errors });
+    }
+    const r = toResult(Server.Connector.Dataverse.DeleteRecord(entitySetName, id));
+    if (!r || !r.IsSuccessStatusCode) {
+      if (r) {
+        Server.Logger.Error("R4 del" + " " + r.StatusCode + " " + r.ReasonPhrase);
+      }
+      return JSON.stringify({ status: "error", message: "The contact couldn't be removed." });
+    }
+    return JSON.stringify({ status: "success" });
+  } catch (e) {
+    Server.Logger.Error("R4 del" + " " + e.name);
+    return JSON.stringify({ status: "error", message: "The contact couldn't be removed." });
+  }
+}

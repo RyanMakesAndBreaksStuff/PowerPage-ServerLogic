@@ -1,0 +1,132 @@
+<style>
+  .sl-card {
+    max-width: 360px;
+    padding: 16px;
+    border: 1px solid #e1e1e1;
+    border-radius: 6px;
+    background: #fff;
+    font-family: Segoe UI, Arial, sans-serif;
+  }
+  .sl-card h3 {
+    margin: 0 0 10px;
+    font-size: 16px;
+    color: #323130;
+  }
+  .sl-row {
+    display: flex;
+    gap: 8px;
+  }
+  .sl-row input {
+    flex: 1;
+    padding: 6px 8px;
+    border: 1px solid #c8c6c4;
+    border-radius: 4px;
+    font-size: 14px;
+  }
+  .sl-row button {
+    padding: 6px 12px;
+    border: 0;
+    border-radius: 4px;
+    background: #0078d4;
+    color: #fff;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  .sl-row button:hover {
+    background: #106ebe;
+  }
+  .sl-result {
+    margin-top: 10px;
+    font-size: 14px;
+    color: #323130;
+  }
+  .sl-error {
+    color: #a80000;
+  }
+</style>
+<div class="sl-card" data-slug="customer-summary">
+  <h3>Test Server Logic</h3>
+  <div class="sl-row">
+    <input id="nameInput" placeholder="Name" />
+    <button id="callBtn">Call</button>
+  </div>
+  <div id="result" class="sl-result"></div>
+</div>
+<script id="demo-page-script">
+const ENDPOINT = "/_api/serverlogics/customer-summary";
+
+function errorText(payload) {
+  var text = payload && payload.message != null ? String(payload.message) : "";
+  if (payload && Array.isArray(payload.errors)) {
+    var extra = payload.errors
+      .map((item) => (item && item.message ? String(item.message) : ""))
+      .filter((item) => item !== "")
+      .join(" ");
+    if (extra) text = text ? text + " " + extra : extra;
+  }
+  return text;
+}
+
+function showResult(text, isError) {
+  var result = document.getElementById("result");
+  result.textContent = text;
+  result.className = isError ? "sl-result sl-error" : "sl-result";
+}
+
+function showEnvelope(resp) {
+  if (!resp || typeof resp !== "object" || Array.isArray(resp)) {
+    showResult("The response could not be read.", true);
+    return;
+  }
+  if (resp.success === false) {
+    showResult(
+      resp.error == null || resp.error === "" ? "Server logic not available" : String(resp.error),
+      true,
+    );
+    return;
+  }
+  if (resp.success !== true || typeof resp.data !== "string") {
+    showResult("The response could not be read.", true);
+    return;
+  }
+  var payload;
+  try {
+    payload = JSON.parse(resp.data);
+  } catch (e) {
+    showResult("The response could not be read.", true);
+    return;
+  }
+  if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
+    showResult("The response could not be read.", true);
+    return;
+  }
+  if (payload.status === "success") {
+    showResult(payload.message == null ? "" : String(payload.message), false);
+    return;
+  }
+  showResult(errorText(payload) || "Application response failed.", true);
+}
+
+function callServer() {
+  var nameInput = document.getElementById("nameInput");
+  var name = nameInput.value || "World";
+  showResult("Loading...", false);
+  shell.getTokenDeferred().done((token) => {
+    fetch(ENDPOINT + "?name=" + encodeURIComponent(name), {
+      method: "GET",
+      headers: { "__RequestVerificationToken": token },
+    })
+      .then((res) => res.json())
+      .then((resp) => {
+        showEnvelope(resp);
+      })
+      .catch(() => {
+        showResult("Request failed", true);
+      });
+  }).fail(() => {
+    showResult("Request failed", true);
+  });
+}
+
+document.getElementById("callBtn").onclick = callServer;
+</script>

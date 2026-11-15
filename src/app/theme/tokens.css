@@ -1,0 +1,110 @@
+/*
+ * 1a Graphite palette using the layout 10a token roles (spec FR-11). Phase 06 imports this file once from the
+ * entry point and sets data-theme="light" or "dark" on the html element. Without the attribute the
+ * light theme applies, which is also the launch default when the host cannot answer (AC-1.6).
+ */
+
+/* JetBrains Mono's font-face rules live in src/assets/fonts/fonts.css (Phase 00, woff2). */
+:root {
+  --font-ui: 'Segoe UI Variable Text', 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+}
+
+/* Light: 1a Graphite. */
+:root,
+[data-theme='light'] {
+  color-scheme: light;
+  --window: #f6f6f6;
+  --window-bg: var(--window);
+  --surface: #fbfbfb;
+  --tile: #ffffff;
+  --tile-glass: transparent;
+  --tile-blur: none;
+  --tile-shadow: none;
+  --code: #ececec;
+  --border: #cfcfcf;
+  --control-border: #666666;
+  --text: #0a0a0a;
+  --text-2: #333333;
+  --muted: #555555;
+  --primary: #111111;
+  --primary-text: #111111;
+  --on-primary: #ffffff;
+  --ok-tint: #e2e2e2;
+  --review: #a8281f;
+  --review-tint: #f5e5e4;
+  --server: #0a5aa8;
+  --server-tint: #e2ebf5;
+  --string: #17663f;
+  --keyword: #2a4bb0;
+  --comment: #555555;
+  --ghost: #eeeeee;
+  --tooltip-bg: #111111;
+  --tooltip-text: #ffffff;
+  --scrim: rgba(0, 0, 0, 0.45);
+  --code-highlight: color-mix(in srgb, var(--primary) 10%, var(--code));
+}
+
+/* Dark: 1a Graphite. Must stay after the light block: both match the html element. */
+[data-theme='dark'] {
+  color-scheme: dark;
+  --window: #000000;
+  --window-bg: var(--window);
+  --surface: #060606;
+  --tile: #0f0f0f;
+  --tile-glass: transparent;
+  --tile-blur: none;
+  --tile-shadow: none;
+  --code: #000000;
+  --border: #3a3a3a;
+  --control-border: #a0a0a0;
+  --text: #fafafa;
+  --text-2: #d4d4d4;
+  --muted: #a5a5a5;
+  --primary: #f2f2f2;
+  --primary-text: #f2f2f2;
+  --on-primary: #0a0a0a;
+  --ok-tint: #333333;
+  --review: #ff8f86;
+  --review-tint: #352422;
+  --server: #8ec5ff;
+  --server-tint: #232c35;
+  --string: #62d69b;
+  --keyword: #92b2ff;
+  --comment: #a5a5a5;
+  --ghost: #191919;
+  --tooltip-bg: #f2f2f2;
+  --tooltip-text: #0a0a0a;
+  --scrim: rgba(0, 0, 0, 0.62);
+  --code-highlight: color-mix(in srgb, var(--primary) 10%, var(--code));
+}
+
+body {
+  margin: 0;
+  min-width: 1024px;
+  min-height: 700px;
+  background: var(--window-bg);
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-weight: 600;
+}
+
+[data-theme='dark'] body {
+  background-attachment: fixed;
+}
+
+/* AC-1.5: every focusable control, pills included. */
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.ui-mono {
+  font-family: var(--font-mono);
+}
+
+/* Highlighted code lines: 10% primary over the code surface plus a 2px inset primary bar (FR-11). */
+.ui-code-highlight {
+  background: var(--code-highlight);
+  box-shadow: inset 2px 0 0 var(--primary);
+}

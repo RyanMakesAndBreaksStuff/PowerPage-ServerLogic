@@ -1,0 +1,17 @@
+{
+  "name": "Real Inspector scan of the Dev site (RG-004 baseline)",
+  "vars": { "toolPath": "C:/Users/RyanDev/source/repos/Server Logic" },
+  "steps": [
+    { "name": "open the built tool with the Dev connection", "open": { "localPath": "{{toolPath}}", "connectionName": "{{connectionName}}" }, "as": "tool", "critical": true },
+    { "name": "remove intercepts left by an earlier run", "clearIntercepts": "all" },
+    { "name": "mark host calls (c0)", "calls": "{{tool}}", "mark": "c0", "expect": { "type": "array" } },
+    { "name": "open Logic Inspector", "eval": "(document.querySelector('#tab-inspector').click(), true)" },
+    { "name": "Inspector shows Select a site", "eval": "[...document.querySelectorAll('#panel-inspector h2')].map((h) => h.textContent.trim())", "waitFor": { "timeoutMs": 30000 }, "expect": { "contains": "Select a site" } },
+    { "name": "open the site picker", "eval": "(document.querySelector('[role=combobox][aria-label=\"Power Pages site\"]').click(), true)" },
+    { "name": "pick the Dev site and start the clock", "eval": "(window.__probeScanStart = performance.now(), [...document.querySelectorAll('[role=listbox][aria-label=\"Power Pages site\"] [role=option]')].find((o) => o.textContent.includes('{{siteName}}')).click(), true)", "waitFor": { "timeoutMs": 5000 }, "expect": { "equals": true } },
+    { "name": "Inspector shows results", "eval": "[...document.querySelectorAll('#panel-inspector h2')].map((h) => h.textContent.trim())", "waitFor": { "timeoutMs": 120000 }, "expect": { "contains": "Review server logic readiness" } },
+    { "name": "real scan wall time ms", "eval": "Math.round(performance.now() - window.__probeScanStart)", "expect": { "type": "number" }, "report": true },
+    { "name": "download calls for latency analysis", "calls": "{{tool}}", "channel": "dataverse.execute", "since": "{{c0}}", "limit": 2000, "expect": { "type": "array" }, "report": true },
+    { "name": "dataverse.execute only runs InitializeFileBlocksDownload and DownloadBlock", "calls": "{{tool}}", "channel": "dataverse.execute", "since": "{{c0}}", "limit": 2000, "argsExcludes": ["InitializeFileBlocksDownload", "DownloadBlock"], "expect": { "length": 0 } }
+  ]
+}

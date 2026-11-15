@@ -1,0 +1,81 @@
+# customer-summary
+
+Dataverse CRUD
+
+## Set up
+
+1. Set up a workspace.
+2. Open Server logic.
+3. Select + New server logic.
+4. Name it exactly `customer-summary`. That name is the API resource name.
+5. Select + Add roles and add a web role the caller holds.
+6. Select Edit code, then Open Visual Studio Code.
+7. Replace the file content with `customer-summary.js` and save.
+8. Configure the site settings, allowed domains and table permissions as listed in permission-checklist.md.
+9. Paste `customer-summary.client.js` into a page's custom JavaScript.
+10. Use `customer-summary.page.html` as the reference page for these calls.
+
+## Endpoint
+
+`/_api/serverlogics/customer-summary`
+
+## Request path
+
+Page script fetch() → Token __RequestVerificationToken → Endpoint /_api/serverlogics/customer-summary → Handler function get() → Returns JSON string
+
+## Learn
+
+https://learn.microsoft.com/en-us/power-pages/configure/server-logic-operations
+https://learn.microsoft.com/en-us/power-pages/configure/server-logic-overview
+https://learn.microsoft.com/en-us/power-pages/configure/author-server-logic
+
+## Browser checks
+
+Line 200: `debugger` (Blocked)
+
+This is a text-pattern check, not a compile or a runtime test.
+
+## Validation
+
+Validation isn't authorization; table permissions are.
+
+Generated validation; edits aren't rechecked.
+
+## Readiness
+
+2/3 ready
+
+! Needs attention: Browser checks
+✓ Validation
+✓ Permissions: marked reviewed in Logic Starter; not checked against any environment
+
+## Troubleshooting
+
+- The `x-ms-user-trace` response header holds base64 JSON, a list of `{ Level, MessageCode, Message }`, including `Server.Logger` output.
+- An `RTSL01` validation error means the whole file doesn't run and the caller gets HTTP 400.
+- HTTP 403 when the tenant's "Disable external service calls from Server Logic" governance control is on: https://learn.microsoft.com/en-us/power-pages/security/disable-external-service-calls
+
+## Secrets
+
+Hold secrets in Azure Key Vault, surface them through an environment variable, and reference them through a site setting. The generated code never holds a literal secret.
+
+## Prerequisites
+
+- Test users' contacts must have a parent account.
+
+## Differences from Learn
+
+- Allowlist and GUID check Reason: Learn reads entitySetName and id straight from the query string, so any caller can name any table. The handler allows only contacts and checks id with isGuid.
+- put uses entitySetName Reason: Learn's put snippet hardcodes the accounts table. The full listing and this handler use the allowlisted entitySetName.
+- Reworded comments Reason: Learn comments include a word the runtime rejects as a restricted pattern. This handler keeps comments to the header.
+- Narrower table permissions Reason: Learn grants Read, Write, Create and Delete as Global. This recipe uses Account access for Read, Write and Delete, plus Global Create only, because Learn binds no account on create.
+- $top default 10, cap 50 and option rules Reason: A list read without $top gets $top=10. $top must be an integer from 1 to 50. Only $select, $filter, $top, $orderby and $expand are accepted, each once, in at most 500 characters.
+- Fixed return shape Reason: Learn returns the connector result. This handler returns status success with data or id, or status alone for put and del, and a fixed message on failure.
+- No exception text in logs Reason: Learn logs err.message, which can reach the browser. This handler logs the operation name, ActivityId, e.name, StatusCode and ReasonPhrase only.
+- toResult and status checks Reason: A connector result may be a JSON string. Every call goes through toResult and is rejected when IsSuccessStatusCode is false, including a blocked call.
+- Ampersand inside a $filter value is not supported Reason: Options are split on &. A filter value that itself contains & is rejected rather than passed through.
+
+## Notes
+
+- The Global Create grant is expected, and Logic Inspector flags it.
+- The new contact isn't readable through the Account-scoped permission until it's linked to the caller's account.

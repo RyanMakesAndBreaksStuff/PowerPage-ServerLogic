@@ -1,0 +1,116 @@
+.shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.shell__titlebar {
+  height: 42px;
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  padding-left: 14px;
+  flex: none;
+}
+
+/* The app glyph: a small primary/review ring (10a title bar). */
+.shell__glyph {
+  align-self: center;
+  margin-right: 10px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  flex: none;
+  background: conic-gradient(var(--primary) 0 200deg, var(--review) 200deg);
+  mask: radial-gradient(circle, transparent 4px, #000 4.5px);
+}
+
+.shell__name {
+  align-self: center;
+  font-size: 12px;
+  margin-right: 14px;
+  white-space: nowrap;
+}
+
+.shell__tabs {
+  display: flex;
+  gap: 2px;
+}
+
+.shell__tab {
+  height: 32px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 8px 8px 0 0;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font: inherit;
+  font-size: 12.5px;
+  color: var(--muted);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.shell__tab--selected {
+  background: var(--surface);
+  color: var(--text);
+}
+
+.shell__tab[aria-disabled='true'] {
+  cursor: default;
+  opacity: 0.55;
+}
+
+.shell__tab:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.shell__tab-icon {
+  display: inline-flex;
+}
+
+.shell__tab-icon--starter {
+  color: var(--text);
+}
+
+.shell__tab-icon--objects {
+  color: var(--server);
+}
+
+.shell__tab-icon--inspector {
+  color: var(--review);
+}
+
+.shell__context {
+  margin-left: auto;
+  align-self: center;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding-right: 18px;
+  font-size: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+  min-width: 0;
+}
+
+/* A long connection name is cut with an ellipsis (its full text is the tooltip) so the site picker stays on screen. */
+.shell__connection {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.shell__content {
+  flex: 1;
+  min-height: 0;
+  background: var(--surface);
+}
+
+.shell__page-error {
+  margin: 16px;
+  color: var(--text);
+}

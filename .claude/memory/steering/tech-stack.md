@@ -14,7 +14,7 @@ Host: **Power Platform ToolBox (PPTB)** tool — a web app running in a sandboxe
 Docs: https://docs.powerplatformtoolbox.com/tool-development · https://github.com/PowerPlatformToolBox/pptb-agent-skills/tree/main/tool-dev
 
 ## Infrastructure
-No backend. All Dataverse/Power Pages reads go through PPTB host APIs (read-only). Distributed as an npm package and submitted to the PPTB registry. Build: Vite via the `yo pptb` generator, single IIFE bundle.
+No backend. All Dataverse/Power Pages reads go through PPTB host APIs (retrieval only: reads plus `InitializeFileBlocksDownload`/`DownloadBlock`). Distributed as an npm package and submitted to the PPTB registry. Build: Vite 8 (standard `react-compiler-ts` template, PPTB build shape added in Phase 00), single IIFE bundle.
 
 ## Package Manager
-npm (PPTB generator default) — edit if switching to pnpm.
+npm — edit if switching to pnpm.

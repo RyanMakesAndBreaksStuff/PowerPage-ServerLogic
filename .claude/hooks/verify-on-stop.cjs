@@ -12,7 +12,9 @@ process.stdin.on('data', (c) => (input += c)).on('end', () => {
     return;
   }
 
-  const root = process.env.CLAUDE_PROJECT_DIR || process.cwd();
+  // realpath.native fixes the drive-letter case: a lowercase "c:" makes Vitest load twice
+  // ("failed to find the current suite") because Vite sees two module paths.
+  const root = fs.realpathSync.native(process.env.CLAUDE_PROJECT_DIR || process.cwd());
   const mods = path.join(root, 'node_modules');
   const run = (bin, args) => {
     if (!fs.existsSync(bin)) return '';

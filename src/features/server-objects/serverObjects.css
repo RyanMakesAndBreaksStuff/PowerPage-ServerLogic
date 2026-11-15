@@ -1,0 +1,378 @@
+/* Server Objects, layout 10a reference 03/04. Colours come only from the theme tokens. */
+
+/* Fills the tool below the 42px title bar; below the 1024×700 minimum the window scrolls (NFR). */
+.objects-page {
+  box-sizing: border-box;
+  height: max(calc(100vh - 42px), 658px);
+  padding: 12px 16px 16px;
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr) 250px;
+  gap: 12px;
+}
+
+.objects-muted {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+/* Object list */
+.objects-list {
+  gap: 6px;
+  padding: 12px;
+}
+
+.objects-search {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 1px solid var(--control-border);
+  border-radius: 99px;
+  background: var(--code);
+  color: var(--muted);
+}
+
+.objects-search input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 12px;
+}
+
+.objects-search:focus-within {
+  outline: 2px solid var(--primary);
+  outline-offset: 1px;
+}
+
+.objects-search input:focus {
+  outline: none;
+}
+
+.objects-list__items {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow-y: auto;
+}
+
+.objects-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.objects-item--selected {
+  background: color-mix(in srgb, var(--primary) 8%, transparent);
+}
+
+.objects-item--selected::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 11px;
+  bottom: 11px;
+  width: 3px;
+  border-radius: 2px;
+  background: var(--primary);
+}
+
+.objects-item__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 6px;
+}
+
+.objects-item__path {
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* One line, as in reference 03; the full description is in the detail column. */
+.objects-item__meta {
+  color: var(--muted);
+  font-size: 11.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Detail */
+.objects-detail__head {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.objects-detail__crumbs {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--muted);
+}
+
+.objects-detail__parent {
+  font-size: 11.5px;
+}
+
+.objects-detail__title {
+  margin: 0;
+  color: var(--text);
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.objects-detail__description {
+  margin: 0;
+  max-width: 560px;
+  color: var(--text-2);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.objects-detail__body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+  padding: 14px 20px;
+  overflow-y: auto;
+}
+
+/* The body scrolls; its blocks keep their height instead of shrinking to fit. */
+.objects-detail__body > * {
+  flex: none;
+}
+
+.objects-signature {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.objects-signature__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.objects-signature__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.objects-sample {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--code);
+  overflow: hidden;
+}
+
+.objects-sample__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.objects-sample__actions {
+  display: flex;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.objects-sample__actions .ui-button {
+  box-sizing: border-box;
+  min-height: 24px;
+  gap: 6px;
+  padding: 2px 10px;
+  font-size: 12px;
+}
+
+.objects-code {
+  margin: 0;
+  padding: 12px 14px;
+  overflow-x: auto;
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  line-height: 1.7;
+  counter-reset: line;
+}
+
+.objects-code__line {
+  display: block;
+  white-space: pre;
+}
+
+/* Line numbers are generated content, so they are never part of the copied text (AC-4.9). */
+.objects-code__line::before {
+  counter-increment: line;
+  content: counter(line);
+  display: inline-block;
+  width: 3ch;
+  margin-right: 2ch;
+  color: var(--comment);
+  text-align: right;
+  user-select: none;
+}
+
+/* Fixed columns, one line per row as in reference 03; each cell's full text is in its title. */
+.objects-table {
+  width: 100%;
+  table-layout: fixed;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 12px;
+}
+
+.objects-table caption {
+  padding-bottom: 6px;
+  text-align: left;
+}
+
+.objects-table th {
+  padding: 7px 12px;
+  color: var(--muted);
+  font-weight: 600;
+  text-align: left;
+}
+
+.objects-table th:first-child {
+  width: 34%;
+}
+
+.objects-table th:nth-child(2) {
+  width: 33%;
+}
+
+/* Fits "HTTP and Liquid" (FR-6); Server.Context only. */
+.objects-table th.objects-table__context {
+  width: 8.5rem;
+}
+
+.objects-table td {
+  padding: 7px 12px;
+  border-top: 1px solid var(--border);
+  color: var(--text-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.objects-table__row--selected td {
+  background: color-mix(in srgb, var(--primary) 6%, transparent);
+}
+
+.objects-table__name {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  font-size: 11.5px;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.objects-table__signature {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+/* Context column */
+.objects-context {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.objects-context > .ui-tile {
+  flex-shrink: 0;
+}
+
+.objects-context .ui-tile {
+  align-items: flex-start;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.objects-context__another {
+  flex: none;
+}
+
+.objects-context__another .objects-code {
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--code);
+  font-size: 10px;
+}
+
+/* The narrow column wraps long lines instead of scrolling sideways. */
+.objects-context__another .objects-code__line {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.objects-used,
+.objects-grants {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.objects-used li,
+.objects-grants li {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 5px;
+}
+
+.objects-used__path {
+  color: var(--server);
+  font-size: 11.5px;
+  word-break: break-all;
+}
+
+.objects-used__members {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}

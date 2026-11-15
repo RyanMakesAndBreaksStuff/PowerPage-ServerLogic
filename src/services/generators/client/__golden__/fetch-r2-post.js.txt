@@ -1,0 +1,62 @@
+// validate-request | POST | post
+const url = "/_api/serverlogics/validate-request";
+
+function showError(text) {
+  console.error(text);
+}
+
+function handleEnvelope(envelope) {
+  if (typeof envelope !== "object" || envelope === null) {
+    showError("The response was not a valid envelope.");
+    return;
+  }
+  if (envelope.success === false) {
+    showError(String(envelope.error));
+    return;
+  }
+  if (envelope.success !== true) {
+    showError("The response was not a valid envelope.");
+    return;
+  }
+  let parsed;
+  try {
+    parsed = JSON.parse(envelope.data);
+  } catch {
+    showError("The response data could not be read.");
+    return;
+  }
+  if (typeof parsed !== "object" || parsed === null) {
+    showError("The response data could not be read.");
+    return;
+  }
+  if (parsed.status !== "success") {
+    showError(String(parsed.message));
+    return;
+  }
+  console.log(parsed.name, parsed.email);
+}
+
+shell.getTokenDeferred().done(function (token) {
+  fetch(url, {
+    method: "POST",
+    headers: {
+      "__RequestVerificationToken": token,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(
+      {
+        "name": "Alton Stott",
+        "email": "alton@contoso.com"
+      }
+    ),
+  })
+    .then(function (response) {
+      return response.json();
+    })
+    .then(handleEnvelope)
+    .catch(function () {
+      showError("The call failed before a response envelope could be read.");
+    });
+}).fail(function () {
+  showError("The request token was rejected.");
+});

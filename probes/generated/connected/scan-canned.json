@@ -1,0 +1,882 @@
+{
+  "name": "Canned Alpha scan: downloads, PDF save, cancelled save, close guard held during a slow save",
+  "vars": {
+    "toolPath": "C:/Users/RyanDev/source/repos/Server Logic"
+  },
+  "steps": [
+    {
+      "name": "open the built tool",
+      "open": {
+        "localPath": "{{toolPath}}",
+        "connectionName": "{{connectionName}}"
+      },
+      "as": "tool",
+      "critical": true
+    },
+    {
+      "name": "remove intercepts left by an earlier run",
+      "clearIntercepts": "all"
+    },
+    {
+      "name": "mark host calls (c0)",
+      "calls": "{{tool}}",
+      "mark": "c0",
+      "expect": {
+        "type": "array"
+      }
+    },
+    {
+      "name": "canned site list",
+      "intercept": "{{tool}}",
+      "channel": "dataverse.queryData",
+      "argsContains": "powerpagesites?",
+      "action": {
+        "kind": "respond",
+        "value": {
+          "value": [
+            {
+              "powerpagesiteid": "00000000-0000-4000-8000-000000000001",
+              "name": "Alpha portal",
+              "primarydomainname": "alpha.example.com",
+              "statecode": 0
+            },
+            {
+              "powerpagesiteid": "00000000-0000-4000-8000-000000000002",
+              "name": "Beta portal",
+              "primarydomainname": "beta.example.com",
+              "statecode": 0
+            },
+            {
+              "powerpagesiteid": "00000000-0000-4000-8000-000000000003",
+              "name": "Retired portal",
+              "primarydomainname": "retired.example.com",
+              "statecode": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "canned component type 9",
+      "intercept": "{{tool}}",
+      "channel": "dataverse.queryData",
+      "argsContains": "_powerpagesiteid_value eq 00000000-0000-4000-8000-000000000001 and powerpagecomponenttype eq 9",
+      "action": {
+        "kind": "respond",
+        "value": {
+          "value": []
+        }
+      }
+    },
+    {
+      "name": "canned component type 11",
+      "intercept": "{{tool}}",
+      "channel": "dataverse.queryData",
+      "argsContains": "_powerpagesiteid_value eq 00000000-0000-4000-8000-000000000001 and powerpagecomponenttype eq 11",
+      "action": {
+        "kind": "respond",
+        "value": {
+          "value": [
+            {
+              "powerpagecomponentid": "00000000-0000-4000-8000-000000000011",
+              "name": "staff",
+              "content": "{}",
+              "statecode": 0,
+              "powerpagecomponenttype": 11
+            },
+            {
+              "powerpagecomponentid": "00000000-0000-4000-8000-000000000012",
+              "name": "anonymous",
+              "content": "{\"anonymoususersrole\":true,\"authenticatedusersrole\":false}",
+              "statecode": 0,
+              "powerpagecomponenttype": 11
+            },
+            {
+              "powerpagecomponentid": "00000000-0000-4000-8000-000000000013",
+              "name": "authenticated",
+              "content": "{\"anonymoususersrole\":false,\"authenticatedusersrole\":true}",
+              "statecode": 0,
+              "powerpagecomponenttype": 11
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "canned component type 18",
+      "intercept": "{{tool}}",
+      "channel": "dataverse.queryData",
+      "argsContains": "_powerpagesiteid_value eq 00000000-0000-4000-8000-000000000001 and powerpagecomponenttype eq 18",
+      "action": {
+        "kind": "respond",
+        "value": {
+          "value": [
+            {
+              "powerpagecomponentid": "00000000-0000-4000-8000-000000000021",
+              "name": "contact-read",
+              "content": "{\"scope\":756150001,\"entitylogicalname\":\"contact\",\"read\":true,\"adx_entitypermission_webrole\":[\"00000000-0000-4000-8000-000000000011\"]}",
+              "statecode": 0,
+              "powerpagecomponenttype": 18
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "canned component type 35",
+      "intercept": "{{tool}}",
+      "channel": "dataverse.queryData",
+      "argsContains": "_powerpagesiteid_value eq 00000000-0000-4000-8000-000000000001 and powerpagecomponenttype eq 35",
+      "action": {
+        "kind": "respond",
+        "value": {
+          "value": [
+            {
+              "powerpagecomponentid": "00000000-0000-4000-8000-000000001001",
+              "name": "handler-01",
+              "content": "{\"adx_serverlogic_adx_webrole\":[\"00000000-0000-4000-8000-000000000011\"]}",
+              "statecode": 0,
+              "powerpagecomponenttype": 35
+            },
+            {
+              "powerpagecomponentid": "00000000-0000-4000-8000-000000001002",
+              "name": "handler-02",
+              "content": "{\"adx_serverlogic_adx_webrole\":[\"00000000-0000-4000-8000-000000000012\"]}",
+              "statecode": 0,
+              "powerpagecomponenttype": 35
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "canned download start 0",
+      "intercept": "{{tool}}",
+      "channel": "dataverse.execute",
+      "argsContains": "00000000-0000-4000-8000-000000001001",
+      "action": {
+        "kind": "respond",
+        "value": {
+          "FileContinuationToken": "probe-block-000",
+          "FileSizeInBytes": 31,
+          "FileName": "handler-0.js",
+          "IsChunkingSupported": true
+        }
+      }
+    },
+    {
+      "name": "canned download block 0",
+      "intercept": "{{tool}}",
+      "channel": "dataverse.execute",
+      "argsContains": "probe-block-000",
+      "action": {
+        "kind": "respond",
+        "value": {
+          "Data": "ZnVuY3Rpb24gZ2V0KCkgeyByZXR1cm4gInt9IjsgfQ=="
+        }
+      }
+    },
+    {
+      "name": "canned download start 1",
+      "intercept": "{{tool}}",
+      "channel": "dataverse.execute",
+      "argsContains": "00000000-0000-4000-8000-000000001002",
+      "action": {
+        "kind": "respond",
+        "value": {
+          "FileContinuationToken": "probe-block-001",
+          "FileSizeInBytes": 84,
+          "FileName": "handler-1.js",
+          "IsChunkingSupported": true
+        }
+      }
+    },
+    {
+      "name": "canned download block 1",
+      "intercept": "{{tool}}",
+      "channel": "dataverse.execute",
+      "argsContains": "probe-block-001",
+      "action": {
+        "kind": "respond",
+        "value": {
+          "Data": "YXN5bmMgZnVuY3Rpb24gZ2V0KCkgeyByZXR1cm4gYXdhaXQgU2VydmVyLkNvbm5lY3Rvci5IdHRwQ2xpZW50LkdldEFzeW5jKHVybCwge30pOyB9"
+        }
+      }
+    },
+    {
+      "name": "mark host calls (scan)",
+      "calls": "{{tool}}",
+      "mark": "scan",
+      "expect": {
+        "type": "array"
+      }
+    },
+    {
+      "name": "reload so every read goes through the intercepts",
+      "reload": "{{tool}}"
+    },
+    {
+      "name": "open Logic Inspector",
+      "eval": "(document.querySelector('#tab-inspector').click(), true)",
+      "waitFor": {
+        "timeoutMs": 10000
+      },
+      "expect": {
+        "equals": true
+      }
+    },
+    {
+      "name": "scan: Inspector shows \"Select a site\"",
+      "eval": "[...document.querySelectorAll('#panel-inspector h2')].map((h) => h.textContent.trim())",
+      "waitFor": {
+        "timeoutMs": 15000
+      },
+      "expect": {
+        "contains": "Select a site"
+      }
+    },
+    {
+      "name": "open the site picker",
+      "eval": "(document.querySelector('[role=combobox][aria-label=\"Power Pages site\"]').click(), true)"
+    },
+    {
+      "name": "pick Alpha portal and start the clock",
+      "eval": "(window.__probeScanStart = performance.now(), [...document.querySelectorAll(\"[role=listbox][aria-label=\\\"Power Pages site\\\"] [role=option]\")].find((o) => o.textContent.includes(\"Alpha portal\")).click(), true)",
+      "waitFor": {
+        "timeoutMs": 5000
+      },
+      "expect": {
+        "equals": true
+      }
+    },
+    {
+      "name": "scan: Inspector shows \"Review server logic readiness\"",
+      "eval": "[...document.querySelectorAll('#panel-inspector h2')].map((h) => h.textContent.trim())",
+      "waitFor": {
+        "timeoutMs": 30000
+      },
+      "expect": {
+        "contains": "Review server logic readiness"
+      }
+    },
+    {
+      "name": "both Alpha handlers are listed",
+      "eval": "document.querySelectorAll('#panel-inspector ul.inspector-files > li').length",
+      "expect": {
+        "equals": 2
+      }
+    },
+    {
+      "name": "each handler took one start and one block call",
+      "calls": "{{tool}}",
+      "channel": "dataverse.execute",
+      "since": "{{scan}}",
+      "expect": {
+        "length": 4
+      }
+    },
+    {
+      "name": "no unreadable-row notice",
+      "eval": "document.querySelector('#panel-inspector').innerText.includes(\"couldn't be read\")",
+      "expect": {
+        "equals": false
+      }
+    },
+    {
+      "name": "PDF save returns a path",
+      "intercept": "{{tool}}",
+      "channel": "filesystem:save-file",
+      "times": 1,
+      "action": {
+        "kind": "respond",
+        "value": "C:/probe-out/report.pdf"
+      }
+    },
+    {
+      "name": "mark host calls (pdf)",
+      "calls": "{{tool}}",
+      "mark": "pdf",
+      "expect": {
+        "type": "array"
+      }
+    },
+    {
+      "name": "pdf: open Export report",
+      "eval": "([...document.querySelectorAll(\"#panel-inspector button\")].find((e) => e.textContent.trim() === \"Export report\").click(), true)",
+      "waitFor": {
+        "timeoutMs": 5000
+      },
+      "expect": {
+        "equals": true
+      }
+    },
+    {
+      "name": "pdf: export dialog is open",
+      "eval": "document.querySelector('[role=dialog][aria-modal=true]') !== null",
+      "waitFor": {
+        "timeoutMs": 5000
+      },
+      "expect": {
+        "equals": true
+      }
+    },
+    {
+      "name": "pdf: choose PDF",
+      "eval": "([...document.querySelectorAll(\"[role=dialog] [role=radio]\")].find((e) => e.textContent.trim() === \"PDF\").click(), true)"
+    },
+    {
+      "name": "pdf: choose Export PDF",
+      "eval": "([...document.querySelectorAll(\"[role=dialog] button\")].find((e) => e.textContent.trim() === \"Export PDF\").click(), true)",
+      "waitFor": {
+        "timeoutMs": 3000
+      },
+      "expect": {
+        "equals": true
+      }
+    },
+    {
+      "name": "pdf: exported notification within 5 s (AC-9.9)",
+      "calls": "{{tool}}",
+      "channel": "show-notification",
+      "since": "{{pdf}}",
+      "argsContains": "exported",
+      "waitFor": {
+        "timeoutMs": 5000
+      },
+      "expect": {
+        "minLength": 1
+      }
+    },
+    {
+      "name": "pdf: the PDF reaches the host as bytes",
+      "calls": "{{tool}}",
+      "channel": "filesystem:save-file",
+      "since": "{{pdf}}",
+      "expect": {
+        "all": [
+          {
+            "path": "0.args.1.binary",
+            "equals": true
+          },
+          {
+            "path": "0.args.1.head",
+            "matches": "^255044462d"
+          }
+        ]
+      }
+    },
+    {
+      "name": "pdf: close guard taken once",
+      "calls": "{{tool}}",
+      "channel": "tool-window:prevent-close",
+      "since": "{{pdf}}",
+      "expect": {
+        "length": 1
+      }
+    },
+    {
+      "name": "pdf: close guard released once",
+      "calls": "{{tool}}",
+      "channel": "tool-window:release-prevent-close",
+      "since": "{{pdf}}",
+      "waitFor": {
+        "timeoutMs": 5000
+      },
+      "expect": {
+        "length": 1
+      }
+    },
+    {
+      "name": "Markdown save is cancelled",
+      "intercept": "{{tool}}",
+      "channel": "filesystem:save-file",
+      "times": 1,
+      "action": {
+        "kind": "respond",
+        "value": null
+      }
+    },
+    {
+      "name": "mark host calls (md)",
+      "calls": "{{tool}}",
+      "mark": "md",
+      "expect": {
+        "type": "array"
+      }
+    },
+    {
+      "name": "cancel: open Export report",
+      "eval": "([...document.querySelectorAll(\"#panel-inspector button\")].find((e) => e.textContent.trim() === \"Export report\").click(), true)",
+      "waitFor": {
+        "timeoutMs": 5000
+      },
+      "expect": {
+        "equals": true
+      }
+    },
+    {
+      "name": "cancel: export dialog is open",
+      "eval": "document.querySelector('[role=dialog][aria-modal=true]') !== null",
+      "waitFor": {
+        "timeoutMs": 5000
+      },
+      "expect": {
+        "equals": true
+      }
+    },
+    {
+      "name": "cancel: choose Markdown",
+      "eval": "([...document.querySelectorAll(\"[role=dialog] [role=radio]\")].find((e) => e.textContent.trim() === \"Markdown\").click(), true)"
+    },
+    {
+      "name": "cancel: choose Export Markdown",
+      "eval": "([...document.querySelectorAll(\"[role=dialog] button\")].find((e) => e.textContent.trim() === \"Export Markdown\").click(), true)",
+      "waitFor": {
+        "timeoutMs": 3000
+      },
+      "expect": {
+        "equals": true
+      }
+    },
+    {
+      "name": "cancel: the save call arrives",
+      "calls": "{{tool}}",
+      "channel": "filesystem:save-file",
+      "since": "{{md}}",
+      "waitFor": {
+        "timeoutMs": 10000
+      },
+      "expect": {
+        "length": 1
+      }
+    },
+    {
+      "name": "cancel: wait for any late notification",
+      "sleep": 1500
+    },
+    {
+      "name": "cancel: no exported notification",
+      "calls": "{{tool}}",
+      "channel": "show-notification",
+      "since": "{{md}}",
+      "argsContains": "exported",
+      "expect": {
+        "length": 0
+      }
+    },
+    {
+      "name": "Markdown save takes 3 s",
+      "intercept": "{{tool}}",
+      "channel": "filesystem:save-file",
+      "times": 1,
+      "action": {
+        "kind": "delay-then-respond",
+        "ms": 3000,
+        "value": "C:/probe-out/report.md"
+      }
+    },
+    {
+      "name": "mark host calls (held)",
+      "calls": "{{tool}}",
+      "mark": "held",
+      "expect": {
+        "type": "array"
+      }
+    },
+    {
+      "name": "held: open Export report",
+      "eval": "([...document.querySelectorAll(\"#panel-inspector button\")].find((e) => e.textContent.trim() === \"Export report\").click(), true)",
+      "waitFor": {
+        "timeoutMs": 5000
+      },
+      "expect": {
+        "equals": true
+      }
+    },
+    {
+      "name": "held: export dialog is open",
+      "eval": "document.querySelector('[role=dialog][aria-modal=true]') !== null",
+      "waitFor": {
+        "timeoutMs": 5000
+      },
+      "expect": {
+        "equals": true
+      }
+    },
+    {
+      "name": "held: choose Markdown",
+      "eval": "([...document.querySelectorAll(\"[role=dialog] [role=radio]\")].find((e) => e.textContent.trim() === \"Markdown\").click(), true)"
+    },
+    {
+      "name": "held: choose Export Markdown",
+      "eval": "([...document.querySelectorAll(\"[role=dialog] button\")].find((e) => e.textContent.trim() === \"Export Markdown\").click(), true)",
+      "waitFor": {
+        "timeoutMs": 3000
+      },
+      "expect": {
+        "equals": true
+      }
+    },
+    {
+      "name": "held: close guard taken",
+      "calls": "{{tool}}",
+      "channel": "tool-window:prevent-close",
+      "since": "{{held}}",
+      "waitFor": {
+        "timeoutMs": 5000
+      },
+      "expect": {
+        "length": 1
+      }
+    },
+    {
+      "name": "held: let the save call start",
+      "sleep": 500
+    },
+    {
+      "name": "held: the save is pending",
+      "calls": "{{tool}}",
+      "channel": "filesystem:save-file",
+      "since": "{{held}}",
+      "expect": {
+        "path": "0.outcome",
+        "equals": "pending"
+      }
+    },
+    {
+      "name": "held: close guard still held",
+      "calls": "{{tool}}",
+      "channel": "tool-window:release-prevent-close",
+      "since": "{{held}}",
+      "expect": {
+        "length": 0
+      }
+    },
+    {
+      "name": "held: close guard released after the save",
+      "calls": "{{tool}}",
+      "channel": "tool-window:release-prevent-close",
+      "since": "{{held}}",
+      "waitFor": {
+        "timeoutMs": 8000
+      },
+      "expect": {
+        "length": 1
+      }
+    },
+    {
+      "name": "no dataverse.create call",
+      "calls": "{{tool}}",
+      "channel": "dataverse.create",
+      "since": "{{c0}}",
+      "limit": 2000,
+      "expect": {
+        "length": 0
+      }
+    },
+    {
+      "name": "no dataverse.update call",
+      "calls": "{{tool}}",
+      "channel": "dataverse.update",
+      "since": "{{c0}}",
+      "limit": 2000,
+      "expect": {
+        "length": 0
+      }
+    },
+    {
+      "name": "no dataverse.delete call",
+      "calls": "{{tool}}",
+      "channel": "dataverse.delete",
+      "since": "{{c0}}",
+      "limit": 2000,
+      "expect": {
+        "length": 0
+      }
+    },
+    {
+      "name": "no dataverse.createMultiple call",
+      "calls": "{{tool}}",
+      "channel": "dataverse.createMultiple",
+      "since": "{{c0}}",
+      "limit": 2000,
+      "expect": {
+        "length": 0
+      }
+    },
+    {
+      "name": "no dataverse.updateMultiple call",
+      "calls": "{{tool}}",
+      "channel": "dataverse.updateMultiple",
+      "since": "{{c0}}",
+      "limit": 2000,
+      "expect": {
+        "length": 0
+      }
+    },
+    {
+      "name": "no dataverse.associate call",
+      "calls": "{{tool}}",
+      "channel": "dataverse.associate",
+      "since": "{{c0}}",
+      "limit": 2000,
+      "expect": {
+        "length": 0
+      }
+    },
+    {
+      "name": "no dataverse.disassociate call",
+      "calls": "{{tool}}",
+      "channel": "dataverse.disassociate",
+      "since": "{{c0}}",
+      "limit": 2000,
+      "expect": {
+        "length": 0
+      }
+    },
+    {
+      "name": "no dataverse.publishCustomizations call",
+      "calls": "{{tool}}",
+      "channel": "dataverse.publishCustomizations",
+      "since": "{{c0}}",
+      "limit": 2000,
+      "expect": {
+        "length": 0
+      }
+    },
+    {
+      "name": "no dataverse.deploySolution call",
+      "calls": "{{tool}}",
+      "channel": "dataverse.deploySolution",
+      "since": "{{c0}}",
+      "limit": 2000,
+      "expect": {
+        "length": 0
+      }
+    },
+    {
+      "name": "no dataverse.executeBatch call",
+      "calls": "{{tool}}",
+      "channel": "dataverse.executeBatch",
+      "since": "{{c0}}",
+      "limit": 2000,
+      "expect": {
+        "length": 0
+      }
+    },
+    {
+      "name": "no dataverse.executeTransaction call",
+      "calls": "{{tool}}",
+      "channel": "dataverse.executeTransaction",
+      "since": "{{c0}}",
+      "limit": 2000,
+      "expect": {
+        "length": 0
+      }
+    },
+    {
+      "name": "no dataverse.createEntityDefinition call",
+      "calls": "{{tool}}",
+      "channel": "dataverse.createEntityDefinition",
+      "since": "{{c0}}",
+      "limit": 2000,
+      "expect": {
+        "length": 0
+      }
+    },
+    {
+      "name": "no dataverse.updateEntityDefinition call",
+      "calls": "{{tool}}",
+      "channel": "dataverse.updateEntityDefinition",
+      "since": "{{c0}}",
+      "limit": 2000,
+      "expect": {
+        "length": 0
+      }
+    },
+    {
+      "name": "no dataverse.deleteEntityDefinition call",
+      "calls": "{{tool}}",
+      "channel": "dataverse.deleteEntityDefinition",
+      "since": "{{c0}}",
+      "limit": 2000,
+      "expect": {
+        "length": 0
+      }
+    },
+    {
+      "name": "no dataverse.createAttribute call",
+      "calls": "{{tool}}",
+      "channel": "dataverse.createAttribute",
+      "since": "{{c0}}",
+      "limit": 2000,
+      "expect": {
+        "length": 0
+      }
+    },
+    {
+      "name": "no dataverse.updateAttribute call",
+      "calls": "{{tool}}",
+      "channel": "dataverse.updateAttribute",
+      "since": "{{c0}}",
+      "limit": 2000,
+      "expect": {
+        "length": 0
+      }
+    },
+    {
+      "name": "no dataverse.deleteAttribute call",
+      "calls": "{{tool}}",
+      "channel": "dataverse.deleteAttribute",
+      "since": "{{c0}}",
+      "limit": 2000,
+      "expect": {
+        "length": 0
+      }
+    },
+    {
+      "name": "no dataverse.createPolymorphicLookupAttribute call",
+      "calls": "{{tool}}",
+      "channel": "dataverse.createPolymorphicLookupAttribute",
+      "since": "{{c0}}",
+      "limit": 2000,
+      "expect": {
+        "length": 0
+      }
+    },
+    {
+      "name": "no dataverse.createRelationship call",
+      "calls": "{{tool}}",
+      "channel": "dataverse.createRelationship",
+      "since": "{{c0}}",
+      "limit": 2000,
+      "expect": {
+        "length": 0
+      }
+    },
+    {
+      "name": "no dataverse.updateRelationship call",
+      "calls": "{{tool}}",
+      "channel": "dataverse.updateRelationship",
+      "since": "{{c0}}",
+      "limit": 2000,
+      "expect": {
+        "length": 0
+      }
+    },
+    {
+      "name": "no dataverse.deleteRelationship call",
+      "calls": "{{tool}}",
+      "channel": "dataverse.deleteRelationship",
+      "since": "{{c0}}",
+      "limit": 2000,
+      "expect": {
+        "length": 0
+      }
+    },
+    {
+      "name": "no dataverse.createGlobalOptionSet call",
+      "calls": "{{tool}}",
+      "channel": "dataverse.createGlobalOptionSet",
+      "since": "{{c0}}",
+      "limit": 2000,
+      "expect": {
+        "length": 0
+      }
+    },
+    {
+      "name": "no dataverse.updateGlobalOptionSet call",
+      "calls": "{{tool}}",
+      "channel": "dataverse.updateGlobalOptionSet",
+      "since": "{{c0}}",
+      "limit": 2000,
+      "expect": {
+        "length": 0
+      }
+    },
+    {
+      "name": "no dataverse.deleteGlobalOptionSet call",
+      "calls": "{{tool}}",
+      "channel": "dataverse.deleteGlobalOptionSet",
+      "since": "{{c0}}",
+      "limit": 2000,
+      "expect": {
+        "length": 0
+      }
+    },
+    {
+      "name": "no dataverse.insertOptionValue call",
+      "calls": "{{tool}}",
+      "channel": "dataverse.insertOptionValue",
+      "since": "{{c0}}",
+      "limit": 2000,
+      "expect": {
+        "length": 0
+      }
+    },
+    {
+      "name": "no dataverse.updateOptionValue call",
+      "calls": "{{tool}}",
+      "channel": "dataverse.updateOptionValue",
+      "since": "{{c0}}",
+      "limit": 2000,
+      "expect": {
+        "length": 0
+      }
+    },
+    {
+      "name": "no dataverse.deleteOptionValue call",
+      "calls": "{{tool}}",
+      "channel": "dataverse.deleteOptionValue",
+      "since": "{{c0}}",
+      "limit": 2000,
+      "expect": {
+        "length": 0
+      }
+    },
+    {
+      "name": "no dataverse.orderOption call",
+      "calls": "{{tool}}",
+      "channel": "dataverse.orderOption",
+      "since": "{{c0}}",
+      "limit": 2000,
+      "expect": {
+        "length": 0
+      }
+    },
+    {
+      "name": "no tool-settings-set call",
+      "calls": "{{tool}}",
+      "channel": "tool-settings-set",
+      "since": "{{c0}}",
+      "limit": 2000,
+      "expect": {
+        "length": 0
+      }
+    },
+    {
+      "name": "no tool-settings-set-all call",
+      "calls": "{{tool}}",
+      "channel": "tool-settings-set-all",
+      "since": "{{c0}}",
+      "limit": 2000,
+      "expect": {
+        "length": 0
+      }
+    },
+    {
+      "name": "dataverse.execute only runs InitializeFileBlocksDownload and DownloadBlock",
+      "calls": "{{tool}}",
+      "channel": "dataverse.execute",
+      "since": "{{c0}}",
+      "limit": 2000,
+      "argsExcludes": [
+        "InitializeFileBlocksDownload",
+        "DownloadBlock"
+      ],
+      "expect": {
+        "length": 0
+      }
+    }
+  ]
+}

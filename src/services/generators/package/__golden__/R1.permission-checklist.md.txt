@@ -1,0 +1,16 @@
+# Permission checklist for customer-summary
+
+For the Read Dataverse records recipe. Review anything you've added.
+
+- [ ] Web role: A web role the caller holds
+- [ ] Table permission: contact (entity set contacts): Read, access type Account
+- [ ] Account relationship for contact: contact_customer_accounts
+- [ ] Test users' contacts must have a parent account.
+
+## Readiness
+
+2/3 ready
+
+✓ Browser checks
+✓ Validation
+! Needs attention: Permissions: not marked reviewed in Logic Starter; not checked against any environment

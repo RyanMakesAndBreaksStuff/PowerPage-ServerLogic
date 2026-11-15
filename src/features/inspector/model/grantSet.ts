@@ -1,0 +1,149 @@
+import type {
+  Reason,
+  ServerLogicFileFacts,
+  SiteFacts,
+  TablePermissionFact,
+} from '@/types/inspector';
+import type { Privilege } from '@/types/recipe';
+import { CONFIG_READ_FAILURE } from './copy';
+
+export type Grant = { permission: TablePermissionFact; roleNames: readonly string[] };
+type IgnoredGrant = Grant & { reason: 'inactive, ignored' | 'parent inactive, ignored' };
+export type GrantSet = {
+  grants: readonly Grant[];
+  ignored: readonly IgnoredGrant[];
+  reasons: readonly Reason[];
+  roleIds: readonly string[];
+  notScanned: boolean;
+};
+
+type ParentChain = {
+  top: TablePermissionFact;
+  inactive: boolean;
+  /** The chain could not be followed, or (PB-002) a Parent chain ends at a readable ancestor whose scope is unknown. */
+  unresolved: boolean;
+  /** The chain broke at a parent that is missing because its row was unreadable. */
+  unread: boolean;
+};
+
+function parentChain(
+  permission: TablePermissionFact,
+  byId: ReadonlyMap<string, TablePermissionFact>,
+  unreadIds: ReadonlySet<string>,
+): ParentChain {
+  let current = permission;
+  let inactive = !current.active;
+  const visited = new Set<string>();
+  while (current.scope === 'Parent') {
+    visited.add(current.id);
+    const parent = current.parentId === null ? undefined : byId.get(current.parentId);
+    if (parent === undefined || visited.has(parent.id)) {
+      const unread =
+        parent === undefined &&
+        (unreadIds.has('') || (current.parentId !== null && unreadIds.has(current.parentId)));
+      return { top: current, inactive, unresolved: true, unread };
+    }
+    current = parent;
+    inactive ||= !current.active;
+  }
+  return {
+    top: current,
+    inactive,
+    unresolved: permission.scope === 'Parent' && current.scope === null,
+    unread: false,
+  };
+}
+
+export function buildGrantSet(facts: SiteFacts, file: ServerLogicFileFacts): GrantSet {
+  const evidence = [facts.roles, facts.permissions, file.roleIds];
+  // Unscanned and failed evidence are reported together (FR-8 precedence): a failure never hides the gap.
+  const base: GrantSet = {
+    grants: [],
+    ignored: [],
+    reasons: [],
+    roleIds: [],
+    notScanned: evidence.some((item) => !item.ok && item.reason === 'not-scanned'),
+  };
+  if (evidence.some((item) => !item.ok && item.reason === 'read-failed')) {
+    return { ...base, reasons: [{ text: CONFIG_READ_FAILURE, readFailure: true }] };
+  }
+  if (!facts.roles.ok || !file.roleIds.ok) return base;
+  const roles = facts.roles.value;
+  const roleIds = file.roleIds.value;
+  const byRoleId = new Map(roles.map((role) => [role.id, role]));
+  if (roleIds.some((id) => !byRoleId.has(id))) {
+    return { ...base, reasons: [{ text: CONFIG_READ_FAILURE, readFailure: true }] };
+  }
+  if (!facts.permissions.ok) return base;
+  const assigned = roles.filter((role) => roleIds.includes(role.id));
+  const ids = new Set(roleIds);
+  if (assigned.some((role) => !role.anonymous)) {
+    roles.filter((role) => role.authenticated).forEach((role) => ids.add(role.id));
+  }
+  if (assigned.some((role) => role.anonymous)) {
+    roles.filter((role) => role.anonymous).forEach((role) => ids.add(role.id));
+  }
+  const byId = new Map(facts.permissions.value.map((permission) => [permission.id, permission]));
+  const unreadIds = new Set(facts.unreadableRows.filter((row) => row.type === 18).map((row) => row.id));
+  const grants: Grant[] = [];
+  const ignored: IgnoredGrant[] = [];
+  const reasons: Reason[] = [];
+  for (const permission of facts.permissions.value) {
+    const chain = parentChain(permission, byId, unreadIds);
+    const linked = [...new Set([...permission.roleIds, ...chain.top.roleIds])].filter((id) =>
+      ids.has(id),
+    );
+    const roleNames = linked.map((id) => byRoleId.get(id)?.name ?? id);
+    if (!permission.active) {
+      if (linked.length > 0) ignored.push({ permission, roleNames, reason: 'inactive, ignored' });
+    } else if (chain.inactive) {
+      if (linked.length > 0)
+        ignored.push({ permission, roleNames, reason: 'parent inactive, ignored' });
+    } else if (chain.unresolved && (chain.top.scope !== null || linked.length > 0)) {
+      // A missing/looping chain is always reported; an unknown-scope terminal only when this file is linked to it.
+      reasons.push({
+        text: `Couldn't evaluate parent permission \`${permission.name}\``,
+        readFailure: chain.unread,
+      });
+    } else if (linked.length > 0) {
+      grants.push({ permission, roleNames });
+    }
+  }
+  return { grants, ignored, reasons, roleIds: [...ids], notScanned: false };
+}
+
+export function privilegeLabel(privilege: Privilege): string {
+  return privilege === 'AppendTo' ? 'Append To' : privilege;
+}
+
+export function permissionSnapshot(grants: GrantSet): readonly string[] {
+  const describe = ({ permission, roleNames }: Grant): string => {
+    const privileges =
+      permission.privileges
+        .map(privilegeLabel)
+        .join(', ') || 'No privileges';
+    return `${permission.table} · ${permission.scope ?? 'Unknown scope'} · ${privileges} · role ${roleNames.join(', ')}`;
+  };
+  return [
+    ...grants.grants.map(describe),
+    ...grants.ignored.map((grant) => `${describe(grant)} (${grant.reason})`),
+    ...grants.reasons.map((reason) => reason.text),
+  ];
+}
+
+export function defaultRoleBanners(facts: SiteFacts): readonly string[] {
+  if (!facts.roles.ok) return [];
+  const banners: string[] = [];
+  for (const [flag, label] of [
+    ['anonymous', 'Anonymous'],
+    ['authenticated', 'Authenticated'],
+  ] as const) {
+    const defaults = facts.roles.value.filter((role) => role[flag]);
+    if (defaults.length > 1) {
+      banners.push(
+        `More than one web role is marked as the ${label} Users Role (${defaults.map((role) => `\`${role.name}\``).join(', ')}). Learn allows one per site.`,
+      );
+    }
+  }
+  return banners;
+}

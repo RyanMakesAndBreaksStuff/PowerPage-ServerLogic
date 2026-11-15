@@ -1,0 +1,17 @@
+# Permission checklist for customer-summary
+
+For the Dataverse CRUD recipe. Review anything you've added.
+
+- [ ] Web role: A web role the caller holds
+- [ ] Table permission: contact (entity set contacts): Read, Write, Delete, access type Account
+- [ ] Account relationship for contact: contact_customer_accounts
+- [ ] Table permission: contact (entity set contacts): Create, access type Global. Learn binds no account on create, so an Account-scoped Create can't place the new contact in the caller's scope. Inspector flags this Global Create grant; that is expected. The new contact isn't readable through the Account-scoped permission until it's linked to the caller's account.
+- [ ] Test users' contacts must have a parent account.
+
+## Readiness
+
+2/3 ready
+
+✓ Browser checks
+✓ Validation
+! Needs attention: Permissions: not marked reviewed in Logic Starter; not checked against any environment

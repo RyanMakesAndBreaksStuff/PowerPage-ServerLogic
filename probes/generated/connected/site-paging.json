@@ -1,0 +1,446 @@
+{
+  "name": "Site list paging: the issued nextLink reaches the host unchanged (RG-001 tool half)",
+  "vars": {
+    "toolPath": "C:/Users/RyanDev/source/repos/Server Logic"
+  },
+  "steps": [
+    {
+      "name": "open the built tool",
+      "open": {
+        "localPath": "{{toolPath}}",
+        "connectionName": "{{connectionName}}"
+      },
+      "as": "tool",
+      "critical": true
+    },
+    {
+      "name": "remove intercepts left by an earlier run",
+      "clearIntercepts": "all"
+    },
+    {
+      "name": "mark host calls (c0)",
+      "calls": "{{tool}}",
+      "mark": "c0",
+      "expect": {
+        "type": "array"
+      }
+    },
+    {
+      "name": "first page carries a nextLink",
+      "intercept": "{{tool}}",
+      "channel": "dataverse.queryData",
+      "argsContains": "powerpagesites?",
+      "times": 1,
+      "action": {
+        "kind": "respond",
+        "value": {
+          "value": [
+            {
+              "powerpagesiteid": "00000000-0000-4000-8000-000000000001",
+              "name": "Alpha portal",
+              "primarydomainname": "alpha.example.com",
+              "statecode": 0
+            }
+          ],
+          "@odata.nextLink": "https://example.crm.dynamics.com/api/data/v9.2/powerpagesites?$select=powerpagesiteid,name,primarydomainname,statecode&$orderby=name,powerpagesiteid&$skiptoken=%3Ccookie%20pagenumber=%222%22%20pagingcookie=%22%253ccookie%2520page%253d%25221%2522%253e%22%20/%3E"
+        }
+      }
+    },
+    {
+      "name": "second page ends the list",
+      "intercept": "{{tool}}",
+      "channel": "dataverse.queryData",
+      "argsContains": "$skiptoken",
+      "action": {
+        "kind": "respond",
+        "value": {
+          "value": [
+            {
+              "powerpagesiteid": "00000000-0000-4000-8000-000000000002",
+              "name": "Beta portal",
+              "primarydomainname": "beta.example.com",
+              "statecode": 0
+            },
+            {
+              "powerpagesiteid": "00000000-0000-4000-8000-000000000003",
+              "name": "Retired portal",
+              "primarydomainname": "retired.example.com",
+              "statecode": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "mark host calls (paging)",
+      "calls": "{{tool}}",
+      "mark": "paging",
+      "expect": {
+        "type": "array"
+      }
+    },
+    {
+      "name": "reload so the site list is read through the intercepts",
+      "reload": "{{tool}}"
+    },
+    {
+      "name": "open Logic Inspector",
+      "eval": "(document.querySelector('#tab-inspector').click(), true)",
+      "waitFor": {
+        "timeoutMs": 10000
+      },
+      "expect": {
+        "equals": true
+      }
+    },
+    {
+      "name": "paging: Inspector shows \"Select a site\"",
+      "eval": "[...document.querySelectorAll('#panel-inspector h2')].map((h) => h.textContent.trim())",
+      "waitFor": {
+        "timeoutMs": 15000
+      },
+      "expect": {
+        "contains": "Select a site"
+      }
+    },
+    {
+      "name": "the tool passed the issued nextLink to the host unchanged",
+      "calls": "{{tool}}",
+      "channel": "dataverse.queryData",
+      "since": "{{paging}}",
+      "argsContains": "$skiptoken",
+      "expect": {
+        "path": "0.args.0",
+        "equals": "powerpagesites?$select=powerpagesiteid,name,primarydomainname,statecode&$orderby=name,powerpagesiteid&$skiptoken=%3Ccookie%20pagenumber=%222%22%20pagingcookie=%22%253ccookie%2520page%253d%25221%2522%253e%22%20/%3E"
+      }
+    },
+    {
+      "name": "open the site picker",
+      "eval": "(document.querySelector('[role=combobox][aria-label=\"Power Pages site\"]').click(), true)"
+    },
+    {
+      "name": "both pages are listed",
+      "eval": "document.querySelectorAll(\"[role=listbox][aria-label=\\\"Power Pages site\\\"] [role=option]\").length",
+      "waitFor": {
+        "timeoutMs": 5000
+      },
+      "expect": {
+        "equals": 3
+      }
+    },
+    {
+      "name": "no dataverse.create call",
+      "calls": "{{tool}}",
+      "channel": "dataverse.create",
+      "since": "{{c0}}",
+      "limit": 2000,
+      "expect": {
+        "length": 0
+      }
+    },
+    {
+      "name": "no dataverse.update call",
+      "calls": "{{tool}}",
+      "channel": "dataverse.update",
+      "since": "{{c0}}",
+      "limit": 2000,
+      "expect": {
+        "length": 0
+      }
+    },
+    {
+      "name": "no dataverse.delete call",
+      "calls": "{{tool}}",
+      "channel": "dataverse.delete",
+      "since": "{{c0}}",
+      "limit": 2000,
+      "expect": {
+        "length": 0
+      }
+    },
+    {
+      "name": "no dataverse.createMultiple call",
+      "calls": "{{tool}}",
+      "channel": "dataverse.createMultiple",
+      "since": "{{c0}}",
+      "limit": 2000,
+      "expect": {
+        "length": 0
+      }
+    },
+    {
+      "name": "no dataverse.updateMultiple call",
+      "calls": "{{tool}}",
+      "channel": "dataverse.updateMultiple",
+      "since": "{{c0}}",
+      "limit": 2000,
+      "expect": {
+        "length": 0
+      }
+    },
+    {
+      "name": "no dataverse.associate call",
+      "calls": "{{tool}}",
+      "channel": "dataverse.associate",
+      "since": "{{c0}}",
+      "limit": 2000,
+      "expect": {
+        "length": 0
+      }
+    },
+    {
+      "name": "no dataverse.disassociate call",
+      "calls": "{{tool}}",
+      "channel": "dataverse.disassociate",
+      "since": "{{c0}}",
+      "limit": 2000,
+      "expect": {
+        "length": 0
+      }
+    },
+    {
+      "name": "no dataverse.publishCustomizations call",
+      "calls": "{{tool}}",
+      "channel": "dataverse.publishCustomizations",
+      "since": "{{c0}}",
+      "limit": 2000,
+      "expect": {
+        "length": 0
+      }
+    },
+    {
+      "name": "no dataverse.deploySolution call",
+      "calls": "{{tool}}",
+      "channel": "dataverse.deploySolution",
+      "since": "{{c0}}",
+      "limit": 2000,
+      "expect": {
+        "length": 0
+      }
+    },
+    {
+      "name": "no dataverse.executeBatch call",
+      "calls": "{{tool}}",
+      "channel": "dataverse.executeBatch",
+      "since": "{{c0}}",
+      "limit": 2000,
+      "expect": {
+        "length": 0
+      }
+    },
+    {
+      "name": "no dataverse.executeTransaction call",
+      "calls": "{{tool}}",
+      "channel": "dataverse.executeTransaction",
+      "since": "{{c0}}",
+      "limit": 2000,
+      "expect": {
+        "length": 0
+      }
+    },
+    {
+      "name": "no dataverse.createEntityDefinition call",
+      "calls": "{{tool}}",
+      "channel": "dataverse.createEntityDefinition",
+      "since": "{{c0}}",
+      "limit": 2000,
+      "expect": {
+        "length": 0
+      }
+    },
+    {
+      "name": "no dataverse.updateEntityDefinition call",
+      "calls": "{{tool}}",
+      "channel": "dataverse.updateEntityDefinition",
+      "since": "{{c0}}",
+      "limit": 2000,
+      "expect": {
+        "length": 0
+      }
+    },
+    {
+      "name": "no dataverse.deleteEntityDefinition call",
+      "calls": "{{tool}}",
+      "channel": "dataverse.deleteEntityDefinition",
+      "since": "{{c0}}",
+      "limit": 2000,
+      "expect": {
+        "length": 0
+      }
+    },
+    {
+      "name": "no dataverse.createAttribute call",
+      "calls": "{{tool}}",
+      "channel": "dataverse.createAttribute",
+      "since": "{{c0}}",
+      "limit": 2000,
+      "expect": {
+        "length": 0
+      }
+    },
+    {
+      "name": "no dataverse.updateAttribute call",
+      "calls": "{{tool}}",
+      "channel": "dataverse.updateAttribute",
+      "since": "{{c0}}",
+      "limit": 2000,
+      "expect": {
+        "length": 0
+      }
+    },
+    {
+      "name": "no dataverse.deleteAttribute call",
+      "calls": "{{tool}}",
+      "channel": "dataverse.deleteAttribute",
+      "since": "{{c0}}",
+      "limit": 2000,
+      "expect": {
+        "length": 0
+      }
+    },
+    {
+      "name": "no dataverse.createPolymorphicLookupAttribute call",
+      "calls": "{{tool}}",
+      "channel": "dataverse.createPolymorphicLookupAttribute",
+      "since": "{{c0}}",
+      "limit": 2000,
+      "expect": {
+        "length": 0
+      }
+    },
+    {
+      "name": "no dataverse.createRelationship call",
+      "calls": "{{tool}}",
+      "channel": "dataverse.createRelationship",
+      "since": "{{c0}}",
+      "limit": 2000,
+      "expect": {
+        "length": 0
+      }
+    },
+    {
+      "name": "no dataverse.updateRelationship call",
+      "calls": "{{tool}}",
+      "channel": "dataverse.updateRelationship",
+      "since": "{{c0}}",
+      "limit": 2000,
+      "expect": {
+        "length": 0
+      }
+    },
+    {
+      "name": "no dataverse.deleteRelationship call",
+      "calls": "{{tool}}",
+      "channel": "dataverse.deleteRelationship",
+      "since": "{{c0}}",
+      "limit": 2000,
+      "expect": {
+        "length": 0
+      }
+    },
+    {
+      "name": "no dataverse.createGlobalOptionSet call",
+      "calls": "{{tool}}",
+      "channel": "dataverse.createGlobalOptionSet",
+      "since": "{{c0}}",
+      "limit": 2000,
+      "expect": {
+        "length": 0
+      }
+    },
+    {
+      "name": "no dataverse.updateGlobalOptionSet call",
+      "calls": "{{tool}}",
+      "channel": "dataverse.updateGlobalOptionSet",
+      "since": "{{c0}}",
+      "limit": 2000,
+      "expect": {
+        "length": 0
+      }
+    },
+    {
+      "name": "no dataverse.deleteGlobalOptionSet call",
+      "calls": "{{tool}}",
+      "channel": "dataverse.deleteGlobalOptionSet",
+      "since": "{{c0}}",
+      "limit": 2000,
+      "expect": {
+        "length": 0
+      }
+    },
+    {
+      "name": "no dataverse.insertOptionValue call",
+      "calls": "{{tool}}",
+      "channel": "dataverse.insertOptionValue",
+      "since": "{{c0}}",
+      "limit": 2000,
+      "expect": {
+        "length": 0
+      }
+    },
+    {
+      "name": "no dataverse.updateOptionValue call",
+      "calls": "{{tool}}",
+      "channel": "dataverse.updateOptionValue",
+      "since": "{{c0}}",
+      "limit": 2000,
+      "expect": {
+        "length": 0
+      }
+    },
+    {
+      "name": "no dataverse.deleteOptionValue call",
+      "calls": "{{tool}}",
+      "channel": "dataverse.deleteOptionValue",
+      "since": "{{c0}}",
+      "limit": 2000,
+      "expect": {
+        "length": 0
+      }
+    },
+    {
+      "name": "no dataverse.orderOption call",
+      "calls": "{{tool}}",
+      "channel": "dataverse.orderOption",
+      "since": "{{c0}}",
+      "limit": 2000,
+      "expect": {
+        "length": 0
+      }
+    },
+    {
+      "name": "no tool-settings-set call",
+      "calls": "{{tool}}",
+      "channel": "tool-settings-set",
+      "since": "{{c0}}",
+      "limit": 2000,
+      "expect": {
+        "length": 0
+      }
+    },
+    {
+      "name": "no tool-settings-set-all call",
+      "calls": "{{tool}}",
+      "channel": "tool-settings-set-all",
+      "since": "{{c0}}",
+      "limit": 2000,
+      "expect": {
+        "length": 0
+      }
+    },
+    {
+      "name": "dataverse.execute only runs InitializeFileBlocksDownload and DownloadBlock",
+      "calls": "{{tool}}",
+      "channel": "dataverse.execute",
+      "since": "{{c0}}",
+      "limit": 2000,
+      "argsExcludes": [
+        "InitializeFileBlocksDownload",
+        "DownloadBlock"
+      ],
+      "expect": {
+        "length": 0
+      }
+    }
+  ]
+}

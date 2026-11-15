@@ -1,0 +1,35 @@
+{% comment %}
+Invoke server logic without input
+{% endcomment %}
+{% serverlogic name: 'invoke-summary', operation: 'getSummary', output: result %}
+{% if result.success and result.data.status == 'success' %}
+{{ result.data.category | escape }}
+{{ result.data.maximumResults | escape }}
+{{ result.data.activityId | escape }}
+{{ result.data.functionName | escape }}
+{{ result.data.serverLogicName | escape }}
+{% elsif result.success %}
+{{ result.data.message | escape }}
+{% else %}
+{{ result.status_code }}
+{% endif %}
+{% comment %}
+result.raw_result holds the unparsed output when the handler returns non-JSON.
+{% endcomment %}
+
+{% comment %}
+Pass input to server logic
+{% endcomment %}
+{% assign inputData = '{"category":"news","maximumResults":5}' %}
+{% serverlogic name: 'invoke-summary', operation: 'getSummary', input: inputData, output: result %}
+{% if result.success and result.data.status == 'success' %}
+{{ result.data.category | escape }}
+{{ result.data.maximumResults | escape }}
+{{ result.data.activityId | escape }}
+{{ result.data.functionName | escape }}
+{{ result.data.serverLogicName | escape }}
+{% elsif result.success %}
+{{ result.data.message | escape }}
+{% else %}
+{{ result.status_code }}
+{% endif %}

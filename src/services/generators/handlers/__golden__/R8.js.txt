@@ -1,0 +1,31 @@
+// R8: Invoke from Liquid
+// Learn: https://learn.microsoft.com/en-us/power-pages/configure/author-server-logic
+
+function getSummary() {
+  let input = null;
+  try {
+    input = JSON.parse(Server.Context.Input || "{}");
+  } catch (e) {
+    input = null;
+  }
+  const errors = [];
+  if (input === null || Array.isArray(input) || typeof input !== "object") {
+    errors.push({ field: "input", message: "Input must be a JSON object." });
+    return JSON.stringify({ status: "error", message: "The request isn't valid.", errors: errors });
+  }
+  const category = input.category === undefined ? "" : input.category;
+  if (typeof category !== "string" || category.length > 50) {
+    errors.push({ field: "category", message: "category must be a string of 50 characters or fewer." });
+  }
+  const maximumResults = input.maximumResults === undefined ? 5 : input.maximumResults;
+  if (!Number.isInteger(maximumResults) || maximumResults < 1 || maximumResults > 50) {
+    errors.push({ field: "maximumResults", message: "maximumResults must be a whole number from 1 to 50." });
+  }
+  if (errors.length > 0) {
+    return JSON.stringify({ status: "error", message: "The request isn't valid.", errors: errors });
+  }
+  const activityId = Server.Context.ActivityId;
+  const functionName = Server.Context.FunctionName;
+  const serverLogicName = Server.Context.ServerLogicName;
+  return JSON.stringify({ status: "success", category, maximumResults, activityId, functionName, serverLogicName });
+}

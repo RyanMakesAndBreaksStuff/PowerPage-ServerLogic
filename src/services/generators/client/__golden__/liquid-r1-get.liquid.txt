@@ -1,0 +1,14 @@
+{% comment %}
+result.raw_result holds the unparsed output when the handler returns non-JSON.
+{% endcomment %}
+{% serverlogic name: 'read-contacts', operation: 'get', output: result %}
+{% if result.success and result.data.status == 'success' %}
+{% for contact in result.data.contacts %}
+{{ contact.fullname | escape }}
+{{ contact.email | escape }}
+{% endfor %}
+{% elsif result.success %}
+{{ result.data.message | escape }}
+{% else %}
+{{ result.status_code }}
+{% endif %}
