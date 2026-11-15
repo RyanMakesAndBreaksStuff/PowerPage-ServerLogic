@@ -4,7 +4,7 @@ The ten recipes behind **Logic Starter**. Each recipe provides a server handler,
 
 The recipe catalogue in the app groups these as **core** (R1–R3), **tutorial** (R4–R7), and **reference** (R8–R10). Those are catalogue groupings, not the Diátaxis quadrants used for this documentation.
 
-[Back to the user guide](../usage-manual.md) · [Server Objects reference](server-objects.md)
+[Back to the user guide](https://github.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/blob/main/docs/usage-manual.md) · [Server Objects reference](https://github.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/blob/main/docs/reference/server-objects.md)
 
 ## HTTP method map
 

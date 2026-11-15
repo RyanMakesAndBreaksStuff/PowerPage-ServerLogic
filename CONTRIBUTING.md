@@ -21,7 +21,7 @@ Thanks for helping improve Server Logic Tools. This is a Power Platform ToolBox 
    npm test
    ```
 
-For the full developer workflow — build targets (`build` vs `build:beta`), the release gate, page selection, and loading a local build in PPTB — see [Build and load the tool from source](docs/how-to/build-and-load-from-source.md). Its "Source map for maintainers" table lists where each area lives.
+For the full developer workflow — build targets (`build` vs `build:beta`), the release gate, page selection, and loading a local build in PPTB — see [Build and load the tool from source](https://github.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/blob/main/docs/how-to/build-and-load-from-source.md). Its "Source map for maintainers" table lists where each area lives.
 
 ## How changes are made
 
@@ -31,23 +31,23 @@ For the full developer workflow — build targets (`build` vs `build:beta`), the
 
 ## Working on the catalogue
 
-The recipe data lives in [`src/services/catalogue/recipes.ts`](src/services/catalogue/recipes.ts) and the `Server.*` object data in [`src/services/catalogue/serverObjects.ts`](src/services/catalogue/serverObjects.ts). These two files are the **source of truth** for the Starter recipes and the Server Objects reference — including the samples, permission notes, and setup guidance that ship in every exported ZIP.
+The recipe data lives in [`src/services/catalogue/recipes.ts`](https://github.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/blob/main/src/services/catalogue/recipes.ts) and the `Server.*` object data in [`src/services/catalogue/serverObjects.ts`](https://github.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/blob/main/src/services/catalogue/serverObjects.ts). These two files are the **source of truth** for the Starter recipes and the Server Objects reference — including the samples, permission notes, and setup guidance that ship in every exported ZIP.
 
 When you change them:
 
 - Add or update the matching entries and their tests (`recipes.test.ts`, `serverObjects.test.ts`).
-- Keep the reference documentation in sync with [`docs/reference/recipes.md`](docs/reference/recipes.md) and [`docs/reference/server-objects.md`](docs/reference/server-objects.md), which summarise the catalogue for readers.
+- Keep the reference documentation in sync with [`docs/reference/recipes.md`](https://github.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/blob/main/docs/reference/recipes.md) and [`docs/reference/server-objects.md`](https://github.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/blob/main/docs/reference/server-objects.md), which summarise the catalogue for readers.
 
 ## Documentation
 
-Documentation is organised by the four [Diátaxis](https://diataxis.fr/) quadrants, indexed from [`docs/usage-manual.md`](docs/usage-manual.md):
+Documentation is organised by the four [Diátaxis](https://diataxis.fr/) quadrants, indexed from [`docs/usage-manual.md`](https://github.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/blob/main/docs/usage-manual.md):
 
-- **Tutorials** — [`docs/tutorials/`](docs/tutorials/) learning-oriented lessons.
-- **How-to guides** — [`docs/how-to/`](docs/how-to/) task-oriented recipes.
-- **Reference** — [`docs/reference/`](docs/reference/) recipes, Server Objects, and readiness checks.
-- **Explanation** — [`docs/explanation/`](docs/explanation/) background and concepts.
+- **Tutorials** — [`docs/tutorials/`](https://github.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/tree/main/docs/tutorials/) learning-oriented lessons.
+- **How-to guides** — [`docs/how-to/`](https://github.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/tree/main/docs/how-to/) task-oriented recipes.
+- **Reference** — [`docs/reference/`](https://github.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/tree/main/docs/reference/) recipes, Server Objects, and readiness checks.
+- **Explanation** — [`docs/explanation/`](https://github.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/tree/main/docs/explanation/) background and concepts.
 
-Put new material in the quadrant it belongs to, and add a link from the hub so readers can find it. The [`README.md`](README.md) stays a concise landing page, separate from the user guide.
+Put new material in the quadrant it belongs to, and add a link from the hub so readers can find it. The [`README.md`](https://github.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/blob/main/README.md) stays a concise landing page, separate from the user guide.
 
 ## Reporting issues
 
@@ -55,4 +55,4 @@ Open an issue at https://github.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogi
 
 ## License
 
-By contributing, you agree that your contributions are licensed under the same [BSD 3-Clause](LICENSE) license as the project.
+By contributing, you agree that your contributions are licensed under the same [BSD 3-Clause](https://github.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/blob/main/LICENSE) license as the project.

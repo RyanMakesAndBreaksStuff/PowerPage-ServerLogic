@@ -2,7 +2,7 @@
 
 Use **Logic Inspector** to read the server logic files on a Power Pages site and see, for each one, whether its web role, table permissions, and outbound networking look configured, then export the result as a Markdown or PDF report. The Inspector only reads; it never changes your site or environment.
 
-[Back to the user guide](../usage-manual.md) · [Readiness and checks reference](../reference/readiness-and-checks.md)
+[Back to the user guide](https://github.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/blob/main/docs/usage-manual.md) · [Readiness and checks reference](https://github.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/blob/main/docs/reference/readiness-and-checks.md)
 
 ## Connect and choose a site
 
@@ -12,7 +12,7 @@ Use **Logic Inspector** to read the server logic files on a Power Pages site and
 
 The Inspector works with enhanced data model sites. If the environment has none, the page says so. If the connection is not a development environment, a notice warns that the Inspector is designed for dev sites; you can still scan.
 
-![Logic Inspector site picker, open in the title bar, with an active site selected](../assets/inspector-site-picker.png)
+![Logic Inspector site picker, open in the title bar, with an active site selected](https://raw.githubusercontent.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/main/docs/assets/inspector-site-picker.png)
 
 Environment, site, and server-logic names are illustrative — inactive sites are listed in the picker but shown as disabled.
 
@@ -22,7 +22,7 @@ Choosing an active site starts its scan. The page shows **Scanning {site}** with
 
 If the scan fails with an unexpected error, nothing is kept — choose **Scan again**.
 
-![The server-logic scan results list with one file selected and its Readiness ring visible](../assets/inspector-results-list.png)
+![The server-logic scan results list with one file selected and its Readiness ring visible](https://raw.githubusercontent.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/main/docs/assets/inspector-results-list.png)
 
 ## Read the results
 
@@ -32,9 +32,9 @@ If the scan fails with an unexpected error, nothing is kept — choose **Scan ag
 - A finding that needs review can be marked as reviewed with a button in the detail, and the mark can be undone. A review mark applies to your current results only; scanning again clears it.
 - Notices above the results explain gaps, such as an incomplete record list, rows the tool could not read, or a lost connection. Some checks show **Not read before the connection was lost**.
 
-The Inspector does not read tenant outbound network policy, does not assess other roles a user may hold, and does not check cloud flows — the page says so where it applies. A **Ready** file means the configuration the tool can see looks complete; it does not prove the handler works or that access is correct. Confirm access with a real site user. The full meaning of each status is in [How readiness is determined](../explanation/how-readiness-is-determined.md).
+The Inspector does not read tenant outbound network policy, does not assess other roles a user may hold, and does not check cloud flows — the page says so where it applies. A **Ready** file means the configuration the tool can see looks complete; it does not prove the handler works or that access is correct. Confirm access with a real site user. The full meaning of each status is in [How readiness is determined](https://github.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/blob/main/docs/explanation/how-readiness-is-determined.md).
 
-![One finding — Table permissions, Needs review — with its reasons, guidance, questions to consider, and the review mark applied](../assets/inspector-finding-detail.png)
+![One finding — Table permissions, Needs review — with its reasons, guidance, questions to consider, and the review mark applied](https://raw.githubusercontent.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/main/docs/assets/inspector-finding-detail.png)
 
 ## Export a report
 
@@ -46,7 +46,7 @@ The Inspector does not read tenant outbound network policy, does not assess othe
 
 File names follow the pattern `{name}-readiness` for a file report and `{site}-site-readiness` for a site summary, with an `.md` or `.pdf` extension. If the results change while a report is still being built, the export is cancelled and you can start it again.
 
-![The Export report dialog with scope, format, and include options](../assets/inspector-export-dialog.png)
+![The Export report dialog with scope, format, and include options](https://raw.githubusercontent.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/main/docs/assets/inspector-export-dialog.png)
 
 ## If the connection changes mid-scan
 

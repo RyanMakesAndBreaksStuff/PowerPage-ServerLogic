@@ -2,7 +2,7 @@
 
 "Readiness" in Server Logic Tools is deliberately narrower than "will this work". This page explains how the tool's two readiness surfaces reach their verdicts, and where their confidence stops.
 
-[Back to the user guide](../usage-manual.md) · [Readiness and checks reference](../reference/readiness-and-checks.md)
+[Back to the user guide](https://github.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/blob/main/docs/usage-manual.md) · [Readiness and checks reference](https://github.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/blob/main/docs/reference/readiness-and-checks.md)
 
 ## Three different kinds of check
 

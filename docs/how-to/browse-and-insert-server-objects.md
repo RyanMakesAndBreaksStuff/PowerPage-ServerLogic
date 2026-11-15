@@ -2,7 +2,7 @@
 
 Search the curated `Server.*` reference in the **Server Objects** page, read a member's signature and samples, and insert a sample into the current Starter handler.
 
-[Back to the user guide](../usage-manual.md) · [Server Objects reference](../reference/server-objects.md)
+[Back to the user guide](https://github.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/blob/main/docs/usage-manual.md) · [Server Objects reference](https://github.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/blob/main/docs/reference/server-objects.md)
 
 ## Find an object or method
 
@@ -14,9 +14,9 @@ Search the curated `Server.*` reference in the **Server Objects** page, read a m
 
 The context column shows **Used in {slug}**, **Permissions needed**, and **Another sample** where available. Used marks come from analysis of the current Starter handler; they are a navigation aid rather than a record of deployed code or runtime calls.
 
-The catalogue is curated data shipped with the tool. It does not discover the APIs available in your connected environment, and a member's detail shows **Returns** only where Microsoft Learn documents a return type. It is the authoritative source; the [reference doc](../reference/server-objects.md) summarises it and may lag behind the app.
+The catalogue is curated data shipped with the tool. It does not discover the APIs available in your connected environment, and a member's detail shows **Returns** only where Microsoft Learn documents a return type. It is the authoritative source; the [reference doc](https://github.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/blob/main/docs/reference/server-objects.md) summarises it and may lag behind the app.
 
-![Server Objects search showing Server.Connector.Dataverse, the RetrieveMultipleRecords signature and sample, and the Used in / Permissions needed context](../assets/usage-server-objects.png)
+![Server Objects search showing Server.Connector.Dataverse, the RetrieveMultipleRecords signature and sample, and the Used in / Permissions needed context](https://raw.githubusercontent.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/main/docs/assets/usage-server-objects.png)
 
 ## Insert a sample into the handler
 

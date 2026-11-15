@@ -2,9 +2,9 @@
 
 Server logic is code that runs server-side on a Power Pages site. A Power Pages "site" is a secure, authenticated portal over Microsoft Dataverse; server logic lets a maker add custom behaviour that runs on the server — without shipping code to the browser — and call Dataverse, external services, or cloud flows from it.
 
-This page explains the programming model that **Logic Starter** and **Server Objects** work with. For the exact API surface, see the [Server Objects reference](../reference/server-objects.md).
+This page explains the programming model that **Logic Starter** and **Server Objects** work with. For the exact API surface, see the [Server Objects reference](https://github.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/blob/main/docs/reference/server-objects.md).
 
-[Back to the user guide](../usage-manual.md)
+[Back to the user guide](https://github.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/blob/main/docs/usage-manual.md)
 
 ## How server logic is invoked
 

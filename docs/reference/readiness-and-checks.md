@@ -2,7 +2,7 @@
 
 The two readiness surfaces in the tool: the **Readiness** count in Logic Starter, and the per-file findings and statuses in Logic Inspector. Both are local, read-only assessments — neither checks your site's actual configuration nor proves a handler runs.
 
-[Back to the user guide](../usage-manual.md) · [How readiness is determined (explanation)](../explanation/how-readiness-is-determined.md)
+[Back to the user guide](https://github.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/blob/main/docs/usage-manual.md) · [How readiness is determined (explanation)](https://github.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/blob/main/docs/explanation/how-readiness-is-determined.md)
 
 ## Starter readiness indicators
 

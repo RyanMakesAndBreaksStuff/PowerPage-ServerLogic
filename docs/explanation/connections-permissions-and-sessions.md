@@ -2,7 +2,7 @@
 
 How Server Logic Tools uses an optional PPTB connection, what it is and is not allowed to do, and how its state lives and dies.
 
-[Back to the user guide](../usage-manual.md)
+[Back to the user guide](https://github.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/blob/main/docs/usage-manual.md)
 
 ## The optional single connection
 
@@ -25,7 +25,7 @@ Deployment and configuration stay yours: you add the exported files to your site
 
 ## Permissions are a checklist, not a check
 
-The permission checklist and the Inspector findings describe configuration the tool cannot authoritatively verify end-to-end. The tool records *your* review of those items, and can read some of the site's configuration in the Inspector; neither is a proof of correct access. See [How readiness is determined](how-readiness-is-determined.md).
+The permission checklist and the Inspector findings describe configuration the tool cannot authoritatively verify end-to-end. The tool records *your* review of those items, and can read some of the site's configuration in the Inspector; neither is a proof of correct access. See [How readiness is determined](https://github.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/blob/main/docs/explanation/how-readiness-is-determined.md).
 
 ## Session state lives in memory
 
