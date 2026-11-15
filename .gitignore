@@ -11,7 +11,10 @@ docs/specs/
 tasks/
 scripts/
 reviews/
-public/
+public/*
+!public/icons/
+public/icons/*
+!public/icons/logo.svg
 probes/
 findings/
 tools/

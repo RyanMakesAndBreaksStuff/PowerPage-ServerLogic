@@ -1,8 +1,0 @@
-<!-- S4 probe page (throwaway). Paste into the page's code, then sync. -->
-{% assign s4input = '{"probe":"liquid"}' %}
-{% serverlogic output: r1, name: 's4-probe', operation: 'liquidSync', input: s4input %}
-{% serverlogic output: r2, name: 's4-probe', operation: 'liquidAsync' %}
-<pre id="s4-liquid">
-sync:  success={{ r1.success }} status={{ r1.status_code }} raw={{ r1.raw_result | escape }} kind={{ r1.data.kind | escape }}
-async: success={{ r2.success }} status={{ r2.status_code }} raw={{ r2.raw_result | escape }} kind={{ r2.data.kind | escape }}
-</pre>
