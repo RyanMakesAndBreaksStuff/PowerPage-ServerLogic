@@ -1,6 +1,6 @@
 {
   "name": "@ryanmakes/powerpages-serverlogic",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
@@ -74,7 +74,7 @@
   "author": "Ryan Rettinger",
   "contributors": [
     {
-      "name": "Ryan Christopher",
+      "name": "Ryan Rettinger",
       "url": "https://github.com/RyanMakesAndBreaksStuff"
     }
   ],
