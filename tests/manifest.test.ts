@@ -41,7 +41,7 @@ describe('PPTB manifest (FR-12)', () => {
   });
 
   it('has the required identity fields', () => {
-    expect(manifest.displayName).toBe('Server Logic Tools');
+    expect(manifest.displayName).toBe('Power Pages Server Logic');
     expect(typeof manifest.description === 'string' && manifest.description.length > 20).toBe(true);
     expect(manifest.main).toBe('index.html');
     expect(String(manifest.version)).toMatch(/^[1-9]\d*\.\d+\.\d+$/);

@@ -1,12 +1,18 @@
 # Server Logic Tools
 
-Server Logic Tools is a Power Platform ToolBox (PPTB) tool for creating Power Pages server logic starters, looking up the `Server.*` APIs those handlers use, and inspecting the server logic already on a site.
+Generate Power Pages server logic starters, browse the `Server.*` reference, and check a site's server logic readiness in Power Platform ToolBox (PPTB).
 
 ## What you can do
 
 - **Logic Starter** generates a server handler, a matching client call, and a permission checklist from one of ten recipes. Edit the handler, review browser-check findings, and download the starter as a ZIP.
 - **Server Objects** provides a searchable, curated reference with member signatures, samples, and permission notes. Copy a sample or insert it into the current Starter handler.
 - **Logic Inspector** scans the server logic files on a Power Pages site and shows, for each file, whether its web role, table permissions, and outbound networking look configured. Export the results as a Markdown or PDF report.
+
+## Screenshots
+
+![Logic Starter showing recipe options, readiness checks, and the server and client code panes](https://raw.githubusercontent.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/main/docs/assets/usage-starter-overview.png)
+
+![Server Objects showing a Dataverse method signature, code sample, and permission notes](https://raw.githubusercontent.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/main/docs/assets/usage-server-objects.png)
 
 ## What this tool changes
 
@@ -57,6 +63,10 @@ The build includes all three pages and writes its output to `dist/`. See [Build 
 ## Contributing
 
 See [CONTRIBUTING.md](https://github.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/blob/main/CONTRIBUTING.md). The [changelog](https://github.com/RyanMakesAndBreaksStuff/PowerPage-ServerLogic/blob/main/CHANGELOG.md) records notable changes.
+
+## AI Assistance
+
+Claude Code helped write a portion of this tool. Claude primarily designed a series of probes and scripts to valdiate certain features were even possible. The maintainer reviewed and tested the code and is responsible for its ongoing maintenance.
 
 ## License
 

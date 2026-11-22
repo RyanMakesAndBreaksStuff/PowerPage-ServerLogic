@@ -1,7 +1,6 @@
 {
   "name": "@ryanmakes/powerpages-serverlogic",
-  "version": "1.0.0",
-  "type": "module",
+  "version": "1.0.1",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
@@ -67,8 +66,8 @@
   "engines": {
     "node": ">=20.19.0"
   },
-  "displayName": "Server Logic Tools",
-  "description": "Power Platform ToolBox (PPTB) tool to generate Power Pages server logic, browse the Server.* object reference, and inspect a site's server logic readiness.",
+  "displayName": "Power Pages Server Logic",
+  "description": "Generate Power Pages server logic starters, browse the Server.* reference, and check a site's server logic readiness.",
   "main": "index.html",
   "icon": "icons/logo.svg",
   "license": "BSD-3-Clause",
